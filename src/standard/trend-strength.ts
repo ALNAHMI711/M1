@@ -7,7 +7,7 @@
  * Formula: correlation(close, bar_index, length)
  */
 
-import { Series, ta, type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig, type FillData, type Bar } from 'oakscriptjs';
+import { Series, ta, color, type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig, type FillData, type Bar } from 'oakscriptjs';
 
 export interface TrendStrengthInputs {
   /** Period length */
@@ -32,8 +32,6 @@ export const inputConfig: InputConfig[] = [
 
 export const plotConfig: PlotConfig[] = [
   { id: 'plot0', title: 'Trend Strength Index', color: '#7E57C2', lineWidth: 1 },
-  { id: 'plot1', title: 'TSI Bullish', color: '#089981', lineWidth: 0, display: 'none' },
-  { id: 'plot2', title: 'TSI Bearish', color: '#F23645', lineWidth: 0, display: 'none' },
   { id: 'plot3', title: 'Middle Line', color: 'transparent', lineWidth: 0, display: 'none' },
 ];
 
@@ -59,20 +57,22 @@ export function calculate(bars: Bar[], inputs: Partial<TrendStrengthInputs> = {}
 
   const tsData = tsArr.map((v, i) => ({ time: bars[i].time, value: v ?? NaN }));
 
-  // Split TSI into bullish (>0) and bearish (<0) for fill zones
-  const bullishData = tsArr.map((v, i) => ({
-    time: bars[i].time,
-    value: (v != null && v > 0) ? v : NaN,
-  }));
-  const bearishData = tsArr.map((v, i) => ({
-    time: bars[i].time,
-    value: (v != null && v < 0) ? v : NaN,
-  }));
   const midlineData = bars.map(b => ({ time: b.time, value: 0 }));
 
+  // Pine: midLinePlot = plot(0, display = display.none)
+  //   fill(tsiPlot, midLinePlot, 1, 0, top_color = bullishColorInput, bottom_color = color.new(bullishColorInput, 100))
+  //   fill(tsiPlot, midLinePlot, 0, -1, top_color = color.new(bearishColorInput, 100), bottom_color = bearishColorInput)
+  const n = bars.length;
+  const constant = <T>(v: T): T[] => new Array(n).fill(v);
   const fills: FillData[] = [
-    { plot1: 'plot1', plot2: 'plot3', options: { color: bullishColor, title: 'Bullish Gradient Fill' } },
-    { plot1: 'plot2', plot2: 'plot3', options: { color: bearishColor, title: 'Bearish Gradient Fill' } },
+    {
+      plot1: 'plot0', plot2: 'plot3', options: { title: 'Bullish Gradient Fill' },
+      gradient: { topValue: constant(1), bottomValue: constant(0), topColor: constant(bullishColor), bottomColor: constant(color.new_color(bullishColor, 100) as string) },
+    },
+    {
+      plot1: 'plot0', plot2: 'plot3', options: { title: 'Bearish Gradient Fill' },
+      gradient: { topValue: constant(0), bottomValue: constant(-1), topColor: constant(color.new_color(bearishColor, 100) as string), bottomColor: constant(bearishColor) },
+    },
   ];
 
   return {
@@ -83,8 +83,6 @@ export function calculate(bars: Bar[], inputs: Partial<TrendStrengthInputs> = {}
     },
     plots: {
       'plot0': tsData,
-      'plot1': bullishData,
-      'plot2': bearishData,
       'plot3': midlineData,
     },
     fills,

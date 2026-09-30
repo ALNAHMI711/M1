@@ -113,10 +113,11 @@ describe('Predictive Channels', () => {
     expect(result.plots).toBeDefined();
     expect(result.metadata.overlay).toBe(true);
   });
-  it('should produce 5 plots (R2, R1, avg, S1, S2)', () => {
+  it('should produce 6 plots (hidden close, R2, R1, avg, S1, S2)', () => {
     const result = PredictiveChannels.calculate(bars);
     const keys = Object.keys(result.plots);
-    expect(keys.length).toBe(5);
+    expect(keys.length).toBe(6);
+    expect(keys).toContain('close');
     expect(keys).toContain('r2');
     expect(keys).toContain('avg');
     expect(keys).toContain('s2');

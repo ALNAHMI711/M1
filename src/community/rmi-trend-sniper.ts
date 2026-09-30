@@ -9,7 +9,7 @@
  * Reference: "RMI Trend Sniper" by TZack88
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, Series, color, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { BarColorData, PlotCandleData, LabelData } from '../types';
 
 export interface RMITrendSniperInputs {
@@ -200,8 +200,14 @@ export function calculate(bars: Bar[], inputs: Partial<RMITrendSniperInputs> = {
   const plot3: { time: number; value: number }[] = [];
   const plot4: { time: number; value: number }[] = [];
   const plot5: { time: number; value: number }[] = [];
-  const topCenterFillColors: string[] = [];
-  const centerBottomFillColors: string[] = [];
+  // Pine: fill(top, center, top_value = max, bottom_value = RWMA, bottom_color = color.new(colour, 75), top_color = alpha)
+  // Pine: fill(center, bottom, top_value = RWMA, bottom_value = min, bottom_color = alpha, top_color = color.new(colour, 75))
+  const maxArr: number[] = new Array(n).fill(NaN);
+  const rwmaValArr: number[] = new Array(n).fill(NaN);
+  const minArr: number[] = new Array(n).fill(NaN);
+  const colour75: string[] = new Array(n);
+  // Pine: alpha = color.new(color.black, 100)
+  const alpha: string[] = new Array(n).fill('#00000000');
   const barColors: BarColorData[] = [];
   const candles: PlotCandleData[] = [];
   const labels: LabelData[] = [];
@@ -216,6 +222,14 @@ export function calculate(bars: Bar[], inputs: Partial<RMITrendSniperInputs> = {
     // Pine: RWMA = positive ? rwma - Band : negative ? rwma + Band : na
     const showPlot = fillShow && !isNaN(rwma) && band > 0 && (pos || neg);
     const RWMA = pos ? rwma - band : neg ? rwma + band : NaN;
+    // Pine: colour = positive ? bull : bear
+    colour75[i] = color.new_color(pos ? bull : bear, 75) as string;
+    if (!isNaN(rwma) && band > 0 && !isNaN(RWMA)) {
+      // Pine: max = RWMA + Band, min = RWMA - Band
+      maxArr[i] = RWMA + band;
+      rwmaValArr[i] = RWMA;
+      minArr[i] = RWMA - band;
+    }
 
     if (showPlot && !isNaN(RWMA)) {
       const colour = pos ? bull : bear;
@@ -230,12 +244,6 @@ export function calculate(bars: Bar[], inputs: Partial<RMITrendSniperInputs> = {
       // Pine: top = plot(max), bottom = plot(min), both transparent
       plot4.push({ time, value: maxVal });
       plot5.push({ time, value: minVal });
-      // Pine fill: colour @ 75% transparency near RWMA, transparent at edges
-      const fillColor = pos
-        ? 'rgba(0,188,212,0.25)'   // bull color at 75% transparency
-        : 'rgba(255,82,82,0.25)';  // bear color at 75% transparency
-      topCenterFillColors.push(fillColor);
-      centerBottomFillColors.push(fillColor);
 
       // Buy label: positive and not positive[1]
       if (i > 0 && pos && !posArr[i - 1]) {
@@ -269,8 +277,6 @@ export function calculate(bars: Bar[], inputs: Partial<RMITrendSniperInputs> = {
       plot3.push({ time, value: NaN });
       plot4.push({ time, value: NaN });
       plot5.push({ time, value: NaN });
-      topCenterFillColors.push('transparent');
-      centerBottomFillColors.push('transparent');
     }
 
     // Pine: Barcol = positive ? color.green : color.red
@@ -294,8 +300,14 @@ export function calculate(bars: Bar[], inputs: Partial<RMITrendSniperInputs> = {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
     plots: { plot0, plot1, plot2, plot3, plot4, plot5 },
     fills: [
-      { plot1: 'plot4', plot2: 'plot0', colors: topCenterFillColors },
-      { plot1: 'plot0', plot2: 'plot5', colors: centerBottomFillColors },
+      {
+        plot1: 'plot4', plot2: 'plot0',
+        gradient: { topValue: maxArr, bottomValue: rwmaValArr, topColor: alpha, bottomColor: colour75 },
+      },
+      {
+        plot1: 'plot0', plot2: 'plot5',
+        gradient: { topValue: rwmaValArr, bottomValue: minArr, topColor: colour75, bottomColor: alpha },
+      },
     ],
     barColors,
     plotCandles: { candle0: candles },

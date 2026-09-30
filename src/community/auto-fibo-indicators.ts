@@ -68,6 +68,7 @@ export const plotConfig: PlotConfig[] = [
   { id: 'f2618', title: '2.618', color: '#E252FF', lineWidth: 2 },
   { id: 'f3618', title: '3.618', color: '#E252FF', lineWidth: 2 },
   { id: 'ind', title: 'IND', color: '#C25757', lineWidth: 3 },
+  { id: 'midLinePlot', title: 'Middle Line', color: 'transparent', lineWidth: 0, display: 'none' },
 ];
 
 export const metadata = {
@@ -201,8 +202,25 @@ export function calculate(bars: Bar[], inputs: Partial<AutoFiboIndicatorsInputs>
       f2618: f2618Plot,
       f3618: f3618Plot,
       ind: indArr.map((v, i) => ({ time: bars[i].time, value: v })),
+      // Pine: midLinePlot = plot(show ? na : 50, color = na, display = display.none)
+      midLinePlot: bars.map((b) => ({ time: b.time, value: cfg.showOBOS ? NaN : 50 })),
     },
   };
+
+  // Pine (v5 colours), drawn only where midLinePlot is not na:
+  //   fill(indPlot, midLinePlot, 100, 70, top_color = color.new(color.green, 0), bottom_color = color.new(color.green, 100))
+  //   fill(indPlot, midLinePlot, 30, 0, top_color = color.new(color.red, 100), bottom_color = color.new(color.red, 0))
+  const constant = <T>(v: T): T[] => new Array(bars.length).fill(v);
+  result.fills = [
+    {
+      plot1: 'ind', plot2: 'midLinePlot', options: { title: 'Overbought Gradient Fill' },
+      gradient: { topValue: constant(100), bottomValue: constant(70), topColor: constant('#4CAF50'), bottomColor: constant('#4CAF5000') },
+    },
+    {
+      plot1: 'ind', plot2: 'midLinePlot', options: { title: 'Oversold Gradient Fill' },
+      gradient: { topValue: constant(30), bottomValue: constant(0), topColor: constant('#FF525200'), bottomColor: constant('#FF5252') },
+    },
+  ];
 
   // OB/OS hlines and fill (only when showOBOS is false in Pine => "Do not Show" is unchecked)
   if (!cfg.showOBOS) {
@@ -211,9 +229,7 @@ export function calculate(bars: Bar[], inputs: Partial<AutoFiboIndicatorsInputs>
       { value: cfg.midLine, options: { color: 'rgba(120,123,134,0.5)', linestyle: 'solid' as const, title: 'Middle Line' } },
       { value: cfg.oversold, options: { color: '#787B86', linestyle: 'solid' as const, title: 'Oversold Level' } },
     ];
-    result.fills = [
-      { plot1: 'hlineOB', plot2: 'hlineOS', options: { color: 'rgba(126,87,194,0.10)' } },
-    ];
+    result.fills.unshift({ plot1: 'hlineOB', plot2: 'hlineOS', options: { color: 'rgba(126,87,194,0.10)' } });
   }
 
   return result;

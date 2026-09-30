@@ -501,7 +501,7 @@ export class IndicatorUI {
 
       // Render plot-to-plot fills (cloud/band) if returned by calculate()
       if (result.fills?.length) {
-        this.chartManager.setPlotFills(result.fills, result.plots, indicatorPaneIndex);
+        this.chartManager.setPlotFills(result.fills, result.plots, indicatorPaneIndex, this.bars);
       }
 
       // Markers (pane and drawing chosen by ChartManager.setIndicatorMarkers)

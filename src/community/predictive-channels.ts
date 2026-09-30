@@ -26,6 +26,7 @@ export const inputConfig: InputConfig[] = [
 ];
 
 export const plotConfig: PlotConfig[] = [
+  { id: 'close', title: 'Close', color: 'transparent', lineWidth: 0, display: 'none' },
   { id: 'r2', title: 'Upper Resistance', color: '#f23645', lineWidth: 1 },
   { id: 'r1', title: 'Lower Resistance', color: 'rgba(242,54,69,0.5)', lineWidth: 1 },
   { id: 'avg', title: 'Average', color: '#787B86', lineWidth: 1 },
@@ -97,15 +98,27 @@ export function calculate(bars: Bar[], inputs: Partial<PredictiveChannelsInputs>
       value: i < warmup ? NaN : (bars[i].close === pcAvgArr[i] ? NaN : v),
     }));
 
-  // Dynamic fill colors: green when close > avg, red when close < avg
-  const fillColors = pcAvgArr.map((avg, i) => {
-    if (i < warmup || bars[i].close === avg) return 'transparent';
-    return bars[i].close > avg ? 'rgba(8,153,129,0.20)' : 'rgba(242,54,69,0.20)';
-  });
+  // Pine: plot_0 = plot(close, color = na, display = display.none, editable = false)
+  const closePlot = bars.map(b => ({ time: b.time, value: b.close }));
+
+  // Pine: areaBull = color.new(#089981, 80), areaBear = color.new(#f23645, 80)
+  //   topcss = close > pc_avg ? areaBull : color.new(chart.bg_color, 100)
+  //   btmcss = close < pc_avg ? areaBear : color.new(chart.bg_color, 100)
+  //   fill(plot_0, plot_avg, pc_R2, pc_S2, topcss, btmcss)
+  const areaBull = 'rgba(8,153,129,0.2)';
+  const areaBear = 'rgba(242,54,69,0.2)';
+  const bgTransparent = '#00000000';
+  const gradient = {
+    topValue: r2Arr.slice(),
+    bottomValue: s2Arr.slice(),
+    topColor: pcAvgArr.map((avg, i) => (bars[i].close > avg ? areaBull : bgTransparent)),
+    bottomColor: pcAvgArr.map((avg, i) => (bars[i].close < avg ? areaBear : bgTransparent)),
+  };
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
     plots: {
+      close: closePlot,
       r2: makePlot(r2Arr),
       r1: makePlot(r1Arr),
       avg: makePlot(pcAvgArr),
@@ -113,7 +126,7 @@ export function calculate(bars: Bar[], inputs: Partial<PredictiveChannelsInputs>
       s2: makePlot(s2Arr),
     },
     fills: [
-      { plot1: 'r2', plot2: 's2', options: { color: 'rgba(8,153,129,0.20)' }, colors: fillColors },
+      { plot1: 'close', plot2: 'avg', gradient },
     ],
   };
 }

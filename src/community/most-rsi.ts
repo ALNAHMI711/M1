@@ -62,8 +62,6 @@ export const plotConfig: PlotConfig[] = [
   { id: 'most', title: 'MOST', color: '#880E4F', lineWidth: 3 },
   { id: 'bullDiv', title: 'Regular Bullish', color: BULL_COLOR, lineWidth: 2 },
   { id: 'bearDiv', title: 'Regular Bearish', color: BEAR_COLOR, lineWidth: 2 },
-  { id: 'obData', title: 'RSI OB', color: '#4CAF50', lineWidth: 0, display: 'none' },
-  { id: 'osData', title: 'RSI OS', color: '#FF5252', lineWidth: 0, display: 'none' },
   { id: 'midline', title: 'Middle Line', color: 'transparent', lineWidth: 0, display: 'none' },
   { id: 'bbUpper', title: 'Upper Bollinger Band', color: '#4CAF50', lineWidth: 1 },
   { id: 'bbLower', title: 'Lower Bollinger Band', color: '#4CAF50', lineWidth: 1 },
@@ -169,12 +167,11 @@ export function calculate(bars: Bar[], inputs: Partial<MOSTRSIInputs> = {}): Omi
   // Pine: plot(MOST, color=color.new(color.maroon, 0), linewidth=3, title='MOST')
   const mostPlot = most.map((v, i) => ({ time: bars[i].time, value: v }));
 
-  // OB/OS gradient fill auxiliary plots (matching rsi.ts pattern)
-  // Pine: fill(rsiPlot, midLinePlot, 100, 70, top_color=green(0), bottom_color=green(100))
-  // Pine: fill(rsiPlot, midLinePlot, 30, 0, top_color=red(100), bottom_color=red(0))
-  const obData = rsiArr.map((v, i) => ({ time: bars[i].time, value: v > 70 ? v : NaN }));
-  const osData = rsiArr.map((v, i) => ({ time: bars[i].time, value: v < 30 ? v : NaN }));
+  // Pine (v5 colours): midLinePlot = plot(50, display = display.none)
+  //   fill(rsiPlot, midLinePlot, 100, 70, top_color = color.new(color.green, 0), bottom_color = color.new(color.green, 100))
+  //   fill(rsiPlot, midLinePlot, 30, 0, top_color = color.new(color.red, 100), bottom_color = color.new(color.red, 0))
   const midlinePlot = bars.map(b => ({ time: b.time, value: 50 }));
+  const constant = <T>(v: T): T[] => new Array(n).fill(v);
 
   // Pine: bbUpperBand = plot(isBB ? rsiMA + ta.stdev(rsi, maLengthInput) * bbMultInput : na)
   const stdevArr = ta.stdev(rsiSeries, maLen).toArray().map((v) => v ?? NaN);
@@ -188,10 +185,14 @@ export function calculate(bars: Bar[], inputs: Partial<MOSTRSIInputs> = {}): Omi
   const fills: FillData[] = [
     // Pine: fill(rsiUpperBand, rsiLowerBand, color=color.rgb(126,87,194,90)) - purple fill between 70/30
     { plot1: 'hline70', plot2: 'hline30', options: { color: 'rgba(126,87,194,0.10)', title: 'RSI Background Fill' } },
-    // OB gradient fill
-    { plot1: 'obData', plot2: 'midline', options: { color: '#4CAF50', transp: 90, title: 'Overbought Gradient Fill' } },
-    // OS gradient fill
-    { plot1: 'osData', plot2: 'midline', options: { color: '#FF5252', transp: 90, title: 'Oversold Gradient Fill' } },
+    {
+      plot1: 'rsi', plot2: 'midline', options: { title: 'Overbought Gradient Fill' },
+      gradient: { topValue: constant(100), bottomValue: constant(70), topColor: constant('#4CAF50'), bottomColor: constant('#4CAF5000') },
+    },
+    {
+      plot1: 'rsi', plot2: 'midline', options: { title: 'Oversold Gradient Fill' },
+      gradient: { topValue: constant(30), bottomValue: constant(0), topColor: constant('#FF525200'), bottomColor: constant('#FF5252') },
+    },
     // Pine: fill(bbUpperBand, bbLowerBand, color= isBB ? color.new(color.green, 90) : na)
     { plot1: 'bbUpper', plot2: 'bbLower', options: { color: 'rgba(76,175,80,0.10)', title: 'Bollinger Bands Background Fill' } },
   ];
@@ -278,8 +279,6 @@ export function calculate(bars: Bar[], inputs: Partial<MOSTRSIInputs> = {}): Omi
       'most': mostPlot,
       'bullDiv': bullDivPlot,
       'bearDiv': bearDivPlot,
-      'obData': obData,
-      'osData': osData,
       'midline': midlinePlot,
       'bbUpper': bbUpperPlot,
       'bbLower': bbLowerPlot,

@@ -46,7 +46,7 @@ import type {
 } from '../../src/types';
 import { barInterval } from '../../src/bar-time';
 import { toCandlestickData } from './data-loader';
-import { isTransparent, withOpacity } from './color';
+import { gradientPart, isTransparent, withOpacity, type GradientPart } from './color';
 
 // ─── Bar grid (bars after the last bar) ────────────────────────────────────
 
@@ -99,6 +99,19 @@ class BarGrid {
 
 /** Fill of a port result; per-bar colours may hold na (null) values */
 type PlotFill = FillData & { colors?: Array<string | null | undefined> };
+
+/** Gradient of a fill (FillData / FillConfig `gradient`), one entry per bar index; na: null / NaN */
+type FillGradientData = {
+  topValue: Array<number | null | undefined>;
+  bottomValue: Array<number | null | undefined>;
+  topColor: Array<string | null | undefined>;
+  bottomColor: Array<string | null | undefined>;
+};
+
+/** Gradient part of bar `i` of a gradient fill (null: nothing drawn on that part) */
+function gradientAt(g: FillGradientData, i: number): GradientPart | null {
+  return gradientPart(g.topValue[i], g.bottomValue[i], g.topColor[i], g.bottomColor[i]);
+}
 
 /** Plot fill colour when the port gives none (renderer default, not a Pine value) */
 const DEFAULT_PLOT_FILL_COLOR = '#2962FF40';
@@ -405,6 +418,9 @@ class BgColorRenderer implements IPrimitivePaneRenderer {
  * (code/render_probe_fill.pine, data/tv/render_probe_fill.png in port-fidelity-check/) fills the polygon
  * between the two plot lines; the part between bar i - 1 and bar i has the colour of bar i, and an na colour on
  * bar i removes that part only. A bar where either plot is na breaks the fill (fillgaps = false).
+ * Gradient fills: the part between bar i - 1 and bar i gets the vertical gradient of bar i (a canvas linear
+ * gradient from the y of top_value to the y of bottom_value; the canvas keeps the end colours outside it, which is
+ * the clamping), see drawGradient.
  * Drawn as a primitive (not AreaSeries pairs) to avoid masking overlay candlesticks.
  */
 interface PlotFillPoint {
@@ -414,6 +430,11 @@ interface PlotFillPoint {
   v2: number;
   /** fill colour of the part that leads into this point (CSS colour with its final alpha); null = na, no fill */
   color: string | null;
+  /**
+   * Gradient fill (Pine fill(p1, p2, top_value, bottom_value, top_color, bottom_color)): gradient of the part that
+   * leads into this point, used instead of `color`; null = nothing drawn on that part (see gradientPart)
+   */
+  gradient?: GradientPart | null;
 }
 
 class PlotFillPrimitive extends BasePrimitive {
@@ -456,9 +477,23 @@ class PlotFillRenderer implements IPrimitivePaneRenderer {
 
     const data = this._source.getData();
     const timeScale = chart.timeScale();
+    const isGradient = data.some(p => p.gradient !== undefined);
 
     target.useMediaCoordinateSpace(({ context: ctx }) => {
       type Pt = { x: number; y1: number; y2: number };
+      const pointAt = (p: PlotFillPoint): Pt | null => {
+        if (!Number.isFinite(p.v1) || !Number.isFinite(p.v2)) return null;
+        const x = timeScale.timeToCoordinate(p.time as unknown as Time);
+        const y1 = series.priceToCoordinate(p.v1);
+        const y2 = series.priceToCoordinate(p.v2);
+        return x != null && y1 != null && y2 != null ? { x: x as number, y1: y1 as number, y2: y2 as number } : null;
+      };
+
+      if (isGradient) {
+        this.drawGradient(ctx, data, pointAt, series);
+        return;
+      }
+
       // consecutive parts of the same colour are filled as one polygon (no seam between bars)
       let run: { color: string; pts: Pt[] } | null = null;
       const flush = () => {
@@ -477,13 +512,7 @@ class PlotFillRenderer implements IPrimitivePaneRenderer {
 
       let prev: Pt | null = null;
       for (const p of data) {
-        let cur: Pt | null = null;
-        if (Number.isFinite(p.v1) && Number.isFinite(p.v2)) {
-          const x = timeScale.timeToCoordinate(p.time as unknown as Time);
-          const y1 = series.priceToCoordinate(p.v1);
-          const y2 = series.priceToCoordinate(p.v2);
-          if (x != null && y1 != null && y2 != null) cur = { x: x as number, y1: y1 as number, y2: y2 as number };
-        }
+        const cur = pointAt(p);
         if (!cur) {
           flush();
           prev = null;
@@ -502,6 +531,79 @@ class PlotFillRenderer implements IPrimitivePaneRenderer {
       }
       flush();
     });
+  }
+
+  /**
+   * Gradient fill: each stretch of bars where both plots have a value is clipped to its polygon, and each part
+   * (bar i - 1 to bar i) is painted with the vertical gradient of bar i as a rectangle between the two bar x (rounded
+   * to device pixels, so neighbour parts neither overlap nor leave a seam). Consecutive parts with the same gradient
+   * share one rectangle.
+   */
+  private drawGradient(
+    ctx: CanvasRenderingContext2D,
+    data: PlotFillPoint[],
+    pointAt: (p: PlotFillPoint) => { x: number; y1: number; y2: number } | null,
+    series: ISeriesApi<SeriesType>
+  ): void {
+    type Pt = { x: number; y1: number; y2: number };
+    const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+    const snap = (x: number) => Math.round(x * dpr) / dpr;
+    const keyOf = (g: GradientPart) => `${g.top}|${g.bottom}|${g.topColor}|${g.bottomColor}`;
+
+    const paintStretch = (pts: Pt[], parts: Array<GradientPart | null>) => {
+      if (pts.length < 2) return;
+      let yMin = Infinity;
+      let yMax = -Infinity;
+      for (const p of pts) {
+        yMin = Math.min(yMin, p.y1, p.y2);
+        yMax = Math.max(yMax, p.y1, p.y2);
+      }
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y1);
+      for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k].x, pts[k].y1);
+      for (let k = pts.length - 1; k >= 0; k--) ctx.lineTo(pts[k].x, pts[k].y2);
+      ctx.closePath();
+      ctx.clip();
+      // parts[k] is the part from pts[k - 1] to pts[k]
+      let k = 1;
+      while (k < pts.length) {
+        const g = parts[k];
+        let end = k;
+        if (g) {
+          const key = keyOf(g);
+          while (end + 1 < pts.length && parts[end + 1] && keyOf(parts[end + 1]!) === key) end++;
+          const yTop = series.priceToCoordinate(g.top);
+          const yBottom = series.priceToCoordinate(g.bottom);
+          if (yTop != null && yBottom != null) {
+            const grad = ctx.createLinearGradient(0, yTop as number, 0, yBottom as number);
+            grad.addColorStop(0, g.topColor);
+            grad.addColorStop(1, g.bottomColor);
+            const x0 = snap(pts[k - 1].x);
+            const x1 = snap(pts[end].x);
+            ctx.fillStyle = grad;
+            ctx.fillRect(x0, yMin - 1, x1 - x0, yMax - yMin + 2);
+          }
+        }
+        k = end + 1;
+      }
+      ctx.restore();
+    };
+
+    let pts: Pt[] = [];
+    let parts: Array<GradientPart | null> = [];
+    for (const p of data) {
+      const cur = pointAt(p);
+      if (!cur) {
+        paintStretch(pts, parts);
+        pts = [];
+        parts = [];
+        continue;
+      }
+      pts.push(cur);
+      parts.push(pts.length > 1 ? p.gradient ?? null : null);
+    }
+    paintStretch(pts, parts);
   }
 }
 
@@ -1140,6 +1242,8 @@ export class ChartManager {
   private fillSeries: Map<string, ISeriesApi<'Baseline'>> = new Map();
   private plotFillPrimitives: PlotFillPrimitive[] = [];
   private plotFillAnchorSeries: ISeriesApi<'Line'>[] = [];
+  /** gradient fills between hlines: primitive + anchor series */
+  private hlineGradientFills: Array<{ anchor: ISeriesApi<'Line'>; primitive: PlotFillPrimitive }> = [];
   private markerPlugin: ISeriesMarkersPluginApi<Time> | null = null;
   // New display component state
   private crossPrimitives: Map<string, CrossPlotPrimitive> = new Map();
@@ -2026,7 +2130,9 @@ export class ChartManager {
   }
 
   /**
-   * Draw filled regions between hline pairs using BaselineSeries
+   * Draw filled regions between hline pairs using BaselineSeries.
+   * A gradient fill (FillConfig.gradient, per-bar arrays) is drawn by the plot fill primitive over the bars, with the
+   * gradient of each bar (Pine fill(hline1, hline2, top_value, bottom_value, top_color, bottom_color)).
    */
   setFills(fills: FillConfig[], hlines: HLineConfig[], paneIndex: number, bars: Bar[]): void {
     this.clearFills();
@@ -2040,6 +2146,30 @@ export class ChartManager {
       const price1 = hlineMap.get(fill.plot1);
       const price2 = hlineMap.get(fill.plot2);
       if (price1 == null || price2 == null) continue;
+
+      if (fill.gradient) {
+        const gradient = fill.gradient as FillGradientData;
+        const anchor = this.chart.addSeries(LineSeries, {
+          color: 'transparent',
+          lineVisible: false,
+          lastValueVisible: false,
+          priceLineVisible: false,
+          crosshairMarkerVisible: false,
+        });
+        anchor.moveToPane(paneIndex);
+        anchor.setData(bars.map(b => ({ time: b.time as unknown as Time, value: Math.max(price1, price2) })));
+        const primitive = new PlotFillPrimitive();
+        primitive.setData(bars.map((b, i) => ({
+          time: b.time,
+          v1: price1,
+          v2: price2,
+          color: null,
+          gradient: gradientAt(gradient, i),
+        })));
+        anchor.attachPrimitive(primitive);
+        this.hlineGradientFills.push({ anchor, primitive });
+        continue;
+      }
 
       const upperPrice = Math.max(price1, price2);
       const lowerPrice = Math.min(price1, price2);
@@ -2075,6 +2205,11 @@ export class ChartManager {
       this.chart.removeSeries(series);
     }
     this.fillSeries.clear();
+    for (const { anchor, primitive } of this.hlineGradientFills) {
+      anchor.detachPrimitive(primitive);
+      this.chart.removeSeries(anchor);
+    }
+    this.hlineGradientFills = [];
   }
 
   /**
@@ -2113,13 +2248,17 @@ export class ChartManager {
    * index in the ports), else `fill.options.color`. A null, empty or fully transparent colour is Pine na: no fill on
    * that bar. `fill.options.transp` (Pine v4 transp, 0..100) multiplies the alpha the colour already has; without
    * transp the colour is drawn as given (draws fill(p1, p2, color.blue) opaque, render_probe_fill.png).
+   * `fill.gradient` (Pine fill(p1, p2, top_value, bottom_value, top_color, bottom_color)) replaces the colour: bar i
+   * (index in `bars`, found by the time of the plot1 point) gets the vertical gradient of gradient[...][i].
    */
   setPlotFills(
     fills: PlotFill[],
     plotData: Record<string, Array<{ time: number; value: number }>>,
-    paneIndex: number
+    paneIndex: number,
+    bars: Bar[]
   ): void {
     this.clearPlotFills();
+    const barIndex = new Map(bars.map((b, i) => [b.time, i]));
 
     for (const fill of fills) {
       const p1Data = plotData[fill.plot1];
@@ -2146,8 +2285,19 @@ export class ChartManager {
 
       // Points aligned by time; NaN where either plot is na
       const p2Map = new Map(p2Data.map(d => [d.time, d.value]));
+      const gradient = fill.gradient as FillGradientData | undefined;
       const points: PlotFillPoint[] = p1Data.map((d1, i) => {
         const v2 = p2Map.get(d1.time);
+        if (gradient) {
+          const bi = barIndex.get(d1.time);
+          return {
+            time: d1.time,
+            v1: d1.value ?? NaN,
+            v2: v2 ?? NaN,
+            color: null,
+            gradient: bi === undefined ? null : gradientAt(gradient, bi),
+          };
+        }
         const raw = fill.colors && i < fill.colors.length ? fill.colors[i] : staticColor;
         return {
           time: d1.time,

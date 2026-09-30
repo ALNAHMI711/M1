@@ -40,8 +40,6 @@ export const plotConfig: PlotConfig[] = [
   { id: 'plot1', title: 'RSI-based MA', color: '#E2CC00', lineWidth: 1 },
   { id: 'plot2', title: 'Upper Bollinger Band', color: '#089981', lineWidth: 1 },
   { id: 'plot3', title: 'Lower Bollinger Band', color: '#089981', lineWidth: 1 },
-  { id: 'plot4', title: 'RSI OB', color: '#4CAF50', lineWidth: 0, display: 'none' },
-  { id: 'plot5', title: 'RSI OS', color: '#FF5252', lineWidth: 0, display: 'none' },
   { id: 'plot6', title: 'Middle Line', color: 'transparent', lineWidth: 0, display: 'none' },
 ];
 
@@ -100,20 +98,21 @@ export function calculate(bars: Bar[], inputs: Partial<RSIInputs> = {}): Omit<In
     }
   }
 
-  // Gradient fill zones: split RSI into OB (>70) and OS (<30) segments
-  const obData = rsiArr.map((v, i) => ({
-    time: bars[i].time,
-    value: (v != null && v > 70) ? v : NaN,
-  }));
-  const osData = rsiArr.map((v, i) => ({
-    time: bars[i].time,
-    value: (v != null && v < 30) ? v : NaN,
-  }));
+  // Pine: midLinePlot = plot(50, display = display.none)
+  //   fill(rsiPlot, midLinePlot, 100, 70, top_color = color.new(color.green, 0), bottom_color = color.new(color.green, 100))
+  //   fill(rsiPlot, midLinePlot, 30, 0, top_color = color.new(color.red, 100), bottom_color = color.new(color.red, 0))
   const midlineData = bars.map(b => ({ time: b.time, value: 50 }));
-
-  fills.push(
-    { plot1: 'plot4', plot2: 'plot6', options: { color: '#4CAF50', transp: 90, title: 'Overbought Gradient Fill' } },
-    { plot1: 'plot5', plot2: 'plot6', options: { color: '#FF5252', transp: 90, title: 'Oversold Gradient Fill' } },
+  const n = bars.length;
+  const constant = <T>(v: T): T[] => new Array(n).fill(v);
+  fills.unshift(
+    {
+      plot1: 'plot0', plot2: 'plot6', options: { title: 'Overbought Gradient Fill' },
+      gradient: { topValue: constant(100), bottomValue: constant(70), topColor: constant('#4CAF50'), bottomColor: constant('#4CAF5000') },
+    },
+    {
+      plot1: 'plot0', plot2: 'plot6', options: { title: 'Oversold Gradient Fill' },
+      gradient: { topValue: constant(30), bottomValue: constant(0), topColor: constant('#F2364500'), bottomColor: constant('#F23645') },
+    },
   );
 
   // Divergence detection
@@ -233,8 +232,6 @@ export function calculate(bars: Bar[], inputs: Partial<RSIInputs> = {}): Omit<In
       'plot1': maData,
       'plot2': bbUpperData,
       'plot3': bbLowerData,
-      'plot4': obData,
-      'plot5': osData,
       'plot6': midlineData,
     },
     fills,

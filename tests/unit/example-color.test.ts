@@ -2,7 +2,7 @@
  * Colour helper of the example renderer (example/src/color.ts), used for plot fills and markers
  */
 import { describe, it, expect } from 'vitest';
-import { parseColor, withOpacity, isTransparent } from '../../example/src/color';
+import { parseColor, withOpacity, isTransparent, gradientPart } from '../../example/src/color';
 
 describe('example colour helper', () => {
   it('reads hex, rgb() and rgba() colours', () => {
@@ -38,5 +38,39 @@ describe('example colour helper', () => {
     expect(isTransparent('#ff000000')).toBe(true);
     expect(isTransparent(undefined)).toBe(true);
     expect(isTransparent('#ff0000')).toBe(false);
+  });
+
+  it('builds the gradient of a gradient fill part (rules)', () => {
+    // top_color at top_value, bottom_color at bottom_value
+    expect(gradientPart(100, 70, '#4CAF50', '#4CAF5000')).toEqual({
+      top: 100, bottom: 70, topColor: 'rgba(76, 175, 80, 1)', bottomColor: 'rgba(76, 175, 80, 0)',
+    });
+    // top_value below bottom_value: top_color stays at top_value
+    expect(gradientPart(14, 20, '#00E676', '#F23645')).toEqual({
+      top: 14, bottom: 20, topColor: 'rgba(0, 230, 118, 1)', bottomColor: 'rgba(242, 54, 69, 1)',
+    });
+    // na value or top_value == bottom_value: nothing drawn
+    expect(gradientPart(NaN, 0, '#fff', '#000')).toBeNull();
+    expect(gradientPart(null, 0, '#fff', '#000')).toBeNull();
+    expect(gradientPart(10, undefined, '#fff', '#000')).toBeNull();
+    expect(gradientPart(5, 5, '#fff', '#000')).toBeNull();
+    // both colours na or transparent: nothing drawn
+    expect(gradientPart(10, 0, null, 'transparent')).toBeNull();
+    expect(gradientPart(10, 0, '#ff000000', '')).toBeNull();
+  });
+
+  it('gives a transparent gradient end the RGB of the other end', () => {
+    // na top colour: blue at the bottom, transparent at the top
+    expect(gradientPart(46, 36, null, '#2962FF')).toEqual({
+      top: 46, bottom: 36, topColor: 'rgba(41, 98, 255, 0)', bottomColor: 'rgba(41, 98, 255, 1)',
+    });
+    // color.new(chart.bg_color, 100) at one end: its RGB is not used
+    expect(gradientPart(1, 0, 'rgba(8, 153, 129, 0.5)', '#ffffff00')).toEqual({
+      top: 1, bottom: 0, topColor: 'rgba(8, 153, 129, 0.5)', bottomColor: 'rgba(8, 153, 129, 0)',
+    });
+    // two visible colours are kept as they are
+    expect(gradientPart(1, 0, '#ff000080', '#0000ff')).toEqual({
+      top: 1, bottom: 0, topColor: 'rgba(255, 0, 0, 0.502)', bottomColor: 'rgba(0, 0, 255, 1)',
+    });
   });
 });

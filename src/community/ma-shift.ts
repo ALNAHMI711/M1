@@ -176,23 +176,20 @@ export function calculate(bars: Bar[], inputs: Partial<MAShiftInputs> = {}): Omi
   const oscZeroPlot = bars.map(b => ({ time: b.time, value: 0 }));
   const oscBotPlot = bars.map(b => ({ time: b.time, value: -oscThreshold }));
 
-  // Dynamic fill colors between threshold and zero (gradient effect)
-  const topFillColors: string[] = new Array(n);
-  const botFillColors: string[] = new Array(n);
+  // Pine: osc_col = osc > 0 ? (osc > osc[1] ? osc_col_up1 : osc_col_up2) : (osc < osc[1] ? osc_col_dn1 : osc_col_dn2)
+  // (v6 palette: osc_col_dn1 = color.yellow #FDD835, osc_col_dn2 = color.orange #FF9800)
+  const oscCol: string[] = new Array(n);
   for (let i = 0; i < n; i++) {
     const val = oscArr[i] ?? NaN;
-    const prev = oscArr[i - 1] ?? NaN;
-    if (isNaN(val)) {
-      topFillColors[i] = 'rgba(0,0,0,0)';
-      botFillColors[i] = 'rgba(0,0,0,0)';
-    } else {
-      const col = val > 0
-        ? (val > prev ? 'rgba(29, 209, 194, 0.3)' : 'rgba(23, 162, 151, 0.3)')
-        : (val < prev ? 'rgba(255, 235, 59, 0.2)' : 'rgba(255, 152, 0, 0.2)');
-      topFillColors[i] = col;
-      botFillColors[i] = col;
-    }
+    const prev = i > 0 ? (oscArr[i - 1] ?? NaN) : NaN;
+    oscCol[i] = val > 0 ? (val > prev ? '#1DD1C2' : '#17A297') : (val < prev ? '#FDD835' : '#FF9800');
   }
+  // color.new(osc_col, t): alpha byte of transparency t
+  const withTransp = (t: number) => {
+    const aa = Math.round((100 - t) * 2.55).toString(16).padStart(2, '0').toUpperCase();
+    return oscCol.map((c) => c + aa);
+  };
+  const constant = (v: number) => new Array<number>(n).fill(v);
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
@@ -201,8 +198,16 @@ export function calculate(bars: Bar[], inputs: Partial<MAShiftInputs> = {}): Omi
     barColors,
     plotCandles: { candle0: candles },
     fills: [
-      { plot1: 'oscTop', plot2: 'oscZero', options: { color: 'rgba(29, 209, 194, 0.15)' }, colors: topFillColors },
-      { plot1: 'oscBot', plot2: 'oscZero', options: { color: 'rgba(255, 152, 0, 0.15)' }, colors: botFillColors },
+      // fill(p1, p0, top, 0, color.new(osc_col, 70), color.new(osc_col, 100))
+      {
+        plot1: 'oscTop', plot2: 'oscZero',
+        gradient: { topValue: constant(oscThreshold), bottomValue: constant(0), topColor: withTransp(70), bottomColor: withTransp(100) },
+      },
+      // fill(p2, p0, 0, bot, color.new(osc_col, 100), color.new(osc_col, 80))
+      {
+        plot1: 'oscBot', plot2: 'oscZero',
+        gradient: { topValue: constant(0), bottomValue: constant(-oscThreshold), topColor: withTransp(100), bottomColor: withTransp(80) },
+      },
     ],
   } as Omit<IndicatorResult, 'markers'> & { markers: MarkerData[]; barColors: BarColorData[]; plotCandles: Record<string, PlotCandleData[]> };
 }

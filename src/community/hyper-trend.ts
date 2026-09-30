@@ -92,22 +92,29 @@ export function calculate(bars: Bar[], inputs: Partial<HyperTrendInputs> = {}): 
   }));
   const plotLower = lower.map((v, i) => ({ time: bars[i].time, value: i < warmup ? NaN : v }));
 
-  // Fill colors: upper area = red-ish when bearish, lower area = teal-ish when bullish
-  const upperFillColors = avg.map((_, i) => {
-    if (i < warmup || (i > 0 && os[i] !== os[i - 1])) return 'transparent';
-    return 'rgba(239,83,80,0.30)';
-  });
-  const lowerFillColors = avg.map((_, i) => {
-    if (i < warmup || (i > 0 && os[i] !== os[i - 1])) return 'transparent';
-    return 'rgba(38,166,154,0.30)';
-  });
+  // Pine (area = 'Gradient'): upper_topcol := upperCss, upper_btmcol := color.new(chart.bg_color, 100),
+  //   lower_topcol := color.new(chart.bg_color, 100), lower_btmcol := lowerCss
+  const upperCss = '#FF52524C'; // color.new(color.red, 70), v5 palette
+  const lowerCss = '#00897B4C'; // color.new(color.teal, 70), v5 palette
+  const bgTransparent = '#00000000'; // color.new(chart.bg_color, 100)
+  // top_color = os != os[1] ? na : ..., bottom_color = os != os[1] ? na : ...
+  const flip = (i: number) => i > 0 && os[i] !== os[i - 1];
+  const colorWhen = (c: string) => os.map((_, i) => (flip(i) ? null : c));
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
     plots: { 'upper': plotUpper, 'avg': plotAvg, 'lower': plotLower },
     fills: [
-      { plot1: 'avg', plot2: 'upper', options: { color: 'rgba(239,83,80,0.30)' }, colors: upperFillColors },
-      { plot1: 'lower', plot2: 'avg', options: { color: 'rgba(38,166,154,0.30)' }, colors: lowerFillColors },
+      // fill(plot_upper, plot_avg, top_color, bottom_color, top_value = upper, bottom_value = avg)
+      {
+        plot1: 'upper', plot2: 'avg',
+        gradient: { topValue: upper.slice(), bottomValue: avg.slice(), topColor: colorWhen(upperCss), bottomColor: colorWhen(bgTransparent) },
+      },
+      // fill(plot_avg, plot_lower, top_color, bottom_color, top_value = avg, bottom_value = lower)
+      {
+        plot1: 'avg', plot2: 'lower',
+        gradient: { topValue: avg.slice(), bottomValue: lower.slice(), topColor: colorWhen(bgTransparent), bottomColor: colorWhen(lowerCss) },
+      },
     ],
   };
 }

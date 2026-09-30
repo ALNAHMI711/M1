@@ -287,14 +287,22 @@ export function calculate(bars: Bar[], inputs: Partial<RsiMomentumDivergenceInpu
 
   // Pine: p50 = plot(50, color = color.gray)
   const plot1 = bars.map((b) => ({ time: b.time, value: 50 }));
+  const constant = <T>(v: T): T[] => new Array(n).fill(v);
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
     plots: { 'plot0': plot0, 'plot1': plot1 },
-    // Pine: fill(rsiLine, p50, 70, 30, divBearColor, na) and fill(rsiLine, p50, 70, 30, na, divBullColor) are
-    // gradient fills by price level; FillData has one colour per bar, so a single fill is kept.
+    // Pine: fill(rsiLine, p50, 70, 30, divBearColor, na)
+    //      fill(rsiLine, p50, 70, 30, na, divBullColor)
     fills: [
-      { plot1: 'plot0', plot2: 'plot1', options: { color: bearColor + '33' } },
+      {
+        plot1: 'plot0', plot2: 'plot1',
+        gradient: { topValue: constant(70), bottomValue: constant(30), topColor: constant(bearColor), bottomColor: constant(null) },
+      },
+      {
+        plot1: 'plot0', plot2: 'plot1',
+        gradient: { topValue: constant(70), bottomValue: constant(30), topColor: constant(null), bottomColor: constant(bullColor) },
+      },
     ],
     markers,
     lines,

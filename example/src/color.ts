@@ -106,6 +106,45 @@ export function withOpacity(color: string | null | undefined, opacity = 1): stri
   return a > 0 ? toCss({ ...c, a }) : null;
 }
 
+/** Gradient of one part of a gradient fill: CSS colours at the prices `top` and `bottom` */
+export interface GradientPart {
+  top: number;
+  bottom: number;
+  topColor: string;
+  bottomColor: string;
+}
+
+/**
+ * Gradient of one bar of Pine fill(p1, p2, top_value, bottom_value, top_color, bottom_color).
+ * rules (oakScriptJS gradient-check/data/probe_gradient_fill.png and
+ * gradient-fill-check/data/tv/probe_gradient_edge.png): the colour changes with the price, top_color at top_value,
+ * bottom_color at bottom_value, linear in between, the end colour outside the range; top_value below bottom_value
+ * keeps top_color at top_value. Nothing is drawn when a value is na or top_value == bottom_value. An na (null,
+ * empty, unreadable) colour is a transparent end: the gradient goes from the other colour to transparent. Null when
+ * nothing is drawn (also when both colours are transparent).
+ * A transparent end takes the RGB of the other end, so the result is the same with or without premultiplied alpha
+ * interpolation.
+ */
+export function gradientPart(
+  topValue: number | null | undefined,
+  bottomValue: number | null | undefined,
+  topColor: string | null | undefined,
+  bottomColor: string | null | undefined
+): GradientPart | null {
+  if (topValue == null || bottomValue == null || !Number.isFinite(topValue) || !Number.isFinite(bottomValue)) {
+    return null;
+  }
+  if (topValue === bottomValue) return null;
+  let t = parseColor(topColor);
+  let b = parseColor(bottomColor);
+  const tOn = t != null && t.a > 0;
+  const bOn = b != null && b.a > 0;
+  if (!tOn && !bOn) return null;
+  if (!tOn) t = { ...b!, a: 0 };
+  if (!bOn) b = { ...t!, a: 0 };
+  return { top: topValue, bottom: bottomValue, topColor: toCss(t!), bottomColor: toCss(b!) };
+}
+
 /** Fully transparent colour (Pine na colour): missing, empty, 'transparent', or alpha 0 (#rrggbb00, rgba(..., 0)) */
 export function isTransparent(color: string | undefined | null): boolean {
   if (!color || !color.trim()) return true;

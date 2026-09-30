@@ -9,7 +9,7 @@
  * Reference: "Bjorgum TSI" community indicator
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, Series, color, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 
 export interface BjorgumTSIInputs {
   speedInput: string;
@@ -58,6 +58,10 @@ export const plotConfig: PlotConfig[] = [
   { id: 'plot1', title: 'Signal', color: '#FF6D00', lineWidth: 1 },
   { id: 'plot2', title: 'Bar Hi', color: '#26A69A', lineWidth: 4, style: 'histogram' },
   { id: 'plot3', title: 'Bar Lo', color: '#EF5350', lineWidth: 4, style: 'histogram' },
+  { id: 'h1', title: 'Level', color: 'transparent', lineWidth: 0, display: 'none' },
+  { id: 'h2', title: 'Level', color: 'transparent', lineWidth: 0, display: 'none' },
+  { id: 'p6', title: 'Plot', color: 'transparent', lineWidth: 0, display: 'none' },
+  { id: 'p7', title: 'Plot', color: 'transparent', lineWidth: 0, display: 'none' },
 ];
 
 export const metadata = {
@@ -162,6 +166,54 @@ export function calculate(bars: Bar[], inputs: Partial<BjorgumTSIInputs> = {}): 
     return tsi >= sig ? 'rgba(41,98,255,0.15)' : 'rgba(255,109,0,0.15)';
   });
 
+  // Pine: isClassic = themeInput == "Classic Bj" (default; this port has no theme input), isBeachy false
+  const isClassic = true;
+  const ob = cfg.obValue;
+  const os = cfg.osValue;
+  const obFillColor = '#33FF57'; // Pine: isBeachy ? #FFD700 : #33FF57
+  const osFillColor = '#33FF57'; // Pine: isBeachy ? #FF6B6B : #33FF57
+  const bullBgColor = '#80FFFF'; // Pine: isBeachy ? #FFD700 : #80FFFF
+  const bearBgColor = '#FF80FF'; // Pine: isBeachy ? #FF6B6B : #FF80FF
+  const perBar = <T>(f: (i: number) => T): T[] => bars.map((_, i) => f(i));
+  const hidden = (f: (i: number) => number) => bars.map((b, i) => ({ time: b.time, value: f(i) }));
+
+  // Pine: h1 = hline(isClassic ? na : oBotInput, ...); h2 = hline(isClassic ? na : oSoldInput, ...)
+  const h1Plot = hidden(() => (isClassic ? NaN : ob));
+  const h2Plot = hidden(() => (isClassic ? NaN : os));
+  // Pine: p6 = plot(oBotInput, display = display.none); p7 = plot(oSoldInput, display = display.none)
+  const p6Plot = hidden(() => ob);
+  const p7Plot = hidden(() => os);
+
+  // Pine: obValue = showObFill ? oBotInput : na (showObFill = tsl > oBotInput and not isClassic)
+  const obValueArr = perBar((i) => (signalArr[i] > ob && !isClassic ? ob : NaN));
+  // Pine: osValue = showOsFill ? oSoldInput : na (showOsFill = tsl < oSoldInput and not isClassic)
+  const osValueArr = perBar((i) => (signalArr[i] < os && !isClassic ? os : NaN));
+
+  const gradientFills = [
+    // Pine: fill(h2, h1, oBotInput, 5, color.new(obFillColor, 80), color(na), fillgaps = true)
+    { plot1: 'h2', plot2: 'h1', gradient: {
+      topValue: perBar(() => ob), bottomValue: perBar(() => 5),
+      topColor: perBar((): string | null => color.new_color(obFillColor, 80) as string),
+      bottomColor: perBar((): string | null => null) } },
+    // Pine: fill(h2, h1, -5, oSoldInput, color(na), color.new(osFillColor, 80), fillgaps = true)
+    { plot1: 'h2', plot2: 'h1', gradient: {
+      topValue: perBar(() => -5), bottomValue: perBar(() => os),
+      topColor: perBar((): string | null => null),
+      bottomColor: perBar((): string | null => color.new_color(osFillColor, 80) as string) } },
+    // Pine: fill(p2, p6, oBotInput + 50, obValue, color.new(bearBgColor, 30), color.new(bearBgColor, 90), fillgaps = true)
+    { plot1: 'plot1', plot2: 'p6', gradient: {
+      topValue: perBar(() => ob + 50), bottomValue: obValueArr,
+      topColor: perBar((): string | null => color.new_color(bearBgColor, 30) as string),
+      bottomColor: perBar((): string | null => color.new_color(bearBgColor, 90) as string) } },
+    // Pine: fill(p2, p7, osValue, oSoldInput - 50, color.new(bullBgColor, 90), color.new(bullBgColor, 30), fillgaps = true)
+    { plot1: 'plot1', plot2: 'p7', gradient: {
+      topValue: osValueArr, bottomValue: perBar(() => os - 50),
+      topColor: perBar((): string | null => color.new_color(bullBgColor, 90) as string),
+      bottomColor: perBar((): string | null => color.new_color(bullBgColor, 30) as string) } },
+  ];
+  // Pine: fill(p1, p2, tsi, tsl, fillColor2, color.new(fillColor2, 70), fillgaps = true, display = displayFill)
+  // is not returned: displayFill = isClassic ? display.none : display.all, and FillData has no display option.
+
   // HLines
   const hlines: Array<{ value: number; options: { color: string; linestyle: 'solid' | 'dashed' | 'dotted'; linewidth?: number; title: string } }> = [];
   if (cfg.showLines) {
@@ -174,9 +226,13 @@ export function calculate(bars: Bar[], inputs: Partial<BjorgumTSIInputs> = {}): 
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
-    plots: { 'plot0': tsiPlot, 'plot1': sigPlot, 'plot2': barHiPlot, 'plot3': barLoPlot },
+    plots: {
+      'plot0': tsiPlot, 'plot1': sigPlot, 'plot2': barHiPlot, 'plot3': barLoPlot,
+      'h1': h1Plot, 'h2': h2Plot, 'p6': p6Plot, 'p7': p7Plot,
+    },
     hlines,
-    fills: [{ plot1: 'plot0', plot2: 'plot1', colors: fillColors }],
+    // Pine order: the 4 gradient fills above, then fill(p1, p2, fillColor1, fillgaps = true)
+    fills: [...gradientFills, { plot1: 'plot0', plot2: 'plot1', colors: fillColors }],
   };
 }
 

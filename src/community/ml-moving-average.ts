@@ -157,23 +157,27 @@ export function calculate(bars: Bar[], inputs: Partial<MlMovingAverageInputs> = 
     }
   }
 
-  // Two gradient fills: center-to-upper (blue/bull) and center-to-lower (pink/bear), matching Pine
-  const upperFillColors = bars.map((_b, i) => {
-    if (i < warmup - 1 || isNaN(centerArr[i])) return 'transparent';
-    return 'rgba(91,156,246,0.5)';
-  });
-
-  const lowerFillColors = bars.map((_b, i) => {
-    if (i < warmup - 1 || isNaN(centerArr[i])) return 'transparent';
-    return 'rgba(233,30,99,0.5)';
-  });
+  // Pine: upCss = color.new(#5b9cf6, 50), dnCss = color.new(#e91e63, 50)
+  //   fill(plot_upper, plot_out, out + mae, out, upCss, color.new(chart.bg_color, 100))
+  //   fill(plot_out, plot_lower, out, out - mae, color.new(chart.bg_color, 100), dnCss)
+  // Port bands: upperArr / lowerArr stand for out + mae / out - mae.
+  const upCss = 'rgba(91,156,246,0.5)';
+  const dnCss = 'rgba(233,30,99,0.5)';
+  const bgTransparent = '#00000000';
+  const constant = <T>(v: T): T[] => new Array(n).fill(v);
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
     plots: { 'plot0': plot0, 'plot1': plot1, 'plot2': plot2 },
     fills: [
-      { plot1: 'plot1', plot2: 'plot0', options: { color: 'rgba(91,156,246,0.5)' }, colors: upperFillColors },
-      { plot1: 'plot0', plot2: 'plot2', options: { color: 'rgba(233,30,99,0.5)' }, colors: lowerFillColors },
+      {
+        plot1: 'plot1', plot2: 'plot0',
+        gradient: { topValue: plot1.map(p => p.value), bottomValue: plot0.map(p => p.value), topColor: constant(upCss), bottomColor: constant(bgTransparent) },
+      },
+      {
+        plot1: 'plot0', plot2: 'plot2',
+        gradient: { topValue: plot0.map(p => p.value), bottomValue: plot2.map(p => p.value), topColor: constant(bgTransparent), bottomColor: constant(dnCss) },
+      },
     ],
     markers,
     bgColors,

@@ -154,21 +154,13 @@ export function calculate(bars: Bar[], inputs: Partial<UltimateRSIInputs> = {}):
     return v < osValue ? 'rgba(242,54,69,0.20)' : 'transparent';
   });
 
-  // Gradient fill: RSI to midline (upper half - green gradient)
-  const fillGradUpColors = arsiArr.map((v, i) => {
-    if (i < warmup || isNaN(v) || v <= 50) return 'transparent';
-    const intensity = Math.min((v - 50) / (obValue - 50), 1);
-    const alpha = (intensity * 0.15).toFixed(2);
-    return `rgba(8,153,129,${alpha})`;
-  });
-
-  // Gradient fill: midline to RSI (lower half - red gradient)
-  const fillGradDnColors = arsiArr.map((v, i) => {
-    if (i < warmup || isNaN(v) || v >= 50) return 'transparent';
-    const intensity = Math.min((50 - v) / (50 - osValue), 1);
-    const alpha = (intensity * 0.15).toFixed(2);
-    return `rgba(242,54,69,${alpha})`;
-  });
+  // Pine: fill(plot_rsi, plot_avg, obValue, 50, obAreaCss, color.new(chart.bg_color, 100))
+  //      fill(plot_avg, plot_rsi, 50, osValue, color.new(chart.bg_color, 100), osAreaCss)
+  // Pine: obAreaCss = input(color.new(#089981, 80)), osAreaCss = input(color.new(#f23645, 80))
+  const constant = <T>(v: T): T[] => new Array(len).fill(v);
+  const obAreaCss = 'rgba(8,153,129,0.20)';
+  const osAreaCss = 'rgba(242,54,69,0.20)';
+  const bgTransparent = '#00000000'; // color.new(chart.bg_color, 100)
 
   // bgColors: highlight bars when RSI crosses into OB/OS zones
   const bgColors: BgColorData[] = [];
@@ -205,8 +197,14 @@ export function calculate(bars: Bar[], inputs: Partial<UltimateRSIInputs> = {}):
     fills: [
       { plot1: 'plot0', plot2: 'plot_up', colors: fillOBColors },
       { plot1: 'plot_dn', plot2: 'plot0', colors: fillOSColors },
-      { plot1: 'plot0', plot2: 'plot_avg', colors: fillGradUpColors },
-      { plot1: 'plot_avg', plot2: 'plot0', colors: fillGradDnColors },
+      {
+        plot1: 'plot0', plot2: 'plot_avg',
+        gradient: { topValue: constant(obValue), bottomValue: constant(50), topColor: constant(obAreaCss), bottomColor: constant(bgTransparent) },
+      },
+      {
+        plot1: 'plot_avg', plot2: 'plot0',
+        gradient: { topValue: constant(50), bottomValue: constant(osValue), topColor: constant(bgTransparent), bottomColor: constant(osAreaCss) },
+      },
     ],
     bgColors,
   };

@@ -9,7 +9,7 @@
  * Reference: "Trend Impulse Channels (Zeiierman)" by Zeiierman
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, Series, color, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { MarkerData } from '../types';
 
 export interface TrendImpulseChannelsInputs {
@@ -134,13 +134,16 @@ export function calculate(bars: Bar[], inputs: Partial<TrendImpulseChannelsInput
     value: i < warmup || !cfg.showFill ? NaN : v,
   }));
 
-  // Fill colors
-  const upperFillColors = trend.map((_, i) => {
-    if (i < warmup) return 'transparent';
-    const c = dir[i] === 1 ? colorUp : dir[i] === -1 ? colorDown : colorGray;
-    return c + '99'; // 60% opacity
-  });
-  const lowerFillColors = upperFillColors;
+  // Pine: fill(plotUpper, plotMid, upper, trend, showFill ? color.new(trendColor, 60) : na, na)
+  //      fill(plotLower, plotMid, lower, trend, showFill ? color.new(trendColor, 60) : na, na)
+  // Pine: colorUp = input.color(color.lime), colorDown = input.color(color.red) (//@version=6 palette)
+  // Pine: trendColor = dir == 1 ? colorUp : dir == -1 ? colorDown : color.gray
+  const fillColor: Array<string | null> = dir.map((d) =>
+    cfg.showFill ? color.new_color(d === 1 ? color.lime : d === -1 ? color.red : color.gray, 60) as string : null);
+  const naColor: Array<string | null> = new Array(n).fill(null);
+  const trendVal = trend.map((v, i) => (i < warmup ? NaN : v));
+  const upperVal = upperArr.map((v, i) => (i < warmup ? NaN : v));
+  const lowerVal = lowerArr.map((v, i) => (i < warmup ? NaN : v));
 
   // Markers: retest signals and step signals
   const markers: MarkerData[] = [];
@@ -183,10 +186,16 @@ export function calculate(bars: Bar[], inputs: Partial<TrendImpulseChannelsInput
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
     plots: { 'trend': plotTrend, 'upper': plotUpper, 'lower': plotLower },
-    fills: cfg.showFill ? [
-      { plot1: 'trend', plot2: 'upper', options: { color: 'rgba(0,230,118,0.38)' }, colors: upperFillColors },
-      { plot1: 'lower', plot2: 'trend', options: { color: 'rgba(0,230,118,0.38)' }, colors: lowerFillColors },
-    ] : [],
+    fills: [
+      {
+        plot1: 'upper', plot2: 'trend',
+        gradient: { topValue: upperVal, bottomValue: trendVal, topColor: fillColor, bottomColor: naColor },
+      },
+      {
+        plot1: 'lower', plot2: 'trend',
+        gradient: { topValue: lowerVal, bottomValue: trendVal, topColor: fillColor, bottomColor: naColor },
+      },
+    ],
     markers,
   };
 }

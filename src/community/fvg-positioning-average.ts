@@ -8,7 +8,7 @@
  * Reference: "FVG Positioning Average [LuxAlgo]" by LuxAlgo
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, Series, color, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { BoxData } from '../types';
 
 export interface FvgPositioningAverageInputs {
@@ -32,6 +32,8 @@ export const inputConfig: InputConfig[] = [
 export const plotConfig: PlotConfig[] = [
   { id: 'plot0', title: 'Bull Average', color: '#089981', lineWidth: 2 },
   { id: 'plot1', title: 'Bear Average', color: '#f23645', lineWidth: 2 },
+  { id: 'ul', title: 'Plot', color: 'transparent', lineWidth: 0, display: 'none' },
+  { id: 'dl', title: 'Plot', color: 'transparent', lineWidth: 0, display: 'none' },
 ];
 
 export const metadata = {
@@ -68,7 +70,8 @@ export function calculate(bars: Bar[], inputs: Partial<FvgPositioningAverageInpu
   const plot0: { time: number; value: number; color?: string }[] = [];
   const plot1: { time: number; value: number; color?: string }[] = [];
 
-  const fillColors: string[] = [];
+  const upAvgArr: number[] = new Array(n);
+  const downAvgArr: number[] = new Array(n);
   const boxes: BoxData[] = [];
 
   for (let i = 0; i < n; i++) {
@@ -150,20 +153,50 @@ export function calculate(bars: Bar[], inputs: Partial<FvgPositioningAverageInpu
       color: downVisible ? '#f23645' : 'transparent',
     });
 
-    // Fill color: green above bull avg, red below bear avg
-    if (!isNaN(upAvg) && upVisible) {
-      fillColors.push('rgba(8,153,129,0.25)');
-    } else if (!isNaN(downAvg) && downVisible) {
-      fillColors.push('rgba(242,54,69,0.25)');
-    } else {
-      fillColors.push('transparent');
-    }
+    upAvgArr[i] = upAvg;
+    downAvgArr[i] = downAvg;
   }
+
+  // Pine: c_mid_h = math.max(math.avg(open,close),up_avg); c_mid_l = math.min(math.avg(open,close),down_avg)
+  const cMidH = bars.map((b, i) => Math.max((b.open + b.close) / 2, upAvgArr[i]));
+  const cMidL = bars.map((b, i) => Math.min((b.open + b.close) / 2, downAvgArr[i]));
+  const upSma = ta.sma(Series.fromArray(bars, upAvgArr), 10).toArray();
+  const downSma = ta.sma(Series.fromArray(bars, downAvgArr), 10).toArray();
+  const invis = '#00000000'; // Pine: color.rgb(0,0,0,100); also color.new(chart.bg_color,100)
+  const greenFill = color.new_color('#089981', 50) as string;
+  const redFill = color.new_color('#f23645', 50) as string;
+
+  // Pine: fill(ua, ul, c_mid_h, math.min(ta.sma(up_avg,10),up_avg), color.new(chart.bg_color,100),
+  //   c_mid_h<=up_avg?invis:color.new(green,50))
+  const upGradient = {
+    topValue: cMidH.slice(),
+    bottomValue: upAvgArr.map((v, i) => Math.min(upSma[i], v)),
+    topColor: cMidH.map((): string | null => invis),
+    bottomColor: cMidH.map((v, i): string | null => (v <= upAvgArr[i] ? invis : greenFill)),
+  };
+  // Pine: fill(da, dl, math.max(ta.sma(down_avg,10),down_avg), c_mid_l,
+  //   c_mid_l>=down_avg?invis:color.new(red,50), color.new(chart.bg_color,100))
+  const downGradient = {
+    topValue: downAvgArr.map((v, i) => Math.max(downSma[i], v)),
+    bottomValue: cMidL.slice(),
+    topColor: cMidL.map((v, i): string | null => (v >= downAvgArr[i] ? invis : redFill)),
+    bottomColor: cMidL.map((): string | null => invis),
+  };
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
-    plots: { 'plot0': plot0, 'plot1': plot1 },
-    fills: [{ plot1: 'plot0', plot2: 'plot1', options: { color: '#2962FF' }, colors: fillColors }],
+    plots: {
+      'plot0': plot0,
+      'plot1': plot1,
+      // Pine: ul = plot(c_mid_h,display = display.none, editable = false)
+      'ul': cMidH.map((v, i) => ({ time: bars[i].time, value: v })),
+      // Pine: dl = plot(c_mid_l,display = display.none, editable = false)
+      'dl': cMidL.map((v, i) => ({ time: bars[i].time, value: v })),
+    },
+    fills: [
+      { plot1: 'plot0', plot2: 'ul', gradient: upGradient },
+      { plot1: 'plot1', plot2: 'dl', gradient: downGradient },
+    ],
     boxes,
   };
 }

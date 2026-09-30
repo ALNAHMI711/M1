@@ -158,16 +158,20 @@ export function calculate(bars: Bar[], inputs: Partial<RadiusTrendInputs> = {}):
     value: (i < warmup + n || v == null || isNaN(v)) ? NaN : v,
   }));
 
-  const fillColors = bars.map((_, i) => {
-    if (i < warmup + n) return 'transparent';
-    return trendArr[i] ? 'rgba(84,182,212,0.15)' : 'rgba(207,43,43,0.15)';
-  });
+  // Pine: color = trend ? #54b6d4 : #cf2b2b
+  //   fill(p1, p2, band, ta.sma(hl2, 20), color.new(color, 60), na)
+  const gradient = {
+    topValue: bandArr.slice(),
+    bottomValue: hl2SmaArr.map(v => (v == null ? NaN : v)),
+    topColor: trendArr.map(t => (t ? 'rgba(84,182,212,0.4)' : 'rgba(207,43,43,0.4)')),
+    bottomColor: new Array<string | null>(len).fill(null),
+  };
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
     plots: { 'plot0': plot0, 'plot1': plot1, 'plot2': plot2 },
     fills: [
-      { plot1: 'plot0', plot2: 'plot2', options: { color: 'rgba(84,182,212,0.15)' }, colors: fillColors },
+      { plot1: 'plot0', plot2: 'plot2', gradient },
     ],
   };
 }

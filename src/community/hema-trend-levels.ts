@@ -8,7 +8,7 @@
  * Reference: "HEMA Trend Levels [AlgoAlpha]" by AlgoAlpha
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, Series, color, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { MarkerData, BarColorData, BoxData } from '../types';
 
 export interface HemaTrendLevelsInputs {
@@ -35,6 +35,8 @@ export const inputConfig: InputConfig[] = [
 export const plotConfig: PlotConfig[] = [
   { id: 'plot0', title: 'HEMA Fast', color: '#00ffbb', lineWidth: 2 },
   { id: 'plot1', title: 'HEMA Slow', color: '#ff1100', lineWidth: 2 },
+  { id: 'hemaTop', title: 'Top HEMA', color: 'transparent', lineWidth: 0, display: 'none' },
+  { id: 'hemaBottom', title: 'Bottom HEMA', color: 'transparent', lineWidth: 0, display: 'none' },
 ];
 
 export const metadata = {
@@ -197,17 +199,24 @@ export function calculate(bars: Bar[], inputs: Partial<HemaTrendLevelsInputs> = 
     return { time: bars[i].time, value: v, color };
   });
 
-  // Fill colors: dynamic per bar (green when hema1 > hema2, red otherwise)
-  const fillColors = h1Arr.map((h1v, i) => {
-    if (i < warmup || h1v == null) return 'transparent';
-    const h2v = h2Arr[i] ?? NaN;
-    return h1v > h2v ? bullColor + '1A' : bearColor + '1A';
-  });
+  // Pine: hemaTop = plot(hema1 > hema2 ? hema1 : hema2, "Top HEMA", display=display.none)
+  const hemaTop = h1Arr.map((h1v, i) => ({ time: bars[i].time, value: h1v > h2Arr[i] ? h1v : h2Arr[i] }));
+  // Pine: hemaBottom = plot(hema1 > hema2 ? hema2 : hema1, "Bottom HEMA", display=display.none)
+  const hemaBottom = h1Arr.map((h1v, i) => ({ time: bars[i].time, value: h1v > h2Arr[i] ? h2Arr[i] : h1v }));
+
+  // Pine: fill(hemaTop, hemaBottom, hema1, hema2, color.new(chart.bg_color, 100), color.new(fillColor, 70), "HEMA Gradient")
+  // fillColor = hema1 > hema2 ? bullColor : bearColor
+  const gradient = {
+    topValue: h1Arr.slice(),
+    bottomValue: h2Arr.slice(),
+    topColor: h1Arr.map((): string | null => '#00000000'),
+    bottomColor: h1Arr.map((h1v, i): string | null => color.new_color(h1v > h2Arr[i] ? bullColor : bearColor, 70) as string),
+  };
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
-    plots: { 'plot0': plot0, 'plot1': plot1 },
-    fills: [{ plot1: 'plot0', plot2: 'plot1', options: { color: bullColor + '1A' }, colors: fillColors }],
+    plots: { 'plot0': plot0, 'plot1': plot1, 'hemaTop': hemaTop, 'hemaBottom': hemaBottom },
+    fills: [{ plot1: 'hemaTop', plot2: 'hemaBottom', options: { title: 'HEMA Gradient' }, gradient }],
     markers,
     barColors,
     boxes,

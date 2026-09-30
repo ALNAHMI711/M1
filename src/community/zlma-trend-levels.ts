@@ -18,7 +18,7 @@
  * Reference: "Zero-Lag MA Trend Levels [ChartPrime]"
  */
 
-import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, color, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { MarkerData, BoxData, LabelData } from '../types';
 
 export interface ZlmaTrendLevelsInputs {
@@ -91,7 +91,11 @@ export function calculate(bars: Bar[], inputs: Partial<ZlmaTrendLevelsInputs> = 
   const plot0: { time: number; value: number; color?: string }[] = [];
   const plot1: { time: number; value: number; color?: string }[] = [];
   const markers: MarkerData[] = [];
-  const fillColors: string[] = [];
+  // Pine: fill(p1, p2, zlma, emaValue, color.new(zlma_color, 80), color.new(ema_col, 80))
+  const fillTopValue: number[] = new Array(n).fill(NaN);
+  const fillBottomValue: number[] = new Array(n).fill(NaN);
+  const fillTopColor: Array<string | null> = new Array(n).fill(null);
+  const fillBottomColor: Array<string | null> = new Array(n).fill(null);
   const boxes: BoxData[] = [];
   const labels: LabelData[] = [];
 
@@ -208,18 +212,12 @@ export function calculate(bars: Bar[], inputs: Partial<ZlmaTrendLevelsInputs> = 
       checkSignalsPrev = checkSignals;
     }
 
-    // Fill between ZLMA and EMA: Pine fill(p1, p2, zlma, emaValue, color.new(zlma_color, 80), color.new(ema_col, 80))
-    if (i < warmup || isNaN(val) || isNaN(emaVal)) {
-      fillColors.push('rgba(0,0,0,0)');
-    } else {
-      // Gradient fill: top part gets zlma_color, bottom gets ema_col
-      // Simplified: use zlma_color when zlma > ema, ema_col when ema > zlma
-      if (val > emaVal) {
-        fillColors.push(zlmaColor === '#30d453' ? 'rgba(48,212,83,0.2)' : zlmaColor === '#4043f1' ? 'rgba(64,67,241,0.2)' : 'rgba(0,0,0,0)');
-      } else {
-        fillColors.push(emaColor === '#30d453' ? 'rgba(48,212,83,0.2)' : 'rgba(64,67,241,0.2)');
-      }
-    }
+    fillTopValue[i] = val;
+    fillBottomValue[i] = emaVal;
+    // zlma_color is na when zlma == zlma[3] (or na): color.new(na, 80) is na
+    fillTopColor[i] = zlmaColor === undefined ? null : color.new_color(zlmaColor, 80) as string;
+    // Pine: ema_col = emaValue < zlma ? up : dn (dn when a value is na)
+    fillBottomColor[i] = color.new_color(emaVal < val ? '#30d453' : '#4043f1', 80) as string;
 
     plot0.push({ time: bars[i].time, value: val, color: zlmaColor });
     plot1.push({ time: bars[i].time, value: emaVal, color: emaColor });
@@ -228,7 +226,10 @@ export function calculate(bars: Bar[], inputs: Partial<ZlmaTrendLevelsInputs> = 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
     plots: { 'plot0': plot0, 'plot1': plot1 },
-    fills: [{ plot1: 'plot0', plot2: 'plot1', options: { color: 'rgba(48,212,83,0.2)' }, colors: fillColors }],
+    fills: [{
+      plot1: 'plot0', plot2: 'plot1',
+      gradient: { topValue: fillTopValue, bottomValue: fillBottomValue, topColor: fillTopColor, bottomColor: fillBottomColor },
+    }],
     markers,
     boxes,
     labels,

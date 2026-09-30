@@ -42,6 +42,8 @@ export const inputConfig: InputConfig[] = [
 export const plotConfig: PlotConfig[] = [
   { id: 'plot0', title: 'SuperTrend', color: '#2962FF', lineWidth: 2 },
   { id: 'plot_body', title: 'Body Middle', color: 'transparent', lineWidth: 0 },
+  { id: 'upTrend', title: 'Up Trend', color: 'transparent', lineWidth: 0, display: 'none' },
+  { id: 'downTrend', title: 'Down Trend', color: 'transparent', lineWidth: 0, display: 'none' },
 ];
 
 export const metadata = {
@@ -243,21 +245,24 @@ export function calculate(bars: Bar[], inputs: Partial<MlAdaptiveSupertrendInput
     return { time: bar.time, value: stValues[i], color };
   });
 
-  // Body middle plot: (open + close) / 2, used for fill reference per Pine source
+  // Pine: bodyMiddle = plot(barstate.isfirst ? na : (open + close) / 2, "Body Middle", display = display.none)
   const plot_body = bars.map((bar, i) => ({
     time: bar.time,
-    value: i < warmup ? NaN : (bar.open + bar.close) / 2,
+    value: i === 0 ? NaN : (bar.open + bar.close) / 2,
   }));
+  // Pine: upTrend = plot(close > ST ? ST : na), downTrend = plot(close < ST ? ST : na)
+  const upTrend = bars.map((bar, i) => ({ time: bar.time, value: bar.close > stValues[i] ? stValues[i] : NaN }));
+  const downTrend = bars.map((bar, i) => ({ time: bar.time, value: bar.close < stValues[i] ? stValues[i] : NaN }));
 
-  // Fills between body middle and SuperTrend (2 fills per Pine: upTrend/downTrend)
-  const fillUpColors = bars.map((_b, i) => {
-    if (i < warmup || isNaN(stValues[i])) return 'transparent';
-    return stDir[i] === 1 ? 'rgba(0,255,187,0.05)' : 'transparent';
-  });
-  const fillDnColors = bars.map((_b, i) => {
-    if (i < warmup || isNaN(stValues[i])) return 'transparent';
-    return stDir[i] === -1 ? 'rgba(255,17,0,0.05)' : 'transparent';
-  });
+  // fill(bodyMiddle, upTrend, (open + close) / 2, ST, color.new(green, t2), color.new(green, t1))
+  // fill(bodyMiddle, downTrend, ST, (open + close) / 2, color.new(red, t1), color.new(red, t2))
+  // green = #00ffbb, red = #ff1100, t1 = 70, t2 = 95
+  const bodyMid = bars.map((bar) => (bar.open + bar.close) / 2);
+  const constant = (c: string) => new Array<string>(n).fill(c);
+  const greenT1 = '#00FFBB4D';
+  const greenT2 = '#00FFBB0D';
+  const redT1 = '#FF11004D';
+  const redT2 = '#FF11000D';
 
   const clusterLabels = ['Low', 'Medium', 'High'];
   const cells: TableCell[] = [
@@ -284,10 +289,16 @@ export function calculate(bars: Bar[], inputs: Partial<MlAdaptiveSupertrendInput
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
-    plots: { 'plot0': plot0, 'plot_body': plot_body },
+    plots: { 'plot0': plot0, 'plot_body': plot_body, 'upTrend': upTrend, 'downTrend': downTrend },
     fills: [
-      { plot1: 'plot_body', plot2: 'plot0', colors: fillUpColors },
-      { plot1: 'plot_body', plot2: 'plot0', colors: fillDnColors },
+      {
+        plot1: 'plot_body', plot2: 'upTrend',
+        gradient: { topValue: bodyMid.slice(), bottomValue: stValues.slice(), topColor: constant(greenT2), bottomColor: constant(greenT1) },
+      },
+      {
+        plot1: 'plot_body', plot2: 'downTrend',
+        gradient: { topValue: stValues.slice(), bottomValue: bodyMid.slice(), topColor: constant(redT1), bottomColor: constant(redT2) },
+      },
     ],
     markers,
     labels,

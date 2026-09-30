@@ -40,6 +40,7 @@ export const inputConfig: InputConfig[] = [
 export const plotConfig: PlotConfig[] = [
   { id: 'plot0', title: 'RSI', color: '#2962FF', lineWidth: 2 },
   { id: 'plot1', title: 'PSAR', color: '#FF6D00', lineWidth: 1, style: 'cross' },
+  { id: 'midLine', title: 'Middle Line', color: 'transparent', lineWidth: 0, display: 'none' },
 ];
 
 export const metadata = {
@@ -178,27 +179,25 @@ export function calculate(bars: Bar[], inputs: Partial<ParabolicRSIInputs> = {})
     value: isNaN(v) ? NaN : v,
   }));
 
-  // Fill between RSI and midline (50): overbought gradient above upper, oversold gradient below lower
-  // Pine: fill(rsiPlot, midLinePlot, 100, upper_, top: red, bottom: orange) and fill(rsiPlot, midLinePlot, lower_, 0, top: orange, bottom: red)
-  // Simplified: fill between RSI plot and hline at 50 with dynamic colors
-  const fillColors: string[] = [];
-  for (let i = 0; i < n; i++) {
-    const rsi = rsiArr[i];
-    if (rsi == null || isNaN(rsi) || i < warmup) {
-      fillColors.push('rgba(0,0,0,0)');
-    } else if (rsi >= upperThreshold) {
-      fillColors.push('rgba(239,83,80,0.2)');
-    } else if (rsi <= lowerThreshold) {
-      fillColors.push('rgba(255,152,0,0.2)');
-    } else {
-      fillColors.push('rgba(194,146,87,0.1)');
-    }
-  }
+  // Pine: midLinePlot = plot(50, color = na, display = display.none)
+  //   fill(rsiPlot, midLinePlot, 100, 70, top_color = color.new(color.red, 0), bottom_color = color.new(color.orange, 100))
+  //   fill(rsiPlot, midLinePlot, 30, 0, top_color = color.new(color.red, 100), bottom_color = color.new(color.orange, 0))
+  const midLine = bars.map((b) => ({ time: b.time, value: 50 }));
+  const constant = <T>(v: T): T[] => new Array(n).fill(v);
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
-    plots: { 'plot0': plot0, 'plot1': plot1 },
-    fills: [{ plot1: 'plot0', plot2: 'plot1', options: { color: 'rgba(194,146,87,0.1)' }, colors: fillColors }],
+    plots: { 'plot0': plot0, 'plot1': plot1, 'midLine': midLine },
+    fills: [
+      {
+        plot1: 'plot0', plot2: 'midLine', options: { title: 'Overbought Gradient Fill' },
+        gradient: { topValue: constant(100), bottomValue: constant(70), topColor: constant('#F23645'), bottomColor: constant('#FF980000') },
+      },
+      {
+        plot1: 'plot0', plot2: 'midLine', options: { title: 'Oversold Gradient Fill' },
+        gradient: { topValue: constant(30), bottomValue: constant(0), topColor: constant('#F2364500'), bottomColor: constant('#FF9800') },
+      },
+    ],
     hlines: [
       { value: upperThreshold, options: { color: '#787B86', linestyle: 'dashed' as const, title: 'Overbought' } },
       { value: lowerThreshold, options: { color: '#787B86', linestyle: 'dashed' as const, title: 'Oversold' } },
