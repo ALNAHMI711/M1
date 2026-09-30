@@ -10,6 +10,7 @@
 
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { MarkerData, LineDrawingData } from '../types';
+import { barInterval, barTime } from '../bar-time';
 
 export interface RsiMomentumDivergenceInputs {
   rsiLength: number;
@@ -59,6 +60,9 @@ export const metadata = {
 
 // Pine: indicator(..., max_lines_count = 500)
 const MAX_LINES = 500;
+// Pine: textCol = color.white, noneCol = color.new(color.white, 100)
+const TEXT_COL = '#FFFFFF';
+const NONE_COL = 'rgba(255,255,255,0)';
 
 export function calculate(bars: Bar[], inputs: Partial<RsiMomentumDivergenceInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[]; lines: LineDrawingData[] } {
   const {
@@ -127,14 +131,19 @@ export function calculate(bars: Bar[], inputs: Partial<RsiMomentumDivergenceInpu
       }
       const priceLL = plLow.length >= 2 && lowRight < plLow[plLow.length - 2];
       if (foundPL && rsiHL && priceLL) {
-        // Pine: plotshape(..., offset = -divLookbackR, location = location.absolute) at rsiRight;
-        // MarkerData has no absolute price, so the label is placed below the bar
+        // Pine (offset = -divLookbackR, location.absolute):
+        // plotshape(isBullDiv ? rsiRight : na, 'Bullish Label', shape.labelup, text = ' Bull ', color = divBullColor,
+        //   textcolor = textCol) in the RSI pane, and
+        // plotshape(isBullDiv ? low[divLookbackR] : na, 'Bullish Price LL Label', shape.labelup, text = '▲\nBull',
+        //   color = noneCol, textcolor = divBullColor, force_overlay = true) on the price pane
+        const t = bars[i - divLookbackR].time;
         markers.push({
-          time: bars[i - divLookbackR].time,
-          position: 'belowBar',
-          shape: 'labelUp',
-          color: bullColor,
-          text: ' Bull ',
+          time: t, position: 'atPriceBottom', price: rsiRight, shape: 'labelUp',
+          color: bullColor, text: ' Bull ', textColor: TEXT_COL,
+        });
+        markers.push({
+          time: t, position: 'atPriceBottom', price: lowRight, shape: 'labelUp',
+          color: NONE_COL, text: '▲\nBull', textColor: bullColor, forceOverlay: true,
         });
         isBullDiv[i] = true;
       }
@@ -153,12 +162,16 @@ export function calculate(bars: Bar[], inputs: Partial<RsiMomentumDivergenceInpu
       }
       const priceHH = phHigh.length >= 2 && highRight > phHigh[phHigh.length - 2];
       if (foundPH && rsiLH && priceHH) {
+        // Pine: 'Bearish Label' (labeldown at rsiRight, RSI pane) and 'Bearish Price HH Label' (labeldown at
+        // high[divLookbackR], text 'Bear\n▼', color noneCol, textcolor divBearColor, force_overlay = true)
+        const t = bars[i - divLookbackR].time;
         markers.push({
-          time: bars[i - divLookbackR].time,
-          position: 'aboveBar',
-          shape: 'labelDown',
-          color: bearColor,
-          text: ' Bear ',
+          time: t, position: 'atPriceTop', price: rsiRight, shape: 'labelDown',
+          color: bearColor, text: ' Bear ', textColor: TEXT_COL,
+        });
+        markers.push({
+          time: t, position: 'atPriceTop', price: highRight, shape: 'labelDown',
+          color: NONE_COL, text: 'Bear\n▼', textColor: bearColor, forceOverlay: true,
         });
         isBearDiv[i] = true;
       }
@@ -200,8 +213,7 @@ export function calculate(bars: Bar[], inputs: Partial<RsiMomentumDivergenceInpu
     }
   };
 
-  // Pine lines at bar_index + 15 lie after the last bar. The port cannot give the time of a future bar and the
-  // example renderer puts any later time on the slot right after the last bar, so x2 is capped at the last bar.
+  // Pine line.set_x2(bar_index + 15): on the last bars x2 lies after the last bar (time of that future bar)
   const futureExt = 15;
 
   if (showDivLevels) {
@@ -241,17 +253,20 @@ export function calculate(bars: Bar[], inputs: Partial<RsiMomentumDivergenceInpu
     }
   }
 
+  // Pine line.new(..., force_overlay = true): the zones are drawn on the price pane
+  const interval = barInterval(bars);
   const lines: LineDrawingData[] = [];
   for (const ln of allLines) {
     if (ln.deleted) continue;
     lines.push({
-      time1: bars[ln.x1].time,
+      time1: barTime(bars, ln.x1, interval),
       price1: ln.y,
-      time2: bars[Math.min(ln.x2, n - 1)].time,
+      time2: barTime(bars, ln.x2, interval),
       price2: ln.y,
       color: ln.color,
       width: ln.width,
       style: ln.style,
+      forceOverlay: true,
     });
   }
 

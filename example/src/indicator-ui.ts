@@ -4,13 +4,9 @@
  */
 
 import type {Bar} from 'oakscriptjs';
-import type { Time, SeriesMarker } from 'lightweight-charts';
 import { LineType } from 'lightweight-charts';
 import { ChartManager } from './chart';
 import { indicatorRegistry, type IndicatorRegistryEntry, type IndicatorCategory, type MarkerData } from '../../src/index';
-
-// Built-in marker shapes supported by lightweight-charts createSeriesMarkers
-const BUILTIN_MARKER_SHAPES = new Set(['arrowUp', 'arrowDown', 'circle', 'square']);
 
 /**
  * Use the indicator registry from indicators/index.ts
@@ -508,27 +504,9 @@ export class IndicatorUI {
         this.chartManager.setPlotFills(result.fills, result.plots, indicatorPaneIndex);
       }
 
-      // Route markers — split built-in vs extended shapes
+      // Markers (pane and drawing chosen by ChartManager.setIndicatorMarkers)
       if (Array.isArray(result.markers) && result.markers.length > 0) {
-        const builtinMarkers: SeriesMarker<Time>[] = [];
-        const extendedMarkers: MarkerData[] = [];
-
-        for (const m of result.markers as MarkerData[]) {
-          if (BUILTIN_MARKER_SHAPES.has(m.shape)) {
-            builtinMarkers.push({
-              time: m.time as unknown as Time,
-              position: m.position,
-              shape: m.shape as 'arrowUp' | 'arrowDown' | 'circle' | 'square',
-              color: m.color,
-              text: m.text ?? '',
-              size: m.size,
-            });
-          } else {
-            extendedMarkers.push(m);
-          }
-        }
-
-        this.chartManager.setMarkers(builtinMarkers, extendedMarkers);
+        this.chartManager.setIndicatorMarkers(result.markers as MarkerData[], indicatorPaneIndex, indicator.overlay);
       } else {
         this.chartManager.clearMarkers();
       }
@@ -567,6 +545,9 @@ export class IndicatorUI {
         this.chartManager.setBoxes(result.boxes, indicatorPaneIndex);
       }
 
+      // Bar slots after the last bar for the points on future bars (Pine bar_index + k, plot offsets)
+      this.chartManager.setFutureSlots(this.lastOutputTime(result));
+
       // Phase 9: tables
       if (Array.isArray(result.tables) && result.tables.length > 0) {
         this.chartManager.setTable(result.tables[0]);
@@ -576,6 +557,30 @@ export class IndicatorUI {
     } catch (error) {
       console.error('Error calculating indicator:', error);
     }
+  }
+
+  /**
+   * Latest time of the indicator outputs (plots, markers, labels, lines, boxes)
+   */
+  private lastOutputTime(result: any): number {
+    let max = -Infinity;
+    const see = (t: unknown) => {
+      if (typeof t === 'number' && t > max) max = t;
+    };
+    for (const points of Object.values(result.plots ?? {}) as Array<Array<{ time: number; value: number }>>) {
+      for (let i = points.length - 1; i >= 0; i--) {
+        const v = points[i].value;
+        if (v != null && !Number.isNaN(v)) {
+          see(points[i].time);
+          break;
+        }
+      }
+    }
+    for (const m of result.markers ?? []) see(m.time);
+    for (const l of result.labels ?? []) see(l.time);
+    for (const l of result.lines ?? []) { see(l.time1); see(l.time2); }
+    for (const b of result.boxes ?? []) { see(b.time1); see(b.time2); }
+    return max;
   }
 
   /**

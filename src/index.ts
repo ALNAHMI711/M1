@@ -1800,6 +1800,7 @@ export const RisingThreeMethods = candlestickPortIndicators['rising-three-method
 
 export type {
   MarkerData,
+  PineSize,
   BarColorData,
   BgColorData,
   PlotCandleData,
@@ -1809,6 +1810,7 @@ export type {
   TableData,
   TableCell,
 } from './types';
+export { barInterval, barTime } from './bar-time';
 
 /**
  * Indicator category types

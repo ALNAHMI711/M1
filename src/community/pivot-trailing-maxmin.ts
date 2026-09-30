@@ -128,16 +128,23 @@ export function calculate(bars: Bar[], inputs: Partial<PivotTrailingMaxMinInputs
     return fillCss[i]!;
   });
 
-  // Labels: plotshape(pl ? pl : na, "Pivot High", shape.labelup, location.absolute, maxCss, -offset, text = "▲")
-  // and plotshape(ph ? ph : na, "Pivot Low", shape.labeldown, location.absolute, minCss, -offset, text = "▼").
-  // MarkerData has no absolute price: the labels are placed below / above the bar.
+  // Labels: plotshape(pl ? pl : na, "Pivot High", shape.labelup, location.absolute, maxCss, -offset, text = "▲",
+  // textcolor = color.white, size = size.tiny) and plotshape(ph ? ph : na, "Pivot Low", shape.labeldown,
+  // location.absolute, minCss, -offset, text = "▼", textcolor = color.white, size = size.tiny).
+  // location.absolute at the pivot price: labelup hangs below the price, labeldown stands above it.
   const markers: MarkerData[] = [];
   for (let i = offset; i < n; i++) {
     if (isOn(plArr[i])) {
-      markers.push({ time: bars[i - offset].time, position: 'belowBar', shape: 'labelUp', color: maxCss, text: '▲' });
+      markers.push({
+        time: bars[i - offset].time, position: 'atPriceBottom', price: plArr[i]!, shape: 'labelUp',
+        color: maxCss, text: '▲', textColor: '#FFFFFF', size: 'tiny',
+      });
     }
     if (isOn(phArr[i])) {
-      markers.push({ time: bars[i - offset].time, position: 'aboveBar', shape: 'labelDown', color: minCss, text: '▼' });
+      markers.push({
+        time: bars[i - offset].time, position: 'atPriceTop', price: phArr[i]!, shape: 'labelDown',
+        color: minCss, text: '▼', textColor: '#FFFFFF', size: 'tiny',
+      });
     }
   }
 

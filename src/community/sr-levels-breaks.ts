@@ -93,19 +93,21 @@ export function calculate(bars: Bar[], inputs: Partial<SRLevelsBreaksInputs> = {
     const crossUnder = close < lowUse[i] && prevClose >= lowUse[i - 1];
     const volPass = osc[i] > volumeThresh;
 
+    // Pine plotshape(..., style = shape.labeldown / labelup, color = color.red / color.green,
+    //   textcolor = color.white, size = size.tiny)
     // For breaks with volume
     if (crossUnder && !(open - close < high - open) && volPass) {
-      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'labelDown', color: RED, text: 'B' });
+      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'labelDown', color: RED, text: 'B', textColor: '#FFFFFF', size: 'tiny' });
     }
     if (crossOver && !(open - low > close - open) && volPass) {
-      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'labelUp', color: GREEN, text: 'B' });
+      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'labelUp', color: GREEN, text: 'B', textColor: '#FFFFFF', size: 'tiny' });
     }
     // For bull / bear wicks (no volume filter)
     if (crossOver && open - low > close - open) {
-      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'labelUp', color: GREEN, text: 'Bull Wick' });
+      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'labelUp', color: GREEN, text: 'Bull Wick', textColor: '#FFFFFF', size: 'tiny' });
     }
     if (crossUnder && open - close < high - open) {
-      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'labelDown', color: RED, text: 'Bear Wick' });
+      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'labelDown', color: RED, text: 'Bear Wick', textColor: '#FFFFFF', size: 'tiny' });
     }
   }
 

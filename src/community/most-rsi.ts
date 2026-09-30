@@ -53,6 +53,8 @@ const BULL_COLOR = '#4CAF50';
 const BEAR_COLOR = '#FF5252';
 // Pine noneColor = color.new(color.white, 100)
 const NONE_COLOR = 'rgba(255,255,255,0)';
+// Pine: textColor = color.white (text of the divergence labels, plotshape location.absolute at the plotted value)
+const TEXT_COLOR = '#FFFFFF';
 
 export const plotConfig: PlotConfig[] = [
   { id: 'rsi', title: 'RSI', color: '#7E57C2', lineWidth: 1 },
@@ -194,16 +196,18 @@ export function calculate(bars: Bar[], inputs: Partial<MOSTRSIInputs> = {}): Omi
     { plot1: 'bbUpper', plot2: 'bbLower', options: { color: 'rgba(76,175,80,0.10)', title: 'Bollinger Bands Background Fill' } },
   ];
 
-  // BUY/SELL markers. Pine: cro = ta.crossover(exMov, MOST), cru = ta.crossunder(exMov, MOST)
+  // BUY/SELL markers. Pine: cro = ta.crossover(exMov, MOST), cru = ta.crossunder(exMov, MOST);
+  // plotshape(..., location.bottom / location.top, shape.labelup / labeldown, size.tiny, color #0F18BF,
+  // textcolor white). MarkerData has no pane top / bottom position: below / above the bar.
   const markers: MarkerData[] = [];
   for (let i = 1; i < n; i++) {
     const cro = rsiMaArr[i] > most[i] && rsiMaArr[i - 1] <= most[i - 1];
     const cru = rsiMaArr[i] < most[i] && rsiMaArr[i - 1] >= most[i - 1];
     if (showSignals && cro) {
-      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'labelUp', color: '#0F18BF', text: 'BUY' });
+      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'labelUp', color: '#0F18BF', text: 'BUY', textColor: '#FFFFFF', size: 'tiny' });
     }
     if (showSignals && cru) {
-      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'labelDown', color: '#0F18BF', text: 'SELL' });
+      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'labelDown', color: '#0F18BF', text: 'SELL', textColor: '#FFFFFF', size: 'tiny' });
     }
   }
 
@@ -248,7 +252,7 @@ export function calculate(bars: Bar[], inputs: Partial<MOSTRSIInputs> = {}): Omi
       // Regular Bullish: RSI higher low, price lower low
       const bullCond = showDivergence && pivotPrice < lastPLPrice && pivotRsi > lastPLRsi && plInRange;
       bullDivPlot[p] = { time: bars[p].time, value: pivotRsi, color: bullCond ? BULL_COLOR : NONE_COLOR };
-      if (bullCond) markers.push({ time: bars[p].time, position: 'belowBar', shape: 'labelUp', color: BULL_COLOR, text: ' Bull ' });
+      if (bullCond) markers.push({ time: bars[p].time, position: 'atPriceBottom', price: pivotRsi, shape: 'labelUp', color: BULL_COLOR, text: ' Bull ', textColor: TEXT_COLOR });
       lastPLRsi = pivotRsi;
       lastPLPrice = pivotPrice;
     }
@@ -260,7 +264,7 @@ export function calculate(bars: Bar[], inputs: Partial<MOSTRSIInputs> = {}): Omi
       // Regular Bearish: RSI lower high, price higher high
       const bearCond = showDivergence && pivotPrice > lastPHPrice && pivotRsi < lastPHRsi && phInRange;
       bearDivPlot[p] = { time: bars[p].time, value: pivotRsi, color: bearCond ? BEAR_COLOR : NONE_COLOR };
-      if (bearCond) markers.push({ time: bars[p].time, position: 'aboveBar', shape: 'labelDown', color: BEAR_COLOR, text: ' Bear ' });
+      if (bearCond) markers.push({ time: bars[p].time, position: 'atPriceTop', price: pivotRsi, shape: 'labelDown', color: BEAR_COLOR, text: ' Bear ', textColor: TEXT_COLOR });
       lastPHRsi = pivotRsi;
       lastPHPrice = pivotPrice;
     }

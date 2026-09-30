@@ -3,6 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { barInterval } from '../../src/bar-time';
 import {
   ADXCobra,
   AIEngulfing,
@@ -2393,7 +2394,21 @@ describe('WilliamsCombo', () => {
   const result = WilliamsCombo.calculate(bars);
 
   it('returns correct shape', () => {
-    assertShape(result, ['plot0', 'plot1', 'plot2', 'plot3', 'plot4'], true);
+    assertShape(result, ['plot3', 'plot4'], true);
+  });
+
+  it('draws the Alligator offsets on the bars after the last bar', () => {
+    // Pine plot offsets: Jaw 8, Teeth 5, Lips 3 -> as many points after the last bar
+    const plots = result.plots as Record<string, Array<{ time: number; value: number }>>;
+    const last = bars[bars.length - 1].time;
+    const step = barInterval(bars);
+    for (const [key, offset] of [['plot0', 8], ['plot1', 5], ['plot2', 3]] as const) {
+      const plot = plots[key];
+      expect(plot).toHaveLength(bars.length + offset);
+      const future = plot.slice(bars.length);
+      future.forEach((p, k) => expect(p.time).toBe(last + (k + 1) * step));
+      expect(future.every((p) => isFinite(p.value))).toBe(true);
+    }
   });
 
   it('produces finite values after warmup', () => {

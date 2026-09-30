@@ -184,12 +184,16 @@ export function calculate(bars: Bar[], inputs: Partial<RSIInputs> = {}): Omit<In
         const priceLL = prevLow != null && lowLBR[i] < prevLow;
 
         if (priceLL) {
+          // Pine: plotshape(bullCond ? rsiLBR : na, offset = -lookbackRight, text = " Bull ", shape.labelup,
+          //   location.absolute, color = bullColor, textcolor = textColor (white))
           markers.push({
             time: bars[i - lookbackRight].time,
-            position: 'belowBar',
+            position: 'atPriceBottom',
+            price: rsiVal!,
             shape: 'labelUp',
             color: '#4CAF50',
-            text: 'Bull',
+            text: ' Bull ',
+            textColor: '#FFFFFF',
           });
         }
       }
@@ -207,12 +211,15 @@ export function calculate(bars: Bar[], inputs: Partial<RSIInputs> = {}): Omit<In
         const priceHH = prevHigh != null && highLBR[i] > prevHigh;
 
         if (priceHH) {
+          // Pine: plotshape(bearCond ? rsiLBR : na, ..., text = " Bear ", shape.labeldown, location.absolute)
           markers.push({
             time: bars[i - lookbackRight].time,
-            position: 'aboveBar',
+            position: 'atPriceTop',
+            price: rsiVal!,
             shape: 'labelDown',
             color: '#FF5252',
-            text: 'Bear',
+            text: ' Bear ',
+            textColor: '#FFFFFF',
           });
         }
       }

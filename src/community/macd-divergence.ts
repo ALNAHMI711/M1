@@ -76,6 +76,8 @@ const HIDDEN_BULL_COLOR = 'rgba(76,175,80,0.20)';
 const HIDDEN_BEAR_COLOR = 'rgba(255,82,82,0.20)';
 // Pine noneColor = color.new(color.white, 100)
 const NONE_COLOR = 'rgba(255,255,255,0)';
+// Pine: textColor = color.white (text of the divergence labels, plotshape location.absolute at the plotted value)
+const TEXT_COLOR = '#FFFFFF';
 
 export const plotConfig: PlotConfig[] = [
   { id: 'plot0', title: 'MACD', color: '#2962FF', lineWidth: 1 },
@@ -173,8 +175,8 @@ export function calculate(bars: Bar[], inputs: Partial<MACDDivergenceInputs> = {
 
       regBullPlot[p] = { time: bars[p].time, value: osc, color: bullCond ? BULL_COLOR : NONE_COLOR };
       hidBullPlot[p] = { time: bars[p].time, value: osc, color: hiddenBullCond ? HIDDEN_BULL_COLOR : NONE_COLOR };
-      if (bullCond) markers.push({ time: bars[p].time as number, position: 'belowBar', shape: 'labelUp', color: BULL_COLOR, text: ' Bull ' });
-      if (hiddenBullCond) markers.push({ time: bars[p].time as number, position: 'belowBar', shape: 'labelUp', color: BULL_COLOR, text: ' H Bull ' });
+      if (bullCond) markers.push({ time: bars[p].time as number, position: 'atPriceBottom', price: osc, shape: 'labelUp', color: BULL_COLOR, text: ' Bull ', textColor: TEXT_COLOR });
+      if (hiddenBullCond) markers.push({ time: bars[p].time as number, position: 'atPriceBottom', price: osc, shape: 'labelUp', color: BULL_COLOR, text: ' H Bull ', textColor: TEXT_COLOR });
 
       plLastOsc = osc;
       plLastLow = low;
@@ -194,8 +196,8 @@ export function calculate(bars: Bar[], inputs: Partial<MACDDivergenceInputs> = {
 
       regBearPlot[p] = { time: bars[p].time, value: osc, color: bearCond ? BEAR_COLOR : NONE_COLOR };
       hidBearPlot[p] = { time: bars[p].time, value: osc, color: hiddenBearCond ? HIDDEN_BEAR_COLOR : NONE_COLOR };
-      if (bearCond) markers.push({ time: bars[p].time as number, position: 'aboveBar', shape: 'labelDown', color: BEAR_COLOR, text: ' Bear ' });
-      if (hiddenBearCond) markers.push({ time: bars[p].time as number, position: 'aboveBar', shape: 'labelDown', color: BEAR_COLOR, text: ' H Bear ' });
+      if (bearCond) markers.push({ time: bars[p].time as number, position: 'atPriceTop', price: osc, shape: 'labelDown', color: BEAR_COLOR, text: ' Bear ', textColor: TEXT_COLOR });
+      if (hiddenBearCond) markers.push({ time: bars[p].time as number, position: 'atPriceTop', price: osc, shape: 'labelDown', color: BEAR_COLOR, text: ' H Bear ', textColor: TEXT_COLOR });
 
       phLastOsc = osc;
       phLastHigh = high;

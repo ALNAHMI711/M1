@@ -126,8 +126,11 @@ export function calculate(
 
   const marker = (bar: number, text: string, above: boolean, color: string) => {
     if (bar < 0) return;
-    // Pine: shape.circle with color=na and textcolor=col (only the text is visible); MarkerData has one colour
-    markers.push({ time: bars[bar].time, position: above ? 'aboveBar' : 'belowBar', shape: 'circle', color, text });
+    // Pine: plotshape(..., style = shape.circle, size = size.tiny, color = na, textcolor = col): only the text
+    markers.push({
+      time: bars[bar].time, position: above ? 'aboveBar' : 'belowBar', shape: 'circle',
+      color: 'transparent', text, textColor: color, size: 'tiny',
+    });
   };
 
   for (let t = 0; t < n; t++) {
@@ -171,10 +174,10 @@ export function calculate(
       const cross = (y: number, y1: number) =>
         !Number.isNaN(y) && !Number.isNaN(y1) && ((gt(c, y) && !gt(c1, y1)) || (lt(c, y) && !lt(c1, y1)));
       if (cross(yUp, yUpPrev)) {
-        markers.push({ time: bars[t].time, position: 'belowBar', shape: 'xcross', color: 'rgba(41,98,255,0.5)' });
+        markers.push({ time: bars[t].time, position: 'belowBar', shape: 'xcross', color: 'rgba(41,98,255,0.5)', size: 'small' });
       }
       if (cross(yDn, yDnPrev)) {
-        markers.push({ time: bars[t].time, position: 'aboveBar', shape: 'xcross', color: 'rgba(255,82,82,0.5)' });
+        markers.push({ time: bars[t].time, position: 'aboveBar', shape: 'xcross', color: 'rgba(255,82,82,0.5)', size: 'small' });
       }
     }
     yUpPrev = yUp;

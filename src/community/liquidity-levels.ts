@@ -14,6 +14,7 @@
 
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { LineDrawingData, BoxData } from '../types';
+import { barInterval, barTime } from '../bar-time';
 
 export interface LiquidityLevelsInputs {
   length: number;
@@ -70,7 +71,7 @@ export function calculate(
   bars: Bar[],
   inputs: Partial<LiquidityLevelsInputs> = {},
 ): Omit<IndicatorResult, 'markers'> & { lines: LineDrawingData[]; boxes: BoxData[] } {
-  const { length, show, lineCol, lvlStyle, relativeColUp, relativeColDn, fixedCol, showHist, upCol, dnCol } =
+  const { length, show, lineCol, lvlStyle, relativeColUp, relativeColDn, fixedCol, showHist, distWin, upCol, dnCol } =
     { ...defaultInputs, ...inputs };
   const n = bars.length;
 
@@ -135,16 +136,29 @@ export function calculate(
     });
   });
 
-  // Histogram (show - 1 bins between adjacent levels). Pine counts, over the last distwin bars, the bullish and
-  // bearish closes in each bin (array.binary_search_rightmost) and draws the bull box from bar n
-  // to n + bull and the bear box from n + bull to n + bull + bear: all on bars after the last bar. The port cannot
-  // give the time of a future bar and the example renderer puts any later time on the slot right after the last
-  // bar, so both box ends are on the last bar and the counts give no width.
-  // Boxes: between pals[index] and pals[index + 1], bgcolor upCol / dnCol, border colour na.
+  // Histogram (Pine, barstate.islast): over the last distwin bars, idx = pals.binary_search_rightmost(close[i]);
+  // when 1 <= idx < show the bar counts as bullish (close > open) or bearish in bin idx - 1. Box per bin:
+  // bull from n to n + bull, bear from n + bull to n + bull + bear (n = bar_index of the last bar), between
+  // pals[index] and pals[index + 1]. The right edges are on bars after the last bar (time of that future bar).
   if (showHist && show >= 2 && pals.length >= 2) {
-    for (let i = 0; i < Math.min(show - 1, pals.length - 1); i++) {
-      boxes.push({ time1: lastBar.time, price1: pals[i + 1], time2: lastBar.time, price2: pals[i], bgColor: upCol });
-      boxes.push({ time1: lastBar.time, price1: pals[i + 1], time2: lastBar.time, price2: pals[i], bgColor: dnCol });
+    const bull = new Array<number>(show - 1).fill(0);
+    const bear = new Array<number>(show - 1).fill(0);
+    for (let i = 0; i <= distWin - 1 && i < n; i++) {
+      const b = bars[n - 1 - i];
+      const idx = binarySearchRightmost(pals, b.close);
+      if (idx >= 1 && idx < show) {
+        if (b.close > b.open) bull[idx - 1]++;
+        else bear[idx - 1]++;
+      }
+    }
+    const interval = barInterval(bars);
+    const at = (k: number) => barTime(bars, n - 1 + k, interval);
+    for (let index = 0; index < Math.min(show - 1, pals.length - 1); index++) {
+      boxes.push({ time1: at(0), price1: pals[index], time2: at(bull[index]), price2: pals[index + 1], bgColor: upCol });
+      boxes.push({
+        time1: at(bull[index]), price1: pals[index], time2: at(bull[index] + bear[index]), price2: pals[index + 1],
+        bgColor: dnCol,
+      });
     }
   }
 
@@ -157,3 +171,19 @@ export function calculate(
 }
 
 export const LiquidityLevels = { calculate, metadata, defaultInputs, inputConfig, plotConfig };
+
+/**
+ * Pine array.binary_search_rightmost on an ascending array: the index of the last element equal to `value`, else
+ * the index of the element to the right of where `value` would lie (number of elements below it).
+ */
+function binarySearchRightmost(sorted: number[], value: number): number {
+  let lo = 0;
+  let hi = sorted.length;
+  while (lo < hi) {
+    const mid = (lo + hi) >> 1;
+    if (sorted[mid] <= value) lo = mid + 1;
+    else hi = mid;
+  }
+  // lo = number of elements <= value
+  return lo > 0 && sorted[lo - 1] === value ? lo - 1 : lo;
+}

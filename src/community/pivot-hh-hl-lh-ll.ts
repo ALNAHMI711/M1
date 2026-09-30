@@ -191,8 +191,12 @@ export function calculate(bars: Bar[], inputs: Partial<PivotHhHlLhLlInputs> = {}
     if (Number.isNaN(pivot) || !inRange(i)) return;
     const bar = i - rightLenH;
     if (bar < 0) return;
-    // Pine: label.style_none (no background), yloc.abovebar / yloc.belowbar
-    labels.push({ time: bars[bar].time, price: pivot, text: fmt(pivot), textColor: color, style: above ? 'label_down' : 'label_up', size: 'normal' });
+    // Pine: label.new(bar_index[_offset], _pivot, text, style = label.style_none, yloc = yloc.abovebar / belowbar,
+    //   color = _color, textcolor = _color): text only, above the bar high / below the bar low
+    labels.push({
+      time: bars[bar].time, price: pivot, text: fmt(pivot), color, textColor: color, style: 'none',
+      yloc: above ? 'abovebar' : 'belowbar', size: 'normal',
+    });
   };
 
   for (let i = 0; i < n; i++) {

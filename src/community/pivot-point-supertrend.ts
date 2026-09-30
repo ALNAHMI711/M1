@@ -153,22 +153,30 @@ export function calculate(bars: Bar[], inputs: Partial<PivotPointSupertrendInput
     //   location=location.abovebar, offset = -prd); same for pl with "L", textcolor=color.lime, location.belowbar
     if (showPivot && i >= prd) {
       if (isPivot(phArr[i])) {
-        markers.push({ time: bars[i - prd].time, position: 'aboveBar', shape: 'labelDown', color: RED, text: 'H' });
+        markers.push({ time: bars[i - prd].time, position: 'aboveBar', shape: 'labelDown', color: 'transparent', text: 'H', textColor: RED });
       }
       if (isPivot(plArr[i])) {
-        markers.push({ time: bars[i - prd].time, position: 'belowBar', shape: 'labelDown', color: LIME, text: 'L' });
+        markers.push({ time: bars[i - prd].time, position: 'belowBar', shape: 'labelDown', color: 'transparent', text: 'L', textColor: LIME });
       }
     }
     // Pine: bsignal = Trend == 1 and Trend[1] == -1; ssignal = Trend == -1 and Trend[1] == 1
-    // plotshape(bsignal and showlabel ? Trailingsl : na, "Buy", location.absolute, shape.labelup, size.tiny, lime)
-    // plotshape(ssignal and showlabel ? Trailingsl : na, "Sell", location.absolute, shape.labeldown, size.tiny, red)
-    // (Pine hides the shape when Trailingsl is na)
+    // plotshape(bsignal and showlabel ? Trailingsl : na, "Buy", location.absolute, shape.labelup, size.tiny, lime,
+    //   textcolor = color.black)
+    // plotshape(ssignal and showlabel ? Trailingsl : na, "Sell", location.absolute, shape.labeldown, size.tiny, red,
+    //   textcolor = color.white)
+    // (Pine hides the shape when Trailingsl is na). At the stop price: labelup below it, labeldown above it.
     if (showLabel && i > 0 && !isNaN(tslArr[i])) {
       if (trendArr[i] === 1 && trendArr[i - 1] === -1) {
-        markers.push({ time: bars[i].time, position: 'belowBar', shape: 'labelUp', color: LIME, text: 'Buy' });
+        markers.push({
+          time: bars[i].time, position: 'atPriceBottom', price: tslArr[i], shape: 'labelUp',
+          color: LIME, text: 'Buy', textColor: '#000000', size: 'tiny',
+        });
       }
       if (trendArr[i] === -1 && trendArr[i - 1] === 1) {
-        markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'labelDown', color: RED, text: 'Sell' });
+        markers.push({
+          time: bars[i].time, position: 'atPriceTop', price: tslArr[i], shape: 'labelDown',
+          color: RED, text: 'Sell', textColor: '#FFFFFF', size: 'tiny',
+        });
       }
     }
   }

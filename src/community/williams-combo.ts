@@ -11,6 +11,7 @@
  */
 
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { barInterval, barTime } from '../bar-time';
 import type { MarkerData } from '../types';
 
 export interface WilliamsComboInputs {
@@ -83,13 +84,14 @@ export function calculate(bars: Bar[], inputs: Partial<WilliamsComboInputs> = {}
   const teethRaw = ta.rma(hl2Series, teethLength).toArray();
   const lipsRaw = ta.rma(hl2Series, lipsLength).toArray();
 
-  // Pine plot(..., offset = k): the value of bar i is drawn on bar i + k. The last k values fall on bars after the
-  // last bar; the port cannot give the time of a future bar, so they are not drawn.
+  // Pine plot(..., offset = k): the value of bar i is drawn on bar i + k. The last k values fall on the k bars after
+  // the last bar (times of these future bars).
+  const interval = barInterval(bars);
   const shifted = (arr: number[], offset: number) =>
-    bars.map((b, i) => {
+    Array.from({ length: n + Math.max(0, offset) }, (_, i) => {
       const j = i - offset;
       const v = j >= 0 && j < n ? arr[j] : NaN;
-      return { time: b.time, value: v ?? NaN };
+      return { time: barTime(bars, i, interval), value: v ?? NaN };
     });
 
   // Fractals (Pine source, literally): h(k) = high[k], NaN before the first bar (comparisons with na are false).

@@ -12,6 +12,7 @@
 
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { MarkerData, BoxData } from '../types';
+import { barTime } from '../bar-time';
 
 export interface SupportResistanceChannelsInputs {
   prd: number;
@@ -141,8 +142,8 @@ export function calculate(bars: Bar[], inputs: Partial<SupportResistanceChannels
     // Pine: plotshape(bool(ph) and showpp, text = 'H', style = shape.labeldown, color = na,
     //   textcolor = color.red, location = location.abovebar, offset = -prd) (and 'L' with color.lime)
     if (showPP && i - prd >= 0) {
-      if (isPh) markers.push({ time: bars[i - prd].time, position: 'aboveBar', shape: 'labelDown', color: '#F23645', text: 'H' });
-      if (isPl) markers.push({ time: bars[i - prd].time, position: 'belowBar', shape: 'labelUp', color: '#00E676', text: 'L' });
+      if (isPh) markers.push({ time: bars[i - prd].time, position: 'aboveBar', shape: 'labelDown', color: 'transparent', text: 'H', textColor: '#F23645' });
+      if (isPl) markers.push({ time: bars[i - prd].time, position: 'belowBar', shape: 'labelUp', color: 'transparent', text: 'L', textColor: '#00E676' });
     }
 
     if (isPh || isPl) {
@@ -279,16 +280,16 @@ export function calculate(bars: Bar[], inputs: Partial<SupportResistanceChannels
     // Pine: plotshape(showsrbroken and resistancebroken, style = shape.triangleup, location = location.belowbar,
     //   color = color.new(color.lime, 0), size = size.tiny) (triangledown, abovebar, color.red for supportbroken)
     if (showSRBroken && resistanceBroken) {
-      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'triangleUp', color: '#00E676' });
+      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'triangleUp', color: '#00E676', size: 'tiny' });
     }
     if (showSRBroken && supportBroken) {
-      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'triangleDown', color: '#F23645' });
+      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'triangleDown', color: '#F23645', size: 'tiny' });
     }
   }
 
-  // Boxes of the last bar. Pine deletes and redraws them on every bar at bar_index..bar_index + 1 with
-  // extend.both, so only the boxes of the last bar are visible and they cover the whole chart. BoxData has no
-  // extend field: the box spans the first to the last loaded bar.
+  // Boxes of the last bar. Pine deletes and redraws them on every bar:
+  // box.new(left = bar_index, right = bar_index + 1, extend = extend.both), so only the boxes of the last bar are
+  // visible; the right edge is on the bar after the last bar and extend.both draws them across the whole chart.
   if (n > 0) {
     const lastClose = bars[n - 1].close;
     for (let x = 0; x <= lastSR; x++) {
@@ -297,13 +298,14 @@ export function calculate(bars: Bar[], inputs: Partial<SupportResistanceChannels
       if (hi === 0) continue; // Pine get_color: na colour (no box) when the level is 0
       const col = hi > lastClose && lo > lastClose ? resCol : hi < lastClose && lo < lastClose ? supCol : inchCol;
       boxes.push({
-        time1: bars[0].time,
+        time1: bars[n - 1].time,
         price1: hi,
-        time2: bars[n - 1].time,
+        time2: barTime(bars, n),
         price2: lo,
         bgColor: col,
         borderColor: col,
         borderWidth: 1,
+        extend: 'both',
       });
     }
   }
