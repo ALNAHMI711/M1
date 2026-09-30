@@ -6,3 +6,5 @@ example/node_modules
 
 # Large local catalog artifact (regenerable via the sweep scripts)
 docs/official/catalog/community-catalog.json
+# Python bytecode
+__pycache__/
