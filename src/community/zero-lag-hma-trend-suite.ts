@@ -63,10 +63,10 @@ const HMA_LINES: [number, number][] = [[2, 0], [3, 20], [4, 40], [5, 60], [7, 80
 
 export const plotConfig: PlotConfig[] = [
   ...HMA_LINES.map(([w], k) => ({ id: `plot${k}`, title: 'Zero Lag HMA', color: '#5CF0D7', lineWidth: w })),
-  { id: 'plot9', title: 'Bullish VWAP', color: '#5CF3DA', lineWidth: 20, style: 'linebr' },
-  { id: 'plot10', title: 'Bullish VWAP', color: '#5CF3DA', lineWidth: 60, style: 'linebr' },
-  { id: 'plot11', title: 'Bearish VWAP', color: '#B029C0', lineWidth: 20, style: 'linebr' },
-  { id: 'plot12', title: 'Bearish VWAP', color: '#B029C0', lineWidth: 60, style: 'linebr' },
+  { id: 'plot9', title: 'Bullish VWAP', color: String(color.new('#5CF3DA', 70)), lineWidth: 20, style: 'linebr' },
+  { id: 'plot10', title: 'Bullish VWAP', color: String(color.new('#5CF3DA', 80)), lineWidth: 60, style: 'linebr' },
+  { id: 'plot11', title: 'Bearish VWAP', color: String(color.new('#B029C0', 70)), lineWidth: 20, style: 'linebr' },
+  { id: 'plot12', title: 'Bearish VWAP', color: String(color.new('#B029C0', 80)), lineWidth: 60, style: 'linebr' },
 ];
 
 export const metadata = {
