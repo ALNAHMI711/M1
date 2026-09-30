@@ -6,25 +6,44 @@
  * Draws up to 3 uptrend lines (ascending pivot lows) and
  * 3 downtrend lines (descending pivot highs).
  *
- * Reference: "Trend Lines v2" by LonesomeTheBlue
+ * Reference: "Trend Lines v2" by LonesomeTheBlue (Pine v4)
  */
 
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { LineDrawingData } from '../types';
 
 export interface TrendLinesV2Inputs {
+  startYear: number;
+  startMonth: number;
+  startDay: number;
   prd: number;
   ppNum: number;
+  /** Uptrend line colour */
+  utcol: string;
+  /** Downtrend line colour */
+  dtcol: string;
 }
 
+// Pine v4 colours read on PineScript: color.lime #00E676, color.red #FF5252
 export const defaultInputs: TrendLinesV2Inputs = {
+  startYear: 2020,
+  startMonth: 1,
+  startDay: 1,
   prd: 20,
   ppNum: 3,
+  utcol: '#00E676',
+  dtcol: '#FF5252',
 };
 
 export const inputConfig: InputConfig[] = [
-  { id: 'prd', type: 'int', title: 'Pivot Period', defval: 20, min: 10 },
-  { id: 'ppNum', type: 'int', title: 'Number of Pivot Points to check', defval: 3, min: 2 },
+  { id: 'startYear', type: 'int', title: 'Start Year', defval: 2020 },
+  { id: 'startMonth', type: 'int', title: 'Start Month', defval: 1 },
+  { id: 'startDay', type: 'int', title: 'Start day', defval: 1 },
+  { id: 'prd', type: 'int', title: 'Pivot Period', defval: 20, min: 10, max: 50 },
+  { id: 'ppNum', type: 'int', title: 'Number of Pivot Points to check', defval: 3, min: 2, max: 6 },
+  { id: 'utcol', type: 'color', title: 'Colors', defval: '#00E676' },
+  // Pine title is '' (same inline row as 'Colors')
+  { id: 'dtcol', type: 'color', title: 'Colors (down)', defval: '#FF5252' },
 ];
 
 export const plotConfig: PlotConfig[] = [];
@@ -35,8 +54,13 @@ export const metadata = {
   overlay: true,
 };
 
+/** Pine float comparison: a == b when |a - b| <= 1e-10 (checked on PineScript) */
+const EPS = 1e-10;
+const lt = (a: number, b: number) => b - a > EPS;
+const gt = (a: number, b: number) => a - b > EPS;
+
 export function calculate(bars: Bar[], inputs: Partial<TrendLinesV2Inputs> = {}): Omit<IndicatorResult, 'markers'> & { lines: LineDrawingData[] } {
-  const { prd, ppNum } = { ...defaultInputs, ...inputs };
+  const { startYear, startMonth, startDay, prd, ppNum, utcol, dtcol } = { ...defaultInputs, ...inputs };
   const n = bars.length;
 
   const highSeries = new Series(bars, (b) => b.high);
@@ -63,7 +87,7 @@ export function calculate(bars: Bar[], inputs: Partial<TrendLinesV2Inputs> = {})
     const pl = plArr[i];
 
     // Add new pivots to front of arrays, keep max ppNum
-    if (ph != null && !isNaN(ph)) {
+    if (ph != null && !isNaN(ph) && ph !== 0) { // Pine v4 `if ph`: not na and not 0
       tval.unshift(ph);
       tpos.unshift(i);
       if (tval.length > ppNum) {
@@ -71,7 +95,7 @@ export function calculate(bars: Bar[], inputs: Partial<TrendLinesV2Inputs> = {})
         tpos.pop();
       }
     }
-    if (pl != null && !isNaN(pl)) {
+    if (pl != null && !isNaN(pl) && pl !== 0) {
       bval.unshift(pl);
       bpos.unshift(i);
       if (bval.length > ppNum) {
@@ -82,8 +106,18 @@ export function calculate(bars: Bar[], inputs: Partial<TrendLinesV2Inputs> = {})
   }
 
   // Now process all pivot pairs to find valid trend lines
-  // Pine recalculates on every bar; we compute at end of data (last bar = bar_index)
+  // Pine deletes and redraws the lines on every bar with time >= starttime; the lines left are the ones of the
+  // last bar. Before starttime nothing is drawn.
+  // Pine timestamp() uses the exchange timezone; the port has no symbol timezone and uses UTC.
   const lastBar = n - 1;
+  const startTime = Date.UTC(startYear, startMonth - 1, startDay, 0, 0, 0) / 1000;
+  if (n === 0 || bars[lastBar].time < startTime) {
+    return {
+      metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
+      plots: {},
+      lines: [],
+    };
+  }
   let countlinelo = 0;
   let countlinehi = 0;
 
@@ -98,14 +132,14 @@ export function calculate(bars: Bar[], inputs: Partial<TrendLinesV2Inputs> = {})
         const pos1 = bpos[p1];
         const pos2 = bpos[p2];
         // Ascending: most recent pivot low (p1) is higher than older one (p2)
-        if (val1 > val2 && pos1 !== pos2) {
+        if (gt(val1, val2) && pos1 !== pos2) {
           const diff = (val1 - val2) / (pos1 - pos2);
           let hline = val2 + diff;
           let lloc = lastBar;
           let valid = true;
           const startCheck = Math.max(0, pos2 + 1 - prd);
           for (let x = startCheck; x <= lastBar; x++) {
-            if (closeArr[x] < hline) {
+            if (lt(closeArr[x], hline)) {
               valid = false;
               break;
             }
@@ -133,14 +167,14 @@ export function calculate(bars: Bar[], inputs: Partial<TrendLinesV2Inputs> = {})
         const pos1 = tpos[p1];
         const pos2 = tpos[p2];
         // Descending: most recent pivot high (p1) is lower than older one (p2)
-        if (val1 < val2 && pos1 !== pos2) {
+        if (lt(val1, val2) && pos1 !== pos2) {
           const diff = (val2 - val1) / (pos1 - pos2);
           let hline = val2 - diff;
           let lloc = lastBar;
           let valid = true;
           const startCheck = Math.max(0, pos2 + 1 - prd);
           for (let x = startCheck; x <= lastBar; x++) {
-            if (closeArr[x] > hline) {
+            if (gt(closeArr[x], hline)) {
               valid = false;
               break;
             }
@@ -167,8 +201,8 @@ export function calculate(bars: Bar[], inputs: Partial<TrendLinesV2Inputs> = {})
         price1: uv2,
         time2: bars[up1].time,
         price2: uv1,
-        color: '#00FF00',
-        width: 2,
+        color: utcol,
+        width: 1,
         style: 'solid',
       });
     }
@@ -182,8 +216,8 @@ export function calculate(bars: Bar[], inputs: Partial<TrendLinesV2Inputs> = {})
         price1: dv2,
         time2: bars[dp1].time,
         price2: dv1,
-        color: '#FF0000',
-        width: 2,
+        color: dtcol,
+        width: 1,
         style: 'solid',
       });
     }

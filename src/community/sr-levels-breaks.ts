@@ -2,33 +2,40 @@
  * Support and Resistance Levels with Breaks
  *
  * Pivot-based S/R with break detection.
- * Tracks pivot highs as resistance and pivot lows as support.
- * Detects breaks when close crosses above resistance or below support.
+ * Resistance = fixnan(pivothigh(leftBars, rightBars)[1]), Support = fixnan(pivotlow(leftBars, rightBars)[1]).
+ * Breaks: crossover(close, resistance) / crossunder(close, support). The volume filter
+ * (osc > volumeThresh) applies only to the 'B' labels; the wick labels have no volume filter.
  *
- * Reference: "Support and Resistance Levels with Breaks" (community)
+ * Reference: "Support and Resistance Levels with Breaks" [LuxAlgo] (community)
  */
 
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { MarkerData } from '../types';
 
 export interface SRLevelsBreaksInputs {
-  pivotLen: number;
+  toggleBreaks: boolean;
+  leftBars: number;
+  rightBars: number;
   volumeThresh: number;
 }
 
 export const defaultInputs: SRLevelsBreaksInputs = {
-  pivotLen: 10,
+  toggleBreaks: true,
+  leftBars: 15,
+  rightBars: 15,
   volumeThresh: 20,
 };
 
 export const inputConfig: InputConfig[] = [
-  { id: 'pivotLen', type: 'int', title: 'Pivot Length', defval: 10, min: 1 },
-  { id: 'volumeThresh', type: 'float', title: 'Volume Threshold', defval: 20, min: 0 },
+  { id: 'toggleBreaks', type: 'bool', title: 'Show Breaks', defval: true },
+  { id: 'leftBars', type: 'int', title: 'Left Bars ', defval: 15 },
+  { id: 'rightBars', type: 'int', title: 'Right Bars', defval: 15 },
+  { id: 'volumeThresh', type: 'int', title: 'Volume Threshold', defval: 20 },
 ];
 
 export const plotConfig: PlotConfig[] = [
-  { id: 'plot0', title: 'Resistance', color: '#EF5350', lineWidth: 2 },
-  { id: 'plot1', title: 'Support', color: '#26A69A', lineWidth: 2 },
+  { id: 'plot0', title: 'Resistance', color: '#FF0000', lineWidth: 3 },
+  { id: 'plot1', title: 'Support', color: '#233dee', lineWidth: 3 },
 ];
 
 export const metadata = {
@@ -37,81 +44,86 @@ export const metadata = {
   overlay: true,
 };
 
+// Pine v4 color constants
+const RED = '#FF5252';
+const GREEN = '#4CAF50';
+
 export function calculate(bars: Bar[], inputs: Partial<SRLevelsBreaksInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[] } {
-  const { pivotLen, volumeThresh } = { ...defaultInputs, ...inputs };
+  const { toggleBreaks, leftBars, rightBars, volumeThresh } = { ...defaultInputs, ...inputs };
   const n = bars.length;
 
   const highSeries = new Series(bars, (b) => b.high);
   const lowSeries = new Series(bars, (b) => b.low);
 
-  // Volume oscillator: osc = 100 * (ema(vol,5) - ema(vol,10)) / ema(vol,10)
-  const volSeries = new Series(bars, (b) => b.volume ?? 0);
+  // Pine: osc = 100 * (ema(volume, 5) - ema(volume, 10)) / ema(volume, 10)  (na while the emas are na)
+  const volSeries = new Series(bars, (b) => b.volume ?? NaN);
   const volEma5 = ta.ema(volSeries, 5).toArray();
   const volEma10 = ta.ema(volSeries, 10).toArray();
-  const volOsc: number[] = new Array(n);
+  const osc: number[] = new Array(n);
   for (let i = 0; i < n; i++) {
-    const e5 = volEma5[i] ?? 0;
-    const e10 = volEma10[i] ?? 0;
-    volOsc[i] = e10 !== 0 ? 100 * (e5 - e10) / e10 : 0;
+    const e5 = volEma5[i] ?? NaN;
+    const e10 = volEma10[i] ?? NaN;
+    osc[i] = 100 * (e5 - e10) / e10;
   }
 
-  const phArr = ta.pivothigh(highSeries, pivotLen, pivotLen).toArray();
-  const plArr = ta.pivotlow(lowSeries, pivotLen, pivotLen).toArray();
+  const phArr = ta.pivothigh(highSeries, leftBars, rightBars).toArray();
+  const plArr = ta.pivotlow(lowSeries, leftBars, rightBars).toArray();
 
-  const warmup = pivotLen * 2;
-  let lastResistance = NaN;
-  let lastSupport = NaN;
+  // Pine: highUsePivot = fixnan(pivothigh(leftBars, rightBars)[1]); lowUsePivot = fixnan(pivotlow(leftBars, rightBars)[1])
+  const highUse: number[] = new Array(n);
+  const lowUse: number[] = new Array(n);
+  let lastHigh = NaN;
+  let lastLow = NaN;
+  for (let i = 0; i < n; i++) {
+    const ph = i > 0 ? phArr[i - 1] : NaN;
+    const pl = i > 0 ? plArr[i - 1] : NaN;
+    if (ph != null && !isNaN(ph)) lastHigh = ph;
+    if (pl != null && !isNaN(pl)) lastLow = pl;
+    highUse[i] = lastHigh;
+    lowUse[i] = lastLow;
+  }
 
-  const resistancePlot = [];
-  const supportPlot = [];
   const markers: MarkerData[] = [];
+  for (let i = 1; i < n; i++) {
+    if (!toggleBreaks) break;
+    const { open, high, low, close } = bars[i];
+    const prevClose = bars[i - 1].close;
+    // Pine crossover / crossunder: false when a value is na
+    const crossOver = close > highUse[i] && prevClose <= highUse[i - 1];
+    const crossUnder = close < lowUse[i] && prevClose >= lowUse[i - 1];
+    const volPass = osc[i] > volumeThresh;
 
-  for (let i = 0; i < n; i++) {
-    // Pine: fixnan(pivothigh(leftBars, rightBars)[1]), fixnan(pivotlow(leftBars, rightBars)[1])
-    if (i > warmup && !isNaN(phArr[i - 1]) && phArr[i - 1] !== 0) {
-      lastResistance = phArr[i - 1];
+    // For breaks with volume
+    if (crossUnder && !(open - close < high - open) && volPass) {
+      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'labelDown', color: RED, text: 'B' });
     }
-    if (i > warmup && !isNaN(plArr[i - 1]) && plArr[i - 1] !== 0) {
-      lastSupport = plArr[i - 1];
+    if (crossOver && !(open - low > close - open) && volPass) {
+      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'labelUp', color: GREEN, text: 'B' });
     }
-
-    // Break detection: invalidate level when price breaks through
-    // Volume filter: only generate markers when volume oscillator > threshold
-    const volPass = volOsc[i] > volumeThresh;
-    if (!isNaN(lastResistance) && bars[i].close > lastResistance) {
-      // Resistance break (bullish)
-      if (i >= warmup && volPass) {
-        const bullWick = (bars[i].open - bars[i].low) > (bars[i].close - bars[i].open);
-        markers.push({
-          time: bars[i].time, position: 'belowBar', shape: 'labelUp',
-          color: '#26A69A', text: bullWick ? 'Bull Wick' : 'B',
-        });
-      }
-      lastResistance = NaN;
+    // For bull / bear wicks (no volume filter)
+    if (crossOver && open - low > close - open) {
+      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'labelUp', color: GREEN, text: 'Bull Wick' });
     }
-    if (!isNaN(lastSupport) && bars[i].close < lastSupport) {
-      // Support break (bearish)
-      if (i >= warmup && volPass) {
-        const bearWick = (bars[i].open - bars[i].close) < (bars[i].high - bars[i].open);
-        markers.push({
-          time: bars[i].time, position: 'aboveBar', shape: 'labelDown',
-          color: '#EF5350', text: bearWick ? 'Bear Wick' : 'B',
-        });
-      }
-      lastSupport = NaN;
+    if (crossUnder && open - close < high - open) {
+      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'labelDown', color: RED, text: 'Bear Wick' });
     }
-
-    resistancePlot.push({ time: bars[i].time, value: i < warmup ? NaN : lastResistance });
-    supportPlot.push({ time: bars[i].time, value: i < warmup ? NaN : lastSupport });
   }
 
-  // Pine: level plots use offset = -(rightBars + 1)
-  const shiftBack = (arr: { time: number; value: number }[]) =>
-    arr.map((p, i) => ({ time: p.time, value: i + pivotLen + 1 < n ? arr[i + pivotLen + 1].value : NaN }));
+  // Pine: plot(level, color = change(level) ? na : col, offset = -(rightBars + 1)).
+  // The value of bar j is drawn at bar j - (rightBars + 1); on the bars where the level changes the colour is na
+  // (value kept, drawn transparent).
+  const shift = rightBars + 1;
+  const levelPlot = (level: number[], col: string) =>
+    bars.map((b, i) => {
+      const j = i + shift;
+      if (j >= n) return { time: b.time, value: NaN };
+      const changed = j > 0 && level[j] - level[j - 1] !== 0 && !isNaN(level[j] - level[j - 1]);
+      return { time: b.time, value: level[j], color: changed ? 'transparent' : col };
+    });
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
-    plots: { 'plot0': shiftBack(resistancePlot), 'plot1': shiftBack(supportPlot) },
+    plots: { 'plot0': levelPlot(highUse, '#FF0000'), 'plot1': levelPlot(lowUse, '#233dee') },
     markers,
   };
 }

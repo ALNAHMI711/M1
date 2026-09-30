@@ -3,40 +3,124 @@
  *
  * Detects pivot highs and lows, then classifies them as:
  * Higher High (HH), Higher Low (HL), Lower High (LH), Lower Low (LL).
- * Plots: pivot avg stepline, top/bottom level circles, breakout/breakdown markers,
- * and labels at pivot price points.
+ * Plots: pivot avg stepline (off by default), top/bottom level circles, fractal chaos channel (off by default),
+ * breakout/breakdown markers, and labels with the pivot price.
  *
- * Reference: "Pivot Points High Low (HH/HL/LH/LL) [Anan]"
+ * Reference: "Pivot Points High Low (HH/HL/LH/LL) [Anan]" (Pine v6)
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, str, math, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 import type { MarkerData, LabelData } from '../types';
 
 export interface PivotHhHlLhLlInputs {
+  /** Pivot high source */
+  srcH: SourceType;
+  /** Pivot high left length (Pine leftLenH) */
   leftBars: number;
+  /** Pivot high right length (Pine rightLenH) */
   rightBars: number;
-  showFB: boolean;
+  colorH: string;
+  /** Pivot low source */
+  srcL: SourceType;
+  leftLenL: number;
+  rightLenL: number;
+  colorL: string;
+  showLevelHH: boolean;
+  showLevelLH: boolean;
+  showLevelHL: boolean;
+  showLevelLL: boolean;
+  showHH: boolean;
+  showLH: boolean;
+  showHL: boolean;
+  showLL: boolean;
+  showPriceHH: boolean;
+  showPriceLH: boolean;
+  showPriceHL: boolean;
+  showPriceLL: boolean;
+  /** Maximum Bars to Display (0 = All) */
+  maxBarsBack: number;
+  /** Maximum S/R Level Extension Length (0 = Max) */
+  maxLvlLen: number;
+  /** Show Levels as a Fractal Chaos Channel */
   showChannel: boolean;
+  /** Show Avg Pivot High Low */
+  showCL: boolean;
+  /** Show fractal Break out/down symbols */
+  showFB: boolean;
 }
 
+// Pine v6 colours read on PineScript: color.teal #089981, color.red #F23645; color.new(c, 50)
+const TEAL_50 = 'rgba(8,153,129,0.5)';
+const RED_50 = 'rgba(242,54,69,0.5)';
+const TRANSPARENT = 'rgba(0,0,0,0)';
+/** syminfo.mintick is not available to the port (Bar has no symbol info) */
+const MINTICK = 0.01;
+/** Pine max_labels_count */
+const MAX_LABELS = 500;
+
 export const defaultInputs: PivotHhHlLhLlInputs = {
+  srcH: 'high',
   leftBars: 4,
   rightBars: 2,
-  showFB: true,
+  colorH: TEAL_50,
+  srcL: 'low',
+  leftLenL: 4,
+  rightLenL: 2,
+  colorL: RED_50,
+  showLevelHH: true,
+  showLevelLH: true,
+  showLevelHL: true,
+  showLevelLL: true,
+  showHH: true,
+  showLH: true,
+  showHL: true,
+  showLL: true,
+  showPriceHH: true,
+  showPriceLH: true,
+  showPriceHL: true,
+  showPriceLL: true,
+  maxBarsBack: 0,
+  maxLvlLen: 0,
   showChannel: false,
+  showCL: false,
+  showFB: true,
 };
 
+// Pine gives the four length/colour inputs an empty title (inline rows 'Pivot High' / 'Pivot Low')
 export const inputConfig: InputConfig[] = [
-  { id: 'leftBars', type: 'int', title: 'Left Bars', defval: 4, min: 0 },
-  { id: 'rightBars', type: 'int', title: 'Right Bars', defval: 2, min: 0 },
-  { id: 'showFB', type: 'bool', title: 'Show Fractal Break', defval: true },
-  { id: 'showChannel', type: 'bool', title: 'Show Channel', defval: false },
+  { id: 'srcH', type: 'source', title: 'High', defval: 'high' },
+  { id: 'leftBars', type: 'int', title: 'Pivot High Left Length', defval: 4, min: 0 },
+  { id: 'rightBars', type: 'int', title: 'Pivot High Right Length', defval: 2, min: 0 },
+  { id: 'colorH', type: 'color', title: 'Pivot High Color', defval: TEAL_50 },
+  { id: 'srcL', type: 'source', title: 'Low', defval: 'low' },
+  { id: 'leftLenL', type: 'int', title: 'Pivot Low Left Length', defval: 4, min: 0 },
+  { id: 'rightLenL', type: 'int', title: 'Pivot Low Right Length', defval: 2, min: 0 },
+  { id: 'colorL', type: 'color', title: 'Pivot Low Color', defval: RED_50 },
+  { id: 'showLevelHH', type: 'bool', title: 'Levels: Higher High', defval: true },
+  { id: 'showLevelLH', type: 'bool', title: 'Levels: Lower High', defval: true },
+  { id: 'showLevelHL', type: 'bool', title: 'Levels: Higher Low', defval: true },
+  { id: 'showLevelLL', type: 'bool', title: 'Levels: Lower Low', defval: true },
+  { id: 'showHH', type: 'bool', title: 'Markers: Higher High', defval: true },
+  { id: 'showLH', type: 'bool', title: 'Markers: Lower High', defval: true },
+  { id: 'showHL', type: 'bool', title: 'Markers: Higher Low', defval: true },
+  { id: 'showLL', type: 'bool', title: 'Markers: Lower Low', defval: true },
+  { id: 'showPriceHH', type: 'bool', title: 'Values: Higher High', defval: true },
+  { id: 'showPriceLH', type: 'bool', title: 'Values: Lower High', defval: true },
+  { id: 'showPriceHL', type: 'bool', title: 'Values: Higher Low', defval: true },
+  { id: 'showPriceLL', type: 'bool', title: 'Values: Lower Low', defval: true },
+  { id: 'maxBarsBack', type: 'int', title: 'Maximum Bars to Display (0 = All)', defval: 0, min: 0 },
+  { id: 'maxLvlLen', type: 'int', title: 'Maximum S/R Level Extension Length (0 = Max)', defval: 0, min: 0 },
+  { id: 'showChannel', type: 'bool', title: 'Show Levels as a Fractal Chaos Channel', defval: false },
+  { id: 'showCL', type: 'bool', title: 'Show Avg Pivot High Low ', defval: false },
+  { id: 'showFB', type: 'bool', title: 'Show fractal Break out/down symbols', defval: true },
 ];
 
 export const plotConfig: PlotConfig[] = [
-  { id: 'plot0', title: 'Pivot Avg', color: '#26A69A', lineWidth: 1, style: 'stepline' },
-  { id: 'plot1', title: 'Top Levels', color: 'rgba(0,128,128,0.5)', lineWidth: 1, style: 'circles' },
-  { id: 'plot2', title: 'Bottom Levels', color: 'rgba(255,0,0,0.5)', lineWidth: 1, style: 'circles' },
+  { id: 'plot0', title: 'H+L /2', color: TEAL_50, lineWidth: 1, style: 'stepline' },
+  { id: 'plot1', title: 'Top Levels HH,LH', color: TEAL_50, lineWidth: 1, style: 'circles' },
+  { id: 'plot2', title: 'Bottom Levels LL,HL', color: RED_50, lineWidth: 1, style: 'circles' },
+  { id: 'plot3', title: 'Top Chaos Channel', color: TEAL_50, lineWidth: 1, style: 'stepline' },
+  { id: 'plot4', title: 'Bottom Chaos Channel', color: RED_50, lineWidth: 1, style: 'stepline' },
 ];
 
 export const metadata = {
@@ -45,146 +129,172 @@ export const metadata = {
   overlay: true,
 };
 
+type Point = { time: number; value: number; color?: string };
+
+/** Pine float comparison: a == b when |a - b| <= 1e-10 (checked on PineScript); na operands give false */
+const EPS = 1e-10;
+const lt = (a: number, b: number) => b - a > EPS;
+const differs = (a: number, b: number) => Math.abs(a - b) > EPS;
+
 export function calculate(bars: Bar[], inputs: Partial<PivotHhHlLhLlInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[]; labels: LabelData[] } {
-  const { leftBars, rightBars, showFB, showChannel } = { ...defaultInputs, ...inputs };
+  const cfg = { ...defaultInputs, ...inputs };
+  const { leftBars: leftLenH, rightBars: rightLenH, leftLenL, rightLenL, colorH, colorL } = cfg;
   const n = bars.length;
+  const lastBarIndex = n - 1;
 
-  const highSeries = new Series(bars, (b) => b.high);
-  const lowSeries = new Series(bars, (b) => b.low);
+  const srcHSeries = getSourceSeries(bars, cfg.srcH);
+  const srcLSeries = getSourceSeries(bars, cfg.srcL);
+  const srcH = srcHSeries.toArray().map((v) => (v == null ? NaN : v));
+  const srcL = srcLSeries.toArray().map((v) => (v == null ? NaN : v));
 
-  const phArr = ta.pivothigh(highSeries, leftBars, rightBars).toArray();
-  const plArr = ta.pivotlow(lowSeries, leftBars, rightBars).toArray();
+  const phArr = ta.pivothigh(srcHSeries, leftLenH, rightLenH).toArray();
+  const plArr = ta.pivotlow(srcLSeries, leftLenL, rightLenL).toArray();
 
-  let lastPivotHigh = NaN;
-  let lastPivotLow = NaN;
-  // Pine uses valuewhen: track previous pivot values for HH/LH/HL/LL classification
-  let prevPivotHighValue = NaN;
-  let prevPivotLowValue = NaN;
+  const inRange = (i: number) => cfg.maxBarsBack === 0 || i > lastBarIndex - cfg.maxBarsBack;
+  // Pine: str.tostring(_pivot, format.mintick) = value rounded with round(v / mintick) * mintick, printed with the
+  // decimals of mintick (checked on the 504 labels). The port gets no syminfo.mintick: tick 0.01.
+  const fmt = (v: number) => '[' + str.tostring(math.round_to_mintick(v, MINTICK), '0.00') + ']';
+
   const markers: MarkerData[] = [];
   const labels: LabelData[] = [];
+  const plot0: Point[] = [];
+  const top: Point[] = [];
+  const bot: Point[] = [];
+  const topCh: Point[] = [];
+  const botCh: Point[] = [];
 
-  // Pine: pvtH holds last pivot high value, pvtL holds last pivot low value
+  // ta.valuewhen(not na(ph), ph_value, 0 / 1)
+  let lastPhValue = NaN;
+  let prevPhValue = NaN;
+  let lastPlValue = NaN;
+  let prevPlValue = NaN;
+  let fixPh = NaN;
+  let fixPl = NaN;
+  let countH = 0;
+  let countL = 0;
   let pvtH = NaN;
   let pvtL = NaN;
-  // Pine: pvtH[1] and pvtL[1] (levels of the previous bar)
-  let prevPvtH = NaN;
-  let prevPvtL = NaN;
-  // Pine: fixnan(ph) and fixnan(pl) - last non-NaN pivot value
-  let fixnanPh = NaN;
-  let fixnanPl = NaN;
+  let pvtHighToShow = NaN;
+  let pvtLowToShow = NaN;
 
-  const plot0: { time: number; value: number; color?: string }[] = [];
-  const plot1: { time: number; value: number; color?: string }[] = [];
-  const plot2: { time: number; value: number; color?: string }[] = [];
+  const shape = (bar: number, text: string, high: boolean, color: string) => {
+    if (bar < 0) return;
+    markers.push({
+      time: bars[bar].time,
+      position: high ? 'aboveBar' : 'belowBar',
+      shape: high ? 'triangleDown' : 'triangleUp',
+      color,
+      text,
+    });
+  };
+  const drawLabel = (i: number, pivot: number, above: boolean, color: string) => {
+    if (Number.isNaN(pivot) || !inRange(i)) return;
+    const bar = i - rightLenH;
+    if (bar < 0) return;
+    // Pine: label.style_none (no background), yloc.abovebar / yloc.belowbar
+    labels.push({ time: bars[bar].time, price: pivot, text: fmt(pivot), textColor: color, style: above ? 'label_down' : 'label_up', size: 'normal' });
+  };
 
   for (let i = 0; i < n; i++) {
-    const ph = phArr[i];
-    const pl = plArr[i];
-    const hasPh = ph != null && !isNaN(ph) && ph !== 0;
-    const hasPl = pl != null && !isNaN(pl) && pl !== 0;
+    const ph = phArr[i] ?? NaN;
+    const pl = plArr[i] ?? NaN;
+    const hasPh = !Number.isNaN(ph);
+    const hasPl = !Number.isNaN(pl);
+    const phValue = i >= rightLenH ? srcH[i - rightLenH] : NaN;
+    const plValue = i >= rightLenL ? srcL[i - rightLenL] : NaN;
 
-    // Pine: ph_value = srcH[rightLenH] (the source value at the pivot point)
-    const phValue = hasPh ? bars[Math.max(0, i - rightBars)].high : NaN;
-    const plValue = hasPl ? bars[Math.max(0, i - rightBars)].low : NaN;
-
-    // HH/LH/HL/LL classification using Pine's valuewhen pattern
-    // Markers and labels go on the pivot bar (Pine: offset = -rightLenH, bar_index[rightLenH])
     if (hasPh) {
-      const isHH = !isNaN(prevPivotHighValue) && phValue > prevPivotHighValue;
-      const isLH = !isNaN(prevPivotHighValue) && phValue <= prevPivotHighValue;
-
-      if (!isNaN(prevPivotHighValue)) {
-        if (isHH) {
-          markers.push({ time: bars[i - rightBars].time, position: 'aboveBar', shape: 'triangleDown', color: 'rgba(0,128,128,0.5)', text: 'HH' });
-        } else {
-          markers.push({ time: bars[i - rightBars].time, position: 'aboveBar', shape: 'triangleDown', color: 'rgba(0,128,128,0.5)', text: 'LH' });
-        }
-      }
-
-      // Pine: label.new with pivot price
-      labels.push({
-        time: bars[i - rightBars].time, price: phValue,
-        text: '[' + phValue.toFixed(2) + ']',
-        textColor: 'rgba(0,128,128,0.5)',
-        style: 'label_down', size: 'tiny',
-      });
-
-      prevPivotHighValue = phValue;
-      pvtH = phValue;
+      prevPhValue = lastPhValue;
+      lastPhValue = phValue;
     }
-
     if (hasPl) {
-      const isHL = !isNaN(prevPivotLowValue) && plValue > prevPivotLowValue;
-      const isLL = !isNaN(prevPivotLowValue) && plValue <= prevPivotLowValue;
-
-      if (!isNaN(prevPivotLowValue)) {
-        if (isHL) {
-          markers.push({ time: bars[i - rightBars].time, position: 'belowBar', shape: 'triangleUp', color: 'rgba(255,0,0,0.5)', text: 'HL' });
-        } else {
-          markers.push({ time: bars[i - rightBars].time, position: 'belowBar', shape: 'triangleUp', color: 'rgba(255,0,0,0.5)', text: 'LL' });
-        }
-      }
-
-      // Pine: label.new with pivot price
-      labels.push({
-        time: bars[i - rightBars].time, price: plValue,
-        text: '[' + plValue.toFixed(2) + ']',
-        textColor: 'rgba(255,0,0,0.5)',
-        style: 'label_up', size: 'tiny',
-      });
-
-      prevPivotLowValue = plValue;
-      pvtL = plValue;
+      prevPlValue = lastPlValue;
+      lastPlValue = plValue;
     }
+    // Comparisons with na are false: no class for the first pivot or for two equal pivots
+    const higherhigh = hasPh && lt(prevPhValue, lastPhValue) ? ph : NaN;
+    const lowerhigh = hasPh && lt(lastPhValue, prevPhValue) ? ph : NaN;
+    const higherlow = hasPl && lt(prevPlValue, lastPlValue) ? pl : NaN;
+    const lowerlow = hasPl && lt(lastPlValue, prevPlValue) ? pl : NaN;
 
-    // Update fixnan values
-    if (hasPh) fixnanPh = ph;
-    if (hasPl) fixnanPl = pl;
+    drawLabel(i, cfg.showPriceHH ? higherhigh : NaN, true, colorH);
+    drawLabel(i, cfg.showPriceHL ? higherlow : NaN, false, colorL);
+    drawLabel(i, cfg.showPriceLH ? lowerhigh : NaN, true, colorH);
+    drawLabel(i, cfg.showPriceLL ? lowerlow : NaN, false, colorL);
 
-    // Pine: pivot_avg = (fixnan(ph) + fixnan(pl)) / 2
-    // Pine: plot(showCL ? pivot_avg : na, style=stepline, color = close > pivot_avg ? colorH : colorL)
-    const pivotAvg = (!isNaN(fixnanPh) && !isNaN(fixnanPl)) ? (fixnanPh + fixnanPl) / 2 : NaN;
-    const avgColor = !isNaN(pivotAvg) && bars[i].close > pivotAvg ? 'rgba(0,128,128,0.5)' : 'rgba(255,0,0,0.5)';
-    plot0.push({ time: bars[i].time, value: pivotAvg, color: avgColor });
+    // plotshape offsets as in the Pine source: HH/HL use -rightLenH, LH/LL use -rightLenL
+    if (cfg.showHH && inRange(i) && !Number.isNaN(higherhigh)) shape(i - rightLenH, 'HH', true, colorH);
+    if (cfg.showHL && inRange(i) && !Number.isNaN(higherlow)) shape(i - rightLenH, 'HL', false, colorL);
+    if (cfg.showLH && inRange(i) && !Number.isNaN(lowerhigh)) shape(i - rightLenL, 'LH', true, colorH);
+    if (cfg.showLL && inRange(i) && !Number.isNaN(lowerlow)) shape(i - rightLenL, 'LL', false, colorL);
 
-    // Pine: Top Levels (pvtHighToShow) - circles or stepline depending on showChannel
-    // When showChannel: continuous stepline (Fractal Chaos Channel). Otherwise: circles with NaN breaks.
-    if (showChannel) {
-      plot1.push({ time: bars[i].time, value: pvtH });
-      plot2.push({ time: bars[i].time, value: pvtL });
-    } else {
-      // Pine: HpC = pvtH != pvtH[1] ? na : colorH (the circle is hidden on the bar where the level changes)
-      const topVal = isNaN(pvtH) ? NaN : (pvtH !== prevPvtH && i > 0 ? NaN : pvtH);
-      plot1.push({ time: bars[i].time, value: topVal });
+    // pivot_avg = (fixnan(ph) + fixnan(pl)) / 2
+    if (hasPh) fixPh = ph;
+    if (hasPl) fixPl = pl;
+    const pivotAvg = (fixPh + fixPl) / 2;
+    plot0.push({
+      time: bars[i].time,
+      value: cfg.showCL && inRange(i) ? pivotAvg : NaN,
+      color: bars[i].close > pivotAvg ? colorH : colorL,
+    });
 
-      const botVal = isNaN(pvtL) ? NaN : (pvtL !== prevPvtL && i > 0 ? NaN : pvtL);
-      plot2.push({ time: bars[i].time, value: botVal });
+    countH = hasPh ? 0 : countH + 1;
+    countL = hasPl ? 0 : countL + 1;
+    pvtH = hasPh ? phValue : pvtH;
+    pvtL = hasPl ? plValue : pvtL;
+
+    const prevHighToShow = pvtHighToShow;
+    const prevLowToShow = pvtLowToShow;
+    if (cfg.showLevelHH && cfg.showLevelLH) pvtHighToShow = pvtH;
+    else if (cfg.showLevelHH) pvtHighToShow = Number.isNaN(higherhigh) ? pvtHighToShow : phValue;
+    else if (cfg.showLevelLH) pvtHighToShow = Number.isNaN(lowerhigh) ? pvtHighToShow : phValue;
+    else pvtHighToShow = NaN;
+    if (cfg.showLevelHL && cfg.showLevelLL) pvtLowToShow = pvtL;
+    else if (cfg.showLevelHL) pvtLowToShow = Number.isNaN(higherlow) ? pvtLowToShow : plValue;
+    else if (cfg.showLevelLL) pvtLowToShow = Number.isNaN(lowerlow) ? pvtLowToShow : plValue;
+    else pvtLowToShow = NaN;
+
+    // HpC_filtered = pvtHighToShow != pvtHighToShow[1] ? na : colorH (na colour: value kept, drawn transparent)
+    const hpc = differs(pvtHighToShow, prevHighToShow) ? TRANSPARENT : colorH;
+    const lpc = differs(pvtLowToShow, prevLowToShow) ? TRANSPARENT : colorL;
+    const showTop = !cfg.showChannel && (cfg.maxLvlLen === 0 || countH < cfg.maxLvlLen) && (cfg.showLevelHH || cfg.showLevelLH) && inRange(i);
+    const showBot = !cfg.showChannel && (cfg.maxLvlLen === 0 || countL < cfg.maxLvlLen) && (cfg.showLevelHL || cfg.showLevelLL) && inRange(i);
+    top.push({ time: bars[i].time, value: showTop ? pvtHighToShow : NaN, color: hpc });
+    bot.push({ time: bars[i].time, value: showBot ? pvtLowToShow : NaN, color: lpc });
+    topCh.push({ time: bars[i].time, value: cfg.showChannel && (cfg.showLevelHH || cfg.showLevelLH) && inRange(i) ? pvtHighToShow : NaN });
+    botCh.push({ time: bars[i].time, value: cfg.showChannel && (cfg.showLevelHL || cfg.showLevelLL) && inRange(i) ? pvtLowToShow : NaN });
+
+    // Fractal break: buy = close > pvtH and open <= pvtH, sell = close < pvtL and open >= pvtL
+    const buy = lt(pvtH, bars[i].close) && !Number.isNaN(pvtH) && !lt(pvtH, bars[i].open);
+    const sell = lt(bars[i].close, pvtL) && !Number.isNaN(pvtL) && !lt(bars[i].open, pvtL);
+    if (cfg.showFB && buy && inRange(i)) {
+      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'triangleUp', color: colorH, text: '↑↑' });
     }
-    prevPvtH = pvtH;
-    prevPvtL = pvtL;
-
-    // Pine: Fractal Break: buy = close > pvtH and open <= pvtH, sell = close < pvtL and open >= pvtL
-    if (showFB && !isNaN(pvtH) && !isNaN(pvtL)) {
-      const buy = bars[i].close > pvtH && bars[i].open <= pvtH;
-      const sell = bars[i].close < pvtL && bars[i].open >= pvtL;
-      if (buy) {
-        markers.push({ time: bars[i].time, position: 'belowBar', shape: 'triangleUp', color: 'rgba(0,128,128,0.5)', text: '\u2191\u2191' });
-      }
-      if (sell) {
-        markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'triangleDown', color: 'rgba(255,0,0,0.5)', text: '\u2193\u2193' });
-      }
+    if (cfg.showFB && sell && inRange(i)) {
+      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'triangleDown', color: colorL, text: '↓↓' });
     }
   }
 
-  // Pine: level plots use offset = -rightLenH / -rightLenL
-  const shiftBack = (arr: { time: number; value: number; color?: string }[]) =>
-    arr.map((p, i) => ({ time: p.time, value: i + rightBars < n ? arr[i + rightBars].value : NaN }));
+  // Pine plot offset = -k: the value computed on bar i is drawn on bar i - k
+  const shiftBack = (arr: Point[], k: number): Point[] =>
+    arr.map((p, i) => {
+      const src = arr[i + k];
+      return src === undefined ? { time: p.time, value: NaN } : { time: p.time, value: src.value, ...(src.color ? { color: src.color } : {}) };
+    });
+
+  markers.sort((a, b) => a.time - b.time);
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
-    plots: { 'plot0': plot0, 'plot1': shiftBack(plot1), 'plot2': shiftBack(plot2) },
+    plots: {
+      'plot0': plot0,
+      'plot1': shiftBack(top, rightLenH),
+      'plot2': shiftBack(bot, rightLenL),
+      'plot3': shiftBack(topCh, rightLenH),
+      'plot4': shiftBack(botCh, rightLenL),
+    },
     markers,
-    labels,
+    labels: labels.slice(-MAX_LABELS),
   };
 }
 

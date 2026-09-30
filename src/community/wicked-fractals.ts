@@ -1,29 +1,30 @@
 /**
  * WICK.ED Fractals
  *
- * Fractal detection based on wicks (high/low).
- * Fractal up = high is strictly highest among leftBars left and rightBars right.
- * Fractal down = low is strictly lowest among leftBars left and rightBars right.
+ * Bill Williams fractals on the wicks (high/low), 3-bar or 5-bar.
+ * Down fractal (triangle above the bar): high[n] strictly above its neighbours.
+ * Up fractal (triangle below the bar): low[n] strictly below its neighbours.
+ * Pine draws both shapes with offset=-2 (fixed, whatever n is).
  *
- * Reference: "WICK.ED Fractals" (community)
+ * Reference: "WICK.ED Fractals" by Mit Nayi (community)
  */
 
 import { type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { MarkerData } from '../types';
 
 export interface WickedFractalsInputs {
-  leftBars: number;
-  rightBars: number;
+  n: number;
+  fractalBars: '3' | '5';
 }
 
 export const defaultInputs: WickedFractalsInputs = {
-  leftBars: 2,
-  rightBars: 2,
+  n: 2,
+  fractalBars: '3',
 };
 
 export const inputConfig: InputConfig[] = [
-  { id: 'leftBars', type: 'int', title: 'Left Bars', defval: 2, min: 1 },
-  { id: 'rightBars', type: 'int', title: 'Right Bars', defval: 2, min: 1 },
+  { id: 'n', type: 'int', title: 'Periods', defval: 2, min: 2 },
+  { id: 'fractalBars', type: 'string', title: '3 or 5 Bar Fractal', defval: '3', options: ['3', '5'] },
 ];
 
 export const plotConfig: PlotConfig[] = [
@@ -36,26 +37,37 @@ export const metadata = {
   overlay: true,
 };
 
+// Pine: color = color.white, transp = 25
+const SHAPE_COLOR = 'rgba(255,255,255,0.75)';
+
 export function calculate(bars: Bar[], inputs: Partial<WickedFractalsInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[] } {
-  const { leftBars, rightBars } = { ...defaultInputs, ...inputs };
+  const { n, fractalBars } = { ...defaultInputs, ...inputs };
+  const len = bars.length;
 
   const markers: MarkerData[] = [];
   const plot0 = bars.map((b) => ({ time: b.time, value: NaN }));
 
-  // Pine: every neighbour strictly below (high) / above (low) the fractal bar; shapes drawn on the fractal bar (offset=-2)
-  for (let c = leftBars; c + rightBars < bars.length; c++) {
-    let dnFractal = true;
-    let upFractal = true;
-    for (let k = -leftBars; k <= rightBars; k++) {
-      if (k === 0) continue;
-      if (!(bars[c + k].high < bars[c].high)) dnFractal = false;
-      if (!(bars[c + k].low > bars[c].low)) upFractal = false;
+  // x[k] on bar i is bar i - k; a bar before the first one is na, and a comparison with na is false
+  const high = (i: number, k: number) => (i - k >= 0 ? bars[i - k].high : NaN);
+  const low = (i: number, k: number) => (i - k >= 0 ? bars[i - k].low : NaN);
+
+  for (let i = 2; i < len; i++) {
+    let dnFractal = false;
+    let upFractal = false;
+    if (fractalBars === '5') {
+      dnFractal = high(i, n - 2) < high(i, n) && high(i, n - 1) < high(i, n) && high(i, n + 1) < high(i, n) && high(i, n + 2) < high(i, n);
+      upFractal = low(i, n - 2) > low(i, n) && low(i, n - 1) > low(i, n) && low(i, n + 1) > low(i, n) && low(i, n + 2) > low(i, n);
+    } else if (fractalBars === '3') {
+      dnFractal = high(i, n - 1) < high(i, n) && high(i, n + 1) < high(i, n);
+      upFractal = low(i, n - 1) > low(i, n) && low(i, n + 1) > low(i, n);
     }
+    // Pine: plotshape(..., offset=-2): the shape computed on bar i is drawn on bar i - 2
+    const time = bars[i - 2].time;
     if (dnFractal) {
-      markers.push({ time: bars[c].time, position: 'aboveBar', shape: 'triangleDown', color: '#EF5350', text: 'F' });
+      markers.push({ time, position: 'aboveBar', shape: 'triangleDown', color: SHAPE_COLOR });
     }
     if (upFractal) {
-      markers.push({ time: bars[c].time, position: 'belowBar', shape: 'triangleUp', color: '#26A69A', text: 'F' });
+      markers.push({ time, position: 'belowBar', shape: 'triangleUp', color: SHAPE_COLOR });
     }
   }
 

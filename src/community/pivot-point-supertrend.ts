@@ -1,10 +1,13 @@
 /**
  * Pivot Point SuperTrend
  *
- * SuperTrend using pivot high/low based center line with ATR bands.
- * Direction flips when price crosses the opposite band.
+ * SuperTrend around a centre line built from pivot points: each new pivot high or low moves the
+ * centre by center = (center * 2 + pivot) / 3. The bands are center -/+ Factor * ATR, trailed like
+ * a SuperTrend. Buy / Sell on a trend change, optional pivot labels, centre line and
+ * support / resistance levels.
  *
  * Reference: "Pivot Point SuperTrend" by LonesomeTheBlue
+ * (docs/official/indicators_community/Pivot Point Supertrend.pine)
  */
 
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
@@ -15,27 +18,41 @@ export interface PivotPointSupertrendInputs {
   atrFactor: number;
   atrLen: number;
   showPivot: boolean;
+  showLabel: boolean;
+  showCl: boolean;
+  showSr: boolean;
 }
 
 export const defaultInputs: PivotPointSupertrendInputs = {
   pivotLen: 2,
-  atrFactor: 3.0,
+  atrFactor: 3,
   atrLen: 10,
   showPivot: false,
+  showLabel: true,
+  showCl: false,
+  showSr: false,
 };
 
 export const inputConfig: InputConfig[] = [
-  { id: 'pivotLen', type: 'int', title: 'Pivot Length', defval: 2, min: 1 },
-  { id: 'atrFactor', type: 'float', title: 'ATR Factor', defval: 3.0, min: 0.1, step: 0.1 },
-  { id: 'atrLen', type: 'int', title: 'ATR Length', defval: 10, min: 1 },
+  { id: 'pivotLen', type: 'int', title: 'Pivot Point Period', defval: 2, min: 1, max: 50 },
+  { id: 'atrFactor', type: 'float', title: 'ATR Factor', defval: 3, min: 1, step: 0.1 },
+  { id: 'atrLen', type: 'int', title: 'ATR Period', defval: 10, min: 1 },
   { id: 'showPivot', type: 'bool', title: 'Show Pivot Points', defval: false },
+  { id: 'showLabel', type: 'bool', title: 'Show Buy/Sell Labels', defval: true },
+  { id: 'showCl', type: 'bool', title: 'Show PP Center Line', defval: false },
+  { id: 'showSr', type: 'bool', title: 'Show Support/Resistance', defval: false },
 ];
 
+// Pine v4 colour constants
+const LIME = '#00E676';
+const RED = '#FF5252';
+const BLUE = '#2196F3';
+
 export const plotConfig: PlotConfig[] = [
-  { id: 'plot0', title: 'SuperTrend', color: '#2962FF', lineWidth: 2 },
-  { id: 'plot1', title: 'Center Line', color: '#2196F3', lineWidth: 1 },
-  { id: 'plot2', title: 'Support', color: '#26A69A', lineWidth: 1, style: 'circles' },
-  { id: 'plot3', title: 'Resistance', color: '#EF5350', lineWidth: 1, style: 'circles' },
+  { id: 'plot0', title: 'PP SuperTrend', color: LIME, lineWidth: 2 },
+  { id: 'plot1', title: 'Center Line', color: BLUE, lineWidth: 1 },
+  { id: 'plot2', title: 'Support', color: LIME, lineWidth: 1, style: 'circles' },
+  { id: 'plot3', title: 'Resistance', color: RED, lineWidth: 1, style: 'circles' },
 ];
 
 export const metadata = {
@@ -45,127 +62,114 @@ export const metadata = {
 };
 
 export function calculate(bars: Bar[], inputs: Partial<PivotPointSupertrendInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[] } {
-  const { pivotLen, atrFactor, atrLen, showPivot } = { ...defaultInputs, ...inputs };
+  const { pivotLen: prd, atrFactor: Factor, atrLen: Pd, showPivot, showLabel, showCl, showSr } = { ...defaultInputs, ...inputs };
   const n = bars.length;
 
-  const highSeries = new Series(bars, (b) => b.high);
-  const lowSeries = new Series(bars, (b) => b.low);
+  // Pine: float ph = pivothigh(prd, prd), float pl = pivotlow(prd, prd)
+  const phArr = ta.pivothigh(new Series(bars, (b) => b.high), prd, prd).toArray();
+  const plArr = ta.pivotlow(new Series(bars, (b) => b.low), prd, prd).toArray();
+  const atrArr = ta.atr(bars, Pd).toArray();
 
-  const phArr = ta.pivothigh(highSeries, pivotLen, pivotLen).toArray();
-  const plArr = ta.pivotlow(lowSeries, pivotLen, pivotLen).toArray();
-  const atrArr = ta.atr(bars, atrLen).toArray();
+  // Pine `if ph` / `ph ? ...`: na and 0 are false
+  const isPivot = (v: number | null | undefined): v is number => v != null && !isNaN(v) && v !== 0;
 
-  // Track last known pivot values
-  let lastPH = NaN;
-  let lastPL = NaN;
+  const centerArr: number[] = new Array(n).fill(NaN);
+  const trendArr: number[] = new Array(n).fill(0);
+  const tslArr: number[] = new Array(n).fill(NaN);
+  const supportArr: number[] = new Array(n).fill(NaN);
+  const resistanceArr: number[] = new Array(n).fill(NaN);
 
-  const centerArr: number[] = new Array(n);
-  const upperArr: number[] = new Array(n);
-  const lowerArr: number[] = new Array(n);
+  let center = NaN;       // var float center = na
+  let prevTUp = NaN;      // TUp[1]
+  let prevTDown = NaN;    // TDown[1]
+  let support = NaN;
+  let resistance = NaN;
 
   for (let i = 0; i < n; i++) {
-    if (phArr[i] != null && !isNaN(phArr[i]!)) lastPH = phArr[i]!;
-    if (plArr[i] != null && !isNaN(plArr[i]!)) lastPL = plArr[i]!;
+    const ph = phArr[i];
+    const pl = plArr[i];
 
-    const center = (!isNaN(lastPH) && !isNaN(lastPL)) ? (lastPH + lastPL) / 2 : bars[i].close;
-    const atr = (atrArr[i] ?? 0) * atrFactor;
+    // Pine: lastpp = ph ? ph : pl ? pl : na; center := na(center) ? lastpp : (center * 2 + lastpp) / 3
+    const lastpp = isPivot(ph) ? ph : isPivot(pl) ? pl : NaN;
+    if (isPivot(lastpp)) {
+      center = isNaN(center) ? lastpp : (center * 2 + lastpp) / 3;
+    }
+
+    const atr = atrArr[i] ?? NaN;
+    const Up = center - Factor * atr;
+    const Dn = center + Factor * atr;
+
+    // Pine: TUp := close[1] > TUp[1] ? max(Up, TUp[1]) : Up (comparisons with na are false, max with na is na)
+    const close1 = i > 0 ? bars[i - 1].close : NaN;
+    const TUp = close1 > prevTUp ? Math.max(Up, prevTUp) : Up;
+    const TDown = close1 < prevTDown ? Math.min(Dn, prevTDown) : Dn;
+
+    // Pine: Trend := close > TDown[1] ? 1 : close < TUp[1] ? -1 : nz(Trend[1], 1)
+    const close = bars[i].close;
+    const trend = close > prevTDown ? 1 : close < prevTUp ? -1 : i > 0 ? trendArr[i - 1] : 1;
 
     centerArr[i] = center;
-    upperArr[i] = center + atr;
-    lowerArr[i] = center - atr;
+    trendArr[i] = trend;
+    tslArr[i] = trend === 1 ? TUp : TDown;
+    prevTUp = TUp;
+    prevTDown = TDown;
+
+    // Pine: support := pl ? pl : support[1]; resistance := ph ? ph : resistance[1]
+    if (isPivot(pl)) support = pl;
+    if (isPivot(ph)) resistance = ph;
+    supportArr[i] = support;
+    resistanceArr[i] = resistance;
   }
 
-  // SuperTrend trailing logic
-  const stArr: number[] = new Array(n);
-  const dirArr: number[] = new Array(n); // 1 = bullish, -1 = bearish
-
-  for (let i = 0; i < n; i++) {
-    if (i === 0) {
-      stArr[i] = lowerArr[i];
-      dirArr[i] = 1;
-      continue;
-    }
-
-    const prevDir = dirArr[i - 1];
-    const prevSt = stArr[i - 1];
-    const close = bars[i].close;
-
-    if (prevDir === 1) {
-      // Bullish: use lower band, ratchet up
-      const newLower = lowerArr[i];
-      stArr[i] = newLower > prevSt ? newLower : prevSt;
-      dirArr[i] = close < stArr[i] ? -1 : 1;
-    } else {
-      // Bearish: use upper band, ratchet down
-      const newUpper = upperArr[i];
-      stArr[i] = newUpper < prevSt ? newUpper : prevSt;
-      dirArr[i] = close > stArr[i] ? 1 : -1;
-    }
-  }
-
-  // Support/Resistance tracking (Pine: support := pl ? pl : support[1])
-  const supportArr: number[] = new Array(n);
-  const resistanceArr: number[] = new Array(n);
-  let lastSupport = NaN;
-  let lastResistance = NaN;
-  for (let i = 0; i < n; i++) {
-    if (plArr[i] != null && !isNaN(plArr[i]!)) lastSupport = plArr[i]!;
-    if (phArr[i] != null && !isNaN(phArr[i]!)) lastResistance = phArr[i]!;
-    supportArr[i] = lastSupport;
-    resistanceArr[i] = lastResistance;
-  }
-
-  const warmup = Math.max(atrLen, pivotLen * 2 + 1);
-
-  const plot0 = stArr.map((v, i) => {
-    if (i < warmup) return { time: bars[i].time, value: NaN };
-    const color = dirArr[i] === 1 ? '#26A69A' : '#EF5350';
+  // Pine: plot(Trailingsl, color = linecolor, linewidth = 2, title = "PP SuperTrend")
+  // linecolor = Trend == 1 and nz(Trend[1]) == 1 ? lime : Trend == -1 and nz(Trend[1]) == -1 ? red : na
+  // A value with an na colour is kept as a transparent point.
+  const plot0 = tslArr.map((v, i) => {
+    const t1 = i > 0 ? trendArr[i - 1] : 0;
+    const t = trendArr[i];
+    const color = t === 1 && t1 === 1 ? LIME : t === -1 && t1 === -1 ? RED : 'transparent';
     return { time: bars[i].time, value: v, color };
   });
 
-  // Center line: colored by position relative to hl2 (Pine: center < hl2 ? blue : red)
+  // Pine: plot(showcl ? center : na, color = showcl ? center < hl2 ? blue : red : na)
   const plot1 = centerArr.map((v, i) => {
-    if (i < warmup || isNaN(v)) return { time: bars[i].time, value: NaN };
+    if (!showCl) return { time: bars[i].time, value: NaN };
     const hl2 = (bars[i].high + bars[i].low) / 2;
-    const color = v < hl2 ? '#2196F3' : '#EF5350';
-    return { time: bars[i].time, value: v, color };
+    return { time: bars[i].time, value: v, color: v < hl2 ? BLUE : RED };
   });
 
-  // Support level (circles)
-  const plot2 = supportArr.map((v, i) => ({
-    time: bars[i].time,
-    value: i < warmup || isNaN(v) ? NaN : v,
-  }));
+  // Pine: plot(showsr and support ? support : na, ..., style = plot.style_circles, offset = -prd)
+  // The value computed on bar i is shown on bar i - prd.
+  const shifted = (arr: number[]) => bars.map((b, j) => {
+    const v = j + prd < n ? arr[j + prd] : NaN;
+    return { time: b.time, value: showSr && isPivot(v) ? v : NaN };
+  });
+  const plot2 = shifted(supportArr);
+  const plot3 = shifted(resistanceArr);
 
-  // Resistance level (circles)
-  const plot3 = resistanceArr.map((v, i) => ({
-    time: bars[i].time,
-    value: i < warmup || isNaN(v) ? NaN : v,
-  }));
-
-  // Markers: pivot labels + trend direction change signals
   const markers: MarkerData[] = [];
-
-  // Pine: plotshape(ph and showpivot, text="H", offset = -prd), plotshape(pl and showpivot, text="L", offset = -prd)
-  if (showPivot) {
-    for (let i = warmup; i < n; i++) {
-      if (phArr[i] != null && !isNaN(phArr[i]!)) {
-        markers.push({ time: bars[i - pivotLen].time, position: 'aboveBar', shape: 'labelDown', color: '#26A69A', text: 'H' });
+  for (let i = 0; i < n; i++) {
+    // Pine: plotshape(ph and showpivot, text="H", style=shape.labeldown, color=na, textcolor=color.red,
+    //   location=location.abovebar, offset = -prd); same for pl with "L", textcolor=color.lime, location.belowbar
+    if (showPivot && i >= prd) {
+      if (isPivot(phArr[i])) {
+        markers.push({ time: bars[i - prd].time, position: 'aboveBar', shape: 'labelDown', color: RED, text: 'H' });
       }
-      if (plArr[i] != null && !isNaN(plArr[i]!)) {
-        markers.push({ time: bars[i - pivotLen].time, position: 'belowBar', shape: 'labelUp', color: '#EF5350', text: 'L' });
+      if (isPivot(plArr[i])) {
+        markers.push({ time: bars[i - prd].time, position: 'belowBar', shape: 'labelDown', color: LIME, text: 'L' });
       }
     }
-  }
-
-  for (let i = warmup + 1; i < n; i++) {
-    // Buy: trend flips from bearish to bullish
-    if (dirArr[i] === 1 && dirArr[i - 1] === -1) {
-      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'arrowUp', color: '#26A69A', text: 'Buy' });
-    }
-    // Sell: trend flips from bullish to bearish
-    if (dirArr[i] === -1 && dirArr[i - 1] === 1) {
-      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'arrowDown', color: '#EF5350', text: 'Sell' });
+    // Pine: bsignal = Trend == 1 and Trend[1] == -1; ssignal = Trend == -1 and Trend[1] == 1
+    // plotshape(bsignal and showlabel ? Trailingsl : na, "Buy", location.absolute, shape.labelup, size.tiny, lime)
+    // plotshape(ssignal and showlabel ? Trailingsl : na, "Sell", location.absolute, shape.labeldown, size.tiny, red)
+    // (Pine hides the shape when Trailingsl is na)
+    if (showLabel && i > 0 && !isNaN(tslArr[i])) {
+      if (trendArr[i] === 1 && trendArr[i - 1] === -1) {
+        markers.push({ time: bars[i].time, position: 'belowBar', shape: 'labelUp', color: LIME, text: 'Buy' });
+      }
+      if (trendArr[i] === -1 && trendArr[i - 1] === 1) {
+        markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'labelDown', color: RED, text: 'Sell' });
+      }
     }
   }
 

@@ -20,6 +20,7 @@ export interface CandlestickReversalInputs {
   pivotLen: number;
   showMA: boolean;
   maLen: number;
+  maColor: string;
   enableWick: boolean;
   wickMultiplier: number;
   wickBodyPct: number;
@@ -38,6 +39,7 @@ export const defaultInputs: CandlestickReversalInputs = {
   pivotLen: 5,
   showMA: false,
   maLen: 10,
+  maColor: '#2196F3',
   enableWick: true,
   wickMultiplier: 2.5,
   wickBodyPct: 0.25,
@@ -56,6 +58,7 @@ export const inputConfig: InputConfig[] = [
   { id: 'pivotLen', type: 'int', title: 'Length to Highest/Lowest', defval: 5, min: 1 },
   { id: 'showMA', type: 'bool', title: 'Show SMA', defval: false },
   { id: 'maLen', type: 'int', title: 'SMA Length', defval: 10, min: 1 },
+  { id: 'maColor', type: 'color', title: 'SMA Color', defval: '#2196F3' },
   { id: 'enableWick', type: 'bool', title: 'Enable Wick Reversal System', defval: true },
   { id: 'wickMultiplier', type: 'float', title: 'Wick Multiplier', defval: 2.5, step: 0.5, max: 20 },
   { id: 'wickBodyPct', type: 'float', title: 'Wick Body Percentage', defval: 0.25, step: 0.1, max: 1 },
@@ -82,7 +85,7 @@ export const metadata = {
 
 export function calculate(bars: Bar[], inputs: Partial<CandlestickReversalInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[] } {
   const {
-    pivotLen, showMA, maLen,
+    pivotLen, showMA, maLen, maColor,
     enableWick, wickMultiplier, wickBodyPct,
     enableExtreme, bodySize, extremeBarsBack, bodyMultiplier,
     enableOutside, barMultiplier, outsideBarsBack,
@@ -101,11 +104,13 @@ export function calculate(bars: Bar[], inputs: Partial<CandlestickReversalInputs
   const pivotLowArr = ta.pivotlow(lowSeries, pivotLen, 0).toArray();
 
   // --- Optional SMA ---
+  // Pine: plot(showma ? sma(close, malen) : na, color = showma ? macol : na, linewidth = 2)
   const smaArr = ta.sma(closeSeries, maLen).toArray();
 
   const plot0 = bars.map((b, i) => ({
     time: b.time,
     value: showMA && smaArr[i] != null ? smaArr[i]! : NaN,
+    color: maColor,
   }));
 
   // --- SMA for wick system (range average over 50 bars) ---
@@ -124,9 +129,8 @@ export function calculate(bars: Bar[], inputs: Partial<CandlestickReversalInputs
   // --- Doji system: SMA(close, 10) ---
   const sma10Arr = ta.sma(closeSeries, 10).toArray();
 
-  const warmup = Math.max(pivotLen, extremeBarsBack, outsideBarsBack, 50, 10);
-
-  for (let i = warmup; i < n; i++) {
+  // Pine computes every bar; a comparison with an na average is false, so no warm-up skip is needed.
+  for (let i = 0; i < n; i++) {
     const O = bars[i].open;
     const C = bars[i].close;
     const H = bars[i].high;
@@ -138,7 +142,6 @@ export function calculate(bars: Bar[], inputs: Partial<CandlestickReversalInputs
 
     // --- Wick Reversal System ---
     let Wlongsignal = false;
-    let Wshortsignal = false;
 
     if (enableWick) {
       const rangeAvg = rangeAvg50Arr[i];
@@ -150,11 +153,7 @@ export function calculate(bars: Bar[], inputs: Partial<CandlestickReversalInputs
         ((C === O && C !== H) && hl >= ((H - C) * wickMultiplier) && (H - C) <= (hl * wickBodyPct)) ||
         ((O === H && C === H) && rangeAvg != null && hl >= rangeAvg);
 
-      Wshortsignal =
-        ((C < O) && (H - O) >= ((O - C) * wickMultiplier) && (C - L) <= (hl * wickBodyPct)) ||
-        ((C > O) && (H - C) >= ((C - O) * wickMultiplier) && (C - L) <= (hl * wickBodyPct)) ||
-        ((C === O && C !== L) && hl >= ((C - L) * wickMultiplier) && (C - L) <= (hl * wickBodyPct)) ||
-        ((O === L && C === L) && rangeAvg != null && hl >= rangeAvg);
+      // Pine also defines Wshortsignal (line 30) but never uses it: line 72 uses Wlongsignal for shorts.
     }
 
     // --- Extreme Reversal System ---
@@ -234,39 +233,21 @@ export function calculate(bars: Bar[], inputs: Partial<CandlestickReversalInputs
       (enableDoji && Dlongsignal)
     );
 
-    // Note: Pine source line 72 has a bug using Wlongsignal for short. We use Wshortsignal.
+    // Pine line 72 uses Wlongsignal (not Wshortsignal) for the short signal; kept as written.
     const shortsignal = highleftempty && (
-      (enableWick && Wshortsignal) ||
+      (enableWick && Wlongsignal) ||
       (enableExtreme && Eshortsignal) ||
       (enableOutside && Oshortsignal) ||
       (enableDoji && Dshortsignal)
     );
 
+    // Pine: plotshape(longsignal, color = color.blue, location = location.belowbar, style = shape.triangleup, size = size.small)
     if (longsignal) {
-      // Determine which system triggered for label
-      let text = 'Long';
-      let color = '#2196F3'; // blue default
-      if (enableWick && Wlongsignal) { text = 'WickL'; color = '#2196F3'; }
-      else if (enableExtreme && Elongsignal) { text = 'ExtrL'; color = '#00BCD4'; }
-      else if (enableOutside && Olongsignal) { text = 'OutsL'; color = '#4CAF50'; }
-      else if (enableDoji && Dlongsignal) { text = 'DojiL'; color = '#9C27B0'; }
-
-      markers.push({
-        time, position: 'belowBar', shape: 'triangleUp', color, text,
-      });
+      markers.push({ time, position: 'belowBar', shape: 'triangleUp', color: '#2196F3' });
     }
-
+    // Pine: plotshape(shortsignal, color = color.red, location = location.abovebar, style = shape.triangledown, size = size.small)
     if (shortsignal) {
-      let text = 'Short';
-      let color = '#EF5350'; // red default
-      if (enableWick && Wshortsignal) { text = 'WickS'; color = '#EF5350'; }
-      else if (enableExtreme && Eshortsignal) { text = 'ExtrS'; color = '#FF5722'; }
-      else if (enableOutside && Oshortsignal) { text = 'OutsS'; color = '#FF9800'; }
-      else if (enableDoji && Dshortsignal) { text = 'DojiS'; color = '#E91E63'; }
-
-      markers.push({
-        time, position: 'aboveBar', shape: 'triangleDown', color, text,
-      });
+      markers.push({ time, position: 'aboveBar', shape: 'triangleDown', color: '#FF5252' });
     }
   }
 

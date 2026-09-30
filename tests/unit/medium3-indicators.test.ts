@@ -304,11 +304,11 @@ describe('Swing Highs/Lows & Candle Patterns', () => {
     expect(result).toBeDefined();
     expect(result.metadata.overlay).toBe(true);
   });
-  it('should produce markers at pivot points', () => {
+  it('should produce labels at pivot points', () => {
     const result = SwingHighsLowsPatterns.calculate(bars) as any;
-    expect(Array.isArray(result.markers)).toBe(true);
-    // With 500 bars and length=21, should find some pivots
-    expect(result.markers.length).toBeGreaterThan(0);
+    expect(Array.isArray(result.labels)).toBe(true);
+    // With 500 bars and length=21, should find some pivots (Pine draws labels only)
+    expect(result.labels.length).toBeGreaterThan(0);
   });
 });
 

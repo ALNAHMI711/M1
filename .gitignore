@@ -10,3 +10,5 @@ docs/official/catalog/community-catalog.json
 __pycache__/
 # Scratch files of the pivot port check
 pivot-port-check/.tmp/
+# Scratch files of the port fidelity check
+port-fidelity-check/.tmp/

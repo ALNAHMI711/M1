@@ -1,25 +1,34 @@
 /**
- * MACD Divergence
+ * MACD Divergences by @DaviddTech
  *
- * MACD with divergence detection using pivot high/low on MACD line.
+ * MACD with regular (and hidden) divergence detection on the MACD line.
  *
- * Reference: "MACD Divergence" community indicator
+ * Reference: docs/official/indicators_community/"MACD Divergences by @DaviddTech.pine" (Pine v4)
  */
 
-import { ta, getSourceSeries, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 import type { MarkerData } from '../types';
 
 export interface MACDDivergenceInputs {
   fastLength: number;
   slowLength: number;
   signalLength: number;
+  /** Pine sma_source: "Oscillator MA Type" */
+  oscMaType: 'SMA' | 'EMA';
+  /** Pine sma_signal: "Signal Line MA Type" */
+  signalMaType: 'SMA' | 'EMA';
+  /** Pine lbR: "Pivot Lookback Right" */
   pivotLookback: number;
+  /** Pine lbL: "Pivot Lookback Left" */
+  pivotLookbackLeft: number;
   rangeUpper: number;
   rangeLower: number;
   dontTouchZero: boolean;
   plotBull: boolean;
   plotBear: boolean;
+  /** Pine constant plotHiddenBull = false (not an input in Pine) */
   plotHiddenBull: boolean;
+  /** Pine constant plotHiddenBear = false (not an input in Pine) */
   plotHiddenBear: boolean;
   src: SourceType;
 }
@@ -28,7 +37,10 @@ export const defaultInputs: MACDDivergenceInputs = {
   fastLength: 12,
   slowLength: 26,
   signalLength: 9,
+  oscMaType: 'EMA',
+  signalMaType: 'EMA',
   pivotLookback: 5,
+  pivotLookbackLeft: 5,
   rangeUpper: 60,
   rangeLower: 5,
   dontTouchZero: true,
@@ -40,28 +52,39 @@ export const defaultInputs: MACDDivergenceInputs = {
 };
 
 export const inputConfig: InputConfig[] = [
-  { id: 'fastLength', type: 'int', title: 'Fast Length', defval: 12, min: 1 },
-  { id: 'slowLength', type: 'int', title: 'Slow Length', defval: 26, min: 1 },
-  { id: 'signalLength', type: 'int', title: 'Signal Length', defval: 9, min: 1 },
-  { id: 'pivotLookback', type: 'int', title: 'Pivot Lookback', defval: 5, min: 1 },
-  { id: 'rangeUpper', type: 'int', title: 'Max of Lookback Range', defval: 60, min: 1 },
-  { id: 'rangeLower', type: 'int', title: 'Min of Lookback Range', defval: 5, min: 1 },
+  { id: 'fastLength', type: 'int', title: 'Fast Length', defval: 12 },
+  { id: 'slowLength', type: 'int', title: 'Slow Length', defval: 26 },
+  { id: 'src', type: 'source', title: 'Source', defval: 'close' },
+  { id: 'signalLength', type: 'int', title: 'Signal Smoothing', defval: 9, min: 1, max: 50 },
+  { id: 'oscMaType', type: 'string', title: 'Oscillator MA Type', defval: 'EMA', options: ['SMA', 'EMA'] },
+  { id: 'signalMaType', type: 'string', title: 'Signal Line MA Type', defval: 'EMA', options: ['SMA', 'EMA'] },
   { id: 'dontTouchZero', type: 'bool', title: "Don't touch the zero line?", defval: true },
+  { id: 'pivotLookback', type: 'int', title: 'Pivot Lookback Right', defval: 5 },
+  { id: 'pivotLookbackLeft', type: 'int', title: 'Pivot Lookback Left', defval: 5 },
+  { id: 'rangeUpper', type: 'int', title: 'Max of Lookback Range', defval: 60 },
+  { id: 'rangeLower', type: 'int', title: 'Min of Lookback Range', defval: 5 },
   { id: 'plotBull', type: 'bool', title: 'Plot Bullish', defval: true },
   { id: 'plotBear', type: 'bool', title: 'Plot Bearish', defval: true },
   { id: 'plotHiddenBull', type: 'bool', title: 'Plot Hidden Bullish', defval: false },
   { id: 'plotHiddenBear', type: 'bool', title: 'Plot Hidden Bearish', defval: false },
-  { id: 'src', type: 'source', title: 'Source', defval: 'close' },
 ];
 
+// Pine v4 colours: color.green #4CAF50, color.red #FF5252; hidden colours color.new(.., 80)
+const BULL_COLOR = '#4CAF50';
+const BEAR_COLOR = '#FF5252';
+const HIDDEN_BULL_COLOR = 'rgba(76,175,80,0.20)';
+const HIDDEN_BEAR_COLOR = 'rgba(255,82,82,0.20)';
+// Pine noneColor = color.new(color.white, 100)
+const NONE_COLOR = 'rgba(255,255,255,0)';
+
 export const plotConfig: PlotConfig[] = [
-  { id: 'plot0', title: 'MACD', color: '#2962FF', lineWidth: 2 },
-  { id: 'plot1', title: 'Signal', color: '#FF6D00', lineWidth: 2 },
+  { id: 'plot0', title: 'MACD', color: '#2962FF', lineWidth: 1 },
+  { id: 'plot1', title: 'Signal', color: '#FF6D00', lineWidth: 1 },
   { id: 'plot2', title: 'Histogram', color: '#26A69A', lineWidth: 4, style: 'columns' },
-  { id: 'regBull', title: 'Regular Bullish', color: '#26A69A', lineWidth: 2 },
-  { id: 'regBear', title: 'Regular Bearish', color: '#EF5350', lineWidth: 2 },
-  { id: 'hidBull', title: 'Hidden Bullish', color: 'rgba(0,150,136,0.20)', lineWidth: 2 },
-  { id: 'hidBear', title: 'Hidden Bearish', color: 'rgba(255,82,82,0.20)', lineWidth: 2 },
+  { id: 'regBull', title: 'Regular Bullish', color: BULL_COLOR, lineWidth: 2 },
+  { id: 'regBear', title: 'Regular Bearish', color: BEAR_COLOR, lineWidth: 2 },
+  { id: 'hidBull', title: 'Hidden Bullish', color: HIDDEN_BULL_COLOR, lineWidth: 2 },
+  { id: 'hidBear', title: 'Hidden Bearish', color: HIDDEN_BEAR_COLOR, lineWidth: 2 },
 ];
 
 export const metadata = {
@@ -70,133 +93,112 @@ export const metadata = {
   overlay: false,
 };
 
+type PlotPoint = { time: number; value: number; color?: string };
+
 export function calculate(bars: Bar[], inputs: Partial<MACDDivergenceInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[] } {
-  const { fastLength, slowLength, signalLength, pivotLookback, rangeUpper, rangeLower,
-    dontTouchZero, plotBull, plotBear, plotHiddenBull, plotHiddenBear, src } = { ...defaultInputs, ...inputs };
+  const { fastLength, slowLength, signalLength, oscMaType, signalMaType, pivotLookback, pivotLookbackLeft,
+    rangeUpper, rangeLower, dontTouchZero, plotBull, plotBear, plotHiddenBull, plotHiddenBear, src } = { ...defaultInputs, ...inputs };
   const source = getSourceSeries(bars, src);
   const n = bars.length;
   const lbR = pivotLookback;
-  const lbL = pivotLookback;
+  const lbL = pivotLookbackLeft;
 
-  const fastEMA = ta.ema(source, fastLength);
-  const slowEMA = ta.ema(source, slowLength);
-  const macdLine = fastEMA.sub(slowEMA);
-  const signalLine = ta.ema(macdLine, signalLength);
+  // Pine: fast_ma / slow_ma with sma_source, signal with sma_signal
+  const fastMA = oscMaType === 'SMA' ? ta.sma(source, fastLength) : ta.ema(source, fastLength);
+  const slowMA = oscMaType === 'SMA' ? ta.sma(source, slowLength) : ta.ema(source, slowLength);
+  const macdLine = fastMA.sub(slowMA);
+  const signalLine = signalMaType === 'SMA' ? ta.sma(macdLine, signalLength) : ta.ema(macdLine, signalLength);
   const histogram = macdLine.sub(signalLine);
 
-  const macdArr = macdLine.toArray();
-  const sigArr = signalLine.toArray();
-  const histArr = histogram.toArray();
+  const macdArr = macdLine.toArray().map((v) => v ?? NaN);
+  const sigArr = signalLine.toArray().map((v) => v ?? NaN);
+  const histArr = histogram.toArray().map((v) => v ?? NaN);
 
-  // Pivot detection on MACD for divergence
-  const phArr = ta.pivothigh(macdLine, lbL, lbR).toArray();
-  const plArr = ta.pivotlow(macdLine, lbL, lbR).toArray();
+  const toPlot = (arr: number[]) => arr.map((v, i) => ({ time: bars[i].time, value: v }));
 
-  const warmup = slowLength;
-
-  const toPlot = (arr: (number | null)[]) =>
-    arr.map((v, i) => ({ time: bars[i].time, value: (i < warmup || v == null) ? NaN : v }));
-
-  // Pine 4-color histogram: col_grow_above=#26A69A, col_fall_above=#B2DFDB, col_grow_below=#FFCDD2, col_fall_below=#FF5252
+  // Pine: hist>=0 ? (hist[1] < hist ? col_grow_above : col_fall_above) : (hist[1] < hist ? col_grow_below : col_fall_below)
   const histPlot = histArr.map((v, i) => {
-    if (i < warmup || v == null) return { time: bars[i].time, value: NaN };
-    const prev = i > 0 ? (histArr[i - 1] ?? NaN) : NaN;
-    let color: string;
-    if (v >= 0) {
-      color = v > prev ? '#26A69A' : '#B2DFDB'; // grow above / fall above
-    } else {
-      color = v < prev ? '#FF5252' : '#FFCDD2'; // fall below / grow below
-    }
+    const prev = i > 0 ? histArr[i - 1] : NaN;
+    const grow = prev < v;
+    const color = v >= 0 ? (grow ? '#26A69A' : '#B2DFDB') : (grow ? '#FFCDD2' : '#FF5252');
     return { time: bars[i].time, value: v, color };
   });
 
-  // Divergence plot data arrays
-  const regBullPlot = bars.map(b => ({ time: b.time, value: NaN }));
-  const regBearPlot = bars.map(b => ({ time: b.time, value: NaN }));
-  const hidBullPlot = bars.map(b => ({ time: b.time, value: NaN }));
-  const hidBearPlot = bars.map(b => ({ time: b.time, value: NaN }));
+  // osc = macd. plFound / phFound are true on the confirmation bar, lbR bars after the pivot bar.
+  const plArr = ta.pivotlow(macdLine, lbL, lbR).toArray();
+  const phArr = ta.pivothigh(macdLine, lbL, lbR).toArray();
+  const plFound = plArr.map((v) => v != null && !Number.isNaN(v));
+  const phFound = phArr.map((v) => v != null && !Number.isNaN(v));
+
+  // Pine: priceHHZero = highest(osc, lbL+lbR+5), priceLLZero = lowest(osc, lbL+lbR+5)
+  const hhZero = ta.highest(macdLine, lbL + lbR + 5).toArray();
+  const llZero = ta.lowest(macdLine, lbL + lbR + 5).toArray();
+
+  // Pine plots every pivot (value osc[lbR], offset=-lbR) and hides it with noneColor when there is no divergence.
+  const na = (i: number): PlotPoint => ({ time: bars[i].time, value: NaN });
+  const regBullPlot = bars.map((_, i) => na(i));
+  const regBearPlot = bars.map((_, i) => na(i));
+  const hidBullPlot = bars.map((_, i) => na(i));
+  const hidBearPlot = bars.map((_, i) => na(i));
 
   const markers: MarkerData[] = [];
 
-  // Helper: _inRange checks if barsSince the last same-type pivot is within range
-  // Pine: bars = barssince(cond == true); rangeLower <= bars and bars <= rangeUpper
-  // We track pivot positions and compute barsSince inline.
+  // Pine: _inRange(cond) => bars = barssince(cond == true); rangeLower <= bars and bars <= rangeUpper,
+  // called with plFound[1] / phFound[1]. Pine v4 `and` evaluates both sides, so barssince runs on every bar.
+  let plBars = NaN;
+  let phBars = NaN;
+  // Pine: valuewhen(plFound, osc[lbR], 1) and valuewhen(plFound, low[lbR], 1): on a pivot bar, the previous pivot
+  let plLastOsc = NaN, plLastLow = NaN;
+  let phLastOsc = NaN, phLastHigh = NaN;
 
-  // Pine: highest(osc, lbL+lbR+5) for "don't touch zero" check
-  const highestOsc = (idx: number): number => {
-    let mx = -Infinity;
-    for (let j = Math.max(0, idx - (lbL + lbR + 4)); j <= idx; j++) {
-      const v = macdArr[j];
-      if (v != null) mx = Math.max(mx, v);
-    }
-    return mx;
-  };
-  const lowestOsc = (idx: number): number => {
-    let mn = Infinity;
-    for (let j = Math.max(0, idx - (lbL + lbR + 4)); j <= idx; j++) {
-      const v = macdArr[j];
-      if (v != null) mn = Math.min(mn, v);
-    }
-    return mn;
-  };
+  for (let i = 0; i < n; i++) {
+    if (i > 0 && plFound[i - 1]) plBars = 0;
+    else if (!Number.isNaN(plBars)) plBars++;
+    if (i > 0 && phFound[i - 1]) phBars = 0;
+    else if (!Number.isNaN(phBars)) phBars++;
+    const plInRange = rangeLower <= plBars && plBars <= rangeUpper;
+    const phInRange = rangeLower <= phBars && phBars <= rangeUpper;
 
-  // Track pivot positions for divergence
-  let lastPLIdx = -1, lastPLVal = NaN, lastPLPrice = NaN;
-  let lastPHIdx = -1, lastPHVal = NaN, lastPHPrice = NaN;
+    if (plFound[i]) {
+      const p = i - lbR;
+      const osc = macdArr[p];
+      const low = bars[p].low;
+      const oscHL = osc > plLastOsc && plInRange && osc < 0;
+      const priceLL = low < plLastLow;
+      const blowzero = dontTouchZero ? hhZero[i] < 0 : true;
+      const bullCond = plotBull && priceLL && oscHL && blowzero;
+      const oscLL = osc < plLastOsc && plInRange;
+      const priceHL = low > plLastLow;
+      const hiddenBullCond = plotHiddenBull && priceHL && oscLL;
 
-  for (let i = lbL + lbR; i < n; i++) {
-    const plVal = plArr[i];
-    if (plVal != null && !isNaN(plVal as number)) {
-      const pivotIdx = i - lbR;
-      const oscAtPivot = macdArr[pivotIdx] ?? NaN;
-      const priceAtPivot = bars[pivotIdx].low;
+      regBullPlot[p] = { time: bars[p].time, value: osc, color: bullCond ? BULL_COLOR : NONE_COLOR };
+      hidBullPlot[p] = { time: bars[p].time, value: osc, color: hiddenBullCond ? HIDDEN_BULL_COLOR : NONE_COLOR };
+      if (bullCond) markers.push({ time: bars[p].time as number, position: 'belowBar', shape: 'labelUp', color: BULL_COLOR, text: ' Bull ' });
+      if (hiddenBullCond) markers.push({ time: bars[p].time as number, position: 'belowBar', shape: 'labelUp', color: BULL_COLOR, text: ' H Bull ' });
 
-      if (lastPLIdx >= 0 && !isNaN(lastPLVal) && !isNaN(oscAtPivot)) {
-        const barsSince = pivotIdx - lastPLIdx;
-        if (barsSince >= rangeLower && barsSince <= rangeUpper) {
-          // Regular Bullish: osc higher low (oscAtPivot > lastPLVal), price lower low, osc < 0
-          const blowzero = dontTouchZero ? highestOsc(i) < 0 : true;
-          if (plotBull && oscAtPivot > lastPLVal && priceAtPivot < lastPLPrice && oscAtPivot < 0 && blowzero) {
-            regBullPlot[pivotIdx] = { time: bars[pivotIdx].time, value: oscAtPivot };
-            markers.push({ time: bars[pivotIdx].time as number, position: 'belowBar', shape: 'labelUp', color: '#26A69A', text: ' Bull ' });
-          }
-          // Hidden Bullish: osc lower low (oscAtPivot < lastPLVal), price higher low
-          if (plotHiddenBull && oscAtPivot < lastPLVal && priceAtPivot > lastPLPrice) {
-            hidBullPlot[pivotIdx] = { time: bars[pivotIdx].time, value: oscAtPivot };
-            markers.push({ time: bars[pivotIdx].time as number, position: 'belowBar', shape: 'labelUp', color: 'rgba(0,150,136,0.50)', text: ' H Bull ' });
-          }
-        }
-      }
-      lastPLIdx = pivotIdx;
-      lastPLVal = oscAtPivot;
-      lastPLPrice = priceAtPivot;
+      plLastOsc = osc;
+      plLastLow = low;
     }
 
-    const phVal = phArr[i];
-    if (phVal != null && !isNaN(phVal as number)) {
-      const pivotIdx = i - lbR;
-      const oscAtPivot = macdArr[pivotIdx] ?? NaN;
-      const priceAtPivot = bars[pivotIdx].high;
+    if (phFound[i]) {
+      const p = i - lbR;
+      const osc = macdArr[p];
+      const high = bars[p].high;
+      const oscLH = osc < phLastOsc && phInRange && osc > 0;
+      const priceHH = high > phLastHigh;
+      const bearzero = dontTouchZero ? llZero[i] > 0 : true;
+      const bearCond = plotBear && priceHH && oscLH && bearzero;
+      const oscHH = osc > phLastOsc && phInRange;
+      const priceLH = high < phLastHigh;
+      const hiddenBearCond = plotHiddenBear && priceLH && oscHH;
 
-      if (lastPHIdx >= 0 && !isNaN(lastPHVal) && !isNaN(oscAtPivot)) {
-        const barsSince = pivotIdx - lastPHIdx;
-        if (barsSince >= rangeLower && barsSince <= rangeUpper) {
-          // Regular Bearish: osc lower high (oscAtPivot < lastPHVal), price higher high, osc > 0
-          const bearzero = dontTouchZero ? lowestOsc(i) > 0 : true;
-          if (plotBear && oscAtPivot < lastPHVal && priceAtPivot > lastPHPrice && oscAtPivot > 0 && bearzero) {
-            regBearPlot[pivotIdx] = { time: bars[pivotIdx].time, value: oscAtPivot };
-            markers.push({ time: bars[pivotIdx].time as number, position: 'aboveBar', shape: 'labelDown', color: '#EF5350', text: ' Bear ' });
-          }
-          // Hidden Bearish: osc higher high (oscAtPivot > lastPHVal), price lower high
-          if (plotHiddenBear && oscAtPivot > lastPHVal && priceAtPivot < lastPHPrice) {
-            hidBearPlot[pivotIdx] = { time: bars[pivotIdx].time, value: oscAtPivot };
-            markers.push({ time: bars[pivotIdx].time as number, position: 'aboveBar', shape: 'labelDown', color: 'rgba(255,82,82,0.50)', text: ' H Bear ' });
-          }
-        }
-      }
-      lastPHIdx = pivotIdx;
-      lastPHVal = oscAtPivot;
-      lastPHPrice = priceAtPivot;
+      regBearPlot[p] = { time: bars[p].time, value: osc, color: bearCond ? BEAR_COLOR : NONE_COLOR };
+      hidBearPlot[p] = { time: bars[p].time, value: osc, color: hiddenBearCond ? HIDDEN_BEAR_COLOR : NONE_COLOR };
+      if (bearCond) markers.push({ time: bars[p].time as number, position: 'aboveBar', shape: 'labelDown', color: BEAR_COLOR, text: ' Bear ' });
+      if (hiddenBearCond) markers.push({ time: bars[p].time as number, position: 'aboveBar', shape: 'labelDown', color: BEAR_COLOR, text: ' H Bear ' });
+
+      phLastOsc = osc;
+      phLastHigh = high;
     }
   }
 
@@ -211,7 +213,6 @@ export function calculate(bars: Bar[], inputs: Partial<MACDDivergenceInputs> = {
       'hidBull': hidBullPlot,
       'hidBear': hidBearPlot,
     },
-    hlines: [{ value: 0, options: { color: '#787B86', linestyle: 'dashed', title: 'Zero' } }],
     markers,
   };
 }

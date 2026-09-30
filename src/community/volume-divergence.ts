@@ -37,21 +37,35 @@ export const defaultInputs: VolumeDivergenceInputs = {
 };
 
 export const inputConfig: InputConfig[] = [
-  { id: 'vl1', type: 'int', title: 'First Moving Average Length', defval: 5, min: 1 },
-  { id: 'vl2', type: 'int', title: 'Second Moving Average Length', defval: 8, min: 1 },
+  { id: 'vl1', type: 'int', title: 'First Moving Average length', defval: 5, min: 1 },
+  { id: 'vl2', type: 'int', title: 'Second Moving Average length', defval: 8, min: 1 },
   { id: 'pivotLookbackRight', type: 'int', title: 'Pivot Lookback Right', defval: 5, min: 1 },
   { id: 'pivotLookbackLeft', type: 'int', title: 'Pivot Lookback Left', defval: 5, min: 1 },
-  { id: 'maxLookbackRange', type: 'int', title: 'Max Lookback Range', defval: 60, min: 1 },
-  { id: 'minLookbackRange', type: 'int', title: 'Min Lookback Range', defval: 5, min: 1 },
+  { id: 'maxLookbackRange', type: 'int', title: 'Max of Lookback Range', defval: 60, min: 1 },
+  { id: 'minLookbackRange', type: 'int', title: 'Min of Lookback Range', defval: 5, min: 1 },
   { id: 'plotBull', type: 'bool', title: 'Plot Bullish', defval: true },
   { id: 'plotHiddenBull', type: 'bool', title: 'Plot Hidden Bullish', defval: false },
   { id: 'plotBear', type: 'bool', title: 'Plot Bearish', defval: true },
   { id: 'plotHiddenBear', type: 'bool', title: 'Plot Hidden Bearish', defval: false },
 ];
 
+// Pine v4 colours: color.green #4CAF50, color.red #FF5252; hidden colours color.new(.., 25)
+const BULL_COLOR = '#4CAF50';
+const BEAR_COLOR = '#FF5252';
+const HIDDEN_BULL_COLOR = 'rgba(76,175,80,0.75)';
+const HIDDEN_BEAR_COLOR = 'rgba(255,82,82,0.75)';
+// Pine noneColor = color.new(color.white, 100)
+const NONE_COLOR = 'rgba(255,255,255,0)';
+
 export const plotConfig: PlotConfig[] = [
-  { id: 'vol', title: 'Volume', color: '#26A69A', lineWidth: 2 },
+  { id: 'vol', title: 'Volume', color: BULL_COLOR, lineWidth: 2 },
+  { id: 'regBull', title: 'Regular Bullish', color: BULL_COLOR, lineWidth: 2 },
+  { id: 'hidBull', title: 'Hidden Bullish', color: HIDDEN_BULL_COLOR, lineWidth: 2 },
+  { id: 'regBear', title: 'Regular Bearish', color: BEAR_COLOR, lineWidth: 2 },
+  { id: 'hidBear', title: 'Hidden Bearish', color: HIDDEN_BEAR_COLOR, lineWidth: 2 },
 ];
+
+type PlotPoint = { time: number; value: number; color?: string };
 
 export const metadata = {
   title: 'Volume Divergence',
@@ -105,103 +119,66 @@ export function calculate(bars: Bar[], inputs: Partial<VolumeDivergenceInputs> =
   const w4 = pineWma(w3, bars, vl4);
   const vol = pineWma(w4, bars, vl5);
 
-  const warmup = vl5;
-
-  // Pivot detection on vol: the value of pivot bar i - lbR appears on bar i
+  // Pivot detection on vol: plFound / phFound are true on the confirmation bar, lbR bars after the pivot bar
   const volSeries = Series.fromArray(bars, vol);
   const plArr = ta.pivotlow(volSeries, lbL, lbR).toArray();
   const phArr = ta.pivothigh(volSeries, lbL, lbR).toArray();
+  const plFound = plArr.map((v) => v != null && !Number.isNaN(v));
+  const phFound = phArr.map((v) => v != null && !Number.isNaN(v));
 
-  // Track pivot history for divergence comparison
-  // For each bar i, check if there's a pivot at i-lbR, then compare with previous pivot
+  // Pine plots every pivot (value vol[lbR], offset=-lbR) and hides it with noneColor when there is no divergence.
+  const na = (i: number): PlotPoint => ({ time: bars[i].time, value: NaN });
+  const regBullPlot = bars.map((_, i) => na(i));
+  const hidBullPlot = bars.map((_, i) => na(i));
+  const regBearPlot = bars.map((_, i) => na(i));
+  const hidBearPlot = bars.map((_, i) => na(i));
+
   const markers: MarkerData[] = [];
 
-  // Store last pivot low/high info
-  let lastPlIdx = -1;
-  let lastPlVol = NaN;
-  let lastPlLow = NaN;
+  // Pine: _inRange(cond) => bars = barssince(cond == true); rangeLower <= bars and bars <= rangeUpper,
+  // called with plFound[1] / phFound[1]. Pine v4 `and` evaluates both sides, so barssince runs on every bar.
+  let plBars = NaN;
+  let phBars = NaN;
+  // Pine: valuewhen(plFound, vol[lbR], 1) and valuewhen(plFound, low[lbR], 1): on a pivot bar, the previous pivot
+  let lastPlVol = NaN, lastPlLow = NaN;
+  let lastPhVol = NaN, lastPhHigh = NaN;
 
-  let lastPhIdx = -1;
-  let lastPhVol = NaN;
-  let lastPhHigh = NaN;
+  for (let i = 0; i < n; i++) {
+    if (i > 0 && plFound[i - 1]) plBars = 0;
+    else if (!Number.isNaN(plBars)) plBars++;
+    if (i > 0 && phFound[i - 1]) phBars = 0;
+    else if (!Number.isNaN(phBars)) phBars++;
+    const plInRange = cfg.minLookbackRange <= plBars && plBars <= cfg.maxLookbackRange;
+    const phInRange = cfg.minLookbackRange <= phBars && phBars <= cfg.maxLookbackRange;
 
-  for (let i = lbL + lbR; i < n; i++) {
-    const pivotIdx = i - lbR;
-
-    // Check pivot low
-    if (!isNaN(plArr[i])) {
-      const curVol = vol[pivotIdx];
-      const curLow = bars[pivotIdx].low;
-
-      if (lastPlIdx >= 0) {
-        const barsSince = pivotIdx - lastPlIdx;
-        const inRange = barsSince >= cfg.minLookbackRange && barsSince <= cfg.maxLookbackRange;
-
-        if (inRange) {
-          // Regular Bullish: price lower low, vol higher low
-          if (cfg.plotBull && curLow < lastPlLow && curVol > lastPlVol) {
-            markers.push({
-              time: bars[pivotIdx].time,
-              position: 'belowBar',
-              shape: 'labelUp',
-              color: '#00FF00',
-              text: 'Bull',
-            });
-          }
-
-          // Hidden Bullish: price higher low, vol lower low
-          if (cfg.plotHiddenBull && curLow > lastPlLow && curVol < lastPlVol) {
-            markers.push({
-              time: bars[pivotIdx].time,
-              position: 'belowBar',
-              shape: 'labelUp',
-              color: 'rgba(0,255,0,0.75)',
-              text: 'H Bull',
-            });
-          }
-        }
-      }
-
-      lastPlIdx = pivotIdx;
+    if (plFound[i]) {
+      const p = i - lbR;
+      const curVol = vol[p];
+      const curLow = bars[p].low;
+      // Regular Bullish: vol higher low, price lower low
+      const bullCond = cfg.plotBull && curLow < lastPlLow && curVol > lastPlVol && plInRange;
+      // Hidden Bullish: vol lower low, price higher low
+      const hiddenBullCond = cfg.plotHiddenBull && curLow > lastPlLow && curVol < lastPlVol && plInRange;
+      regBullPlot[p] = { time: bars[p].time, value: curVol, color: bullCond ? BULL_COLOR : NONE_COLOR };
+      hidBullPlot[p] = { time: bars[p].time, value: curVol, color: hiddenBullCond ? HIDDEN_BULL_COLOR : NONE_COLOR };
+      if (bullCond) markers.push({ time: bars[p].time, position: 'belowBar', shape: 'labelUp', color: BULL_COLOR, text: ' Bull ' });
+      if (hiddenBullCond) markers.push({ time: bars[p].time, position: 'belowBar', shape: 'labelUp', color: BULL_COLOR, text: ' H Bull ' });
       lastPlVol = curVol;
       lastPlLow = curLow;
     }
 
-    // Check pivot high
-    if (!isNaN(phArr[i])) {
-      const curVol = vol[pivotIdx];
-      const curHigh = bars[pivotIdx].high;
-
-      if (lastPhIdx >= 0) {
-        const barsSince = pivotIdx - lastPhIdx;
-        const inRange = barsSince >= cfg.minLookbackRange && barsSince <= cfg.maxLookbackRange;
-
-        if (inRange) {
-          // Regular Bearish: price higher high, vol lower high
-          if (cfg.plotBear && curHigh > lastPhHigh && curVol < lastPhVol) {
-            markers.push({
-              time: bars[pivotIdx].time,
-              position: 'aboveBar',
-              shape: 'labelDown',
-              color: '#FF0000',
-              text: 'Bear',
-            });
-          }
-
-          // Hidden Bearish: price lower high, vol higher high
-          if (cfg.plotHiddenBear && curHigh < lastPhHigh && curVol > lastPhVol) {
-            markers.push({
-              time: bars[pivotIdx].time,
-              position: 'aboveBar',
-              shape: 'labelDown',
-              color: 'rgba(255,0,0,0.75)',
-              text: 'H Bear',
-            });
-          }
-        }
-      }
-
-      lastPhIdx = pivotIdx;
+    if (phFound[i]) {
+      const p = i - lbR;
+      const curVol = vol[p];
+      const curHigh = bars[p].high;
+      // Regular Bearish: vol lower high, price higher high
+      const bearCond = cfg.plotBear && curHigh > lastPhHigh && curVol < lastPhVol && phInRange;
+      // Hidden Bearish: vol higher high, price lower high
+      const hiddenBearCond = cfg.plotHiddenBear && curHigh < lastPhHigh && curVol > lastPhVol && phInRange;
+      regBearPlot[p] = { time: bars[p].time, value: curVol, color: bearCond ? BEAR_COLOR : NONE_COLOR };
+      hidBearPlot[p] = { time: bars[p].time, value: curVol, color: hiddenBearCond ? HIDDEN_BEAR_COLOR : NONE_COLOR };
+      if (bearCond) markers.push({ time: bars[p].time, position: 'aboveBar', shape: 'labelDown', color: BEAR_COLOR, text: ' Bear ' });
+      if (hiddenBearCond) markers.push({ time: bars[p].time, position: 'aboveBar', shape: 'labelDown', color: BEAR_COLOR, text: ' H Bear ' });
       lastPhVol = curVol;
       lastPhHigh = curHigh;
     }
@@ -210,15 +187,16 @@ export function calculate(bars: Bar[], inputs: Partial<VolumeDivergenceInputs> =
   // Volume plot colored green/red based on sign
   const volPlot = vol.map((v, i) => ({
     time: bars[i].time,
-    value: i < warmup ? NaN : v,
-    color: v > 0 ? '#26A69A' : '#EF5350',
+    value: v,
+    // Pine: vol_color = vol > 0 ? color.green : color.red
+    color: v > 0 ? BULL_COLOR : BEAR_COLOR,
   }));
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
-    plots: { vol: volPlot },
+    plots: { vol: volPlot, regBull: regBullPlot, hidBull: hidBullPlot, regBear: regBearPlot, hidBear: hidBearPlot },
     hlines: [
-      { value: 0, options: { color: '#C0C0C0', linestyle: 'solid' as const, title: 'Baseline' } },
+      { value: 0, options: { color: '#B2B5BE', linestyle: 'solid' as const, title: 'Baseline' } },
     ],
     markers,
   };

@@ -1,26 +1,26 @@
 /**
  * Divergence Indicator (any oscillator)
  *
- * Overlay indicator that detects regular and hidden divergences by comparing
- * pivot highs/lows in price vs an oscillator source.
- * Since external indicator sourcing is not available, ohlc4 is used as the
- * default oscillator (matching the Pine default).
+ * Detects regular and hidden divergences between price and an oscillator source (pivots on the oscillator).
+ * Since external indicator sourcing is not available, the oscillator is a price source (Pine default ohlc4).
  *
  * Regular Bullish: price makes lower low, oscillator makes higher low
  * Regular Bearish: price makes higher high, oscillator makes lower high
  * Hidden Bullish: price makes higher low, oscillator makes lower low
  * Hidden Bearish: price makes lower high, oscillator makes higher high
  *
- * Pine plots 4 trendlines (connecting consecutive pivots where divergence found)
- * and 4 plotshape labels at divergence points. overlay=true.
+ * Pine plots 4 lines through every oscillator pivot (value osc[lbR], or low/high with "Plot on price",
+ * offset=-lbR) with a transparent colour unless a divergence is found there, and 4 plotshape labels.
  *
- * Reference: "Divergence Indicator (any oscillator)"
+ * Reference: docs/official/indicators_community/"Divergence Indicator (any oscillator).pine" (Pine v4)
  */
 
-import { ta, getSourceSeries, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
-import type { MarkerData, LineDrawingData } from '../types';
+import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import type { MarkerData } from '../types';
 
 export interface DivergenceIndicatorInputs {
+  /** Pine overlay_main: "Plot on price (rather than on indicator)" */
+  overlayMain: boolean;
   src: SourceType;
   pivotLookbackLeft: number;
   pivotLookbackRight: number;
@@ -30,9 +30,15 @@ export interface DivergenceIndicatorInputs {
   plotHiddenBull: boolean;
   plotBear: boolean;
   plotHiddenBear: boolean;
+  /**
+   * Pine delay_plot_til_closed. Pine: repaint = not delay_plot_til_closed or barstate.ishistory or
+   * barstate.isconfirmed. Every bar given to calculate() is a closed (historical) bar, so repaint is always true.
+   */
+  delayPlotTilClosed: boolean;
 }
 
 export const defaultInputs: DivergenceIndicatorInputs = {
+  overlayMain: false,
   src: 'ohlc4',
   pivotLookbackLeft: 5,
   pivotLookbackRight: 5,
@@ -42,22 +48,37 @@ export const defaultInputs: DivergenceIndicatorInputs = {
   plotHiddenBull: false,
   plotBear: true,
   plotHiddenBear: false,
+  delayPlotTilClosed: false,
 };
 
 export const inputConfig: InputConfig[] = [
+  { id: 'overlayMain', type: 'bool', title: 'Plot on price (rather than on indicator)', defval: false },
   { id: 'src', type: 'source', title: 'Indicator', defval: 'ohlc4' },
-  { id: 'pivotLookbackLeft', type: 'int', title: 'Pivot Lookback Left', defval: 5, min: 1 },
-  { id: 'pivotLookbackRight', type: 'int', title: 'Pivot Lookback Right', defval: 5, min: 1 },
-  { id: 'rangeUpper', type: 'int', title: 'Max Lookback Range', defval: 60, min: 1 },
-  { id: 'rangeLower', type: 'int', title: 'Min Lookback Range', defval: 5, min: 1 },
+  { id: 'pivotLookbackRight', type: 'int', title: 'Pivot Lookback Right', defval: 5 },
+  { id: 'pivotLookbackLeft', type: 'int', title: 'Pivot Lookback Left', defval: 5 },
+  { id: 'rangeUpper', type: 'int', title: 'Max of Lookback Range', defval: 60 },
+  { id: 'rangeLower', type: 'int', title: 'Min of Lookback Range', defval: 5 },
   { id: 'plotBull', type: 'bool', title: 'Plot Bullish', defval: true },
   { id: 'plotHiddenBull', type: 'bool', title: 'Plot Hidden Bullish', defval: false },
   { id: 'plotBear', type: 'bool', title: 'Plot Bearish', defval: true },
   { id: 'plotHiddenBear', type: 'bool', title: 'Plot Hidden Bearish', defval: false },
+  { id: 'delayPlotTilClosed', type: 'bool', title: "Delay plot until candle is closed (don't repaint)", defval: false },
 ];
 
-// Overlay on price - divergence shown via markers and lines
-export const plotConfig: PlotConfig[] = [];
+// Pine v4 colours: color.green #4CAF50, color.red #FF5252; hidden colours color.new(.., 80)
+const BULL_COLOR = '#4CAF50';
+const BEAR_COLOR = '#FF5252';
+const HIDDEN_BULL_COLOR = 'rgba(76,175,80,0.20)';
+const HIDDEN_BEAR_COLOR = 'rgba(255,82,82,0.20)';
+// Pine noneColor = color.new(color.white, 100)
+const NONE_COLOR = 'rgba(255,255,255,0)';
+
+export const plotConfig: PlotConfig[] = [
+  { id: 'regBull', title: 'Regular Bullish', color: BULL_COLOR, lineWidth: 2 },
+  { id: 'hidBull', title: 'Hidden Bullish', color: HIDDEN_BULL_COLOR, lineWidth: 2 },
+  { id: 'regBear', title: 'Regular Bearish', color: BEAR_COLOR, lineWidth: 2 },
+  { id: 'hidBear', title: 'Hidden Bearish', color: HIDDEN_BEAR_COLOR, lineWidth: 2 },
+];
 
 export const metadata = {
   title: 'Divergence Indicator',
@@ -65,156 +86,97 @@ export const metadata = {
   overlay: true,
 };
 
-export function calculate(bars: Bar[], inputs: Partial<DivergenceIndicatorInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[]; lines: LineDrawingData[] } {
+type PlotPoint = { time: number; value: number; color?: string };
+
+export function calculate(bars: Bar[], inputs: Partial<DivergenceIndicatorInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[] } {
   const {
-    src, pivotLookbackLeft, pivotLookbackRight,
+    overlayMain, src, pivotLookbackLeft, pivotLookbackRight,
     rangeUpper, rangeLower, plotBull, plotHiddenBull, plotBear, plotHiddenBear,
   } = { ...defaultInputs, ...inputs };
 
   const n = bars.length;
   const osc = getSourceSeries(bars, src);
-  const oscArr = osc.toArray();
+  const oscArr = osc.toArray().map((v) => v ?? NaN);
 
   const lbL = pivotLookbackLeft;
   const lbR = pivotLookbackRight;
 
-  // Pivot detection on the oscillator
-  // The value appears on the confirmation bar, lbR bars after the pivot bar.
+  // Pine: repaint = not delay_plot_til_closed or barstate.ishistory or barstate.isconfirmed.
+  // All bars given to calculate() are closed, so repaint is true on every bar.
+  const repaint = true;
+
+  // plFound / phFound are true on the confirmation bar, lbR bars after the pivot bar.
   const plArr = ta.pivotlow(osc, lbL, lbR).toArray();
   const phArr = ta.pivothigh(osc, lbL, lbR).toArray();
+  const plFound = plArr.map((v) => v != null && !Number.isNaN(v));
+  const phFound = phArr.map((v) => v != null && !Number.isNaN(v));
+
+  const na = (i: number): PlotPoint => ({ time: bars[i].time, value: NaN });
+  const regBullPlot = bars.map((_, i) => na(i));
+  const hidBullPlot = bars.map((_, i) => na(i));
+  const regBearPlot = bars.map((_, i) => na(i));
+  const hidBearPlot = bars.map((_, i) => na(i));
 
   const markers: MarkerData[] = [];
-  const lines: LineDrawingData[] = [];
 
-  // Track previous pivot lows for bullish divergence checks
-  // Pine uses valuewhen(plFound, osc[lbR], 1) and barssince to find previous pivot
-  // and check if it's within range. We track pivot history manually.
-  const pivotLows: { idx: number; oscVal: number; priceLow: number }[] = [];
-  const pivotHighs: { idx: number; oscVal: number; priceHigh: number }[] = [];
+  // Pine: _inRange(cond) => bars = barssince(cond == true); rangeLower <= bars and bars <= rangeUpper,
+  // called with plFound[1] / phFound[1]. Pine v4 `and` evaluates both sides, so barssince runs on every bar.
+  let plBars = NaN;
+  let phBars = NaN;
+  // Pine: valuewhen(plFound, osc[lbR], 1) and valuewhen(plFound, low[lbR], 1): on a pivot bar, the previous pivot
+  let plLastOsc = NaN, plLastLow = NaN;
+  let phLastOsc = NaN, phLastHigh = NaN;
 
   for (let i = 0; i < n; i++) {
-    const plVal = plArr[i];
-    const phVal = phArr[i];
+    if (i > 0 && plFound[i - 1]) plBars = 0;
+    else if (!Number.isNaN(plBars)) plBars++;
+    if (i > 0 && phFound[i - 1]) phBars = 0;
+    else if (!Number.isNaN(phBars)) phBars++;
+    const plInRange = rangeLower <= plBars && plBars <= rangeUpper;
+    const phInRange = rangeLower <= phBars && phBars <= rangeUpper;
 
-    // Pivot low on oscillator confirmed at bar i (pivot bar p = i - lbR)
-    if (plVal != null && !isNaN(plVal as number)) {
+    if (plFound[i]) {
       const p = i - lbR;
-      const oscAtPivot = oscArr[p];
-      const priceAtPivot = bars[p].low;
-
-      if (pivotLows.length > 0) {
-        const prev = pivotLows[pivotLows.length - 1];
-        const barsBetween = p - prev.idx;
-
-        // Pine: _inRange checks rangeLower <= barssince(plFound[1]) <= rangeUpper
-        if (barsBetween >= rangeLower && barsBetween <= rangeUpper) {
-          // Regular Bullish: price lower low, osc higher low
-          if (plotBull && priceAtPivot < prev.priceLow && oscAtPivot > prev.oscVal) {
-            markers.push({
-              time: bars[p].time as number,
-              position: 'belowBar',
-              shape: 'labelUp',
-              color: '#4CAF50',
-              text: 'Bull',
-            });
-            lines.push({
-              time1: bars[prev.idx].time as number,
-              price1: prev.priceLow,
-              time2: bars[p].time as number,
-              price2: priceAtPivot,
-              color: '#4CAF50',
-              width: 2,
-              style: 'solid',
-            });
-          }
-
-          // Hidden Bullish: price higher low, osc lower low
-          if (plotHiddenBull && priceAtPivot > prev.priceLow && oscAtPivot < prev.oscVal) {
-            markers.push({
-              time: bars[p].time as number,
-              position: 'belowBar',
-              shape: 'labelUp',
-              color: 'rgba(76, 175, 80, 0.20)',
-              text: 'H Bull',
-            });
-            lines.push({
-              time1: bars[prev.idx].time as number,
-              price1: prev.priceLow,
-              time2: bars[p].time as number,
-              price2: priceAtPivot,
-              color: 'rgba(76, 175, 80, 0.20)',
-              width: 2,
-              style: 'solid',
-            });
-          }
-        }
-      }
-
-      pivotLows.push({ idx: p, oscVal: oscAtPivot, priceLow: priceAtPivot });
+      const o = oscArr[p];
+      const low = bars[p].low;
+      const bullCond = plotBull && low < plLastLow && o > plLastOsc && plInRange && repaint;
+      const hiddenBullCond = plotHiddenBull && low > plLastLow && o < plLastOsc && plInRange && repaint;
+      // Pine: plFound ? overlay_main ? low[lbR] : osc[lbR] : na
+      const value = overlayMain ? low : o;
+      regBullPlot[p] = { time: bars[p].time, value, color: bullCond ? BULL_COLOR : NONE_COLOR };
+      hidBullPlot[p] = { time: bars[p].time, value, color: hiddenBullCond ? HIDDEN_BULL_COLOR : NONE_COLOR };
+      if (bullCond) markers.push({ time: bars[p].time as number, position: 'belowBar', shape: 'labelUp', color: BULL_COLOR, text: ' Bull ' });
+      if (hiddenBullCond) markers.push({ time: bars[p].time as number, position: 'belowBar', shape: 'labelUp', color: BULL_COLOR, text: ' H Bull ' });
+      plLastOsc = o;
+      plLastLow = low;
     }
 
-    // Pivot high on oscillator confirmed at bar i (pivot bar p = i - lbR)
-    if (phVal != null && !isNaN(phVal as number)) {
+    if (phFound[i]) {
       const p = i - lbR;
-      const oscAtPivot = oscArr[p];
-      const priceAtPivot = bars[p].high;
-
-      if (pivotHighs.length > 0) {
-        const prev = pivotHighs[pivotHighs.length - 1];
-        const barsBetween = p - prev.idx;
-
-        if (barsBetween >= rangeLower && barsBetween <= rangeUpper) {
-          // Regular Bearish: price higher high, osc lower high
-          if (plotBear && priceAtPivot > prev.priceHigh && oscAtPivot < prev.oscVal) {
-            markers.push({
-              time: bars[p].time as number,
-              position: 'aboveBar',
-              shape: 'labelDown',
-              color: '#EF5350',
-              text: 'Bear',
-            });
-            lines.push({
-              time1: bars[prev.idx].time as number,
-              price1: prev.priceHigh,
-              time2: bars[p].time as number,
-              price2: priceAtPivot,
-              color: '#EF5350',
-              width: 2,
-              style: 'solid',
-            });
-          }
-
-          // Hidden Bearish: price lower high, osc higher high
-          if (plotHiddenBear && priceAtPivot < prev.priceHigh && oscAtPivot > prev.oscVal) {
-            markers.push({
-              time: bars[p].time as number,
-              position: 'aboveBar',
-              shape: 'labelDown',
-              color: 'rgba(239, 83, 80, 0.20)',
-              text: 'H Bear',
-            });
-            lines.push({
-              time1: bars[prev.idx].time as number,
-              price1: prev.priceHigh,
-              time2: bars[p].time as number,
-              price2: priceAtPivot,
-              color: 'rgba(239, 83, 80, 0.20)',
-              width: 2,
-              style: 'solid',
-            });
-          }
-        }
-      }
-
-      pivotHighs.push({ idx: p, oscVal: oscAtPivot, priceHigh: priceAtPivot });
+      const o = oscArr[p];
+      const high = bars[p].high;
+      const bearCond = plotBear && high > phLastHigh && o < phLastOsc && phInRange && repaint;
+      const hiddenBearCond = plotHiddenBear && high < phLastHigh && o > phLastOsc && phInRange && repaint;
+      // Pine: phFound ? overlay_main ? high[lbR] : osc[lbR] : na
+      const value = overlayMain ? high : o;
+      regBearPlot[p] = { time: bars[p].time, value, color: bearCond ? BEAR_COLOR : NONE_COLOR };
+      hidBearPlot[p] = { time: bars[p].time, value, color: hiddenBearCond ? HIDDEN_BEAR_COLOR : NONE_COLOR };
+      if (bearCond) markers.push({ time: bars[p].time as number, position: 'aboveBar', shape: 'labelDown', color: BEAR_COLOR, text: ' Bear ' });
+      if (hiddenBearCond) markers.push({ time: bars[p].time as number, position: 'aboveBar', shape: 'labelDown', color: BEAR_COLOR, text: ' H Bear ' });
+      phLastOsc = o;
+      phLastHigh = high;
     }
   }
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
-    plots: {},
+    plots: {
+      'regBull': regBullPlot,
+      'hidBull': hidBullPlot,
+      'regBear': regBearPlot,
+      'hidBear': hidBearPlot,
+    },
     markers,
-    lines,
   };
 }
 

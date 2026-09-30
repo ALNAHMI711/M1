@@ -4,8 +4,8 @@
  * Pivot-based S/R channel detection. Collects pivot highs/lows,
  * groups nearby pivots into channels based on max width.
  * Each channel is scored by pivot count + price touches.
- * Top N strongest channels are displayed as boxes.
- * Color: red (resistance), green (support), gray (inside).
+ * The strongest channels of the last bar are drawn as boxes (Pine: extend.both).
+ * Color: resistance (price below), support (price above), in channel.
  *
  * Reference: "Support Resistance Channels" by LonesomeTheBlue
  */
@@ -20,8 +20,20 @@ export interface SupportResistanceChannelsInputs {
   minStrength: number;
   maxNumSR: number;
   loopback: number;
+  resCol: string;
+  supCol: string;
+  inchCol: string;
+  showPP: boolean;
+  showSRBroken: boolean;
+  showMA1: boolean;
+  ma1Len: number;
+  ma1Type: 'SMA' | 'EMA';
+  showMA2: boolean;
+  ma2Len: number;
+  ma2Type: 'SMA' | 'EMA';
 }
 
+// Pine v6 colors: color.new(color.red, 75), color.new(color.lime, 75), color.new(color.gray, 75)
 export const defaultInputs: SupportResistanceChannelsInputs = {
   prd: 10,
   ppsrc: 'High/Low',
@@ -29,29 +41,67 @@ export const defaultInputs: SupportResistanceChannelsInputs = {
   minStrength: 1,
   maxNumSR: 6,
   loopback: 290,
+  resCol: '#F2364540',
+  supCol: '#00E67640',
+  inchCol: '#787B8640',
+  showPP: false,
+  showSRBroken: false,
+  showMA1: false,
+  ma1Len: 50,
+  ma1Type: 'SMA',
+  showMA2: false,
+  ma2Len: 200,
+  ma2Type: 'SMA',
 };
 
 export const inputConfig: InputConfig[] = [
-  { id: 'prd', type: 'int', title: 'Pivot Period', defval: 10, min: 4 },
+  { id: 'prd', type: 'int', title: 'Pivot Period', defval: 10, min: 4, max: 30 },
   { id: 'ppsrc', type: 'string', title: 'Source', defval: 'High/Low', options: ['High/Low', 'Close/Open'] },
-  { id: 'channelW', type: 'int', title: 'Maximum Channel Width %', defval: 5, min: 1 },
+  { id: 'channelW', type: 'int', title: 'Maximum Channel Width %', defval: 5, min: 1, max: 8 },
   { id: 'minStrength', type: 'int', title: 'Minimum Strength', defval: 1, min: 1 },
-  { id: 'maxNumSR', type: 'int', title: 'Maximum Number of S/R', defval: 6, min: 1 },
-  { id: 'loopback', type: 'int', title: 'Loopback Period', defval: 290, min: 100 },
+  { id: 'maxNumSR', type: 'int', title: 'Maximum Number of S/R', defval: 6, min: 1, max: 10 },
+  { id: 'loopback', type: 'int', title: 'Loopback Period', defval: 290, min: 100, max: 400 },
+  { id: 'resCol', type: 'color', title: 'Resistance Color', defval: '#F2364540' },
+  { id: 'supCol', type: 'color', title: 'Support Color', defval: '#00E67640' },
+  { id: 'inchCol', type: 'color', title: 'Color When Price in Channel', defval: '#787B8640' },
+  { id: 'showPP', type: 'bool', title: 'Show Pivot Points', defval: false },
+  { id: 'showSRBroken', type: 'bool', title: 'Show Broken Support/Resistance', defval: false },
+  { id: 'showMA1', type: 'bool', title: 'MA 1', defval: false },
+  { id: 'ma1Len', type: 'int', title: 'MA 1 Length', defval: 50 },
+  { id: 'ma1Type', type: 'string', title: 'MA 1 Type', defval: 'SMA', options: ['SMA', 'EMA'] },
+  { id: 'showMA2', type: 'bool', title: 'MA 2', defval: false },
+  { id: 'ma2Len', type: 'int', title: 'MA 2 Length', defval: 200 },
+  { id: 'ma2Type', type: 'string', title: 'MA 2 Type', defval: 'SMA', options: ['SMA', 'EMA'] },
 ];
 
-export const plotConfig: PlotConfig[] = [];
+// Pine: plot(ma1, color = not na(ma1) ? color.blue : na), plot(ma2, color = not na(ma2) ? color.red : na)
+export const plotConfig: PlotConfig[] = [
+  { id: 'plot0', title: 'MA 1', color: '#2962FF', lineWidth: 1 },
+  { id: 'plot1', title: 'MA 2', color: '#F23645', lineWidth: 1 },
+];
 
 export const metadata = {
   title: 'Support Resistance Channels',
-  shortTitle: 'SRChannel',
+  shortTitle: 'SRchannel',
   overlay: true,
 };
 
 export function calculate(bars: Bar[], inputs: Partial<SupportResistanceChannelsInputs> = {}): Omit<IndicatorResult, 'markers'> & { boxes: BoxData[]; markers: MarkerData[] } {
-  const { prd, ppsrc, channelW, minStrength, maxNumSR, loopback } = { ...defaultInputs, ...inputs };
+  const {
+    prd, ppsrc, channelW, minStrength, maxNumSR, loopback,
+    resCol, supCol, inchCol, showPP, showSRBroken,
+    showMA1, ma1Len, ma1Type, showMA2, ma2Len, ma2Type,
+  } = { ...defaultInputs, ...inputs };
   const n = bars.length;
   const maxnumsr = maxNumSR - 1;
+  const lastSR = Math.min(9, maxnumsr);
+
+  // Moving averages: na when disabled
+  const closeSeries = new Series(bars, (b) => b.close);
+  const maPlot = (show: boolean, len: number, type: 'SMA' | 'EMA') => {
+    const arr = show ? (type === 'SMA' ? ta.sma(closeSeries, len) : ta.ema(closeSeries, len)).toArray() : [];
+    return bars.map((b, i) => ({ time: b.time, value: show ? (arr[i] ?? NaN) : NaN }));
+  };
 
   // Pivot source
   const src1Series = ppsrc === 'High/Low'
@@ -65,7 +115,7 @@ export function calculate(bars: Bar[], inputs: Partial<SupportResistanceChannels
   const phArr = ta.pivothigh(src1Series, prd, prd).toArray();
   const plArr = ta.pivotlow(src2Series, prd, prd).toArray();
 
-  // Highest/lowest over 300 bars for channel width calculation
+  // Highest/lowest over 300 bars for channel width calculation (na for the first 299 bars)
   const highSeries = new Series(bars, (b) => b.high);
   const lowSeries = new Series(bars, (b) => b.low);
   const highestArr = ta.highest(highSeries, 300).toArray();
@@ -84,11 +134,19 @@ export function calculate(bars: Bar[], inputs: Partial<SupportResistanceChannels
   for (let i = 0; i < n; i++) {
     const ph = phArr[i];
     const pl = plArr[i];
-    const hasPivot = (ph != null && !isNaN(ph)) || (pl != null && !isNaN(pl));
+    // Pine bool(x): false for na and 0
+    const isPh = ph != null && !isNaN(ph) && ph !== 0;
+    const isPl = pl != null && !isNaN(pl) && pl !== 0;
 
-    if (hasPivot) {
-      const pivVal = (ph != null && !isNaN(ph)) ? ph : pl as number;
-      pivotVals.unshift(pivVal);
+    // Pine: plotshape(bool(ph) and showpp, text = 'H', style = shape.labeldown, color = na,
+    //   textcolor = color.red, location = location.abovebar, offset = -prd) (and 'L' with color.lime)
+    if (showPP && i - prd >= 0) {
+      if (isPh) markers.push({ time: bars[i - prd].time, position: 'aboveBar', shape: 'labelDown', color: '#F23645', text: 'H' });
+      if (isPl) markers.push({ time: bars[i - prd].time, position: 'belowBar', shape: 'labelUp', color: '#00E676', text: 'L' });
+    }
+
+    if (isPh || isPl) {
+      pivotVals.unshift(isPh ? ph! : pl!);
       pivotLocs.unshift(i);
 
       // Remove old pivots beyond loopback
@@ -102,9 +160,9 @@ export function calculate(bars: Bar[], inputs: Partial<SupportResistanceChannels
         }
       }
 
-      // Calculate channel width
-      const prdhighest = (highestArr[i] != null && !isNaN(highestArr[i] as number)) ? highestArr[i] as number : 0;
-      const prdlowest = (lowestArr[i] != null && !isNaN(lowestArr[i] as number)) ? lowestArr[i] as number : 0;
+      // Channel width; na (no pivot fits a channel) while highest/lowest(300) are na
+      const prdhighest = highestArr[i] ?? NaN;
+      const prdlowest = lowestArr[i] ?? NaN;
       const cwidth = (prdhighest - prdlowest) * channelW / 100;
 
       // Build S/R channels from current pivots
@@ -137,7 +195,6 @@ export function calculate(bars: Bar[], inputs: Partial<SupportResistanceChannels
         let s = 0;
         for (let y = 0; y <= Math.min(i, loopback); y++) {
           const barIdx = i - y;
-          if (barIdx < 0) break;
           if ((bars[barIdx].high <= h && bars[barIdx].high >= l) ||
               (bars[barIdx].low <= h && bars[barIdx].low >= l)) {
             s++;
@@ -181,15 +238,12 @@ export function calculate(bars: Bar[], inputs: Partial<SupportResistanceChannels
         }
       }
 
-      // Sort by strength (bubble sort)
+      // Sort by strength as written in Pine: stren[y] takes stren[x], but stren[x] does not take the old
+      // stren[y] (no full swap of the strengths); the S/R levels are swapped (changeit).
       for (let x = 0; x <= 8; x++) {
         for (let y = x + 1; y <= 9; y++) {
           if (stren[y] > stren[x]) {
-            // Swap strengths
-            const tmp = stren[y];
             stren[y] = stren[x];
-            stren[x] = tmp;
-            // Swap SR levels
             const tmpHi = srLevels[y * 2];
             srLevels[y * 2] = srLevels[x * 2];
             srLevels[x * 2] = tmpHi;
@@ -201,93 +255,62 @@ export function calculate(bars: Bar[], inputs: Partial<SupportResistanceChannels
       }
     }
 
-    // Check for break signals (only when not inside any channel)
-    if (i > 0 && srLevels.some(v => v !== 0)) {
-      const close = bars[i].close;
-      const prevClose = bars[i - 1].close;
-
-      let notInChannel = true;
-      for (let x = 0; x <= Math.min(9, maxnumsr); x++) {
-        if (srLevels[x * 2] !== 0 && close <= srLevels[x * 2] && close >= srLevels[x * 2 + 1]) {
-          notInChannel = false;
-          break;
+    // Break signals (only when the close is not inside any channel); close[1] is na on the first bar
+    const close = bars[i].close;
+    const prevClose = i > 0 ? bars[i - 1].close : NaN;
+    let notInChannel = true;
+    for (let x = 0; x <= lastSR; x++) {
+      if (close <= srLevels[x * 2] && close >= srLevels[x * 2 + 1]) {
+        notInChannel = false;
+      }
+    }
+    let resistanceBroken = false;
+    let supportBroken = false;
+    if (notInChannel) {
+      for (let x = 0; x <= lastSR; x++) {
+        if (prevClose <= srLevels[x * 2] && close > srLevels[x * 2]) {
+          resistanceBroken = true;
+        }
+        if (prevClose >= srLevels[x * 2 + 1] && close < srLevels[x * 2 + 1]) {
+          supportBroken = true;
         }
       }
-
-      if (notInChannel) {
-        let resistanceBroken = false;
-        let supportBroken = false;
-        for (let x = 0; x <= Math.min(9, maxnumsr); x++) {
-          if (srLevels[x * 2] === 0) continue;
-          if (prevClose <= srLevels[x * 2] && close > srLevels[x * 2]) {
-            resistanceBroken = true;
-          }
-          if (prevClose >= srLevels[x * 2 + 1] && close < srLevels[x * 2 + 1]) {
-            supportBroken = true;
-          }
-        }
-        if (resistanceBroken) {
-          markers.push({
-            time: bars[i].time,
-            position: 'belowBar',
-            shape: 'triangleUp',
-            color: '#00FF00',
-            text: 'R Break',
-          });
-        }
-        if (supportBroken) {
-          markers.push({
-            time: bars[i].time,
-            position: 'aboveBar',
-            shape: 'triangleDown',
-            color: '#FF0000',
-            text: 'S Break',
-          });
-        }
-      }
+    }
+    // Pine: plotshape(showsrbroken and resistancebroken, style = shape.triangleup, location = location.belowbar,
+    //   color = color.new(color.lime, 0), size = size.tiny) (triangledown, abovebar, color.red for supportbroken)
+    if (showSRBroken && resistanceBroken) {
+      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'triangleUp', color: '#00E676' });
+    }
+    if (showSRBroken && supportBroken) {
+      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'triangleDown', color: '#F23645' });
     }
   }
 
-  // Draw final S/R channel boxes at the end of data
-  const lastClose = n > 0 ? bars[n - 1].close : 0;
-  for (let x = 0; x <= Math.min(9, maxnumsr); x++) {
-    const hi = srLevels[x * 2];
-    const lo = srLevels[x * 2 + 1];
-    if (hi === 0 && lo === 0) continue;
-
-    // Color based on price position
-    let bgColor: string;
-    let borderColor: string;
-    if (hi > lastClose && lo > lastClose) {
-      // Resistance (price below)
-      bgColor = 'rgba(255,0,0,0.25)';
-      borderColor = '#FF0000';
-    } else if (hi < lastClose && lo < lastClose) {
-      // Support (price above)
-      bgColor = 'rgba(0,255,0,0.25)';
-      borderColor = '#00FF00';
-    } else {
-      // Inside channel
-      bgColor = 'rgba(128,128,128,0.25)';
-      borderColor = '#808080';
+  // Boxes of the last bar. Pine deletes and redraws them on every bar at bar_index..bar_index + 1 with
+  // extend.both, so only the boxes of the last bar are visible and they cover the whole chart. BoxData has no
+  // extend field: the box spans the first to the last loaded bar.
+  if (n > 0) {
+    const lastClose = bars[n - 1].close;
+    for (let x = 0; x <= lastSR; x++) {
+      const hi = srLevels[x * 2];
+      const lo = srLevels[x * 2 + 1];
+      if (hi === 0) continue; // Pine get_color: na colour (no box) when the level is 0
+      const col = hi > lastClose && lo > lastClose ? resCol : hi < lastClose && lo < lastClose ? supCol : inchCol;
+      boxes.push({
+        time1: bars[0].time,
+        price1: hi,
+        time2: bars[n - 1].time,
+        price2: lo,
+        bgColor: col,
+        borderColor: col,
+        borderWidth: 1,
+      });
     }
-
-    // Box spans the visible area (last ~50 bars to end)
-    const startIdx = Math.max(0, n - 50);
-    boxes.push({
-      time1: bars[startIdx].time,
-      price1: hi,
-      time2: bars[n - 1].time,
-      price2: lo,
-      bgColor,
-      borderColor,
-      borderWidth: 1,
-    });
   }
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
-    plots: {},
+    plots: { 'plot0': maPlot(showMA1, ma1Len, ma1Type), 'plot1': maPlot(showMA2, ma2Len, ma2Type) },
     boxes,
     markers,
   };
