@@ -68,88 +68,87 @@ export function calculate(bars: Bar[], inputs: Partial<RsiMomentumDivergenceInpu
 
   const warmup = 10 + rsiLength;
 
-  // Track barssince for pivots and valuewhen
   const markers: MarkerData[] = [];
   const qtyDivLevels = 10;
 
-  // Track divergence events: { barIndex (of the divergence bar), isBull }
+  // Track divergence events: { barIndex (of the confirmation bar), isBull }
   const divEvents: { barIdx: number; isBull: boolean }[] = [];
 
   if (enableDivCheck) {
-    // Store pivot history for valuewhen lookback
-    let lastPLRsiRight = NaN;
-    let lastPLPriceLow = NaN;
-    let lastPLBar = -999;
-
-    let lastPHRsiRight = NaN;
-    let lastPHPriceHigh = NaN;
-    let lastPHBar = -999;
+    // Pine: ta.valuewhen(found, x, 1) -> the pivot before the latest one (the latest includes the current bar)
+    const plRsi: number[] = [];
+    const plLow: number[] = [];
+    const phRsi: number[] = [];
+    const phHigh: number[] = [];
+    // Pine v6 `and` is lazy: in `rsiHL = rsiRight > ta.valuewhen(...) and _inRange(foundPL[1])` the ta.barssince
+    // inside _inRange only runs on bars where the left side is true, so it counts those calls, not bars.
+    let plCalls = NaN;
+    let phCalls = NaN;
+    let prevFoundPL = false;
+    let prevFoundPH = false;
 
     for (let i = 0; i < n; i++) {
       const rsiRight = rsiArr[i - divLookbackR] ?? NaN;
+      const lowRight = bars[i - divLookbackR]?.low ?? NaN;
+      const highRight = bars[i - divLookbackR]?.high ?? NaN;
 
-      // Check for pivot low (bullish divergence)
+      // Bullish: price LL, RSI HL
       const foundPL = pivotLowArr[i] != null && !isNaN(pivotLowArr[i]!);
       if (foundPL) {
-        const barsSincePrevPL = i - lastPLBar;
-        const inRange = barsSincePrevPL >= minBarsInRange && barsSincePrevPL <= maxBarsInRange;
-
-        // Bullish: price LL, RSI HL
-        if (inRange && !isNaN(lastPLRsiRight) && !isNaN(rsiRight)) {
-          const rsiHL = rsiRight > lastPLRsiRight;
-          const priceLL = bars[i - divLookbackR]?.low < lastPLPriceLow;
-          if (rsiHL && priceLL && i >= warmup) {
-            const divBar = i - divLookbackR;
-            markers.push({
-              time: bars[divBar]?.time ?? bars[i].time,
-              position: 'belowBar',
-              shape: 'labelUp',
-              color: bullColor,
-              text: 'Bull',
-            });
-            divEvents.push({ barIdx: divBar, isBull: true });
-          }
-        }
-
-        lastPLRsiRight = rsiRight;
-        lastPLPriceLow = bars[i - divLookbackR]?.low ?? NaN;
-        lastPLBar = i;
+        plRsi.push(rsiRight);
+        plLow.push(lowRight);
+      }
+      let rsiHL = false;
+      if (plRsi.length >= 2 && rsiRight > plRsi[plRsi.length - 2]) {
+        if (prevFoundPL) plCalls = 0;
+        else if (!isNaN(plCalls)) plCalls++;
+        rsiHL = plCalls >= minBarsInRange && plCalls <= maxBarsInRange;
+      }
+      const priceLL = plLow.length >= 2 && lowRight < plLow[plLow.length - 2];
+      if (foundPL && rsiHL && priceLL && i >= warmup) {
+        markers.push({
+          time: bars[i - divLookbackR].time,
+          position: 'belowBar',
+          shape: 'labelUp',
+          color: bullColor,
+          text: 'Bull',
+        });
+        divEvents.push({ barIdx: i, isBull: true });
       }
 
-      // Check for pivot high (bearish divergence)
+      // Bearish: price HH, RSI LH
       const foundPH = pivotHighArr[i] != null && !isNaN(pivotHighArr[i]!);
       if (foundPH) {
-        const barsSincePrevPH = i - lastPHBar;
-        const inRange = barsSincePrevPH >= minBarsInRange && barsSincePrevPH <= maxBarsInRange;
-
-        // Bearish: price HH, RSI LH
-        if (inRange && !isNaN(lastPHRsiRight) && !isNaN(rsiRight)) {
-          const rsiLH = rsiRight < lastPHRsiRight;
-          const priceHH = bars[i - divLookbackR]?.high > lastPHPriceHigh;
-          if (rsiLH && priceHH && i >= warmup) {
-            const divBar = i - divLookbackR;
-            markers.push({
-              time: bars[divBar]?.time ?? bars[i].time,
-              position: 'aboveBar',
-              shape: 'labelDown',
-              color: bearColor,
-              text: 'Bear',
-            });
-            divEvents.push({ barIdx: divBar, isBull: false });
-          }
-        }
-
-        lastPHRsiRight = rsiRight;
-        lastPHPriceHigh = bars[i - divLookbackR]?.high ?? NaN;
-        lastPHBar = i;
+        phRsi.push(rsiRight);
+        phHigh.push(highRight);
       }
+      let rsiLH = false;
+      if (phRsi.length >= 2 && rsiRight < phRsi[phRsi.length - 2]) {
+        if (prevFoundPH) phCalls = 0;
+        else if (!isNaN(phCalls)) phCalls++;
+        rsiLH = phCalls >= minBarsInRange && phCalls <= maxBarsInRange;
+      }
+      const priceHH = phHigh.length >= 2 && highRight > phHigh[phHigh.length - 2];
+      if (foundPH && rsiLH && priceHH && i >= warmup) {
+        markers.push({
+          time: bars[i - divLookbackR].time,
+          position: 'aboveBar',
+          shape: 'labelDown',
+          color: bearColor,
+          text: 'Bear',
+        });
+        divEvents.push({ barIdx: i, isBull: false });
+      }
+
+      prevFoundPL = foundPL;
+      prevFoundPH = foundPH;
     }
   }
 
   // Build divergence zone lines (force_overlay=true in Pine — drawn on price chart)
   // Simulates Pine's bar-by-bar zone management:
-  //   - New zone added at divergence price level
-  //   - Each bar: if price breaks through zone, extend (solid); otherwise dashed + remove
+  //   - New zone added on the confirmation bar, from bar_index - divLookbackR at the divergence price level
+  //   - Each bar from the confirmation bar: if price breaks through zone, extend (solid); otherwise dashed + remove
   //   - Cap at qtyDivLevels per type
   const lines: LineDrawingData[] = [];
 
@@ -170,8 +169,9 @@ export function calculate(bars: Bar[], inputs: Partial<RsiMomentumDivergenceInpu
       // Add new zones from divergence events on this bar
       while (nextEventIdx < divEvents.length && divEvents[nextEventIdx].barIdx === i) {
         const ev = divEvents[nextEventIdx];
-        const price = ev.isBull ? bars[i].low : bars[i].high;
-        const zone: Zone = { price, startIdx: i, isBull: ev.isBull, endIdx: i };
+        const startIdx = i - divLookbackR;
+        const price = ev.isBull ? bars[startIdx].low : bars[startIdx].high;
+        const zone: Zone = { price, startIdx, isBull: ev.isBull, endIdx: i };
         if (ev.isBull) {
           bullZones.push(zone);
           if (bullZones.length > qtyDivLevels) bullZones.shift();

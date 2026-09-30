@@ -2,13 +2,13 @@
  * WICK.ED Fractals
  *
  * Fractal detection based on wicks (high/low).
- * Fractal up = high is highest among leftBars left and rightBars right.
- * Fractal down = low is lowest among leftBars left and rightBars right.
+ * Fractal up = high is strictly highest among leftBars left and rightBars right.
+ * Fractal down = low is strictly lowest among leftBars left and rightBars right.
  *
  * Reference: "WICK.ED Fractals" (community)
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { MarkerData } from '../types';
 
 export interface WickedFractalsInputs {
@@ -39,24 +39,23 @@ export const metadata = {
 export function calculate(bars: Bar[], inputs: Partial<WickedFractalsInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[] } {
   const { leftBars, rightBars } = { ...defaultInputs, ...inputs };
 
-  const highSeries = new Series(bars, (b) => b.high);
-  const lowSeries = new Series(bars, (b) => b.low);
-
-  const pivotHighs = ta.pivothigh(highSeries, leftBars, rightBars);
-  const pivotLows = ta.pivotlow(lowSeries, leftBars, rightBars);
-
-  const phArr = pivotHighs.toArray();
-  const plArr = pivotLows.toArray();
-
   const markers: MarkerData[] = [];
   const plot0 = bars.map((b) => ({ time: b.time, value: NaN }));
 
-  for (let i = 0; i < bars.length; i++) {
-    if (phArr[i] != null && !isNaN(phArr[i]!)) {
-      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'triangleDown', color: '#EF5350', text: 'F' });
+  // Pine: every neighbour strictly below (high) / above (low) the fractal bar; shapes drawn on the fractal bar (offset=-2)
+  for (let c = leftBars; c + rightBars < bars.length; c++) {
+    let dnFractal = true;
+    let upFractal = true;
+    for (let k = -leftBars; k <= rightBars; k++) {
+      if (k === 0) continue;
+      if (!(bars[c + k].high < bars[c].high)) dnFractal = false;
+      if (!(bars[c + k].low > bars[c].low)) upFractal = false;
     }
-    if (plArr[i] != null && !isNaN(plArr[i]!)) {
-      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'triangleUp', color: '#26A69A', text: 'F' });
+    if (dnFractal) {
+      markers.push({ time: bars[c].time, position: 'aboveBar', shape: 'triangleDown', color: '#EF5350', text: 'F' });
+    }
+    if (upFractal) {
+      markers.push({ time: bars[c].time, position: 'belowBar', shape: 'triangleUp', color: '#26A69A', text: 'F' });
     }
   }
 

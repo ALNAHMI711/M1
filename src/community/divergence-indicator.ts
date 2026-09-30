@@ -79,8 +79,7 @@ export function calculate(bars: Bar[], inputs: Partial<DivergenceIndicatorInputs
   const lbR = pivotLookbackRight;
 
   // Pivot detection on the oscillator
-  // Library pivotlow/pivothigh place values at the actual pivot bar (center),
-  // unlike Pine which places at the confirmation bar (center + rightbars).
+  // The value appears on the confirmation bar, lbR bars after the pivot bar.
   const plArr = ta.pivotlow(osc, lbL, lbR).toArray();
   const phArr = ta.pivothigh(osc, lbL, lbR).toArray();
 
@@ -97,21 +96,22 @@ export function calculate(bars: Bar[], inputs: Partial<DivergenceIndicatorInputs
     const plVal = plArr[i];
     const phVal = phArr[i];
 
-    // Pivot low found on oscillator at bar i
+    // Pivot low on oscillator confirmed at bar i (pivot bar p = i - lbR)
     if (plVal != null && !isNaN(plVal as number)) {
-      const oscAtPivot = oscArr[i];
-      const priceAtPivot = bars[i].low;
+      const p = i - lbR;
+      const oscAtPivot = oscArr[p];
+      const priceAtPivot = bars[p].low;
 
       if (pivotLows.length > 0) {
         const prev = pivotLows[pivotLows.length - 1];
-        const barsBetween = i - prev.idx;
+        const barsBetween = p - prev.idx;
 
         // Pine: _inRange checks rangeLower <= barssince(plFound[1]) <= rangeUpper
         if (barsBetween >= rangeLower && barsBetween <= rangeUpper) {
           // Regular Bullish: price lower low, osc higher low
           if (plotBull && priceAtPivot < prev.priceLow && oscAtPivot > prev.oscVal) {
             markers.push({
-              time: bars[i].time as number,
+              time: bars[p].time as number,
               position: 'belowBar',
               shape: 'labelUp',
               color: '#4CAF50',
@@ -120,7 +120,7 @@ export function calculate(bars: Bar[], inputs: Partial<DivergenceIndicatorInputs
             lines.push({
               time1: bars[prev.idx].time as number,
               price1: prev.priceLow,
-              time2: bars[i].time as number,
+              time2: bars[p].time as number,
               price2: priceAtPivot,
               color: '#4CAF50',
               width: 2,
@@ -131,7 +131,7 @@ export function calculate(bars: Bar[], inputs: Partial<DivergenceIndicatorInputs
           // Hidden Bullish: price higher low, osc lower low
           if (plotHiddenBull && priceAtPivot > prev.priceLow && oscAtPivot < prev.oscVal) {
             markers.push({
-              time: bars[i].time as number,
+              time: bars[p].time as number,
               position: 'belowBar',
               shape: 'labelUp',
               color: 'rgba(76, 175, 80, 0.20)',
@@ -140,7 +140,7 @@ export function calculate(bars: Bar[], inputs: Partial<DivergenceIndicatorInputs
             lines.push({
               time1: bars[prev.idx].time as number,
               price1: prev.priceLow,
-              time2: bars[i].time as number,
+              time2: bars[p].time as number,
               price2: priceAtPivot,
               color: 'rgba(76, 175, 80, 0.20)',
               width: 2,
@@ -150,23 +150,24 @@ export function calculate(bars: Bar[], inputs: Partial<DivergenceIndicatorInputs
         }
       }
 
-      pivotLows.push({ idx: i, oscVal: oscAtPivot, priceLow: priceAtPivot });
+      pivotLows.push({ idx: p, oscVal: oscAtPivot, priceLow: priceAtPivot });
     }
 
-    // Pivot high found on oscillator at bar i
+    // Pivot high on oscillator confirmed at bar i (pivot bar p = i - lbR)
     if (phVal != null && !isNaN(phVal as number)) {
-      const oscAtPivot = oscArr[i];
-      const priceAtPivot = bars[i].high;
+      const p = i - lbR;
+      const oscAtPivot = oscArr[p];
+      const priceAtPivot = bars[p].high;
 
       if (pivotHighs.length > 0) {
         const prev = pivotHighs[pivotHighs.length - 1];
-        const barsBetween = i - prev.idx;
+        const barsBetween = p - prev.idx;
 
         if (barsBetween >= rangeLower && barsBetween <= rangeUpper) {
           // Regular Bearish: price higher high, osc lower high
           if (plotBear && priceAtPivot > prev.priceHigh && oscAtPivot < prev.oscVal) {
             markers.push({
-              time: bars[i].time as number,
+              time: bars[p].time as number,
               position: 'aboveBar',
               shape: 'labelDown',
               color: '#EF5350',
@@ -175,7 +176,7 @@ export function calculate(bars: Bar[], inputs: Partial<DivergenceIndicatorInputs
             lines.push({
               time1: bars[prev.idx].time as number,
               price1: prev.priceHigh,
-              time2: bars[i].time as number,
+              time2: bars[p].time as number,
               price2: priceAtPivot,
               color: '#EF5350',
               width: 2,
@@ -186,7 +187,7 @@ export function calculate(bars: Bar[], inputs: Partial<DivergenceIndicatorInputs
           // Hidden Bearish: price lower high, osc higher high
           if (plotHiddenBear && priceAtPivot < prev.priceHigh && oscAtPivot > prev.oscVal) {
             markers.push({
-              time: bars[i].time as number,
+              time: bars[p].time as number,
               position: 'aboveBar',
               shape: 'labelDown',
               color: 'rgba(239, 83, 80, 0.20)',
@@ -195,7 +196,7 @@ export function calculate(bars: Bar[], inputs: Partial<DivergenceIndicatorInputs
             lines.push({
               time1: bars[prev.idx].time as number,
               price1: prev.priceHigh,
-              time2: bars[i].time as number,
+              time2: bars[p].time as number,
               price2: priceAtPivot,
               color: 'rgba(239, 83, 80, 0.20)',
               width: 2,
@@ -205,7 +206,7 @@ export function calculate(bars: Bar[], inputs: Partial<DivergenceIndicatorInputs
         }
       }
 
-      pivotHighs.push({ idx: i, oscVal: oscAtPivot, priceHigh: priceAtPivot });
+      pivotHighs.push({ idx: p, oscVal: oscAtPivot, priceHigh: priceAtPivot });
     }
   }
 

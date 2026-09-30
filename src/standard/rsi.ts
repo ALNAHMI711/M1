@@ -129,21 +129,10 @@ export function calculate(bars: Bar[], inputs: Partial<RSIInputs> = {}): Omit<In
     const plArr = ta.pivotlow(rsi, lookbackLeft, lookbackRight).toArray();
     const phArr = ta.pivothigh(rsi, lookbackLeft, lookbackRight).toArray();
 
-    // Build barssince arrays for pivot conditions
-    const plFound: boolean[] = plArr.map(v => v != null);
-    const phFound: boolean[] = phArr.map(v => v != null);
-
-    // Helper: bars since last condition was true
-    function barsSince(cond: boolean[]): number[] {
-      const result: number[] = [];
-      let count = NaN;
-      for (let i = 0; i < cond.length; i++) {
-        if (cond[i]) count = 0;
-        else if (!isNaN(count)) count++;
-        result.push(count);
-      }
-      return result;
-    }
+    // Pivot conditions
+    // Pine: plFound = not na(ta.pivotlow(...)), true `lookbackRight` bars after the pivot bar
+    const plFound: boolean[] = plArr.map(v => v != null && !isNaN(v));
+    const phFound: boolean[] = phArr.map(v => v != null && !isNaN(v));
 
     // Helper: value of source when condition was true, nth occurrence back
     function valueWhen(cond: boolean[], source: number[], occurrence: number): (number | null)[] {
@@ -156,9 +145,6 @@ export function calculate(bars: Bar[], inputs: Partial<RSIInputs> = {}): Omit<In
       }
       return result;
     }
-
-    const plBarsSince = barsSince(plFound);
-    const phBarsSince = barsSince(phFound);
 
     // RSI values shifted by lookbackRight
     const rsiLBR: (number | null)[] = rsiArr.map((_, i) =>
@@ -177,20 +163,27 @@ export function calculate(bars: Bar[], inputs: Partial<RSIInputs> = {}): Omit<In
     const plLowVW = valueWhen(plFound, lowLBR, 1);
     const phHighVW = valueWhen(phFound, highLBR, 1);
 
+    // Pine v6 `and` is lazy: in `rsiHL = rsiLBR > ta.valuewhen(...) and _inRange(plFound[1])` the ta.barssince
+    // inside _inRange only runs on bars where the left side is true, so it counts those calls, not bars.
+    let plCalls = NaN;
+    let phCalls = NaN;
+
     for (let i = lookbackRight; i < bars.length; i++) {
       const rsiVal = rsiLBR[i];
-      if (rsiVal == null) continue;
 
       // Regular Bullish: RSI higher low + price lower low at pivot low
-      if (plFound[i]) {
-        const prevPlBars = i > 0 ? plBarsSince[i - 1] : NaN;
-        const inRange = !isNaN(prevPlBars) && prevPlBars >= rangeLower && prevPlBars <= rangeUpper;
-        const prevRsi = plRsiVW[i];
-        const rsiHL = prevRsi != null && rsiVal > prevRsi && inRange;
+      const prevRsiL = plRsiVW[i];
+      let rsiHL = false;
+      if (rsiVal != null && prevRsiL != null && rsiVal > prevRsiL) {
+        if (plFound[i - 1]) plCalls = 0;
+        else if (!isNaN(plCalls)) plCalls++;
+        rsiHL = plCalls >= rangeLower && plCalls <= rangeUpper;
+      }
+      if (plFound[i] && rsiHL) {
         const prevLow = plLowVW[i];
         const priceLL = prevLow != null && lowLBR[i] < prevLow;
 
-        if (rsiHL && priceLL) {
+        if (priceLL) {
           markers.push({
             time: bars[i - lookbackRight].time,
             position: 'belowBar',
@@ -202,15 +195,18 @@ export function calculate(bars: Bar[], inputs: Partial<RSIInputs> = {}): Omit<In
       }
 
       // Regular Bearish: RSI lower high + price higher high at pivot high
-      if (phFound[i]) {
-        const prevPhBars = i > 0 ? phBarsSince[i - 1] : NaN;
-        const inRange = !isNaN(prevPhBars) && prevPhBars >= rangeLower && prevPhBars <= rangeUpper;
-        const prevRsi = phRsiVW[i];
-        const rsiLH = prevRsi != null && rsiVal < prevRsi && inRange;
+      const prevRsiH = phRsiVW[i];
+      let rsiLH = false;
+      if (rsiVal != null && prevRsiH != null && rsiVal < prevRsiH) {
+        if (phFound[i - 1]) phCalls = 0;
+        else if (!isNaN(phCalls)) phCalls++;
+        rsiLH = phCalls >= rangeLower && phCalls <= rangeUpper;
+      }
+      if (phFound[i] && rsiLH) {
         const prevHigh = phHighVW[i];
         const priceHH = prevHigh != null && highLBR[i] > prevHigh;
 
-        if (rsiLH && priceHH) {
+        if (priceHH) {
           markers.push({
             time: bars[i - lookbackRight].time,
             position: 'aboveBar',

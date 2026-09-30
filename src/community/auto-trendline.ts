@@ -63,21 +63,12 @@ export function calculate(
   const highSeries = new Series(bars, (b) => b.high);
   const lowSeries = new Series(bars, (b) => b.low);
 
-  // oakscriptjs pivothigh/pivotlow place values at the actual pivot bar (center).
-  // Pine's ta.pivothigh(n,n)[1] means: detected with lookback n on each side,
-  // then shifted by 1 bar to signal one bar after confirmation.
-  // In our library, pivot is at center bar. We detect at bar i = center,
-  // but it is only "confirmed" once we have nPeriod bars after it.
-  // So the confirmation bar is i + nPeriod. The Pine [1] shifts detection
-  // one more bar, so effective confirmation is at i + nPeriod + 1.
-  // We'll mimic the Pine behavior by scanning for pivots manually.
+  // Pine's ta.pivothigh(n,n)[1]: the pivot value appears on the confirmation bar
+  // (pivot bar + nPeriod) and [1] shifts it one more bar. The fractal's price/time
+  // for line drawing is at the pivot bar (bar_index - n - 1 in Pine).
+  const phArr = ta.pivothigh(highSeries, nPeriod, nPeriod).toArray();
+  const plArr = ta.pivotlow(lowSeries, nPeriod, nPeriod).toArray();
 
-  const highArr = highSeries.toArray();
-  const lowArr = lowSeries.toArray();
-
-  // Detect fractals: a fractal high at bar i requires high[i] > all neighbors within nPeriod
-  // It is confirmed at bar i + nPeriod. Pine's [1] shift means we see it at i + nPeriod + 1.
-  // But for line drawing purposes, the fractal's price/time is at bar i.
   interface Fractal {
     barIndex: number; // the actual pivot bar index
     confirmedAt: number; // bar index when confirmed
@@ -87,21 +78,14 @@ export function calculate(
 
   const fractals: Fractal[] = [];
 
-  for (let i = nPeriod; i < n - nPeriod; i++) {
-    let isHigh = true;
-    let isLow = true;
-    for (let j = 1; j <= nPeriod; j++) {
-      if (highArr[i] <= highArr[i - j] || highArr[i] <= highArr[i + j]) isHigh = false;
-      if (lowArr[i] >= lowArr[i - j] || lowArr[i] >= lowArr[i + j]) isLow = false;
-      if (!isHigh && !isLow) break;
+  // Bar t sees the pivot confirmed at t - 1 ([1]), so a pivot confirmed on the last bar is not seen
+  for (let t = 1; t < n; t++) {
+    const i = t - 1 - nPeriod;
+    if (!isNaN(phArr[t - 1])) {
+      fractals.push({ barIndex: i, confirmedAt: t, price: phArr[t - 1], type: 'up' });
     }
-    // Pine confirms at bar_index of the fractal + nPeriod, then [1] adds one more
-    const confirmedAt = i + nPeriod;
-    if (isHigh) {
-      fractals.push({ barIndex: i, confirmedAt, price: highArr[i], type: 'up' });
-    }
-    if (isLow) {
-      fractals.push({ barIndex: i, confirmedAt, price: lowArr[i], type: 'down' });
+    if (!isNaN(plArr[t - 1])) {
+      fractals.push({ barIndex: i, confirmedAt: t, price: plArr[t - 1], type: 'down' });
     }
   }
 

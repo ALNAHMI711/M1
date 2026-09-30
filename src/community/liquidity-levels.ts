@@ -64,10 +64,8 @@ export function calculate(
   for (let i = 0; i < n; i++) {
     const phv = phvArr[i];
     if (phv != null && !isNaN(phv as number) && i >= length) {
-      // Pine: close[length] at the pivot bar means the close `length` bars ago
-      // But pivothigh already places the value at bar_index - length internally,
-      // so `i` here is the actual pivot bar position. We want close at that bar.
-      pals.unshift(bars[i].close);
+      // Pine: close[length] on the confirmation bar = close of the pivot bar
+      pals.unshift(bars[i - length].close);
       if (pals.length > show) {
         pals.pop();
       }

@@ -146,14 +146,14 @@ export function calculate(bars: Bar[], inputs: Partial<PivotPointSupertrendInput
   // Markers: pivot labels + trend direction change signals
   const markers: MarkerData[] = [];
 
-  // Pine: plotshape(ph and showpivot, text="H"), plotshape(pl and showpivot, text="L")
+  // Pine: plotshape(ph and showpivot, text="H", offset = -prd), plotshape(pl and showpivot, text="L", offset = -prd)
   if (showPivot) {
     for (let i = warmup; i < n; i++) {
       if (phArr[i] != null && !isNaN(phArr[i]!)) {
-        markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'labelDown', color: '#26A69A', text: 'H' });
+        markers.push({ time: bars[i - pivotLen].time, position: 'aboveBar', shape: 'labelDown', color: '#26A69A', text: 'H' });
       }
       if (plArr[i] != null && !isNaN(plArr[i]!)) {
-        markers.push({ time: bars[i].time, position: 'belowBar', shape: 'labelUp', color: '#EF5350', text: 'L' });
+        markers.push({ time: bars[i - pivotLen].time, position: 'belowBar', shape: 'labelUp', color: '#EF5350', text: 'L' });
       }
     }
   }

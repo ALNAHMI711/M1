@@ -8,3 +8,5 @@ example/node_modules
 docs/official/catalog/community-catalog.json
 # Python bytecode
 __pycache__/
+# Scratch files of the pivot port check
+pivot-port-check/.tmp/

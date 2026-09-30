@@ -42,7 +42,7 @@ export function calculate(bars: Bar[], inputs: Partial<TrendLinesV2Inputs> = {})
   const highSeries = new Series(bars, (b) => b.high);
   const lowSeries = new Series(bars, (b) => b.low);
 
-  // Detect pivots - oakscriptjs places value at actual pivot bar (not confirmation bar)
+  // Detect pivots - the value appears on the confirmation bar (pivot bar + prd), as in Pine
   const phArr = ta.pivothigh(highSeries, prd, prd).toArray();
   const plArr = ta.pivotlow(lowSeries, prd, prd).toArray();
 

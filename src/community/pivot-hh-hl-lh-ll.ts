@@ -66,6 +66,9 @@ export function calculate(bars: Bar[], inputs: Partial<PivotHhHlLhLlInputs> = {}
   // Pine: pvtH holds last pivot high value, pvtL holds last pivot low value
   let pvtH = NaN;
   let pvtL = NaN;
+  // Pine: pvtH[1] and pvtL[1] (levels of the previous bar)
+  let prevPvtH = NaN;
+  let prevPvtL = NaN;
   // Pine: fixnan(ph) and fixnan(pl) - last non-NaN pivot value
   let fixnanPh = NaN;
   let fixnanPl = NaN;
@@ -85,21 +88,22 @@ export function calculate(bars: Bar[], inputs: Partial<PivotHhHlLhLlInputs> = {}
     const plValue = hasPl ? bars[Math.max(0, i - rightBars)].low : NaN;
 
     // HH/LH/HL/LL classification using Pine's valuewhen pattern
+    // Markers and labels go on the pivot bar (Pine: offset = -rightLenH, bar_index[rightLenH])
     if (hasPh) {
       const isHH = !isNaN(prevPivotHighValue) && phValue > prevPivotHighValue;
       const isLH = !isNaN(prevPivotHighValue) && phValue <= prevPivotHighValue;
 
       if (!isNaN(prevPivotHighValue)) {
         if (isHH) {
-          markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'triangleDown', color: 'rgba(0,128,128,0.5)', text: 'HH' });
+          markers.push({ time: bars[i - rightBars].time, position: 'aboveBar', shape: 'triangleDown', color: 'rgba(0,128,128,0.5)', text: 'HH' });
         } else {
-          markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'triangleDown', color: 'rgba(0,128,128,0.5)', text: 'LH' });
+          markers.push({ time: bars[i - rightBars].time, position: 'aboveBar', shape: 'triangleDown', color: 'rgba(0,128,128,0.5)', text: 'LH' });
         }
       }
 
       // Pine: label.new with pivot price
       labels.push({
-        time: bars[i].time, price: phValue,
+        time: bars[i - rightBars].time, price: phValue,
         text: '[' + phValue.toFixed(2) + ']',
         textColor: 'rgba(0,128,128,0.5)',
         style: 'label_down', size: 'tiny',
@@ -115,15 +119,15 @@ export function calculate(bars: Bar[], inputs: Partial<PivotHhHlLhLlInputs> = {}
 
       if (!isNaN(prevPivotLowValue)) {
         if (isHL) {
-          markers.push({ time: bars[i].time, position: 'belowBar', shape: 'triangleUp', color: 'rgba(255,0,0,0.5)', text: 'HL' });
+          markers.push({ time: bars[i - rightBars].time, position: 'belowBar', shape: 'triangleUp', color: 'rgba(255,0,0,0.5)', text: 'HL' });
         } else {
-          markers.push({ time: bars[i].time, position: 'belowBar', shape: 'triangleUp', color: 'rgba(255,0,0,0.5)', text: 'LL' });
+          markers.push({ time: bars[i - rightBars].time, position: 'belowBar', shape: 'triangleUp', color: 'rgba(255,0,0,0.5)', text: 'LL' });
         }
       }
 
       // Pine: label.new with pivot price
       labels.push({
-        time: bars[i].time, price: plValue,
+        time: bars[i - rightBars].time, price: plValue,
         text: '[' + plValue.toFixed(2) + ']',
         textColor: 'rgba(255,0,0,0.5)',
         style: 'label_up', size: 'tiny',
@@ -149,14 +153,15 @@ export function calculate(bars: Bar[], inputs: Partial<PivotHhHlLhLlInputs> = {}
       plot1.push({ time: bars[i].time, value: pvtH });
       plot2.push({ time: bars[i].time, value: pvtL });
     } else {
-      const prevPvtH = i > 0 ? plot1[i - 1]?.value : NaN;
+      // Pine: HpC = pvtH != pvtH[1] ? na : colorH (the circle is hidden on the bar where the level changes)
       const topVal = isNaN(pvtH) ? NaN : (pvtH !== prevPvtH && i > 0 ? NaN : pvtH);
       plot1.push({ time: bars[i].time, value: topVal });
 
-      const prevPvtL = i > 0 ? plot2[i - 1]?.value : NaN;
       const botVal = isNaN(pvtL) ? NaN : (pvtL !== prevPvtL && i > 0 ? NaN : pvtL);
       plot2.push({ time: bars[i].time, value: botVal });
     }
+    prevPvtH = pvtH;
+    prevPvtL = pvtL;
 
     // Pine: Fractal Break: buy = close > pvtH and open <= pvtH, sell = close < pvtL and open >= pvtL
     if (showFB && !isNaN(pvtH) && !isNaN(pvtL)) {
@@ -171,9 +176,13 @@ export function calculate(bars: Bar[], inputs: Partial<PivotHhHlLhLlInputs> = {}
     }
   }
 
+  // Pine: level plots use offset = -rightLenH / -rightLenL
+  const shiftBack = (arr: { time: number; value: number; color?: string }[]) =>
+    arr.map((p, i) => ({ time: p.time, value: i + rightBars < n ? arr[i + rightBars].value : NaN }));
+
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
-    plots: { 'plot0': plot0, 'plot1': plot1, 'plot2': plot2 },
+    plots: { 'plot0': plot0, 'plot1': shiftBack(plot1), 'plot2': shiftBack(plot2) },
     markers,
     labels,
   };

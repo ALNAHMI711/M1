@@ -3,7 +3,7 @@
  *
  * Alligator: 3 SMMA (RMA) lines on HL2 with forward offsets.
  * Jaw = RMA(hl2, 13) shifted 8 bars, Teeth = RMA(hl2, 8) shifted 5, Lips = RMA(hl2, 5) shifted 3.
- * Fractals: 5-bar pivot high/low detection.
+ * Fractals: 5-bar fractal high/low detection (Pine rule, equal highs/lows allowed before the fractal bar).
  * Resistance: valuewhen(high >= highest(high, lengthRS), high, 0) - held until new fractal high.
  * Support: valuewhen(low <= lowest(low, lengthRS), low, 0) - held until new fractal low.
  *
@@ -64,9 +64,25 @@ export function calculate(bars: Bar[], inputs: Partial<WilliamsComboInputs> = {}
   const teethArr = shift(teethRaw, 5);
   const lipsArr = shift(lipsRaw, 3);
 
-  // Fractals: 5-bar pivots (2 left, 2 right)
-  const phArr = ta.pivothigh(highSeries, 2, 2).toArray();
-  const plArr = ta.pivotlow(lowSeries, 2, 2).toArray();
+  // Fractals (Pine n = 2, 5 clauses): the 2 bars after the fractal bar are strictly beyond it; before it, up to 4
+  // equal (or beyond) bars, then 2 strictly beyond bars.
+  // `beyond(a, x)`: a is lower than x (high fractal) or higher than x (low fractal). NaN before the first bar.
+  const isFractal = (c: number, v: (j: number) => number, beyond: (a: number, x: number) => boolean): boolean => {
+    const x = v(c);
+    if (!(c + 2 < n && beyond(v(c + 1), x) && beyond(v(c + 2), x))) return false;
+    const b = (k: number) => (c - k >= 0 ? v(c - k) : NaN); // k bars before the fractal bar
+    const bEq = (k: number) => b(k) === x;
+    const bLe = (k: number) => beyond(b(k), x) || b(k) === x;
+    return (beyond(b(2), x) && beyond(b(1), x)) ||
+      (beyond(b(3), x) && beyond(b(2), x) && bEq(1)) ||
+      (beyond(b(4), x) && beyond(b(3), x) && bEq(2) && bLe(1)) ||
+      (beyond(b(5), x) && beyond(b(4), x) && bEq(3) && bEq(2) && bLe(1)) ||
+      (beyond(b(6), x) && beyond(b(5), x) && bEq(4) && bLe(3) && bEq(2) && bLe(1));
+  };
+  const highAt = (j: number) => bars[j].high;
+  const lowAt = (j: number) => bars[j].low;
+  const below = (a: number, x: number) => a < x;
+  const above = (a: number, x: number) => a > x;
 
   // Pine: highRS = valuewhen(high >= highest(high, lengthRS), high, 0)
   // Pine: lowRS  = valuewhen(low  <= lowest(low, lengthRS),  low, 0)
@@ -84,10 +100,11 @@ export function calculate(bars: Bar[], inputs: Partial<WilliamsComboInputs> = {}
   const plot4: { time: number; value: number }[] = [];
 
   for (let i = 0; i < n; i++) {
-    if (!isNaN(phArr[i]) && phArr[i] !== 0) {
+    // Shapes drawn on the fractal bar (Pine offset=-2)
+    if (isFractal(i, highAt, below)) {
       markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'triangleDown', color: '#EF5350', text: 'F' });
     }
-    if (!isNaN(plArr[i]) && plArr[i] !== 0) {
+    if (isFractal(i, lowAt, above)) {
       markers.push({ time: bars[i].time, position: 'belowBar', shape: 'triangleUp', color: '#26A69A', text: 'F' });
     }
 

@@ -61,9 +61,7 @@ export function calculate(bars: Bar[], inputs: Partial<AutoSupportResistanceInpu
   const quickPivotHighArr = ta.pivothigh(closeSeries, left, quickRight).toArray();
   const quickPivotLowArr = ta.pivotlow(closeSeries, left, quickRight).toArray();
 
-  // Convert pivot arrays to boolean condition Series (1 where pivot found, 0 otherwise).
-  // oakscriptjs pivothigh/pivotlow place the pivot value at the actual pivot bar,
-  // so the close at that bar IS the pivot source value -- no offset needed.
+  // Convert pivot arrays to boolean condition Series (1 where pivot found, 0 otherwise)
   const toBoolSeries = (arr: number[]) =>
     Series.fromArray(bars, arr.map(v => isNaN(v) ? 0 : 1));
 
@@ -73,17 +71,18 @@ export function calculate(bars: Bar[], inputs: Partial<AutoSupportResistanceInpu
   const quickPivotLowCond = toBoolSeries(quickPivotLowArr);
 
   // Pine: valuewhen(pivot_cond, close[offset], occurrence)
-  // In Pine, pivot fires at the confirmation bar (offset bars after pivot).
-  // close[offset] at the confirmation bar = close at the actual pivot bar.
-  // In oakscriptjs, pivot fires at the actual pivot bar, so source is just closeSeries.
-  const level1Arr = ta.valuewhen(quickPivotHighCond, closeSeries, 0).toArray();
-  const level2Arr = ta.valuewhen(quickPivotLowCond, closeSeries, 0).toArray();
-  const level3Arr = ta.valuewhen(pivotHighCond, closeSeries, 0).toArray();
-  const level4Arr = ta.valuewhen(pivotLowCond, closeSeries, 0).toArray();
-  const level5Arr = ta.valuewhen(pivotHighCond, closeSeries, 1).toArray();
-  const level6Arr = ta.valuewhen(pivotLowCond, closeSeries, 1).toArray();
-  const level7Arr = ta.valuewhen(pivotHighCond, closeSeries, 2).toArray();
-  const level8Arr = ta.valuewhen(pivotLowCond, closeSeries, 2).toArray();
+  // The pivot fires at the confirmation bar (offset bars after the pivot bar),
+  // so close[offset] there is the close of the pivot bar.
+  const closeQuick = closeSeries.offset(quickRight);
+  const closeRight = closeSeries.offset(right);
+  const level1Arr = ta.valuewhen(quickPivotHighCond, closeQuick, 0).toArray();
+  const level2Arr = ta.valuewhen(quickPivotLowCond, closeQuick, 0).toArray();
+  const level3Arr = ta.valuewhen(pivotHighCond, closeRight, 0).toArray();
+  const level4Arr = ta.valuewhen(pivotLowCond, closeRight, 0).toArray();
+  const level5Arr = ta.valuewhen(pivotHighCond, closeRight, 1).toArray();
+  const level6Arr = ta.valuewhen(pivotLowCond, closeRight, 1).toArray();
+  const level7Arr = ta.valuewhen(pivotHighCond, closeRight, 2).toArray();
+  const level8Arr = ta.valuewhen(pivotLowCond, closeRight, 2).toArray();
 
   const GREEN = '#26A69A';
   const RED = '#EF5350';

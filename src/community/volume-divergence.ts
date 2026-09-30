@@ -107,36 +107,10 @@ export function calculate(bars: Bar[], inputs: Partial<VolumeDivergenceInputs> =
 
   const warmup = vl5;
 
-  // Pivot detection on vol
-  // pivotlow: vol[lbR] is lower than all surrounding bars within lbL left and lbR right
-  // pivothigh: vol[lbR] is higher than all surrounding bars
-  function isPivotLow(arr: number[], idx: number): boolean {
-    const pivotIdx = idx - lbR;
-    if (pivotIdx < lbL) return false;
-    const val = arr[pivotIdx];
-    if (isNaN(val)) return false;
-    for (let j = 1; j <= lbL; j++) {
-      if (arr[pivotIdx - j] <= val) return false;
-    }
-    for (let j = 1; j <= lbR; j++) {
-      if (arr[pivotIdx + j] <= val) return false;
-    }
-    return true;
-  }
-
-  function isPivotHigh(arr: number[], idx: number): boolean {
-    const pivotIdx = idx - lbR;
-    if (pivotIdx < lbL) return false;
-    const val = arr[pivotIdx];
-    if (isNaN(val)) return false;
-    for (let j = 1; j <= lbL; j++) {
-      if (arr[pivotIdx - j] >= val) return false;
-    }
-    for (let j = 1; j <= lbR; j++) {
-      if (arr[pivotIdx + j] >= val) return false;
-    }
-    return true;
-  }
+  // Pivot detection on vol: the value of pivot bar i - lbR appears on bar i
+  const volSeries = Series.fromArray(bars, vol);
+  const plArr = ta.pivotlow(volSeries, lbL, lbR).toArray();
+  const phArr = ta.pivothigh(volSeries, lbL, lbR).toArray();
 
   // Track pivot history for divergence comparison
   // For each bar i, check if there's a pivot at i-lbR, then compare with previous pivot
@@ -155,7 +129,7 @@ export function calculate(bars: Bar[], inputs: Partial<VolumeDivergenceInputs> =
     const pivotIdx = i - lbR;
 
     // Check pivot low
-    if (isPivotLow(vol, i)) {
+    if (!isNaN(plArr[i])) {
       const curVol = vol[pivotIdx];
       const curLow = bars[pivotIdx].low;
 
@@ -194,7 +168,7 @@ export function calculate(bars: Bar[], inputs: Partial<VolumeDivergenceInputs> =
     }
 
     // Check pivot high
-    if (isPivotHigh(vol, i)) {
+    if (!isNaN(phArr[i])) {
       const curVol = vol[pivotIdx];
       const curHigh = bars[pivotIdx].high;
 

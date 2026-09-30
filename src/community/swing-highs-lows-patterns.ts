@@ -108,7 +108,7 @@ export function calculate(bars: Bar[], inputs: Partial<SwingHighsLowsPatternsInp
       const label = !isNaN(prevPhy) ? (phVal > prevPhy ? 'HH' : 'LH') : 'HH';
 
       markers.push({
-        time: bars[i].time,
+        time: bars[pivotIdx].time,
         position: 'aboveBar',
         shape: 'labelDown',
         color: swinghCss,
@@ -116,7 +116,7 @@ export function calculate(bars: Bar[], inputs: Partial<SwingHighsLowsPatternsInp
       });
 
       labels.push({
-        time: bars[i].time,
+        time: bars[pivotIdx].time,
         price: phVal,
         text: label + '\n' + patternName,
         textColor: swinghCss,
@@ -132,7 +132,7 @@ export function calculate(bars: Bar[], inputs: Partial<SwingHighsLowsPatternsInp
       const label = !isNaN(prevPly) ? (plVal < prevPly ? 'LL' : 'HL') : 'HL';
 
       markers.push({
-        time: bars[i].time,
+        time: bars[pivotIdx].time,
         position: 'belowBar',
         shape: 'labelUp',
         color: swinglCss,
@@ -140,7 +140,7 @@ export function calculate(bars: Bar[], inputs: Partial<SwingHighsLowsPatternsInp
       });
 
       labels.push({
-        time: bars[i].time,
+        time: bars[pivotIdx].time,
         price: plVal,
         text: label + '\n' + patternName,
         textColor: swinglCss,

@@ -67,11 +67,12 @@ export function calculate(bars: Bar[], inputs: Partial<SRLevelsBreaksInputs> = {
   const markers: MarkerData[] = [];
 
   for (let i = 0; i < n; i++) {
-    if (i >= warmup && !isNaN(phArr[i]) && phArr[i] !== 0) {
-      lastResistance = phArr[i];
+    // Pine: fixnan(pivothigh(leftBars, rightBars)[1]), fixnan(pivotlow(leftBars, rightBars)[1])
+    if (i > warmup && !isNaN(phArr[i - 1]) && phArr[i - 1] !== 0) {
+      lastResistance = phArr[i - 1];
     }
-    if (i >= warmup && !isNaN(plArr[i]) && plArr[i] !== 0) {
-      lastSupport = plArr[i];
+    if (i > warmup && !isNaN(plArr[i - 1]) && plArr[i - 1] !== 0) {
+      lastSupport = plArr[i - 1];
     }
 
     // Break detection: invalidate level when price breaks through
@@ -104,9 +105,13 @@ export function calculate(bars: Bar[], inputs: Partial<SRLevelsBreaksInputs> = {
     supportPlot.push({ time: bars[i].time, value: i < warmup ? NaN : lastSupport });
   }
 
+  // Pine: level plots use offset = -(rightBars + 1)
+  const shiftBack = (arr: { time: number; value: number }[]) =>
+    arr.map((p, i) => ({ time: p.time, value: i + pivotLen + 1 < n ? arr[i + pivotLen + 1].value : NaN }));
+
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
-    plots: { 'plot0': resistancePlot, 'plot1': supportPlot },
+    plots: { 'plot0': shiftBack(resistancePlot), 'plot1': shiftBack(supportPlot) },
     markers,
   };
 }
