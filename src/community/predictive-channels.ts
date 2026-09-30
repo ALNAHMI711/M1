@@ -49,7 +49,6 @@ export function calculate(bars: Bar[], inputs: Partial<PredictiveChannelsInputs>
   // ATR(200) * mult
   const atrArr = ta.atr(bars, 200).toArray();
 
-  const warmup = 200;
 
   // State variables matching Pine's var declarations
   let pcAvg = bars.length > 0 ? bars[0].close : 0;
@@ -64,7 +63,9 @@ export function calculate(bars: Bar[], inputs: Partial<PredictiveChannelsInputs>
 
   for (let i = 0; i < n; i++) {
     const close = bars[i].close;
-    const atr = (atrArr[i] ?? 0) * mult;
+    // Pine: nz(ta.atr(200)) * mult (NaN during the ATR warm-up counts as 0)
+    const atrRaw = atrArr[i];
+    const atr = (atrRaw === undefined || Number.isNaN(atrRaw) ? 0 : atrRaw) * mult;
 
     // pc_avg := math.abs(close - pc_avg) > atr ? close : pc_avg + os * hold_atr / slope
     if (Math.abs(close - pcAvg) > atr) {
@@ -91,11 +92,12 @@ export function calculate(bars: Bar[], inputs: Partial<PredictiveChannelsInputs>
     s2Arr[i] = pcAvg - holdAtr;
   }
 
+  // Pine: plot(value, color = close == pc_avg ? na : css): the value is kept, the colour is na on reset bars
   const makePlot = (arr: number[]) =>
     arr.map((v, i) => ({
       time: bars[i].time,
-      // Pine: close == pc_avg ? na : value (hide when resetting)
-      value: i < warmup ? NaN : (bars[i].close === pcAvgArr[i] ? NaN : v),
+      value: v,
+      ...(bars[i].close === pcAvgArr[i] ? { color: 'transparent' } : {}),
     }));
 
   // Pine: plot_0 = plot(close, color = na, display = display.none, editable = false)
