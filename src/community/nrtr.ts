@@ -6,7 +6,7 @@
  * If close < trail, flip to downtrend (and vice versa).
  * Two plot series: green for uptrend, red for downtrend.
  *
- * Reference: "Nick Rypock Trailing Reverse" (TV#479)
+ * Reference: "Nick Rypock Trailing Reverse"
  */
 
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

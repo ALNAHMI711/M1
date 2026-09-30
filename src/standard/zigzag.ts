@@ -4,7 +4,7 @@
  * Identifies trend reversals by connecting pivot highs and lows
  * that exceed a specified percentage deviation threshold.
  *
- * Based on ZigZag indicator v8.
+ * Based on the standard ZigZag indicator v8.
  *
  * PineScript display:
  *   line.new(x1, y1, x2, y2, color=lineColorInput)

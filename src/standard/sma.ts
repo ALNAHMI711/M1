@@ -2,7 +2,7 @@
  * Simple Moving Average (SMA) Indicator
  *
  * Hand-optimized implementation using oakscriptjs.
- * Matches built-in SMA indicator.
+ * Matches the standard built-in SMA indicator.
  */
 
 import { Series, ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type FillData, type Bar, type SourceType } from 'oakscriptjs';

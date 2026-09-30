@@ -4,7 +4,7 @@
  * The difference between Aroon Up and Aroon Down. Oscillates between -100 and
  * +100; positive values indicate an uptrend, negative a downtrend.
  *
- * Based on built-in "Aroon Oscillator" (STD;Aroon_Oscillator).
+ * Based on the standard "Aroon Oscillator" indicator.
  */
 
 import { type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig, type Bar } from 'oakscriptjs';

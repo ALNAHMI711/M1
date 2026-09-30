@@ -31,7 +31,7 @@ export interface AutoTrendlineInputs {
   showCrosses: boolean;
 }
 
-// Pine v5 colours read on PineScript: color.blue #2962FF, color.gray #787B86, color.red #FF5252,
+// Pine v5 colours: color.blue #2962FF, color.gray #787B86, color.red #FF5252,
 // color.purple #9C27B0
 export const defaultInputs: AutoTrendlineInputs = {
   fractalPeriod: 10,
@@ -82,7 +82,7 @@ export const metadata = {
   overlay: true,
 };
 
-/** Pine float comparison: a == b when |a - b| <= 1e-10 (checked on PineScript) */
+/** Pine float comparison: a == b when |a - b| <= 1e-10 */
 const EPS = 1e-10;
 const lt = (a: number, b: number) => b - a > EPS;
 const gt = (a: number, b: number) => a - b > EPS;

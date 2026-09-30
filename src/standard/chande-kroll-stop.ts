@@ -4,7 +4,7 @@
  * ATR-based trailing stop system that identifies potential stop levels
  * for both long and short positions.
  *
- * Based on Chande Kroll Stop indicator.
+ * Based on the standard Chande Kroll Stop indicator.
  */
 
 import { Series, ta, type Bar, type IndicatorResult, type InputConfig, type PlotConfig } from 'oakscriptjs';

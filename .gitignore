@@ -4,16 +4,7 @@ node_modules
 .claude
 example/node_modules
 
-# Large local catalog artifact (regenerable via the sweep scripts)
-docs/official/catalog/community-catalog.json
 # Python bytecode
 __pycache__/
-# Scratch files of the pivot port check
-pivot-port-check/.tmp/
-# Scratch files of the port fidelity check
-port-fidelity-check/.tmp/
-# Outputs of the library upgrade check (215 MB per stage, regenerate with lib-upgrade-check/code/diff_registry.mjs)
-lib-upgrade-check/data/lib-*/
-lib-upgrade-check/.tmp/
-# Scratch files of the gradient fill check
-gradient-fill-check/.tmp/
+# Local research files (not published)
+.tmp/

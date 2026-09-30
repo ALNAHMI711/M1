@@ -5,7 +5,7 @@
  * within anchor periods (e.g., daily, weekly). This helps identify unusual volume
  * relative to typical volume at that time of day/week.
  *
- * Based on Relative Volume at Time indicator.
+ * Based on the standard Relative Volume at Time indicator.
  */
 
 import { type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig, type Bar } from 'oakscriptjs';

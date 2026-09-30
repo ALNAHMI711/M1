@@ -1,6 +1,5 @@
 /**
- * Tests for the 10 built-in studies added from the 2026-05-31 PineScript
- * Desktop catalog capture.
+ * Tests for 10 built-in studies.
  */
 import { describe, it, expect } from 'vitest';
 import type { Bar } from 'oakscriptjs';

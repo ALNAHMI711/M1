@@ -1,5 +1,5 @@
 /**
- * Generic runner that turns a PatternDef into the declarations one official
+ * Generic runner that turns a PatternDef into the declarations one standard
  * candlestick .pine script makes: the trend input, the label-color input,
  * an alertcondition, a label marker (plotshape) and the background highlight
  * over the candles forming the pattern (bgcolor with negative offset).
@@ -21,7 +21,7 @@ export interface PatternDef {
   candles: number;
   /** Whether the original script declares the trend detection input. */
   needsTrend: boolean;
-  /** Original tooltip text. */
+  /** Original tooltip text of the Pine script. */
   tooltip: string;
   /** Detection condition: truthy (1) on the last bar of the pattern. */
   detect(c: CandleProps, t: TrendFlags): Series;

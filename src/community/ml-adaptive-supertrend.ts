@@ -5,7 +5,7 @@
  * (low/medium/high), then selects an appropriate SuperTrend factor.
  * Low volatility → higher factor, high volatility → lower factor.
  *
- * Reference: "ML Adaptive SuperTrend [AlgoAlpha]" (TV#408)
+ * Reference: "ML Adaptive SuperTrend [AlgoAlpha]"
  */
 
 import { ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

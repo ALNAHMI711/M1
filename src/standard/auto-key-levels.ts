@@ -5,7 +5,7 @@
  * pivot highs and lows. Each retained level is drawn as a horizontal ray that
  * extends to the right from the pivot that formed it.
  *
- * Approximation of built-in "Auto Key Levels" (STD;Auto_Key_Levels),
+ * Approximation of the standard "Auto Key Levels" indicator,
  * which uses a proprietary level-selection/merging scheme. Here we keep the most
  * recent `maxLevels` confirmed pivots (pivot highs = resistance, lows = support).
  */

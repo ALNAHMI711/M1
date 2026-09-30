@@ -85,7 +85,7 @@ function cci(typicalPrice: number[], length: number): number[] {
 export function calculate(bars: Bar[], inputs: Partial<WoodiesCCIInputs> = {}): IndicatorResult {
   const { turboLength, cciLength } = { ...defaultInputs, ...inputs };
 
-  // Woodies CCI uses close as source (not hlc3)
+  // The standard Woodies CCI uses close as source (not hlc3)
   const source = bars.map(b => b.close);
 
   // Calculate both CCIs

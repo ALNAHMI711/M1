@@ -8,7 +8,7 @@
  *   drawdown_i = 100 * (close - highest(close, length)) / highest(close, length)
  *   UI        = sqrt( sma(drawdown^2, length) )
  *
- * Based on built-in "Ulcer Index" (STD;Ulcer_Index).
+ * Based on the standard "Ulcer Index" indicator.
  */
 
 import { Series, ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

@@ -727,7 +727,7 @@ Add missing PineScript display items (fills, markers, barColors, bgColors, plotC
 ## 2026-02-26 - Medium Wave 2 Community Indicators (PineScript Ports)
 
 ### Goal
-Implement 15 more Medium-difficulty community indicators by reading their PineScript source from docs/official/indicators_community/.
+Implement 15 more Medium-difficulty community indicators by reading their PineScript source.
 
 ### Approach Taken
 - Read PineScript source files directly (not web search) for algorithm reference
@@ -749,7 +749,7 @@ Implement 15 more Medium-difficulty community indicators by reading their PineSc
 - 51 Hard indicators remaining implementable
 
 ### Key Decisions
-- Used local PineScript source files (docs/official/indicators_community/*.pine) as primary reference
+- Used local PineScript source files as primary reference
 - HEMA Trend Levels skipped (requires box drawing not supported)
 - Adaptive MACD uses R² correlation for speed adaptation (not standard MACD)
 - Beta-weighted MA uses Beta distribution kernel for weight function
@@ -933,7 +933,6 @@ Ported PineScript logic directly using oakscriptjs ta.* functions where availabl
 - Done: ZLSMA, Forecast Oscillator, CCT BBO, MACD 4C, Colored Volume Bars, KDJ, WaveTrend, Squeeze Momentum, Coral Trend, Chandelier Exit, Impulse MACD, Schaff Trend Cycle, Donchian Trend Ribbon, OBV MACD
 - Skipped (already exist): Parabolic SAR, ADX/DI, MFI, Awesome Oscillator
 - Remaining from Wave 1 list: Heiken Ashi Candles (#278) - TBD if distinct from smoothed HA
-- No regression tests yet for new indicators (need PineSuite reference CSV data)
 
 ### Key Decisions
 - Used ta.rma() as SMMA equivalent (same algorithm: Wilder smoothing)

@@ -77,7 +77,7 @@ export function calculate(bars: Bar[], inputs: Partial<SqueezeMomentumInputs> = 
   const val = ta.linreg(source.sub(midline), kcLength, 0);
   const valArr = val.toArray();
 
-  // Momentum histogram: 4-color scheme like PineScript
+  // Momentum histogram: 4-color scheme as in the Pine script
   // Positive & rising = lime (#00E676), positive & falling = dark green (#26A69A)
   // Negative & falling = red (#FF5252), negative & rising = dark red (#EF5350)
   const momData = valArr.map((value, i) => {

@@ -1,6 +1,6 @@
 # OakScriptJS Candlestick Pattern Inventory
 
-This document provides a comprehensive inventory of all PineScript candlestick pattern indicators from standard library. It tracks implementation status in OakScriptJS.
+This document provides a comprehensive inventory of the standard PineScript candlestick pattern indicators. It tracks implementation status in OakScriptJS.
 
 ## Summary Statistics
 
@@ -75,11 +75,6 @@ This document provides a comprehensive inventory of all PineScript candlestick p
 | **N/A (combined)** | 2 |
 
 ## File Reference
-
-All source PineScript files are located in:
-```
-docs/official/indicators_candlestick/
-```
 
 Implementation files are in `src/` using the `candlestick-pattern.ts` factory with shared helpers from `candlestick-helpers.ts`.
 

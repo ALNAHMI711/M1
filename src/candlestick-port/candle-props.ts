@@ -1,6 +1,6 @@
 /**
- * Shared candle properties for the candlestick pattern indicators.
- * This is the C_* block that all 45 official .pine scripts repeat verbatim,
+ * Shared candle properties for the standard candlestick pattern indicators.
+ * This is the C_* block that all 45 standard .pine scripts repeat verbatim,
  * ported once. Every function here must run inside executeScript().
  */
 import { Series, ta, math, input, close, open, high, low } from 'oakscriptjs/script';

@@ -12,7 +12,7 @@
  * Pine plots 4 lines through every oscillator pivot (value osc[lbR], or low/high with "Plot on price",
  * offset=-lbR) with a transparent colour unless a divergence is found there, and 4 plotshape labels.
  *
- * Reference: docs/official/indicators_community/"Divergence Indicator (any oscillator).pine" (Pine v4)
+ * Reference: "Divergence Indicator (any oscillator)" (community, Pine v4)
  */
 
 import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

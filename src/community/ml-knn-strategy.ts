@@ -5,7 +5,7 @@
  * For each bar, computes Euclidean distance to all historical feature pairs,
  * finds k-nearest neighbors, and takes majority vote on price direction.
  *
- * Reference: "Machine Learning: kNN-based Strategy" (TV#413)
+ * Reference: "Machine Learning: kNN-based Strategy"
  */
 
 import { ta, Series, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

@@ -4,7 +4,7 @@
  * CCI = (close - SMA(close, len)) / (0.015 * meanDev(close, len))
  * Then apply Stochastic to CCI: K = stoch(CCI, CCI, CCI, stochLen), smoothed.
  *
- * Reference: "CCI Stochastic" (TV#117)
+ * Reference: "CCI Stochastic"
  */
 
 import { ta, Series, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

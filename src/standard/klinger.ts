@@ -4,7 +4,7 @@
  * Volume-based oscillator that measures long-term money flow trends.
  * Uses the difference between two EMAs of signed volume.
  *
- * Based on Klinger Oscillator indicator.
+ * Based on the standard Klinger Oscillator indicator.
  */
 
 import { Series, ta, type Bar, type IndicatorResult, type InputConfig, type PlotConfig } from 'oakscriptjs';

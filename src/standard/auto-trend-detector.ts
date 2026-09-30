@@ -5,8 +5,7 @@
  * recent confirmed pivot highs (resistance) and the two most recent confirmed
  * pivot lows (support), extending both to the right. Pivot points are marked.
  *
- * Approximation of built-in "Auto Trend Detector"
- * (STD;Auto_Trend_Detector).
+ * Approximation of the standard "Auto Trend Detector" indicator.
  */
 
 import { type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

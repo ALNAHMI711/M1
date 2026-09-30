@@ -10,7 +10,7 @@
  *   hline(0)
  *   plotcandle(openVolume, maxVolume, minVolume, lastVolume, "Volume Delta", color=col, bordercolor=col, wickcolor=col)
  *
- * Note: version uses intrabar data for more precise calculation.
+ * Note: the standard version uses intrabar data for more precise calculation.
  * This implementation uses close vs open as an approximation.
  */
 

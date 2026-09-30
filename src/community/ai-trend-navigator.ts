@@ -6,7 +6,7 @@
  * kNN Classifier: Compute Euclidean distances between current features (price, ROC) and historical
  * features, classify trend as bullish/bearish based on majority vote of k-nearest neighbors.
  *
- * Reference: "AI Trend Navigator [K-Neighbor]" (TV#34)
+ * Reference: "AI Trend Navigator [K-Neighbor]"
  */
 
 import { ta, Series, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

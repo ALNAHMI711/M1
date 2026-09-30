@@ -24,7 +24,7 @@ export interface TrendLinesV2Inputs {
   dtcol: string;
 }
 
-// Pine v4 colours read on PineScript: color.lime #00E676, color.red #FF5252
+// Pine v4 colours: color.lime #00E676, color.red #FF5252
 export const defaultInputs: TrendLinesV2Inputs = {
   startYear: 2020,
   startMonth: 1,
@@ -54,7 +54,7 @@ export const metadata = {
   overlay: true,
 };
 
-/** Pine float comparison: a == b when |a - b| <= 1e-10 (checked on PineScript) */
+/** Pine float comparison: a == b when |a - b| <= 1e-10 */
 const EPS = 1e-10;
 const lt = (a: number, b: number) => b - a > EPS;
 const gt = (a: number, b: number) => a - b > EPS;

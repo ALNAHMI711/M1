@@ -4,7 +4,7 @@
  * Converts prices into a Gaussian normal distribution, making
  * turning points easier to identify.
  *
- * Based on Fisher Transform indicator.
+ * Based on the standard Fisher Transform indicator.
  */
 
 import type { Bar, InputConfig, PlotConfig, HLineConfig } from 'oakscriptjs';

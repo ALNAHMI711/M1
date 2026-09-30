@@ -6,7 +6,7 @@
  * For each bar, find k-nearest historical RSI/WMA patterns and predict next movement.
  * Prediction = weighted average of directional outcomes of k-nearest neighbors.
  *
- * Reference: "Machine Learning Momentum Index (MLMI) [Zeiierman]" (TV#409)
+ * Reference: "Machine Learning Momentum Index (MLMI) [Zeiierman]"
  */
 
 import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

@@ -3,7 +3,7 @@
  *
  * MACD with regular (and hidden) divergence detection on the MACD line.
  *
- * Reference: docs/official/indicators_community/"MACD Divergences by @DaviddTech.pine" (Pine v4)
+ * Reference: "MACD Divergences by @DaviddTech" (community, Pine v4)
  */
 
 import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

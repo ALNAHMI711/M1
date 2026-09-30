@@ -9,7 +9,7 @@
  *   stdev  = sqrt( sum(volume*src^2)/sum(volume) - vwap^2 )
  *   bands  = vwap +/- mult * stdev
  *
- * Based on built-in "Volume Weighted Average Price" (STD;VWAP).
+ * Based on the standard "Volume Weighted Average Price" indicator.
  */
 
 import { getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

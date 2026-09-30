@@ -5,10 +5,10 @@
  * Approximates up/down volume by comparing close to open price.
  * Positive values indicate buying pressure, negative indicates selling pressure.
  *
- * Note: version uses intrabar data for more precise calculation.
+ * Note: the standard version uses intrabar data for more precise calculation.
  * This implementation uses close vs open as an approximation.
  *
- * Based on Net Volume indicator.
+ * Based on the standard Net Volume indicator.
  */
 
 import { type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig, type Bar } from 'oakscriptjs';

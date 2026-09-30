@@ -4,7 +4,7 @@
  * Parabolic SAR logic applied to RSI values instead of price.
  * Compute RSI, then run SAR-style trailing stop on the RSI series.
  *
- * Reference: "Parabolic RSI" (TV#507)
+ * Reference: "Parabolic RSI"
  */
 
 import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

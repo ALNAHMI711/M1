@@ -4,7 +4,7 @@
  * Multiple supertrend levels at different ATR multipliers creating a "ladder".
  * Three supertrend lines at mult1, mult2, mult3 for layered support/resistance.
  *
- * Reference: "SuperTrend Ladder ATR" (TV#681)
+ * Reference: "SuperTrend Ladder ATR"
  */
 
 import { ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

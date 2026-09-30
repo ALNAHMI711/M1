@@ -10,7 +10,7 @@
  *   SMA:    10  10  10  15 | 50  65  75 100 | 130 130 130 195
  *   weight:  1   2   3   4 |  1   2   3   4 |   1   2   3   4
  *
- * Based on built-in "Pring's Special K" (STD;Prings_Special_K).
+ * Based on the standard "Pring's Special K" indicator.
  */
 
 import { Series, ta, type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig, type Bar } from 'oakscriptjs';

@@ -5,7 +5,7 @@
  * Plots SAR as two separate circle series: one for bullish (SAR below price),
  * one for bearish (SAR above price), providing clear trend direction coloring.
  *
- * Reference: "Lucid SAR" (TV#388)
+ * Reference: "Lucid SAR"
  */
 
 import { ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

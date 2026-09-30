@@ -370,7 +370,7 @@ describe('ChandelierExit', () => {
   it('plots both stops continuously after warmup', () => {
     const longPlot = (result.plots as Record<string, Array<{ value: number }>>)['plot0'];
     const shortPlot = (result.plots as Record<string, Array<{ value: number }>>)['plot1'];
-    // Matches built-in ta.chandelier(): both lines drawn at every bar past warmup.
+    // As in the PineScript ta.chandelier(): both lines drawn at every bar past warmup.
     for (let i = 22; i < bars.length; i++) {
       expect(isNaN(longPlot[i].value)).toBe(false);
       expect(isNaN(shortPlot[i].value)).toBe(false);

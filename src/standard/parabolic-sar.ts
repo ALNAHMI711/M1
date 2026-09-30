@@ -21,7 +21,7 @@ export interface ParabolicSARInputs {
 }
 
 /**
- * Default input values matching defaults
+ * Default input values matching the standard indicator defaults
  */
 export const defaultInputs: ParabolicSARInputs = {
   start: 0.02,

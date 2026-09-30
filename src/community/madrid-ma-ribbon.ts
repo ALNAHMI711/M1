@@ -5,7 +5,7 @@
  * Supports SMA and EMA types. Colors based on direction and position vs MA 100 reference.
  * Lime=uptrend, Green=reentry, Red=downtrend, Maroon=reversal warning.
  *
- * Reference: "Madrid Moving Average Ribbon" (TV#416/417)
+ * Reference: "Madrid Moving Average Ribbon"
  */
 
 import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

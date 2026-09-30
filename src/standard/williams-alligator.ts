@@ -64,7 +64,7 @@ export function calculate(bars: Bar[], inputs: Partial<WilliamsAlligatorInputs> 
   const lipsSMMA = ta.rma(hl2, lipsLength).toArray();
 
   // Apply offsets by shifting values backward in the array
-  // offset shifts values forward on the chart (right)
+  // The PineScript offset shifts values forward on the chart (right)
   // In the exported CSV, this means values appear at later bar indices
   // To match, we shift values forward: value[i+offset] = calculated[i]
   const applyOffset = (values: number[], offset: number): number[] => {

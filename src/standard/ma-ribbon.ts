@@ -3,7 +3,7 @@
  *
  * Hand-optimized implementation using oakscriptjs.
  * Displays up to 4 moving averages to visualize trend direction and momentum.
- * Based on official MA Ribbon indicator.
+ * Based on the standard MA Ribbon indicator.
  */
 
 import { Series, ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

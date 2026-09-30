@@ -1,5 +1,5 @@
 /**
- * Registry of all 44 ported candlestick patterns (the 45th official script,
+ * Registry of all 44 ported candlestick patterns (the 45th standard script,
  * "_All Candlestick Patterns_", is the composite in all-patterns.ts).
  */
 import type { PatternDef } from './pattern-runner';

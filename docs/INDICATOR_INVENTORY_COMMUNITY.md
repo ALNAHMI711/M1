@@ -1,15 +1,15 @@
 # OakScriptJS Community Indicator Inventory
 
-This document provides a comprehensive inventory of all community PineScript indicators
-from PineScript. It tracks implementation feasibility and status in OakScriptJS.
+This document provides a comprehensive inventory of community PineScript indicators.
+It tracks implementation feasibility and status in OakScriptJS.
 
 ## Summary Statistics
 
 | Category | Count |
 |---|---|
-| **Total Indicators** | 867 |
+| **Total Indicators** | 864 |
 | **Implementable** | 51 |
-| **Blocked** | 513 |
+| **Blocked** | 510 |
 | **Implemented** | 317 |
 | **Duplicate** | 19 |
 | **N/A** | 2 |
@@ -26,12 +26,12 @@ from PineScript. It tracks implementation feasibility and status in OakScriptJS.
 
 | Blocker | Affected | Description |
 |---|---|---|
-| Drawing | 324 | Heavy use of line.new/box.new/label.new (>3 calls) |
-| MTF | 192 | Uses request.security() for multi-timeframe data |
-| Table | 128 | Uses table.new/table.cell for info display |
-| Strategy | 61 | Uses strategy.* for backtesting/trade simulation |
+| Drawing | 323 | Heavy use of line.new/box.new/label.new (>3 calls) |
+| MTF | 191 | Uses request.security() for multi-timeframe data |
+| Table | 126 | Uses table.new/table.cell for info display |
+| Strategy | 60 | Uses strategy.* for backtesting/trade simulation |
 | Session | 38 | Uses session/timezone functions |
-| Screener | 37 | Cross-symbol scanning (>5 security calls or >2 input.symbol) |
+| Screener | 36 | Cross-symbol scanning (>5 security calls or >2 input.symbol) |
 | ExternalData | 4 | Uses request.financial/earnings/dividends |
 
 > **Note:** Many blocked indicators have multiple blockers. The primary blocker is listed first.
@@ -807,8 +807,6 @@ from PineScript. It tracks implementation feasibility and status in OakScriptJS.
 | 742 | Traders Reality Main | Blocked | N/A | Screener;MTF;Session;Table |
 | 743 | Trading ABC | Blocked | N/A | Drawing |
 | 744 | Trading Psychology - Fear & Greed Index by DGT | Blocked | N/A | Screener;MTF;Table |
-| 745 | Alerts (Expo) | Blocked | N/A | Table |
-| 746 | Alerts to MT4 MT5 + dynamic variables NON-REPAINTING | Blocked | N/A | Strategy;Table |
 | 747 | Trailing SL Strategy [QuantNomad] | Blocked | N/A | Strategy |
 | 748 | Trailing Stop Loss Indicator by KıvanÇ fr3762 | Blocked | N/A | MTF |
 | 749 | Transient Zones v1.1 | Implemented | Easy | `transient-zones.ts` |
@@ -845,7 +843,6 @@ from PineScript. It tracks implementation feasibility and status in OakScriptJS.
 | 780 | TTM Squeeze | Duplicate | Easy | `community/squeeze-momentum.ts` |
 | 781 | TTrades Daily Bias [TFO] | Blocked | N/A | Table;Drawing |
 | 782 | Turtle Trade Channels Indicator TUTCI | Implemented | Easy | `turtle-trade-channels.ts` |
-| 783 | TV Community Algo | Blocked | N/A | Screener;MTF;Drawing |
 | 784 | Tweezers and Kangaroo Tail | Implemented | Medium |  \ |
 | 785 | Twin Optimized Trend Tracker Strategy TOTT | Blocked | N/A | Strategy |
 | 786 | Twin Range Filter Visualized | Duplicate | Easy | `community/twin-range-filter.ts` |
@@ -1000,15 +997,6 @@ These are popular, well-known indicators that port directly using existing oaksc
 | 386 | Lorentzian Classification Strategy | ML classification |
 | 415 | Machine Learning_ Lorentzian Classification | ML with matrix ops |
 | 577-581 | RedK indicators suite | custom smoothing filters |
-
----
-
-## File Reference
-
-All source PineScript files are located in:
-```
-docs/official/indicators_community/
-```
 
 ---
 

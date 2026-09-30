@@ -44,7 +44,7 @@ export const inputConfig: InputConfig[] = [
   { id: 'tradeZonePct', type: 'float', title: 'Percent of the diff to use for trade zone', defval: 25 },
 ];
 
-// Pine colours: color.navy #311B92, color.rgb(33,150,243,70), color.blue #2962FF (v5 values read on PineScript), color.red #FF5252, color.lime #00E676
+// Pine colours: color.navy #311B92, color.rgb(33,150,243,70), color.blue #2962FF (v5 values), color.red #FF5252, color.lime #00E676
 export const plotConfig: PlotConfig[] = [
   { id: 'plot0', title: 'STR', color: '#311B92', lineWidth: 1, style: 'linebr' },
   { id: 'plot1', title: 'STS', color: '#311B92', lineWidth: 1, style: 'linebr' },
@@ -62,7 +62,7 @@ export const metadata = {
   overlay: true,
 };
 
-/** Pine float comparison: a == b when |a - b| <= 1e-10 (checked on PineScript) */
+/** Pine float comparison: a == b when |a - b| <= 1e-10 */
 const EPS = 1e-10;
 
 /** ta.valuewhen(src >= ta.highest(src, len), src, 0) (isHigh) or the lowest form. Comparisons with na are false. */

@@ -11,7 +11,7 @@
  *   fill(emaslowplot, emaslowplot2, fillCol2, transp=80) -- EMA-5 vs EMA-9
  *   fill(emaslowplot2, emaslowplot3, fillCol3, transp=75) -- EMA-9 vs EMA-21
  *
- * Reference: "Bjorgum Triple EMA Strategy" (TV#84)
+ * Reference: "Bjorgum Triple EMA Strategy"
  */
 
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

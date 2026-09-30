@@ -49,7 +49,7 @@ export interface PivotHhHlLhLlInputs {
   showFB: boolean;
 }
 
-// Pine v6 colours read on PineScript: color.teal #089981, color.red #F23645; color.new(c, 50)
+// Pine v6 colours: color.teal #089981, color.red #F23645; color.new(c, 50)
 const TEAL_50 = 'rgba(8,153,129,0.5)';
 const RED_50 = 'rgba(242,54,69,0.5)';
 const TRANSPARENT = 'rgba(0,0,0,0)';
@@ -131,7 +131,7 @@ export const metadata = {
 
 type Point = { time: number; value: number; color?: string };
 
-/** Pine float comparison: a == b when |a - b| <= 1e-10 (checked on PineScript); na operands give false */
+/** Pine float comparison: a == b when |a - b| <= 1e-10; na operands give false */
 const EPS = 1e-10;
 const lt = (a: number, b: number) => b - a > EPS;
 const differs = (a: number, b: number) => Math.abs(a - b) > EPS;
@@ -152,7 +152,7 @@ export function calculate(bars: Bar[], inputs: Partial<PivotHhHlLhLlInputs> = {}
 
   const inRange = (i: number) => cfg.maxBarsBack === 0 || i > lastBarIndex - cfg.maxBarsBack;
   // Pine: str.tostring(_pivot, format.mintick) = value rounded with round(v / mintick) * mintick, printed with the
-  // decimals of mintick (checked on the 504 labels). The port gets no syminfo.mintick: tick 0.01.
+  // decimals of mintick. The port gets no syminfo.mintick: tick 0.01.
   const fmt = (v: number) => '[' + str.tostring(math.round_to_mintick(v, MINTICK), '0.00') + ']';
 
   const markers: MarkerData[] = [];

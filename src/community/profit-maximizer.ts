@@ -4,7 +4,7 @@
  * ATR-based trailing stop applied to a moving average (not raw close).
  * SuperTrend-style logic on the MA value determines trend direction.
  *
- * Reference: "Profit Maximizer PMax" (TV#548)
+ * Reference: "Profit Maximizer PMax"
  */
 
 import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

@@ -5,7 +5,7 @@
  * T3 uses a 6-stage EMA cascade with volume factor coefficients.
  * PSAR provides additional trend direction via manual computation.
  *
- * Reference: "TKP T3 Trend with PSAR" (TV#737)
+ * Reference: "TKP T3 Trend with PSAR"
  */
 
 import { ta, Series, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

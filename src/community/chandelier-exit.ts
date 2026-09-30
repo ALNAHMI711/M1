@@ -4,8 +4,8 @@
  * Long stop:  highest(length) - ATR*mult
  * Short stop: lowest(length)  + ATR*mult
  *
- * Both lines are plotted continuously, matching built-in
- * `ta.chandelier()` (PineScript/ta library). Direction state is still
+ * Both lines are plotted continuously, as in the PineScript
+ * `ta.chandelier()` library function. Direction state is still
  * tracked to drive buy/sell markers and the fill colors, but the plotted
  * series are never gated to NaN.
  */

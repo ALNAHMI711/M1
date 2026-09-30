@@ -3,7 +3,7 @@
  *
  * Shows trend direction and strength using +DI, -DI, and ADX lines.
  *
- * Based on DMI indicator.
+ * Based on the standard DMI indicator.
  */
 
 import { Series, ta, type Bar, type IndicatorResult, type InputConfig, type PlotConfig } from 'oakscriptjs';

@@ -4,7 +4,7 @@
  * Triple Exponential Average Rate of Change.
  * Shows the percent rate of change of a triple exponentially smoothed moving average.
  *
- * Based on TRIX indicator.
+ * Based on the standard TRIX indicator.
  */
 
 import { Series, ta, type Bar, type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig } from 'oakscriptjs';

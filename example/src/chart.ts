@@ -170,8 +170,8 @@ class BasePrimitive implements ISeriesPrimitive<Time> {
 /**
  * Line-break primitive — draws a line that breaks at NaN gaps.
  * Used for plot.style_linebr where the line disappears during NaN runs.
- * Per-point colours follow PineScript: the segment that leads into a point has the colour of that point
- * (render_probe_segment_colour.pine); with steps, the horizontal part at the previous value keeps the previous
+ * Per-point colours follow Pine: the segment that leads into a point has the colour of that point;
+ * with steps, the horizontal part at the previous value keeps the previous
  * point colour and the vertical part into the point has the point colour.
  */
 class LineBrPrimitive extends BasePrimitive {
@@ -415,12 +415,12 @@ class BgColorRenderer implements IPrimitivePaneRenderer {
 
 /**
  * Plot fill primitive: Pine fill(plot1, plot2, color) between two plots.
- * (code/render_probe_fill.pine, data/tv/render_probe_fill.png in port-fidelity-check/) fills the polygon
- * between the two plot lines; the part between bar i - 1 and bar i has the colour of bar i, and an na colour on
+ * Pine fills the polygon between the two plot lines; the part between bar i - 1 and bar i has the colour of bar i,
+ * and an na colour on
  * bar i removes that part only. A bar where either plot is na breaks the fill (fillgaps = false).
  * Gradient fills: the part between bar i - 1 and bar i gets the vertical gradient of bar i (a canvas linear
  * gradient from the y of top_value to the y of bottom_value; the canvas keeps the end colours outside it, which is
- * the clamping), see drawGradient.
+ * the Pine clamping), see drawGradient.
  * Drawn as a primitive (not AreaSeries pairs) to avoid masking overlay candlesticks.
  */
 interface PlotFillPoint {
@@ -613,7 +613,7 @@ class PlotFillRenderer implements IPrimitivePaneRenderer {
  * a transparent colour (Pine color = na: text only), multi-line text and label shapes (text inside the label).
  * Positions: aboveBar / belowBar / inBar next to the bar of the price series (markers of one bar stacked away from
  * the bar), atPriceTop / atPriceBottom / atPriceMiddle at marker.price (see MarkerData).
- * layout (render_probe_markers.pine): a label has its text inside and its tip on the bar / price;
+ * Pine layout: a label has its text inside and its tip on the bar / price;
  * other shapes have the text on the far side of the shape (above for abovebar, below for belowbar).
  */
 class ExtendedMarkerPrimitive extends BasePrimitive {
@@ -922,7 +922,7 @@ const LABEL_BAR_GAP = 4; // px between the bar and a yloc.abovebar / belowbar la
  * Label geometry (Pine label styles): label_down = box above the point with a pointer down to it, label_up = box
  * below with a pointer up, label_left / label_right = box right / left of the point, label_center (or no style) =
  * box centred on the point, none = text only. yloc abovebar / belowbar: the point is the bar high / low, and a
- * centred box or a text without box is moved above / below it (PineScript, render_probe_markers.pine).
+ * centred box or a text without box is moved above / below it, as in Pine.
  */
 class LabelRenderer implements IPrimitivePaneRenderer {
   constructor(private _source: LabelPrimitive) {}
@@ -1394,10 +1394,10 @@ export class ChartManager {
   }
 
   /**
-   * Per-point colours of a line plot. colours the segment that leads into a point with the colour of
-   * that point (render_probe_segment_colour.pine, also across na points of plot.style_line); lightweight-charts
+   * Per-point colours of a line plot. Pine colours the segment that leads into a point with the colour of
+   * that point (also across na points of plot.style_line); lightweight-charts
    * colours the segment from a point to the next one with the colour of the first point. So each point gets the
-   * colour of the next point. Only for a visible simple line: a stepline already matches (horizontal
+   * colour of the next point. Only for a visible simple line: a stepline already matches Pine (horizontal
    * part in the colour of its point, vertical part in the colour of the next point) and circles have no segments.
    */
   private segmentColors<T extends { color?: string }>(data: T[], config: SeriesConfig): T[] {
@@ -2247,7 +2247,7 @@ export class ChartManager {
    * Colour of bar i: `fill.colors[i]` when the port gives per-bar colours (index of the plot1 data, which is the bar
    * index in the ports), else `fill.options.color`. A null, empty or fully transparent colour is Pine na: no fill on
    * that bar. `fill.options.transp` (Pine v4 transp, 0..100) multiplies the alpha the colour already has; without
-   * transp the colour is drawn as given (draws fill(p1, p2, color.blue) opaque, render_probe_fill.png).
+   * transp the colour is drawn as given (Pine draws fill(p1, p2, color.blue) opaque).
    * `fill.gradient` (Pine fill(p1, p2, top_value, bottom_value, top_color, bottom_color)) replaces the colour: bar i
    * (index in `bars`, found by the time of the plot1 point) gets the vertical gradient of gradient[...][i].
    */

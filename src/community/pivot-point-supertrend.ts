@@ -7,7 +7,6 @@
  * support / resistance levels.
  *
  * Reference: "Pivot Point SuperTrend" by LonesomeTheBlue
- * (docs/official/indicators_community/Pivot Point Supertrend.pine)
  */
 
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

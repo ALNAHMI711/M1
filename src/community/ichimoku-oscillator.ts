@@ -5,7 +5,7 @@
  * Tenkan = (highest high + lowest low) / 2 over conversionPeriods.
  * Kijun = (highest high + lowest low) / 2 over basePeriods.
  *
- * Reference: "Ichimoku Oscillator" (TV#302)
+ * Reference: "Ichimoku Oscillator"
  */
 
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

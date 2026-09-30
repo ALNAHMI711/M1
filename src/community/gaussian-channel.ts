@@ -4,7 +4,7 @@
  * Gaussian-weighted moving average approximated via linear regression,
  * with upper and lower bands at configurable standard deviation multiples.
  *
- * Reference: "Gaussian Channel [DW]" (TV#263)
+ * Reference: "Gaussian Channel [DW]"
  */
 
 import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

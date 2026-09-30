@@ -27,7 +27,7 @@ export interface KeltnerInputs {
 }
 
 /**
- * Default input values matching defaults
+ * Default input values matching the standard indicator defaults
  */
 export const defaultInputs: KeltnerInputs = {
   length: 20,

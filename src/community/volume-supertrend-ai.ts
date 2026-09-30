@@ -6,7 +6,7 @@
  * Find k-nearest historical bars with similar volume profile, weight ATR by their outcomes.
  * Apply adapted ATR factor to SuperTrend calculation.
  *
- * Reference: "Volume SuperTrend AI [Expo]" (TV#837)
+ * Reference: "Volume SuperTrend AI [Expo]"
  */
 
 import { ta, Series, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

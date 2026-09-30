@@ -19,7 +19,7 @@ export interface DonchianInputs {
 }
 
 /**
- * Default input values matching defaults
+ * Default input values matching the standard indicator defaults
  */
 export const defaultInputs: DonchianInputs = {
   length: 20,

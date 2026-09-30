@@ -40,7 +40,7 @@ describe('example colour helper', () => {
     expect(isTransparent('#ff0000')).toBe(false);
   });
 
-  it('builds the gradient of a gradient fill part (rules)', () => {
+  it('builds the gradient of a gradient fill part (Pine rules)', () => {
     // top_color at top_value, bottom_color at bottom_value
     expect(gradientPart(100, 70, '#4CAF50', '#4CAF5000')).toEqual({
       top: 100, bottom: 70, topColor: 'rgba(76, 175, 80, 1)', bottomColor: 'rgba(76, 175, 80, 0)',

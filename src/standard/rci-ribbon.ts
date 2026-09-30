@@ -5,7 +5,7 @@
  * RCI measures the directional consistency of price movements using Spearman's
  * rank correlation coefficient, scaled to -100 to 100.
  *
- * Based on RCI Ribbon indicator.
+ * Based on the standard RCI Ribbon indicator.
  */
 
 import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig, type FillConfig, type Bar, type SourceType } from 'oakscriptjs';

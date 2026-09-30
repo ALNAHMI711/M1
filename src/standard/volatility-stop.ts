@@ -2,8 +2,7 @@
  * Volatility Stop
  *
  * An ATR-based trailing stop (SAR-like). Flips between long and short when price
- * crosses the stop. Mirrors built-in "Volatility Stop"
- * (STD;Volatility_Stop):
+ * crosses the stop. Mirrors the standard "Volatility Stop" indicator:
  *
  *   atrM = nz(atr(length) * factor, tr)
  *   max  = max(max, src);  min = min(min, src)

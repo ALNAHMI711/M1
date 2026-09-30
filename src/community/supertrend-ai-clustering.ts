@@ -6,7 +6,7 @@
  * poor/average/excellent groups, then uses the weighted average of excellent
  * factors as the final optimized factor.
  *
- * Reference: "SuperTrend AI (Clustering) [LuxAlgo]" (TV#683)
+ * Reference: "SuperTrend AI (Clustering) [LuxAlgo]"
  */
 
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

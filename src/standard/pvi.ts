@@ -5,7 +5,7 @@
  * prior bar, by the bar's percentage price change. Tracks the "crowd" that is
  * presumed to trade on active days. Seeded at 1000; an EMA(255) acts as signal.
  *
- * Based on built-in "Positive Volume Index" (STD;Positive_Volume_Index).
+ * Based on the standard "Positive Volume Index" indicator.
  */
 
 import { Series, ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

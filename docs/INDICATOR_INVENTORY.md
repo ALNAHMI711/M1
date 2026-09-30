@@ -1,6 +1,6 @@
 # OakScriptJS Indicator Inventory
 
-This document provides a comprehensive inventory of all PineScript indicators from standard library,
+This document provides a comprehensive inventory of the standard PineScript indicators,
 ranked by complexity. It tracks implementation status in OakScriptJS.
 
 ## Summary Statistics
@@ -15,9 +15,8 @@ ranked by complexity. It tracks implementation status in OakScriptJS.
 | **Medium (5-14)**      | 43    |
 | **Simple (0-4)**       | 59    |
 
-> Totals reconciled against the live `indicatorRegistry` in `src/index.ts` (2026-05-31):
-> 131 scored rows below (84 implemented / 47 pending) + the 16 built-ins captured this session
-> (all 16 now implemented). The complexity buckets cover the scored table only (the 16 new
+> 131 scored rows below (84 implemented / 47 pending) + 16 built-in studies listed separately
+> (all 16 implemented). The complexity buckets cover the scored table only (the 16 built-in
 > rows await Pine-source scoring). Note `src/` registers 412 indicators in total — the bulk are
 > community/candlestick ports tracked in `INDICATOR_INVENTORY_COMMUNITY.md` /
 > `INDICATOR_INVENTORY_CANDLESTICK.md`, not in this standard-library table.
@@ -37,170 +36,166 @@ Complexity is calculated based on:
 
 ## Complete Indicator Inventory
 
-| Indicator | Score | TA Funcs | Special Features | Status | Test Data | Test |
-|-----------|-------|----------|------------------|--------|-----------|------|
-| Keltner Channels Strategy | 27 | 7 | Strategy | Pending | No | - |
-| Technical Ratings Strategy | 26 | 6 | Strategy, ReqSec | Pending | No | - |
-| Seasonality | 25 | 5 | Drawing, ReqSec, Tables, Arrays | Pending | No | - |
-| Stochastic Slow Strategy | 24 | 4 | Strategy | Pending | No | - |
-| Bollinger Bands Strategy | 24 | 4 | Strategy | Pending | No | - |
-| Bollinger Bands Strategy directed | 24 | 4 | Strategy | Pending | No | - |
-| RSI Strategy | 23 | 3 | Strategy | Pending | No | - |
-| MovingAvg2Line Cross | 23 | 3 | Strategy | Pending | No | - |
-| MACD Strategy | 23 | 3 | Strategy | Pending | No | - |
-| Volty Expan Close Strategy | 22 | 2 | Strategy | Pending | No | - |
-| Supertrend Strategy | 22 | 2 | Strategy | Pending | No | - |
-| Price Channel Strategy | 22 | 2 | Strategy | Pending | No | - |
-| Pivot Reversal Strategy | 22 | 2 | Strategy | Pending | No | - |
-| Pivot Extension Strategy | 22 | 2 | Strategy | Pending | No | - |
-| ChannelBreakOutStrategy | 22 | 2 | Strategy | Pending | No | - |
-| Pivot Points Standard | 21 | 1 | Drawing, ReqSec, Arrays | Pending | No | - |
-| MovingAvg Cross | 21 | 1 | Strategy | Pending | No | - |
-| Gaps | 21 | 1 | Drawing, Tables, Arrays | Pending | No | - |
-| Rob Booker - ADX Breakout | 20 | 0 | Strategy | Pending | No | - |
-| Parabolic SAR Strategy | 20 | 0 | Strategy | Pending | No | - |
-| OutSide Bar Strategy | 20 | 0 | Strategy | Pending | No | - |
-| Momentum Strategy | 20 | 0 | Strategy | Pending | No | - |
-| InSide Bar Strategy | 20 | 0 | Strategy | Pending | No | - |
-| Greedy Strategy | 20 | 0 | Strategy | Pending | No | - |
-| Consecutive Up_Down Strategy | 20 | 0 | Strategy | Pending | No | - |
-| BarUpDn Strategy | 20 | 0 | Strategy | Pending | No | - |
-| Technical Ratings | 17 | 7 | ReqSec, Tables, Arrays | Pending | No | - |
-| Trading Sessions | 15 | 5 | Drawing, Arrays | Pending | No | - |
-| Price Target | 15 | 5 | Drawing, Tables | Pending | No | - |
-| Multi-Time Period Charts | 15 | 5 | Drawing, ReqSec | Pending | No | - |
-| Auto Pitchfork | 15 | 5 | Drawing, Arrays | Pending | No | - |
-| Auto Fib Extension | 15 | 5 | Drawing, Arrays | Pending | No | - |
-| Pivot Points High Low | 12 | 2 | Drawing | Pending | No | - |
-| Relative Strength Index | 11 | 11 | - | **Implemented** | Yes | ✅ Pass |
-| Auto Fib Retracement | 11 | 1 | Drawing | Pending | No | - |
-| Performance | 10 | 0 | ReqSec, Tables | Pending | No | - |
-| Linear Regression Channel | 10 | 0 | Drawing | **Implemented** | No | - (community/) |
-| On Balance Volume | 8 | 8 | - | **Implemented** | Yes | ✅ Pass |
-| Relative Volatility Index | 7 | 7 | - | **Implemented** | Yes | ✅ Pass |
-| Rank Correlation Index | 7 | 7 | - | **Implemented** | Yes | ✅ Pass |
-| Commodity Channel Index | 7 | 7 | - | **Implemented** | Yes | ✅ Pass |
-| Moving Average Simple | 6 | 6 | - | **Implemented** | Yes | ✅ Pass |
-| Moving Average Exponential | 6 | 6 | - | **Implemented** | Yes | ✅ Pass |
-| Moon Phases | 6 | 1 | Arrays | **Implemented** | Yes | ✅ Pass |
-| Cumulative Volume Index | 6 | 1 | ReqSec | Pending | No | - |
-| Correlation Coefficient | 6 | 1 | ReqSec | Pending | No | - |
-| Bollinger Bands | 6 | 6 | - | **Implemented** | Yes | ✅ Pass |
-| Advance Decline Line | 6 | 1 | ReqSec | Pending | No | - |
-| Visible Average Price | 5 | 0 | ReqSec | Pending | No | - |
-| RSI Divergence Indicator | 5 | 5 | Drawing | Pending | No | - |
-| Rob Booker - Ziv Ghost Pivots | 5 | 0 | Drawing | Pending | No | - |
-| Open Interest | 5 | 0 | ReqSec | Pending | No | - |
-| Moving Average Ribbon | 5 | 5 | - | **Implemented** | Yes | ✅ Pass |
-| Keltner Channels | 5 | 5 | - | **Implemented** | Yes | ✅ Pass |
-| Average True Range | 5 | 5 | - | **Implemented** | Yes | ✅ Pass |
-| Advance Decline Ratio | 5 | 1 | ReqSec | Pending | No | - |
-| Advance_Decline Ratio (Bars) | 5 | 1 | ReqSec | Pending | No | - |
-| 24-hour Volume | 5 | 0 | ReqSec | Pending | No | - |
-| Directional Movement Index | 4 | 4 | - | **Implemented** | Yes | ✅ Pass |
-| Know Sure Thing | 4 | 4 | - | **Implemented** | Yes | ✅ Pass |
-| Volume Profile Fixed Range | 4 | 0 | Drawing | Pending | No | - |
-| Volume Profile Visible Range | 4 | 0 | Drawing | Pending | No | - |
-| Connors RSI | 3 | 3 | - | **Implemented** | Yes | ✅ Pass |
-| Aroon | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Bollinger Bands %B | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Bollinger BandWidth | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Chaikin Oscillator | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Chande Kroll Stop | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Chop Zone | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Choppiness Index | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Coppock Curve | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Donchian Channels | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Ease of Movement | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Envelope | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Fisher Transform | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Klinger Oscillator | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| MACD | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Price Oscillator | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Stochastic | 2 | 2 | - | **Implemented** | Yes | ✅ Pass |
-| Average Directional Index | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Awesome Oscillator | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| BBTrend | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Bull Bear Power | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Chande Momentum Oscillator | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Cumulative Volume Delta | 1 | 1 | - | **Implemented** | Yes | ⏭️ Skip |
-| Detrended Price Oscillator | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Double EMA | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Elder Force Index | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Historical Volatility | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Hull Moving Average | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Ichimoku Cloud | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Least Squares Moving Average | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| MA Cross | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Mass Index | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| McGinley Dynamic | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Median | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Money Flow Index | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Moving Average Weighted | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Net Volume | 1 | 1 | - | **Implemented** | Yes | ⏭️ Skip |
-| Parabolic SAR | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Price Volume Trend | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| RCI Ribbon | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Relative Vigor Index | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Relative Volume at Time | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Smoothed Moving Average | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| SMI Ergodic Indicator | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| SMI Ergodic Oscillator | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Standard Deviation | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Stochastic RSI | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Supertrend | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Trend Strength Index | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Triple EMA | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| True Strength Index | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Volume Delta | 1 | 1 | - | **Implemented** | Yes | ⏭️ Skip |
-| Volume Oscillator | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Volume Weighted Moving Average | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Vortex Indicator | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Williams Alligator | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Williams %R | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Woodies CCI | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Accumulation/Distribution | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Average Day Range | 1 | 1 | - | **Implemented** | Yes | ✅ Pass |
-| Balance of Power | 0 | 0 | - | **Implemented** | Yes | ✅ Pass |
-| Bollinger Bars | 0 | 0 | - | **Implemented** | Yes | ✅ Pass |
-| Chaikin Money Flow | 0 | 0 | - | **Implemented** | Yes | ✅ Pass |
-| Momentum | 0 | 0 | - | **Implemented** | Yes | ✅ Pass |
-| Rate of Change | 0 | 0 | - | **Implemented** | Yes | ✅ Pass |
-| Time Weighted Average Price | 0 | 0 | - | **Implemented** | Yes | ✅ Pass |
-| Ultimate Oscillator | 0 | 0 | - | **Implemented** | Yes | ✅ Pass |
-| Williams Fractals | 0 | 0 | - | **Implemented** | Yes | ⏭️ Skip |
-| Zig Zag | 0 | 0 | - | **Implemented** | Yes | ✅ Pass |
+| Indicator | Score | TA Funcs | Special Features | Status |
+|-----------|-------|----------|------------------|--------|
+| Keltner Channels Strategy | 27 | 7 | Strategy | Pending |
+| Technical Ratings Strategy | 26 | 6 | Strategy, ReqSec | Pending |
+| Seasonality | 25 | 5 | Drawing, ReqSec, Tables, Arrays | Pending |
+| Stochastic Slow Strategy | 24 | 4 | Strategy | Pending |
+| Bollinger Bands Strategy | 24 | 4 | Strategy | Pending |
+| Bollinger Bands Strategy directed | 24 | 4 | Strategy | Pending |
+| RSI Strategy | 23 | 3 | Strategy | Pending |
+| MovingAvg2Line Cross | 23 | 3 | Strategy | Pending |
+| MACD Strategy | 23 | 3 | Strategy | Pending |
+| Volty Expan Close Strategy | 22 | 2 | Strategy | Pending |
+| Supertrend Strategy | 22 | 2 | Strategy | Pending |
+| Price Channel Strategy | 22 | 2 | Strategy | Pending |
+| Pivot Reversal Strategy | 22 | 2 | Strategy | Pending |
+| Pivot Extension Strategy | 22 | 2 | Strategy | Pending |
+| ChannelBreakOutStrategy | 22 | 2 | Strategy | Pending |
+| Pivot Points Standard | 21 | 1 | Drawing, ReqSec, Arrays | Pending |
+| MovingAvg Cross | 21 | 1 | Strategy | Pending |
+| Gaps | 21 | 1 | Drawing, Tables, Arrays | Pending |
+| Rob Booker - ADX Breakout | 20 | 0 | Strategy | Pending |
+| Parabolic SAR Strategy | 20 | 0 | Strategy | Pending |
+| OutSide Bar Strategy | 20 | 0 | Strategy | Pending |
+| Momentum Strategy | 20 | 0 | Strategy | Pending |
+| InSide Bar Strategy | 20 | 0 | Strategy | Pending |
+| Greedy Strategy | 20 | 0 | Strategy | Pending |
+| Consecutive Up_Down Strategy | 20 | 0 | Strategy | Pending |
+| BarUpDn Strategy | 20 | 0 | Strategy | Pending |
+| Technical Ratings | 17 | 7 | ReqSec, Tables, Arrays | Pending |
+| Trading Sessions | 15 | 5 | Drawing, Arrays | Pending |
+| Price Target | 15 | 5 | Drawing, Tables | Pending |
+| Multi-Time Period Charts | 15 | 5 | Drawing, ReqSec | Pending |
+| Auto Pitchfork | 15 | 5 | Drawing, Arrays | Pending |
+| Auto Fib Extension | 15 | 5 | Drawing, Arrays | Pending |
+| Pivot Points High Low | 12 | 2 | Drawing | Pending |
+| Relative Strength Index | 11 | 11 | - | **Implemented** |
+| Auto Fib Retracement | 11 | 1 | Drawing | Pending |
+| Performance | 10 | 0 | ReqSec, Tables | Pending |
+| Linear Regression Channel | 10 | 0 | Drawing | **Implemented** (community/) |
+| On Balance Volume | 8 | 8 | - | **Implemented** |
+| Relative Volatility Index | 7 | 7 | - | **Implemented** |
+| Rank Correlation Index | 7 | 7 | - | **Implemented** |
+| Commodity Channel Index | 7 | 7 | - | **Implemented** |
+| Moving Average Simple | 6 | 6 | - | **Implemented** |
+| Moving Average Exponential | 6 | 6 | - | **Implemented** |
+| Moon Phases | 6 | 1 | Arrays | **Implemented** |
+| Cumulative Volume Index | 6 | 1 | ReqSec | Pending |
+| Correlation Coefficient | 6 | 1 | ReqSec | Pending |
+| Bollinger Bands | 6 | 6 | - | **Implemented** |
+| Advance Decline Line | 6 | 1 | ReqSec | Pending |
+| Visible Average Price | 5 | 0 | ReqSec | Pending |
+| RSI Divergence Indicator | 5 | 5 | Drawing | Pending |
+| Rob Booker - Ziv Ghost Pivots | 5 | 0 | Drawing | Pending |
+| Open Interest | 5 | 0 | ReqSec | Pending |
+| Moving Average Ribbon | 5 | 5 | - | **Implemented** |
+| Keltner Channels | 5 | 5 | - | **Implemented** |
+| Average True Range | 5 | 5 | - | **Implemented** |
+| Advance Decline Ratio | 5 | 1 | ReqSec | Pending |
+| Advance_Decline Ratio (Bars) | 5 | 1 | ReqSec | Pending |
+| 24-hour Volume | 5 | 0 | ReqSec | Pending |
+| Directional Movement Index | 4 | 4 | - | **Implemented** |
+| Know Sure Thing | 4 | 4 | - | **Implemented** |
+| Volume Profile Fixed Range | 4 | 0 | Drawing | Pending |
+| Volume Profile Visible Range | 4 | 0 | Drawing | Pending |
+| Connors RSI | 3 | 3 | - | **Implemented** |
+| Aroon | 2 | 2 | - | **Implemented** |
+| Bollinger Bands %B | 2 | 2 | - | **Implemented** |
+| Bollinger BandWidth | 2 | 2 | - | **Implemented** |
+| Chaikin Oscillator | 2 | 2 | - | **Implemented** |
+| Chande Kroll Stop | 2 | 2 | - | **Implemented** |
+| Chop Zone | 2 | 2 | - | **Implemented** |
+| Choppiness Index | 2 | 2 | - | **Implemented** |
+| Coppock Curve | 2 | 2 | - | **Implemented** |
+| Donchian Channels | 2 | 2 | - | **Implemented** |
+| Ease of Movement | 2 | 2 | - | **Implemented** |
+| Envelope | 2 | 2 | - | **Implemented** |
+| Fisher Transform | 2 | 2 | - | **Implemented** |
+| Klinger Oscillator | 2 | 2 | - | **Implemented** |
+| MACD | 2 | 2 | - | **Implemented** |
+| Price Oscillator | 2 | 2 | - | **Implemented** |
+| Stochastic | 2 | 2 | - | **Implemented** |
+| Average Directional Index | 1 | 1 | - | **Implemented** |
+| Awesome Oscillator | 1 | 1 | - | **Implemented** |
+| BBTrend | 1 | 1 | - | **Implemented** |
+| Bull Bear Power | 1 | 1 | - | **Implemented** |
+| Chande Momentum Oscillator | 1 | 1 | - | **Implemented** |
+| Cumulative Volume Delta | 1 | 1 | - | **Implemented** |
+| Detrended Price Oscillator | 1 | 1 | - | **Implemented** |
+| Double EMA | 1 | 1 | - | **Implemented** |
+| Elder Force Index | 1 | 1 | - | **Implemented** |
+| Historical Volatility | 1 | 1 | - | **Implemented** |
+| Hull Moving Average | 1 | 1 | - | **Implemented** |
+| Ichimoku Cloud | 1 | 1 | - | **Implemented** |
+| Least Squares Moving Average | 1 | 1 | - | **Implemented** |
+| MA Cross | 1 | 1 | - | **Implemented** |
+| Mass Index | 1 | 1 | - | **Implemented** |
+| McGinley Dynamic | 1 | 1 | - | **Implemented** |
+| Median | 1 | 1 | - | **Implemented** |
+| Money Flow Index | 1 | 1 | - | **Implemented** |
+| Moving Average Weighted | 1 | 1 | - | **Implemented** |
+| Net Volume | 1 | 1 | - | **Implemented** |
+| Parabolic SAR | 1 | 1 | - | **Implemented** |
+| Price Volume Trend | 1 | 1 | - | **Implemented** |
+| RCI Ribbon | 1 | 1 | - | **Implemented** |
+| Relative Vigor Index | 1 | 1 | - | **Implemented** |
+| Relative Volume at Time | 1 | 1 | - | **Implemented** |
+| Smoothed Moving Average | 1 | 1 | - | **Implemented** |
+| SMI Ergodic Indicator | 1 | 1 | - | **Implemented** |
+| SMI Ergodic Oscillator | 1 | 1 | - | **Implemented** |
+| Standard Deviation | 1 | 1 | - | **Implemented** |
+| Stochastic RSI | 1 | 1 | - | **Implemented** |
+| Supertrend | 1 | 1 | - | **Implemented** |
+| Trend Strength Index | 1 | 1 | - | **Implemented** |
+| Triple EMA | 1 | 1 | - | **Implemented** |
+| True Strength Index | 1 | 1 | - | **Implemented** |
+| Volume Delta | 1 | 1 | - | **Implemented** |
+| Volume Oscillator | 1 | 1 | - | **Implemented** |
+| Volume Weighted Moving Average | 1 | 1 | - | **Implemented** |
+| Vortex Indicator | 1 | 1 | - | **Implemented** |
+| Williams Alligator | 1 | 1 | - | **Implemented** |
+| Williams %R | 1 | 1 | - | **Implemented** |
+| Woodies CCI | 1 | 1 | - | **Implemented** |
+| Accumulation/Distribution | 1 | 1 | - | **Implemented** |
+| Average Day Range | 1 | 1 | - | **Implemented** |
+| Balance of Power | 0 | 0 | - | **Implemented** |
+| Bollinger Bars | 0 | 0 | - | **Implemented** |
+| Chaikin Money Flow | 0 | 0 | - | **Implemented** |
+| Momentum | 0 | 0 | - | **Implemented** |
+| Rate of Change | 0 | 0 | - | **Implemented** |
+| Time Weighted Average Price | 0 | 0 | - | **Implemented** |
+| Ultimate Oscillator | 0 | 0 | - | **Implemented** |
+| Williams Fractals | 0 | 0 | - | **Implemented** |
+| Zig Zag | 0 | 0 | - | **Implemented** |
 
 ---
 
-## Built-in indicators added from live capture (2026-05-31)
+## Built-in studies
 
-These 16 built-in **studies** appear in live `standard` catalog
-(`pine-facade.PineScript.com/pine-facade/list?filter=standard`, 145 entries) but were
-absent from the table above. Captured by driving the Desktop app over CDP — see
-[`INDICATOR_CATALOG.md`](INDICATOR_CATALOG.md). Six were already
-implemented (the table above was stale); the other ten were implemented on 2026-05-31. All 16
-are now implemented. Complexity scores are left blank pending Pine-source analysis and so are
-excluded from the bucket counts above.
+These 16 built-in **studies** are not in the table above. Six were already implemented and the
+other ten were added later. All 16 are now implemented. Complexity scores are left
+blank pending Pine-source analysis and so are excluded from the bucket counts above.
 
-| Indicator | scriptIdPart | Status | Implementation / Notes |
-|-----------|--------------|--------|------------------------|
-| Arnaud Legoux Moving Average (ALMA) | `STD;Arnaud%1Legoux%1Moving%1Average` | **Implemented** | `src/standard/alma.ts` |
-| TRIX | `STD;TRIX` | **Implemented** | `src/standard/trix.ts` |
-| Chandelier Exit | `STD;Chandelier_Exit` | **Implemented** | `src/community/chandelier-exit.ts` |
-| Kaufman's Adaptive Moving Average (KAMA) | `STD;Kaufmans_Adaptive_Moving_Average` | **Implemented** | `src/community/kaufman-adaptive-ma.ts` |
-| Price Momentum Oscillator (PMO) | `STD;Price_Momentum_Oscillator` | **Implemented** | `src/community/price-momentum-oscillator.ts` |
-| Stochastic Momentum Index (SMI) | `STD;SMI` | **Implemented** | `src/community/stochastic-momentum-index.ts` (distinct from SMI Ergodic) |
-| Aroon Oscillator | `STD;Aroon_Oscillator` | **Implemented** | `src/standard/aroon-oscillator.ts` |
-| Negative Volume Index (NVI) | `STD;Negative_Volume_Index` | **Implemented** | `src/standard/nvi.ts` (NVI + EMA signal) |
-| Positive Volume Index (PVI) | `STD;Positive_Volume_Index` | **Implemented** | `src/standard/pvi.ts` (PVI + EMA signal) |
-| Pring's Special K | `STD;Prings_Special_K` | **Implemented** | `src/standard/prings-special-k.ts` |
-| Ulcer Index | `STD;Ulcer_Index` | **Implemented** | `src/standard/ulcer-index.ts` |
-| Volatility Stop | `STD;Volatility_Stop` | **Implemented** | `src/standard/volatility-stop.ts` |
-| Volume Weighted Average Price (VWAP) | `STD;VWAP` | **Implemented** | `src/standard/vwap.ts` (anchored, optional bands) |
-| Auto Key Levels | `STD;Auto_Key_Levels` | **Implemented** | `src/standard/auto-key-levels.ts` (approx; pivot-based S/R rays) |
-| Auto Trend Detector | `STD;Auto_Trend_Detector` | **Implemented** | `src/standard/auto-trend-detector.ts` (approx; pivot trendlines) |
-| Up/Down Volume | `STD;UP_DOWN_Volume` | **Implemented** | `src/standard/up-down-volume.ts` (approx; no intrabar data — like CVD) |
+| Indicator | Status | Implementation / Notes |
+|-----------|--------|------------------------|
+| Arnaud Legoux Moving Average (ALMA) | **Implemented** | `src/standard/alma.ts` |
+| TRIX | **Implemented** | `src/standard/trix.ts` |
+| Chandelier Exit | **Implemented** | `src/community/chandelier-exit.ts` |
+| Kaufman's Adaptive Moving Average (KAMA) | **Implemented** | `src/community/kaufman-adaptive-ma.ts` |
+| Price Momentum Oscillator (PMO) | **Implemented** | `src/community/price-momentum-oscillator.ts` |
+| Stochastic Momentum Index (SMI) | **Implemented** | `src/community/stochastic-momentum-index.ts` (distinct from SMI Ergodic) |
+| Aroon Oscillator | **Implemented** | `src/standard/aroon-oscillator.ts` |
+| Negative Volume Index (NVI) | **Implemented** | `src/standard/nvi.ts` (NVI + EMA signal) |
+| Positive Volume Index (PVI) | **Implemented** | `src/standard/pvi.ts` (PVI + EMA signal) |
+| Pring's Special K | **Implemented** | `src/standard/prings-special-k.ts` |
+| Ulcer Index | **Implemented** | `src/standard/ulcer-index.ts` |
+| Volatility Stop | **Implemented** | `src/standard/volatility-stop.ts` |
+| Volume Weighted Average Price (VWAP) | **Implemented** | `src/standard/vwap.ts` (anchored, optional bands) |
+| Auto Key Levels | **Implemented** | `src/standard/auto-key-levels.ts` (approx; pivot-based S/R rays) |
+| Auto Trend Detector | **Implemented** | `src/standard/auto-trend-detector.ts` (approx; pivot trendlines) |
+| Up/Down Volume | **Implemented** | `src/standard/up-down-volume.ts` (approx; no intrabar data — like CVD) |
 
 ---
 
@@ -227,43 +222,20 @@ These functions are implemented in the core `ta` module (`packages/oakscriptjs/s
 
 ## File Reference
 
-All source PineScript files are located in:
-```
-docs/official/indicators_standard/
-```
-
 Implemented indicators are in:
 ```
 src/
 ```
 
-Regression tests and reference data mapping:
-```
-tests/regression/
-```
-
 ---
 
-## Regression Test Results
+## Notes
 
-All 74 implemented indicators pass PineSuite regression tests:
-
-```
-Total Indicators: 77 (in mapping)
-Passed:           53
-Passed w/caveats: 20 (extended warmup, normalized comparison, or tolerance adjustment)
-Skipped:          4 (CVD, Net Volume, Volume Delta, Williams Fractals)
-Failed:           0
-```
-
-**Notes on skipped indicators:**
-- CVD, Net Volume, and Volume Delta use `ta.requestVolumeDelta` / `ta.requestUpAndDownVolume` which analyze intrabar data from lower timeframes
+- CVD, Net Volume, and Volume Delta use the PineScript `ta.requestVolumeDelta` / `ta.requestUpAndDownVolume`, which analyze intrabar data from lower timeframes
 - Our implementation approximates up/down volume using close vs open price comparison
-- Williams Fractals: CSV has duplicate 'Shapes' columns that merge in parser - incompatible format
-- RCI Ribbon passes with extended warmup and tolerance adjustment
 
 ---
 
 *Last updated: February 25, 2026 - Added KST, Connors RSI, Chop Zone, RCI, RVI, Williams Fractals, TWAP, Bollinger Bars, Moon Phases*
 
-*Updated May 31, 2026 - Added 16 built-in studies from live Desktop capture (6 already implemented but undocumented). Implemented the remaining 10 (`src/standard/`: aroon-oscillator, nvi, pvi, ulcer-index, prings-special-k, volatility-stop, vwap, up-down-volume, auto-key-levels, auto-trend-detector) with unit tests — Auto Key Levels, Auto Trend Detector, and Up/Down Volume are approximations (drawing/intrabar). Reconciled the full table against `src/index.ts`: flipped Linear Regression Channel (Pending → Implemented, `community/`) and corrected the stale summary counts; the rest of the scored table matched the registry.*
+*Updated May 31, 2026 - Added 16 built-in studies (6 already implemented but undocumented). Implemented the remaining 10 (`src/standard/`: aroon-oscillator, nvi, pvi, ulcer-index, prings-special-k, volatility-stop, vwap, up-down-volume, auto-key-levels, auto-trend-detector) with unit tests. Auto Key Levels, Auto Trend Detector, and Up/Down Volume are approximations (drawing/intrabar). Linear Regression Channel is now marked as implemented (`community/`) and the summary counts are corrected.*

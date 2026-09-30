@@ -4,7 +4,7 @@
  * Multi-timeframe momentum oscillator that uses weighted average of three periods.
  * Designed to capture momentum across short, medium, and long-term periods.
  *
- * Based on Ultimate Oscillator indicator.
+ * Based on the standard Ultimate Oscillator indicator.
  */
 
 import type { Bar, InputConfig, PlotConfig } from 'oakscriptjs';

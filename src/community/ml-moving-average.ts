@@ -6,7 +6,7 @@
  * Weight(i) = exp(-0.5 * ((i - current) / sigma)^2)
  * Upper/lower bands = center +/- mult * weighted_stdev.
  *
- * Reference: "Machine Learning Moving Average [LuxAlgo]" (TV#410)
+ * Reference: "Machine Learning Moving Average [LuxAlgo]"
  */
 
 import { getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

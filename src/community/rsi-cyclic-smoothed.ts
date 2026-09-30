@@ -4,7 +4,7 @@
  * Standard RSI with an additional Ehlers-style 2-pole Butterworth smoothing filter.
  * Reduces noise and highlights dominant cycle trends in RSI.
  *
- * Reference: "RSI Cyclic Smoothed" (TV#603)
+ * Reference: "RSI Cyclic Smoothed"
  */
 
 import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

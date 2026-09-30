@@ -116,8 +116,7 @@ export interface GradientPart {
 
 /**
  * Gradient of one bar of Pine fill(p1, p2, top_value, bottom_value, top_color, bottom_color).
- * rules (oakScriptJS gradient-check/data/probe_gradient_fill.png and
- * gradient-fill-check/data/tv/probe_gradient_edge.png): the colour changes with the price, top_color at top_value,
+ * Pine rules: the colour changes with the price, top_color at top_value,
  * bottom_color at bottom_value, linear in between, the end colour outside the range; top_value below bottom_value
  * keeps top_color at top_value. Nothing is drawn when a value is na or top_value == bottom_value. An na (null,
  * empty, unreadable) colour is a transparent end: the gradient goes from the other colour to transparent. Null when

@@ -5,7 +5,7 @@
  * prior bar, by the bar's percentage price change. Tracks "smart money" that is
  * presumed to trade on quiet days. Seeded at 1000; an EMA(255) acts as signal.
  *
- * Based on built-in "Negative Volume Index" (STD;Negative_Volume_Index).
+ * Based on the standard "Negative Volume Index" indicator.
  */
 
 import { Series, ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

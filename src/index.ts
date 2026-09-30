@@ -1815,7 +1815,7 @@ export { barInterval, barTime } from './bar-time';
 /**
  * Indicator category types
  */
-// ── Built-in studies added from live Desktop capture (2026-05-31) ──
+// ── Built-in studies ──
 // Aroon Oscillator
 import * as aroonOscIndicator from './standard/aroon-oscillator';
 export { AroonOscillator, calculate as calculateAroonOscillator } from './standard/aroon-oscillator';
@@ -7302,7 +7302,7 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
   ...candlestickEntries(
     candlestickPortEntries.map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
   ),
-  // ── Built-in studies added from live Desktop capture (2026-05-31) ──
+  // ── Built-in studies ──
   {
     id: 'aroon-oscillator',
     group: 'standard',

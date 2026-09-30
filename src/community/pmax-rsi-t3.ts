@@ -4,7 +4,7 @@
  * Tillson T3 smoothing applied to RSI, then PMax trailing stop.
  * T3 is a triple-smoothed EMA with a volume factor for reduced lag.
  *
- * Reference: "PMax on RSI with T3" (TV#527)
+ * Reference: "PMax on RSI with T3"
  */
 
 import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

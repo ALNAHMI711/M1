@@ -6,7 +6,7 @@
  * Filter moves up when close > filter + smoothRange, down vice versa.
  * Upper and lower bands derived from filter +/- smoothRange.
  *
- * Reference: "Range Filter [DW]" (TV#567)
+ * Reference: "Range Filter [DW]"
  */
 
 import { ta, getSourceSeries, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';

@@ -3,12 +3,12 @@
  *
  * Splits each bar's volume into "up" and "down" components.
  *
- * NOTE: built-in "Up/Down Volume" (STD;UP_DOWN_Volume) derives the
+ * NOTE: the standard "Up/Down Volume" indicator derives the
  * split from LOWER-TIMEFRAME intrabar data (the up/down volume of each contained
  * lower-timeframe bar). That intrabar data is not available here, so — like this
  * library's Volume Delta / CVD — we APPROXIMATE the split from bar direction:
  * a bar closing up contributes its volume to "up", a bar closing down to "down".
- * Values therefore differ from when intrabar data would split a bar.
+ * Values therefore differ from the standard indicator when intrabar data would split a bar.
  */
 
 import { type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';

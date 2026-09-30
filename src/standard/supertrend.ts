@@ -25,7 +25,7 @@ export interface SupertrendInputs {
 }
 
 /**
- * Default input values matching defaults
+ * Default input values matching the standard indicator defaults
  */
 export const defaultInputs: SupertrendInputs = {
   atrPeriod: 10,

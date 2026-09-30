@@ -30,8 +30,8 @@ export const defaultInputs: MarketStructureTrailingStopInputs = {
   incr: 100,
   resetOn: 'CHoCH',
   showMS: true,
-  bullCss: '#00897B',  // Pine v5 color.teal (output 0xFF00897B)
-  bearCss: '#FF5252',  // Pine v5 color.red (output 0xFFFF5252)
+  bullCss: '#00897B',  // Pine v5 color.teal (0xFF00897B)
+  bearCss: '#FF5252',  // Pine v5 color.red (0xFFFF5252)
   retCss: '#ff5d00',
   areaTransp: 80,
 };
@@ -176,8 +176,8 @@ export function calculate(bars: Bar[], inputs: Partial<MarketStructureTrailingSt
   const closePlot = bars.map((b) => ({ time: b.time, value: b.close }));
 
   // Pine: css_area = (close - ts) * os < 0 ? retCss : css; fill color color.new(css_area, areaTransp).
-  // When css_area is na, gives color.new(na, areaTransp) as black with that transparency
-  // (0x33000000 for 80), not na: checked with port-fidelity-check/data/tv/na_color_probe2.json.
+  // When css_area is na, Pine gives color.new(na, areaTransp) as black with that transparency
+  // (0x33000000 for 80), not na.
   const fillColors = bars.map((b, i) => {
     const cssArea = (b.close - tsArr[i]) * osArr[i] < 0 ? cfg.retCss : cssArr[i];
     return withTransp(cssArea ?? '#000000', cfg.areaTransp);

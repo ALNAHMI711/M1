@@ -19,7 +19,7 @@ export interface SwingHighsLowsPatternsInputs {
   swinglCss: string;
 }
 
-// Pine v5 colours read on PineScript: color.red #FF5252, color.teal #00897B
+// Pine v5 colours: color.red #FF5252, color.teal #00897B
 export const defaultInputs: SwingHighsLowsPatternsInputs = {
   length: 21,
   swinghCss: '#FF5252',
@@ -46,8 +46,8 @@ export const metadata = {
 const MAX_LABELS = 500;
 
 /**
- * Pine compares floats with an absolute tolerance: a == b when |a - b| <= 1e-10 (checked on PineScript,
- * port-fidelity-check/.tmp/eps2_run.py). So a < b only when b - a > 1e-10.
+ * Pine compares floats with an absolute tolerance: a == b when |a - b| <= 1e-10.
+ * So a < b only when b - a > 1e-10.
  */
 const EPS = 1e-10;
 const lt = (a: number, b: number) => b - a > EPS;

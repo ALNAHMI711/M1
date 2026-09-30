@@ -253,7 +253,7 @@ Drawing primitive support: Lines (`LineDrawingData`), Boxes (`BoxData`), Labels 
 
 ### Candlestick Patterns (44)
 
-All 44 patterns from standard candlestick pattern library, rendered as chart markers.
+All 44 patterns from the standard candlestick pattern set, rendered as chart markers.
 
 | Pattern | Signal | Candles |
 |---------|--------|---------|

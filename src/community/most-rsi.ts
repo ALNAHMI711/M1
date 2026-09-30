@@ -5,7 +5,7 @@
  * Includes RSI, RSI-based MA, MOST line, regular divergence detection on the RSI,
  * OB/OS gradient fills, and Bollinger Bands when the MA type is "Bollinger Bands".
  *
- * Reference: docs/official/indicators_community/"MOST on RSI.pine" (Pine v5)
+ * Reference: "MOST on RSI" (community, Pine v5)
  */
 
 import { ta, getSourceSeries, Series, type IndicatorResult, type InputConfig, type PlotConfig, type FillData, type Bar, type SourceType } from 'oakscriptjs';

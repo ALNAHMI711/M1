@@ -5,7 +5,7 @@
  * Finds k-nearest historical bars with similar RSI values, then analyzes
  * what price did after those readings to compute adaptive OB/OS levels.
  *
- * Reference: "Machine Learning RSI [BullVision]" (TV#411)
+ * Reference: "Machine Learning RSI [BullVision]"
  */
 
 import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
