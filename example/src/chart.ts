@@ -46,6 +46,7 @@ import type {
 } from '../../src/types';
 import { barInterval } from '../../src/bar-time';
 import { toCandlestickData } from './data-loader';
+import { isTransparent, withOpacity } from './color';
 
 // ─── Bar grid (bars after the last bar) ────────────────────────────────────
 
@@ -96,20 +97,11 @@ class BarGrid {
   }
 }
 
-/** Fully transparent colour (Pine na colour): 'transparent', #rrggbb00, #rgb0, rgba(..., 0) */
-function isTransparent(color: string | undefined | null): boolean {
-  if (!color) return true;
-  const c = color.trim().toLowerCase();
-  if (c === 'transparent') return true;
-  if (/^#[0-9a-f]{8}$/.test(c)) return c.slice(7) === '00';
-  if (/^#[0-9a-f]{4}$/.test(c)) return c[4] === '0';
-  const m = c.match(/^rgba\(([^)]*)\)$/);
-  if (m) {
-    const parts = m[1].split(',');
-    return parts.length === 4 && parseFloat(parts[3]) === 0;
-  }
-  return false;
-}
+/** Fill of a port result; per-bar colours may hold na (null) values */
+type PlotFill = FillData & { colors?: Array<string | null | undefined> };
+
+/** Plot fill colour when the port gives none (renderer default, not a Pine value) */
+const DEFAULT_PLOT_FILL_COLOR = '#2962FF40';
 
 /** Marker shapes of the lightweight-charts markers plugin */
 const BUILTIN_MARKER_SHAPES = new Set(['arrowUp', 'arrowDown', 'circle', 'square']);
@@ -409,28 +401,31 @@ class BgColorRenderer implements IPrimitivePaneRenderer {
 }
 
 /**
- * Plot fill primitive — draws filled areas between two price levels per bar.
- * Used instead of AreaSeries pairs to avoid masking overlay candlesticks.
+ * Plot fill primitive: Pine fill(plot1, plot2, color) between two plots.
+ * (code/render_probe_fill.pine, data/tv/render_probe_fill.png in port-fidelity-check/) fills the polygon
+ * between the two plot lines; the part between bar i - 1 and bar i has the colour of bar i, and an na colour on
+ * bar i removes that part only. A bar where either plot is na breaks the fill (fillgaps = false).
+ * Drawn as a primitive (not AreaSeries pairs) to avoid masking overlay candlesticks.
  */
-interface PlotFillBar {
+interface PlotFillPoint {
   time: number;
-  upper: number;
-  lower: number;
+  /** plot1 / plot2 values (NaN = na) */
+  v1: number;
+  v2: number;
+  /** fill colour of the part that leads into this point (CSS colour with its final alpha); null = na, no fill */
+  color: string | null;
 }
 
 class PlotFillPrimitive extends BasePrimitive {
-  private _data: PlotFillBar[] = [];
-  private _color: string = '#2962FF40';
+  private _data: PlotFillPoint[] = [];
   private _views: IPrimitivePaneView[] = [new PlotFillPaneView(this)];
 
-  setData(data: PlotFillBar[], color: string): void {
+  setData(data: PlotFillPoint[]): void {
     this._data = data;
-    this._color = color;
     this._requestUpdate?.();
   }
 
   getData() { return this._data; }
-  getColor() { return this._color; }
   getChart() { return this._chart; }
   getSeries() { return this._series; }
 
@@ -460,24 +455,52 @@ class PlotFillRenderer implements IPrimitivePaneRenderer {
     if (!chart || !series) return;
 
     const data = this._source.getData();
-    const color = this._source.getColor();
     const timeScale = chart.timeScale();
 
-    target.useMediaCoordinateSpace(({ context: ctx, mediaSize }) => {
-      ctx.fillStyle = color;
-      const barWidth = getBarWidth(timeScale, mediaSize.width);
+    target.useMediaCoordinateSpace(({ context: ctx }) => {
+      type Pt = { x: number; y1: number; y2: number };
+      // consecutive parts of the same colour are filled as one polygon (no seam between bars)
+      let run: { color: string; pts: Pt[] } | null = null;
+      const flush = () => {
+        if (run && run.pts.length >= 2) {
+          const pts = run.pts;
+          ctx.beginPath();
+          ctx.moveTo(pts[0].x, pts[0].y1);
+          for (let k = 1; k < pts.length; k++) ctx.lineTo(pts[k].x, pts[k].y1);
+          for (let k = pts.length - 1; k >= 0; k--) ctx.lineTo(pts[k].x, pts[k].y2);
+          ctx.closePath();
+          ctx.fillStyle = run.color;
+          ctx.fill();
+        }
+        run = null;
+      };
 
-      for (const bar of data) {
-        const x = timeScale.timeToCoordinate(bar.time as unknown as Time);
-        if (x == null) continue;
-        const yUpper = series.priceToCoordinate(bar.upper);
-        const yLower = series.priceToCoordinate(bar.lower);
-        if (yUpper == null || yLower == null) continue;
-
-        const top = Math.min(yUpper as number, yLower as number);
-        const bottom = Math.max(yUpper as number, yLower as number);
-        ctx.fillRect((x as number) - barWidth / 2, top, barWidth, bottom - top);
+      let prev: Pt | null = null;
+      for (const p of data) {
+        let cur: Pt | null = null;
+        if (Number.isFinite(p.v1) && Number.isFinite(p.v2)) {
+          const x = timeScale.timeToCoordinate(p.time as unknown as Time);
+          const y1 = series.priceToCoordinate(p.v1);
+          const y2 = series.priceToCoordinate(p.v2);
+          if (x != null && y1 != null && y2 != null) cur = { x: x as number, y1: y1 as number, y2: y2 as number };
+        }
+        if (!cur) {
+          flush();
+          prev = null;
+          continue;
+        }
+        if (prev && p.color) {
+          if (!run || run.color !== p.color) {
+            flush();
+            run = { color: p.color, pts: [prev] };
+          }
+          run.pts.push(cur);
+        } else {
+          flush();
+        }
+        prev = cur;
       }
+      flush();
     });
   }
 }
@@ -2085,10 +2108,14 @@ export class ChartManager {
   }
 
   /**
-   * Draw filled cloud/band between two plot series using stacked AreaSeries
+   * Draw the plot-to-plot fills (Pine fill(plot1, plot2, color)) of a port result.
+   * Colour of bar i: `fill.colors[i]` when the port gives per-bar colours (index of the plot1 data, which is the bar
+   * index in the ports), else `fill.options.color`. A null, empty or fully transparent colour is Pine na: no fill on
+   * that bar. `fill.options.transp` (Pine v4 transp, 0..100) multiplies the alpha the colour already has; without
+   * transp the colour is drawn as given (draws fill(p1, p2, color.blue) opaque, render_probe_fill.png).
    */
   setPlotFills(
-    fills: FillData[],
+    fills: PlotFill[],
     plotData: Record<string, Array<{ time: number; value: number }>>,
     paneIndex: number
   ): void {
@@ -2099,34 +2126,38 @@ export class ChartManager {
       const p2Data = plotData[fill.plot2];
       if (!p1Data?.length || !p2Data?.length) continue;
 
-      // Resolve fill color with alpha
-      let fillColor: string;
-      if (fill.options?.color) {
-        const transp = fill.options.transp;
-        if (transp != null) {
-          const alpha = Math.round((1 - transp / 100) * 255);
-          fillColor = fill.options.color + alpha.toString(16).padStart(2, '0');
-        } else {
-          fillColor = fill.options.color + '40';
+      const transp = fill.options?.transp;
+      const opacity = transp != null ? 1 - transp / 100 : 1;
+      // no colour from the port: renderer default (not a Pine value)
+      const staticColor = fill.options?.color ?? DEFAULT_PLOT_FILL_COLOR;
+      const resolved = new Map<string, string | null>();
+      const resolve = (raw: string | null | undefined): string | null => {
+        if (raw == null) return null;
+        let c = resolved.get(raw);
+        if (c === undefined) {
+          c = withOpacity(raw, opacity);
+          if (c === null && !isTransparent(raw)) {
+            console.warn(`plot fill ${fill.plot1} / ${fill.plot2}: colour '${raw}' is not readable, not drawn`);
+          }
+          resolved.set(raw, c);
         }
-      } else {
-        fillColor = '#2962FF40';
-      }
+        return c;
+      };
 
-      // Build per-bar fill data aligned by time (skip bars where either value is NaN)
+      // Points aligned by time; NaN where either plot is na
       const p2Map = new Map(p2Data.map(d => [d.time, d.value]));
-      const fillBars: PlotFillBar[] = [];
-      for (const d1 of p1Data) {
-        const v1 = d1.value;
+      const points: PlotFillPoint[] = p1Data.map((d1, i) => {
         const v2 = p2Map.get(d1.time);
-        if (v1 == null || v2 == null || Number.isNaN(v1) || Number.isNaN(v2)) continue;
-        fillBars.push({
+        const raw = fill.colors && i < fill.colors.length ? fill.colors[i] : staticColor;
+        return {
           time: d1.time,
-          upper: Math.max(v1, v2),
-          lower: Math.min(v1, v2),
-        });
-      }
-      if (!fillBars.length) continue;
+          v1: d1.value ?? NaN,
+          v2: v2 ?? NaN,
+          color: resolve(raw),
+        };
+      });
+      const valid = points.filter(p => Number.isFinite(p.v1) && Number.isFinite(p.v2));
+      if (!valid.length) continue;
 
       // Create anchor series + primitive for this fill
       const anchor = this.chart.addSeries(LineSeries, {
@@ -2138,10 +2169,10 @@ export class ChartManager {
       });
       anchor.moveToPane(paneIndex);
       // Set anchor data to all valid fill bars so price scale includes the fill range
-      anchor.setData(fillBars.map(b => ({ time: b.time as unknown as Time, value: b.upper })));
+      anchor.setData(valid.map(p => ({ time: p.time as unknown as Time, value: Math.max(p.v1, p.v2) })));
 
       const primitive = new PlotFillPrimitive();
-      primitive.setData(fillBars, fillColor);
+      primitive.setData(points);
       anchor.attachPrimitive(primitive);
 
       this.plotFillPrimitives.push(primitive);
