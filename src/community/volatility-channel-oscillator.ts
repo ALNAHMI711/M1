@@ -321,13 +321,12 @@ export function calculate(
           color: bearLabel, text: ' Bear ', textColor: cfg.textColor });
       }
     }
-    // Signal triangles: location.bottom (buy) / location.top (sell), size.tiny. MarkerData has no pane
-    // top / bottom position: below / above the bar.
+    // Signal triangles: location.bottom (buy) / location.top (sell), size.tiny
     const buy = (on: boolean, v: number) => {
-      if (on && !isNaN(v)) markers.push({ time: t(i), position: 'belowBar', shape: 'triangleUp', color: cfg.oversoldColor, size: 'tiny' });
+      if (on && !isNaN(v)) markers.push({ time: t(i), position: 'bottom', shape: 'triangleUp', color: cfg.oversoldColor, size: 'tiny' });
     };
     const sell = (on: boolean, v: number) => {
-      if (on && !isNaN(v)) markers.push({ time: t(i), position: 'aboveBar', shape: 'triangleDown', color: cfg.overboughtColor, size: 'tiny' });
+      if (on && !isNaN(v)) markers.push({ time: t(i), position: 'top', shape: 'triangleDown', color: cfg.overboughtColor, size: 'tiny' });
     };
     buy(showObos && crossover(osc, cfg.oversold, i), osc[i]);
     sell(showObos && crossunder(osc, cfg.overbought, i), osc[i]);

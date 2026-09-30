@@ -134,12 +134,11 @@ export function calculate(
   const thresholdColor = String(color.new(color.gray, 50));
   for (let i = 0; i < n; i++) {
     // plotshape(show_signals and bullish_o, shape.circle, location.top, ...); bearish_o: location.bottom.
-    // MarkerData has no pane top / bottom position: above / below the bar.
     if (cfg.showSignals && gt(total[i], upper[i])) {
-      markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'circle', color: cfg.bullishDotColor, size: 'auto' });
+      markers.push({ time: bars[i].time, position: 'top', shape: 'circle', color: cfg.bullishDotColor, size: 'auto' });
     }
     if (cfg.showSignals && lt(total[i], lower[i])) {
-      markers.push({ time: bars[i].time, position: 'belowBar', shape: 'circle', color: cfg.bearishDotColor, size: 'auto' });
+      markers.push({ time: bars[i].time, position: 'bottom', shape: 'circle', color: cfg.bearishDotColor, size: 'auto' });
     }
   }
 

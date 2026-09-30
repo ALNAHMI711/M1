@@ -2101,6 +2101,87 @@ export type { DualEMATrendRibbonInputs } from './community/dual-ema-trend-ribbon
 import * as sharpeRatioIndicatorIndicator from './community/sharpe-ratio-indicator';
 export { SharpeRatioIndicator, calculate as calculateSharpeRatioIndicator } from './community/sharpe-ratio-indicator';
 export type { SharpeRatioIndicatorInputs } from './community/sharpe-ratio-indicator';
+// ── Community batch 4 (Pine v6 ports) ──
+// Adaptive Ehlers Filtered Percentile
+import * as adaptiveEhlersFilteredPercentileIndicator from './community/adaptive-ehlers-filtered-percentile';
+export { AdaptiveEhlersFilteredPercentile, calculate as calculateAdaptiveEhlersFilteredPercentile } from './community/adaptive-ehlers-filtered-percentile';
+export type { AdaptiveEhlersFilteredPercentileInputs } from './community/adaptive-ehlers-filtered-percentile';
+// Adaptive Volatility-Scaled Oscillator
+import * as adaptiveVolatilityScaledOscillatorIndicator from './community/adaptive-volatility-scaled-oscillator';
+export { AdaptiveVolatilityScaledOscillator, calculate as calculateAdaptiveVolatilityScaledOscillator } from './community/adaptive-volatility-scaled-oscillator';
+export type { AdaptiveVolatilityScaledOscillatorInputs } from './community/adaptive-volatility-scaled-oscillator';
+// Dynamic Volatility Filter
+import * as dynamicVolatilityFilterIndicator from './community/dynamic-volatility-filter';
+export { DynamicVolatilityFilter, calculate as calculateDynamicVolatilityFilter } from './community/dynamic-volatility-filter';
+export type { DynamicVolatilityFilterInputs } from './community/dynamic-volatility-filter';
+// Trend State Signals
+import * as trendStateSignalsIndicator from './community/trend-state-signals';
+export { TrendStateSignals, calculate as calculateTrendStateSignals } from './community/trend-state-signals';
+export type { TrendStateSignalsInputs } from './community/trend-state-signals';
+// Asymmetric Volatility Trend Line
+import * as asymmetricVolatilityTrendLineIndicator from './community/asymmetric-volatility-trend-line';
+export { AsymmetricVolatilityTrendLine, calculate as calculateAsymmetricVolatilityTrendLine } from './community/asymmetric-volatility-trend-line';
+export type { AsymmetricVolatilityTrendLineInputs } from './community/asymmetric-volatility-trend-line';
+// Fractional EMA Kalman Filter
+import * as fractionalEmaKalmanFilterIndicator from './community/fractional-ema-kalman-filter';
+export { FractionalEmaKalmanFilter, calculate as calculateFractionalEmaKalmanFilter } from './community/fractional-ema-kalman-filter';
+export type { FractionalEmaKalmanFilterInputs } from './community/fractional-ema-kalman-filter';
+// Uptrick: Volatility Reversion Bands
+import * as uptrickVolatilityReversionBandsIndicator from './community/uptrick-volatility-reversion-bands';
+export { UptrickVolatilityReversionBands, calculate as calculateUptrickVolatilityReversionBands } from './community/uptrick-volatility-reversion-bands';
+export type { UptrickVolatilityReversionBandsInputs } from './community/uptrick-volatility-reversion-bands';
+// OA - SMES
+import * as oaSmesIndicator from './community/oa-smes';
+export { OaSmes, calculate as calculateOaSmes } from './community/oa-smes';
+export type { OaSmesInputs } from './community/oa-smes';
+// Filter Ribbon
+import * as filterRibbonIndicator from './community/filter-ribbon';
+export { FilterRibbon, calculate as calculateFilterRibbon } from './community/filter-ribbon';
+export type { FilterRibbonInputs } from './community/filter-ribbon';
+// Kalman VWAP Filter
+import * as kalmanVwapFilterIndicator from './community/kalman-vwap-filter';
+export { KalmanVwapFilter, calculate as calculateKalmanVwapFilter } from './community/kalman-vwap-filter';
+export type { KalmanVwapFilterInputs } from './community/kalman-vwap-filter';
+// Multi-Band Trend Line
+import * as multiBandTrendLineIndicator from './community/multi-band-trend-line';
+export { MultiBandTrendLine, calculate as calculateMultiBandTrendLine } from './community/multi-band-trend-line';
+export type { MultiBandTrendLineInputs } from './community/multi-band-trend-line';
+// Projected Crossover Trend
+import * as projectedCrossoverTrendIndicator from './community/projected-crossover-trend';
+export { ProjectedCrossoverTrend, calculate as calculateProjectedCrossoverTrend } from './community/projected-crossover-trend';
+export type { ProjectedCrossoverTrendInputs } from './community/projected-crossover-trend';
+// Institutional MACD (Z-Score Edition)
+import * as institutionalMacdIndicator from './community/institutional-macd';
+export { InstitutionalMacd, calculate as calculateInstitutionalMacd } from './community/institutional-macd';
+export type { InstitutionalMacdInputs } from './community/institutional-macd';
+// TrendCylinder (Expo)
+import * as trendcylinderIndicator from './community/trendcylinder';
+export { TrendCylinder, calculate as calculateTrendCylinder } from './community/trendcylinder';
+export type { TrendCylinderInputs } from './community/trendcylinder';
+// Multi-Oscillator Adaptive Kernel | AlphaAlgos
+import * as multiOscillatorAdaptiveKernelAlphaalgosIndicator from './community/multi-oscillator-adaptive-kernel-alphaalgos';
+export { MultiOscillatorAdaptiveKernel, calculate as calculateMultiOscillatorAdaptiveKernel } from './community/multi-oscillator-adaptive-kernel-alphaalgos';
+export type { MultiOscillatorAdaptiveKernelInputs } from './community/multi-oscillator-adaptive-kernel-alphaalgos';
+// Adaptive Trend Channel
+import * as adaptiveTrendChannelIndicator from './community/adaptive-trend-channel';
+export { AdaptiveTrendChannel, calculate as calculateAdaptiveTrendChannel } from './community/adaptive-trend-channel';
+export type { AdaptiveTrendChannelInputs } from './community/adaptive-trend-channel';
+// Renko Boxes
+import * as renkoBoxesIndicator from './community/renko-boxes';
+export { RenkoBoxes, calculate as calculateRenkoBoxes } from './community/renko-boxes';
+export type { RenkoBoxesInputs } from './community/renko-boxes';
+// NLMS Volatility Trail
+import * as nlmsVolatilityTrailIndicator from './community/nlms-volatility-trail';
+export { NlmsVolatilityTrail, calculate as calculateNlmsVolatilityTrail } from './community/nlms-volatility-trail';
+export type { NlmsVolatilityTrailInputs } from './community/nlms-volatility-trail';
+// Simplified Percentile Clustering
+import * as simplifiedPercentileClusteringIndicator from './community/simplified-percentile-clustering';
+export { SimplifiedPercentileClustering, calculate as calculateSimplifiedPercentileClustering } from './community/simplified-percentile-clustering';
+export type { SimplifiedPercentileClusteringInputs } from './community/simplified-percentile-clustering';
+// ATR Based Zigzag w EMA
+import * as atrBasedZigzagWEmaIndicator from './community/atr-based-zigzag-w-ema';
+export { AtrBasedZigzagWEma, calculate as calculateAtrBasedZigzagWEma } from './community/atr-based-zigzag-w-ema';
+export type { AtrBasedZigzagWEmaInputs } from './community/atr-based-zigzag-w-ema';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -8327,6 +8408,269 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: sharpeRatioIndicatorIndicator.plotConfig as PlotConfig[],
     defaultInputs: { ...sharpeRatioIndicatorIndicator.defaultInputs },
     calculate: sharpeRatioIndicatorIndicator.calculate,
+  },
+  {
+    id: 'adaptive-ehlers-filtered-percentile',
+    group: 'community',
+    name: 'Adaptive Ehlers Filtered Percentile',
+    shortName: adaptiveEhlersFilteredPercentileIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: adaptiveEhlersFilteredPercentileIndicator.metadata,
+    inputConfig: adaptiveEhlersFilteredPercentileIndicator.inputConfig as InputConfig[],
+    plotConfig: adaptiveEhlersFilteredPercentileIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adaptiveEhlersFilteredPercentileIndicator.defaultInputs },
+    calculate: adaptiveEhlersFilteredPercentileIndicator.calculate,
+  },
+  {
+    id: 'adaptive-volatility-scaled-oscillator',
+    group: 'community',
+    name: 'Adaptive Volatility-Scaled Oscillator',
+    shortName: adaptiveVolatilityScaledOscillatorIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: false,
+    metadata: adaptiveVolatilityScaledOscillatorIndicator.metadata,
+    inputConfig: adaptiveVolatilityScaledOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: adaptiveVolatilityScaledOscillatorIndicator.plotConfig as PlotConfig[],
+    hlineConfig: adaptiveVolatilityScaledOscillatorIndicator.hlineConfig,
+    defaultInputs: { ...adaptiveVolatilityScaledOscillatorIndicator.defaultInputs },
+    calculate: adaptiveVolatilityScaledOscillatorIndicator.calculate,
+  },
+  {
+    id: 'dynamic-volatility-filter',
+    group: 'community',
+    name: 'Dynamic Volatility Filter',
+    shortName: dynamicVolatilityFilterIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: dynamicVolatilityFilterIndicator.metadata,
+    inputConfig: dynamicVolatilityFilterIndicator.inputConfig as InputConfig[],
+    plotConfig: dynamicVolatilityFilterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...dynamicVolatilityFilterIndicator.defaultInputs },
+    calculate: dynamicVolatilityFilterIndicator.calculate,
+  },
+  {
+    id: 'trend-state-signals',
+    group: 'community',
+    name: 'Trend State Signals',
+    shortName: trendStateSignalsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: trendStateSignalsIndicator.metadata,
+    inputConfig: trendStateSignalsIndicator.inputConfig as InputConfig[],
+    plotConfig: trendStateSignalsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...trendStateSignalsIndicator.defaultInputs },
+    calculate: trendStateSignalsIndicator.calculate,
+  },
+  {
+    id: 'asymmetric-volatility-trend-line',
+    group: 'community',
+    name: 'Asymmetric Volatility Trend Line',
+    shortName: asymmetricVolatilityTrendLineIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: asymmetricVolatilityTrendLineIndicator.metadata,
+    inputConfig: asymmetricVolatilityTrendLineIndicator.inputConfig as InputConfig[],
+    plotConfig: asymmetricVolatilityTrendLineIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...asymmetricVolatilityTrendLineIndicator.defaultInputs },
+    calculate: asymmetricVolatilityTrendLineIndicator.calculate,
+  },
+  {
+    id: 'fractional-ema-kalman-filter',
+    group: 'community',
+    name: 'Fractional EMA Kalman Filter',
+    shortName: fractionalEmaKalmanFilterIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: fractionalEmaKalmanFilterIndicator.metadata,
+    inputConfig: fractionalEmaKalmanFilterIndicator.inputConfig as InputConfig[],
+    plotConfig: fractionalEmaKalmanFilterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...fractionalEmaKalmanFilterIndicator.defaultInputs },
+    calculate: fractionalEmaKalmanFilterIndicator.calculate,
+  },
+  {
+    id: 'uptrick-volatility-reversion-bands',
+    group: 'community',
+    name: 'Uptrick: Volatility Reversion Bands',
+    shortName: uptrickVolatilityReversionBandsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: uptrickVolatilityReversionBandsIndicator.metadata,
+    inputConfig: uptrickVolatilityReversionBandsIndicator.inputConfig as InputConfig[],
+    plotConfig: uptrickVolatilityReversionBandsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...uptrickVolatilityReversionBandsIndicator.defaultInputs },
+    calculate: uptrickVolatilityReversionBandsIndicator.calculate,
+  },
+  {
+    id: 'oa-smes',
+    group: 'community',
+    name: 'OA - SMES',
+    shortName: oaSmesIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: oaSmesIndicator.metadata,
+    inputConfig: oaSmesIndicator.inputConfig as InputConfig[],
+    plotConfig: oaSmesIndicator.plotConfig as PlotConfig[],
+    hlineConfig: oaSmesIndicator.hlineConfig,
+    fillConfig: oaSmesIndicator.fillConfig,
+    defaultInputs: { ...oaSmesIndicator.defaultInputs },
+    calculate: oaSmesIndicator.calculate,
+  },
+  {
+    id: 'filter-ribbon',
+    group: 'community',
+    name: 'Filter Ribbon',
+    shortName: filterRibbonIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: filterRibbonIndicator.metadata,
+    inputConfig: filterRibbonIndicator.inputConfig as InputConfig[],
+    plotConfig: filterRibbonIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...filterRibbonIndicator.defaultInputs },
+    calculate: filterRibbonIndicator.calculate,
+  },
+  {
+    id: 'kalman-vwap-filter',
+    group: 'community',
+    name: 'Kalman VWAP Filter',
+    shortName: kalmanVwapFilterIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: kalmanVwapFilterIndicator.metadata,
+    inputConfig: kalmanVwapFilterIndicator.inputConfig as InputConfig[],
+    plotConfig: kalmanVwapFilterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...kalmanVwapFilterIndicator.defaultInputs },
+    calculate: kalmanVwapFilterIndicator.calculate,
+  },
+  {
+    id: 'multi-band-trend-line',
+    group: 'community',
+    name: 'Multi-Band Trend Line',
+    shortName: multiBandTrendLineIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: multiBandTrendLineIndicator.metadata,
+    inputConfig: multiBandTrendLineIndicator.inputConfig as InputConfig[],
+    plotConfig: multiBandTrendLineIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...multiBandTrendLineIndicator.defaultInputs },
+    calculate: multiBandTrendLineIndicator.calculate,
+  },
+  {
+    id: 'projected-crossover-trend',
+    group: 'community',
+    name: 'Projected Crossover Trend',
+    shortName: projectedCrossoverTrendIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: projectedCrossoverTrendIndicator.metadata,
+    inputConfig: projectedCrossoverTrendIndicator.inputConfig as InputConfig[],
+    plotConfig: projectedCrossoverTrendIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...projectedCrossoverTrendIndicator.defaultInputs },
+    calculate: projectedCrossoverTrendIndicator.calculate,
+  },
+  {
+    id: 'institutional-macd',
+    group: 'community',
+    name: 'Institutional MACD (Z-Score Edition)',
+    shortName: institutionalMacdIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: institutionalMacdIndicator.metadata,
+    inputConfig: institutionalMacdIndicator.inputConfig as InputConfig[],
+    plotConfig: institutionalMacdIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...institutionalMacdIndicator.defaultInputs },
+    calculate: institutionalMacdIndicator.calculate,
+  },
+  {
+    id: 'trendcylinder',
+    group: 'community',
+    name: 'TrendCylinder (Expo)',
+    shortName: trendcylinderIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: trendcylinderIndicator.metadata,
+    inputConfig: trendcylinderIndicator.inputConfig as InputConfig[],
+    plotConfig: trendcylinderIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...trendcylinderIndicator.defaultInputs },
+    calculate: trendcylinderIndicator.calculate,
+  },
+  {
+    id: 'multi-oscillator-adaptive-kernel-alphaalgos',
+    group: 'community',
+    name: 'Multi-Oscillator Adaptive Kernel | AlphaAlgos',
+    shortName: multiOscillatorAdaptiveKernelAlphaalgosIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: multiOscillatorAdaptiveKernelAlphaalgosIndicator.metadata,
+    inputConfig: multiOscillatorAdaptiveKernelAlphaalgosIndicator.inputConfig as InputConfig[],
+    plotConfig: multiOscillatorAdaptiveKernelAlphaalgosIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...multiOscillatorAdaptiveKernelAlphaalgosIndicator.defaultInputs },
+    calculate: multiOscillatorAdaptiveKernelAlphaalgosIndicator.calculate,
+  },
+  {
+    id: 'adaptive-trend-channel',
+    group: 'community',
+    name: 'Adaptive Trend Channel',
+    shortName: adaptiveTrendChannelIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: adaptiveTrendChannelIndicator.metadata,
+    inputConfig: adaptiveTrendChannelIndicator.inputConfig as InputConfig[],
+    plotConfig: adaptiveTrendChannelIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adaptiveTrendChannelIndicator.defaultInputs },
+    calculate: adaptiveTrendChannelIndicator.calculate,
+  },
+  {
+    id: 'renko-boxes',
+    group: 'community',
+    name: 'Renko Boxes',
+    shortName: renkoBoxesIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: renkoBoxesIndicator.metadata,
+    inputConfig: renkoBoxesIndicator.inputConfig as InputConfig[],
+    plotConfig: renkoBoxesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...renkoBoxesIndicator.defaultInputs },
+    calculate: renkoBoxesIndicator.calculate,
+  },
+  {
+    id: 'nlms-volatility-trail',
+    group: 'community',
+    name: 'NLMS Volatility Trail',
+    shortName: nlmsVolatilityTrailIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: nlmsVolatilityTrailIndicator.metadata,
+    inputConfig: nlmsVolatilityTrailIndicator.inputConfig as InputConfig[],
+    plotConfig: nlmsVolatilityTrailIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...nlmsVolatilityTrailIndicator.defaultInputs },
+    calculate: nlmsVolatilityTrailIndicator.calculate,
+  },
+  {
+    id: 'simplified-percentile-clustering',
+    group: 'community',
+    name: 'Simplified Percentile Clustering',
+    shortName: simplifiedPercentileClusteringIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: simplifiedPercentileClusteringIndicator.metadata,
+    inputConfig: simplifiedPercentileClusteringIndicator.inputConfig as InputConfig[],
+    plotConfig: simplifiedPercentileClusteringIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...simplifiedPercentileClusteringIndicator.defaultInputs },
+    calculate: simplifiedPercentileClusteringIndicator.calculate,
+  },
+  {
+    id: 'atr-based-zigzag-w-ema',
+    group: 'community',
+    name: 'ATR Based Zigzag w EMA',
+    shortName: atrBasedZigzagWEmaIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: atrBasedZigzagWEmaIndicator.metadata,
+    inputConfig: atrBasedZigzagWEmaIndicator.inputConfig as InputConfig[],
+    plotConfig: atrBasedZigzagWEmaIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...atrBasedZigzagWEmaIndicator.defaultInputs },
+    calculate: atrBasedZigzagWEmaIndicator.calculate,
   },
   ...candlestickEntries(
     candlestickPortEntries.map((e) => [e.id, e.indicator] as [string, typeof e.indicator])

@@ -15,8 +15,10 @@ export interface MarkerData {
    * - atPriceTop: the shape is above the price, its bottom (the tip of a label) on the price (Pine shape.labeldown)
    * - atPriceBottom: the shape is below the price, its top (the tip of a label) on the price (Pine shape.labelup)
    * - atPriceMiddle: the shape is centred on the price (other Pine shapes)
+   * top / bottom: at the top / bottom edge of the pane of the indicator (Pine location.top / location.bottom), the
+   * price pane for an overlay indicator or with forceOverlay.
    */
-  position: 'aboveBar' | 'belowBar' | 'inBar' | 'atPriceTop' | 'atPriceBottom' | 'atPriceMiddle';
+  position: 'aboveBar' | 'belowBar' | 'inBar' | 'atPriceTop' | 'atPriceBottom' | 'atPriceMiddle' | 'top' | 'bottom';
   /** Price of the atPrice* positions (required with them) */
   price?: number;
   shape: 'arrowUp' | 'arrowDown' | 'circle' | 'square'
@@ -37,8 +39,9 @@ export interface MarkerData {
   /** Size multiplier (1 = default size) or a Pine size */
   size?: number | PineSize;
   /**
-   * Pine force_overlay = true: an atPrice* marker of a non-overlay indicator is drawn on the price pane. Without it
-   * the atPrice* markers of a non-overlay indicator are drawn in the indicator pane (the price is an indicator value).
+   * Pine force_overlay = true: an atPrice* / top / bottom marker of a non-overlay indicator is drawn on the price
+   * pane. Without it these markers of a non-overlay indicator are drawn in the indicator pane (the price is an
+   * indicator value).
    */
   forceOverlay?: boolean;
 }

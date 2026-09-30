@@ -677,10 +677,12 @@ class ExtendedMarkerRenderer implements IPrimitivePaneRenderer {
     const grid = this._source.getGrid();
     const timeScale = chart.timeScale();
 
-    target.useMediaCoordinateSpace(({ context: ctx }) => {
-      // height already used above / below each bar by earlier markers
+    target.useMediaCoordinateSpace(({ context: ctx, mediaSize }) => {
+      // height already used above / below each bar (and from the pane top / bottom) by earlier markers
       const usedAbove = new Map<number, number>();
       const usedBelow = new Map<number, number>();
+      const usedTop = new Map<number, number>();
+      const usedBottom = new Map<number, number>();
 
       for (const marker of markers) {
         const x = grid.x(timeScale, marker.time);
@@ -704,7 +706,14 @@ class ExtendedMarkerRenderer implements IPrimitivePaneRenderer {
         // Anchor y and direction: -1 = the marker extends upward from the anchor, 1 = downward, 0 = centred
         let anchorY: number | null = null;
         let dir: -1 | 0 | 1 = 0;
-        if (marker.position === 'atPriceTop' || marker.position === 'atPriceBottom' || marker.position === 'atPriceMiddle') {
+        if (marker.position === 'top' || marker.position === 'bottom') {
+          // pane edge: stacked from the top edge downward / from the bottom edge upward
+          const edgeMap = marker.position === 'top' ? usedTop : usedBottom;
+          const used = edgeMap.get(marker.time) ?? 0;
+          edgeMap.set(marker.time, used + height + MARKER_STACK_GAP);
+          anchorY = marker.position === 'top' ? MARKER_BAR_GAP + used : mediaSize.height - MARKER_BAR_GAP - used;
+          dir = marker.position === 'top' ? 1 : -1;
+        } else if (marker.position === 'atPriceTop' || marker.position === 'atPriceBottom' || marker.position === 'atPriceMiddle') {
           if (marker.price == null || Number.isNaN(marker.price)) continue;
           anchorY = series.priceToCoordinate(marker.price);
           dir = marker.position === 'atPriceTop' ? -1 : marker.position === 'atPriceBottom' ? 1 : 0;
@@ -1712,15 +1721,18 @@ export class ChartManager {
    * Draw the markers of an indicator.
    * Pane: bar positions (aboveBar / belowBar / inBar) and the atPrice* markers of an overlay indicator (or with
    * forceOverlay) are drawn on the price pane; the atPrice* markers of a non-overlay indicator in the indicator pane
-   * (their price is an indicator value).
+   * (their price is an indicator value). top / bottom markers: at the edge of the indicator pane (price pane for an
+   * overlay indicator or with forceOverlay).
    * Drawing: the lightweight-charts markers plugin (native API, atPrice* positions included) for its 4 shapes
    * when the text has the shape colour and one line; the extended primitive otherwise (other shapes, textColor,
-   * transparent shape colour, labels, multi-line text).
+   * transparent shape colour, labels, multi-line text, top / bottom).
    */
   setIndicatorMarkers(markers: MarkerData[], paneIndex: number, overlay: boolean): void {
     this.clearMarkers();
     const isPrice = (m: MarkerData) => m.position.startsWith('atPrice');
-    const inPane = (m: MarkerData) => isPrice(m) && !overlay && !m.forceOverlay && paneIndex !== 0;
+    // Pine location.top / location.bottom: edge of the pane, drawn by the extended marker primitive
+    const isEdge = (m: MarkerData) => m.position === 'top' || m.position === 'bottom';
+    const inPane = (m: MarkerData) => (isPrice(m) || isEdge(m)) && !overlay && !m.forceOverlay && paneIndex !== 0;
     const priceMarkers = markers.filter(m => !inPane(m));
     const paneMarkers = markers.filter(inPane);
 
@@ -1729,7 +1741,8 @@ export class ChartManager {
       const extended: MarkerData[] = [];
       for (const m of list) {
         if (isPrice(m) && (m.price == null || Number.isNaN(m.price))) continue;
-        const nativeOk = BUILTIN_MARKER_SHAPES.has(m.shape)
+        const nativeOk = !isEdge(m)
+          && BUILTIN_MARKER_SHAPES.has(m.shape)
           && (m.textColor == null || m.textColor === m.color)
           && !isTransparent(m.color)
           && !(m.text ?? '').includes('\n');
@@ -2107,6 +2120,8 @@ export class ChartManager {
     };
 
     for (const hline of hlines) {
+      // Pine hline(..., display = display.none): not drawn (it can still bound a fill)
+      if (hline.display === 'none') continue;
       const series = this.chart.addSeries(LineSeries, {
         color: hline.color ?? '#787B86',
         lineWidth: (hline.linewidth ?? 1) as 1 | 2 | 3 | 4,
@@ -2152,8 +2167,10 @@ export class ChartManager {
       const price2 = hlineMap.get(fill.plot2);
       if (price1 == null || price2 == null) continue;
 
-      if (fill.gradient) {
-        const gradient = fill.gradient as FillGradientData;
+      // gradient or per-bar colours (Pine fill colour series): drawn bar by bar
+      if (fill.gradient || fill.colors) {
+        const gradient = fill.gradient as FillGradientData | undefined;
+        const colors = fill.colors;
         const anchor = this.chart.addSeries(LineSeries, {
           color: 'transparent',
           lineVisible: false,
@@ -2168,8 +2185,8 @@ export class ChartManager {
           time: b.time,
           v1: price1,
           v2: price2,
-          color: null,
-          gradient: gradientAt(gradient, i),
+          color: colors && !isTransparent(colors[i]) ? colors[i] : null,
+          gradient: gradient ? gradientAt(gradient, i) : undefined,
         })));
         anchor.attachPrimitive(primitive);
         this.hlineGradientFills.push({ anchor, primitive });

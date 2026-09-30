@@ -558,9 +558,25 @@ export class IndicatorUI {
         this.chartManager.setHLines(hlines, indicatorPaneIndex, this.bars);
       }
 
-      // Render fills between hlines if configured
-      if (indicator.fillConfig?.length && indicator.hlineConfig) {
-        this.chartManager.setFills(indicator.fillConfig, indicator.hlineConfig, indicatorPaneIndex, this.bars);
+      // Render fills between hlines: the hline fills returned by calculate() (they follow the inputs), else the
+      // registry fillConfig (default inputs)
+      if (indicator.hlineConfig?.length) {
+        const hlineIds = new Set(indicator.hlineConfig.map((h) => h.id));
+        const resultHlineFills = (result.fills ?? [])
+          .filter((f: any) => hlineIds.has(f.plot1) && hlineIds.has(f.plot2))
+          .map((f: any, k: number) => ({
+            id: `hlineFill${k}`,
+            plot1: f.plot1,
+            plot2: f.plot2,
+            color: f.options?.color ?? f.color,
+            colors: f.colors,
+            gradient: f.gradient,
+            title: f.options?.title,
+          }));
+        const hlineFills = resultHlineFills.length ? resultHlineFills : indicator.fillConfig ?? [];
+        if (hlineFills.length) {
+          this.chartManager.setFills(hlineFills, indicator.hlineConfig, indicatorPaneIndex, this.bars);
+        }
       }
 
       // Render plot-to-plot fills (cloud/band) if returned by calculate()
