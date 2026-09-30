@@ -71,6 +71,8 @@ export interface PlotCandleData {
   color?: string;
   borderColor?: string;
   wickColor?: string;
+  /** Pine force_overlay = true: the candles of a non-overlay indicator are drawn on the price pane */
+  forceOverlay?: boolean;
 }
 
 /**

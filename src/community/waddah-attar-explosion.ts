@@ -63,9 +63,9 @@ export function calculate(bars: Bar[], inputs: Partial<WaddahAttarExplosionInput
   const bbUpperArr = bbUpper.toArray();
   const bbLowerArr = bbLower.toArray();
 
-  // Dead zone = RMA(TR, 100) * 3.7
+  // Dead zone = nz(rma(tr(true), 100)) * 3.7 (tr(true): high - low on the first bar)
   const deadZonePeriod = 100;
-  const deadZoneArr = ta.rma(ta.tr(bars), deadZonePeriod).toArray();
+  const deadZoneArr = ta.rma(ta.tr(bars, true), deadZonePeriod).toArray();
 
   const warmup = Math.max(slowLength, channelLength, deadZonePeriod);
 

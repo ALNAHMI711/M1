@@ -54,13 +54,13 @@
   },
   "homepage": "https://github.com/deepentropy/lightweight-charts-indicators#readme",
   "peerDependencies": {
-    "oakscriptjs": ">=0.7.0 <0.8.0"
+    "oakscriptjs": ">=0.8.0 <0.9.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.6",
     "esbuild": "^0.19.11",
     "lightweight-charts": "^5.0.0",
-    "oakscriptjs": "^0.7.2",
+    "oakscriptjs": "^0.8.0",
     "rimraf": "^6.1.0",
     "typescript": "^5.3.3",
     "vite": "^5.4.0",

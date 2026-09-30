@@ -6,6 +6,7 @@
 import type {Bar} from 'oakscriptjs';
 import { LineType } from 'lightweight-charts';
 import { ChartManager } from './chart';
+import { parseColor } from './color';
 import { indicatorRegistry, type IndicatorRegistryEntry, type IndicatorCategory, type MarkerData } from '../../src/index';
 
 /**
@@ -354,6 +355,43 @@ export class IndicatorUI {
             </div>
           `;
 
+        case 'color': {
+          // <input type="color"> takes #rrggbb only: the alpha of the colour is kept apart (data-alpha)
+          const rgba = parseColor(String(value));
+          const hex = rgba
+            ? '#' + [rgba.r, rgba.g, rgba.b].map(c => Math.round(c).toString(16).padStart(2, '0')).join('')
+            : '#000000';
+          return `
+            <div class="input-group">
+              <label for="input-${input.id}">${input.title}:</label>
+              <input
+                type="color"
+                id="input-${input.id}"
+                data-input-id="${input.id}"
+                data-alpha="${rgba ? rgba.a : 1}"
+                value="${hex}"
+              />
+            </div>
+          `;
+        }
+
+        case 'time': {
+          // Pine input.time: UNIX time in ms, shown and edited in UTC
+          const ms = Number(value);
+          const iso = new Date(Number.isFinite(ms) ? ms : 0).toISOString().slice(0, 16);
+          return `
+            <div class="input-group">
+              <label for="input-${input.id}">${input.title} (UTC):</label>
+              <input
+                type="datetime-local"
+                id="input-${input.id}"
+                data-input-id="${input.id}"
+                value="${iso}"
+              />
+            </div>
+          `;
+        }
+
         default:
           return '';
       }
@@ -389,6 +427,21 @@ export class IndicatorUI {
               : parseFloat(inputEl.value);
             if (!isNaN(value)) {
               this.currentInputs[inputId] = value;
+              this.recalculate();
+            }
+          });
+        } else if (inputEl.type === 'color') {
+          element.addEventListener('input', () => {
+            const alpha = parseFloat(inputEl.dataset.alpha ?? '1');
+            const aa = alpha < 1 ? Math.round(alpha * 255).toString(16).padStart(2, '0') : '';
+            this.currentInputs[inputId] = inputEl.value + aa;
+            this.recalculate();
+          });
+        } else if (inputEl.type === 'datetime-local') {
+          element.addEventListener('change', () => {
+            const ms = Date.parse(inputEl.value + ':00Z');
+            if (!isNaN(ms)) {
+              this.currentInputs[inputId] = ms;
               this.recalculate();
             }
           });
@@ -435,6 +488,7 @@ export class IndicatorUI {
           const seriesConfig = {
             color: plotDef.color,
             lineWidth: plotDef.lineWidth,
+            histBase: plotDef.histbase,
             overlay: indicator.overlay,
             paneIndex: indicatorPaneIndex,
           };
@@ -489,9 +543,19 @@ export class IndicatorUI {
         }
       }
 
-      // Render hlines if configured
-      if (indicator.hlineConfig && indicator.hlineConfig.length > 0) {
-        this.chartManager.setHLines(indicator.hlineConfig, indicatorPaneIndex, this.bars);
+      // Render hlines: the registry hlineConfig, else the hlines returned by calculate() (Pine hline)
+      const hlines = indicator.hlineConfig?.length
+        ? indicator.hlineConfig
+        : (result.hlines ?? []).map((h: any, i: number) => ({
+          id: `hline${i}`,
+          price: h.value,
+          title: h.options?.title,
+          color: h.options?.color,
+          linestyle: h.options?.linestyle,
+          linewidth: h.options?.linewidth,
+        }));
+      if (hlines.length > 0) {
+        this.chartManager.setHLines(hlines, indicatorPaneIndex, this.bars);
       }
 
       // Render fills between hlines if configured

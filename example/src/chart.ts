@@ -9,6 +9,7 @@ import {
   CandlestickSeries,
   LineSeries,
   HistogramSeries,
+  type LineWidth,
   BaselineSeries,
   AreaSeries,
   type IChartApi,
@@ -1225,6 +1226,8 @@ export interface SeriesConfig {
   lineVisible?: boolean;
   /** When true, NaN values create gaps (whitespace) instead of being filtered out */
   preserveGaps?: boolean;
+  /** Base value of histogram / columns plots (Pine histbase, default 0) */
+  histBase?: number;
 }
 
 /**
@@ -1337,9 +1340,9 @@ export class ChartManager {
     let series = this.indicatorSeries.get(id);
 
     if (!series) {
-      const lineWidth = config.lineWidth && config.lineWidth >= 1 && config.lineWidth <= 4
-        ? config.lineWidth as 1 | 2 | 3 | 4
-        : 2;
+      // Pine widths go above 4 (e.g. 6, 8, 10 for glow lines): the canvas draws any width, the LineWidth type
+      // of lightweight-charts only lists 1..4
+      const lineWidth = (config.lineWidth && config.lineWidth >= 1 ? config.lineWidth : 2) as LineWidth;
       series = this.chart.addSeries(LineSeries, {
         color: config.color || '#2962FF',
         lineWidth,
@@ -1427,11 +1430,10 @@ export class ChartManager {
     if (!series) {
       const color = config.color || '#2962FF';
       series = this.chart.addSeries(AreaSeries, {
-        topColor: color + '40',
-        bottomColor: color + '10',
+        topColor: withOpacity(color, 0x40 / 255) ?? 'transparent',
+        bottomColor: withOpacity(color, 0x10 / 255) ?? 'transparent',
         lineColor: color,
-        lineWidth: (config.lineWidth && config.lineWidth >= 1 && config.lineWidth <= 4
-          ? config.lineWidth : 2) as 1 | 2 | 3 | 4,
+        lineWidth: (config.lineWidth && config.lineWidth >= 1 ? config.lineWidth : 2) as LineWidth,
         crosshairMarkerVisible: true,
       });
 
@@ -1675,8 +1677,10 @@ export class ChartManager {
         wickUpColor: '#26a69a',
         wickDownColor: '#ef5350',
       });
-      series.moveToPane(paneIndex);
-      this.indicatorPanes.set(`candle_${id}`, paneIndex);
+      // candles with forceOverlay (Pine force_overlay) go to the price pane
+      const pane = data.some(d => d.forceOverlay) ? 0 : paneIndex;
+      series.moveToPane(pane);
+      this.indicatorPanes.set(`candle_${id}`, pane);
       this.candlePlotSeries.set(id, series);
     }
 
@@ -2035,6 +2039,7 @@ export class ChartManager {
     if (!series) {
       series = this.chart.addSeries(HistogramSeries, {
         color: config.color || '#26A69A',
+        base: config.histBase ?? 0,
         lastValueVisible: false,
         priceLineVisible: false,
       });
