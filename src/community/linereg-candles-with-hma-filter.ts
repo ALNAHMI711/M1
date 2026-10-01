@@ -8,10 +8,6 @@
  * volatility adaptation of the lengths (ATR based, with factors updated every N bars), confirmation by the next bar,
  * an anti-whipsaw filter (slope and volume), and divergences between the regression close and its smoothed slope.
  *
- * Limit: divergence detection together with volatility adaptation is not supported (calculate() throws). The
- * divergence check calls ta.lowest / ta.highest with a lookback that changes per bar; Pine keeps a state for a
- * series length, and oakscriptjs ta.lowest / ta.highest take a fixed length only.
- *
  * Reference: "Advanced LinReg Candles with AI Optimization" by MaximusGains
  * Licence: Mozilla Public License 2.0, as the original Pine script (https://mozilla.org/MPL/2.0/).
  * Original notice: © MaximusGains
@@ -181,10 +177,6 @@ export function calculate(
   const close = bars.map((b) => b.close);
   const volume = bars.map((b) => b.volume ?? NaN);
   const va = cfg.volatilityAdaptation;
-  if (va && cfg.divergenceDetection) {
-    throw new Error('Advanced LinReg Candles: Divergence Detection with Volatility Adaptation is not supported: '
-      + 'ta.lowest / ta.highest with a lookback that changes per bar is not available.');
-  }
 
   // Adaptive parameters
   const atr = A(ta.atr(bars, 14));
@@ -302,9 +294,13 @@ export function calculate(
   if (cfg.divergenceDetection) {
     const lookback = validLinreg.map((l) => Math.max(1, Math.max(5, Math.min(30, Math.round(l * 1.5)))));
     const prev = (x: number[]) => x.map((_v, i) => (i > 0 ? x[i - 1] : NaN));
-    // the lookback is fixed here (volatility adaptation is off, checked at the start)
-    const extreme = (x: number[], isLow: boolean) =>
-      A(isLow ? ta.lowest(S(x), lookback[0] ?? 1) : ta.highest(S(x), lookback[0] ?? 1));
+    // ta.lowest / ta.highest(x, lookback): with volatility adaptation the lookback changes per bar (series length,
+    // one call site per call: callsite.lowest / highest keep the Pine state); without it the length is fixed
+    const extreme = (x: number[], isLow: boolean) => {
+      if (!va) return A(isLow ? ta.lowest(S(x), lookback[0] ?? 1) : ta.highest(S(x), lookback[0] ?? 1));
+      const site = isLow ? callsite.lowest() : callsite.highest();
+      return x.map((v, i) => site(v, lookback[i]));
+    };
     const lowPrice = extreme(prev(bclose), true);
     const lowSlope = extreme(prev(smoothedSlope), true);
     const highPrice = extreme(prev(bclose), false);

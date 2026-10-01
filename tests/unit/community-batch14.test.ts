@@ -109,13 +109,9 @@ describe.each(ports)('%s', (id, port, mainPlot, leftOffsets, rightOffsets) => {
   });
 });
 
-describe('linereg-candles-with-hma-filter limit', () => {
-  it('throws for divergence detection with volatility adaptation (ta.lowest / ta.highest with a per-bar length)', () => {
-    expect(() => AdvancedLinRegCandles.calculate(bars, { volatilityAdaptation: true, divergenceDetection: true }))
-      .toThrow(/not supported/);
-  });
-
-  it('runs with volatility adaptation alone', () => {
-    expect(() => AdvancedLinRegCandles.calculate(bars, { volatilityAdaptation: true })).not.toThrow();
+describe('linereg-candles-with-hma-filter volatility adaptation', () => {
+  it('runs divergence detection with a per-bar lookback (series-length ta.lowest / ta.highest)', () => {
+    const r = AdvancedLinRegCandles.calculate(bars, { volatilityAdaptation: true, divergenceDetection: true });
+    expect(r.plots.plot0.some((p: { value: number }) => Number.isFinite(p.value))).toBe(true);
   });
 });
