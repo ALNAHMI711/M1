@@ -1326,13 +1326,24 @@ export class ChartManager {
   }
 
   /**
+   * Replace the candle data. lightweight-charts 5.0.9 / 5.2.1 bug (tradingview/lightweight-charts#2154): a setData
+   * with the same times on a series that is alone keeps a stale list of time points, and a later setData after other
+   * series were added empties the time scale (blank chart). Clearing first (setData([])) rebuilds the time points on
+   * every call (client-side avoidance given in the issue). Remove when the library fix is released.
+   */
+  private setCandles(data: CandlestickData<Time>[]): void {
+    this.candlestickSeries.setData([]);
+    this.candlestickSeries.setData(data);
+  }
+
+  /**
    * Set candlestick data
    */
   setCandlestickData(bars: Bar[]): void {
     const data = toCandlestickData(bars) as CandlestickData<Time>[];
     this.grid.setBars(bars);
     this.originalBarColors = data.map(d => ({ ...d }));
-    this.candlestickSeries.setData(data);
+    this.setCandles(data);
     this.chart.timeScale().fitContent();
   }
 
@@ -1608,7 +1619,7 @@ export class ChartManager {
       }
       return bar;
     });
-    this.candlestickSeries.setData(data);
+    this.setCandles(data);
   }
 
   /**
@@ -1616,7 +1627,7 @@ export class ChartManager {
    */
   private clearBarColors(): void {
     if (this.originalBarColors) {
-      this.candlestickSeries.setData(this.originalBarColors);
+      this.setCandles(this.originalBarColors);
     }
   }
 

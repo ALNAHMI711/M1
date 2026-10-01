@@ -2506,6 +2506,87 @@ export type { DynamicScorePsarInputs } from './community/dynamic-score-psar';
 import * as rsiMulticolorEditableIndicator from './community/rsi-multicolor-editable';
 export { RsiMulticolorEditable, calculate as calculateRsiMulticolorEditable } from './community/rsi-multicolor-editable';
 export type { RsiMulticolorEditableInputs } from './community/rsi-multicolor-editable';
+// ── Community batch 9 (Pine v6 ports) ──
+// Double RSI
+import * as doubleRsiIndicator from './community/double-rsi';
+export { DoubleRsi, calculate as calculateDoubleRsi } from './community/double-rsi';
+export type { DoubleRsiInputs } from './community/double-rsi';
+// Dynamic Testing
+import * as dynamicTestingIndicator from './community/dynamic-testing';
+export { DynamicTesting, calculate as calculateDynamicTesting } from './community/dynamic-testing';
+export type { DynamicTestingInputs } from './community/dynamic-testing';
+// IIR One-Pole Price Filter
+import * as iirOnePolePriceFilterIndicator from './community/iir-one-pole-price-filter';
+export { IirOnePolePriceFilter, calculate as calculateIirOnePolePriceFilter } from './community/iir-one-pole-price-filter';
+export type { IirOnePolePriceFilterInputs } from './community/iir-one-pole-price-filter';
+// Volatility-Gated Trend Oscillator
+import * as volatilityGatedTrendOscillatorIndicator from './community/volatility-gated-trend-oscillator';
+export { VolatilityGatedTrendOscillator, calculate as calculateVolatilityGatedTrendOscillator } from './community/volatility-gated-trend-oscillator';
+export type { VolatilityGatedTrendOscillatorInputs } from './community/volatility-gated-trend-oscillator';
+// Adaptive ALMA 2.0
+import * as adaptiveAlma20Indicator from './community/adaptive-alma-2-0';
+export { AdaptiveAlma20, calculate as calculateAdaptiveAlma20 } from './community/adaptive-alma-2-0';
+export type { AdaptiveAlma20Inputs } from './community/adaptive-alma-2-0';
+// VWAP Deviation Oscillator
+import * as vwapDeviationOscillatorIndicator from './community/vwap-deviation-oscillator';
+export { VwapDeviationOscillator, calculate as calculateVwapDeviationOscillator } from './community/vwap-deviation-oscillator';
+export type { VwapDeviationOscillatorInputs } from './community/vwap-deviation-oscillator';
+// Quantum Trend Signal
+import * as quantumTrendSignalIndicator from './community/quantum-trend-signal';
+export { QuantumTrendSignal, calculate as calculateQuantumTrendSignal } from './community/quantum-trend-signal';
+export type { QuantumTrendSignalInputs } from './community/quantum-trend-signal';
+// Loacally Weighted MA (LWMA) Direction Histogram
+import * as loacallyWeightedMaDirectionHistogramIndicator from './community/loacally-weighted-ma-direction-histogram';
+export { LoacallyWeightedMaDirectionHistogram, calculate as calculateLoacallyWeightedMaDirectionHistogram } from './community/loacally-weighted-ma-direction-histogram';
+export type { LoacallyWeightedMaDirectionHistogramInputs } from './community/loacally-weighted-ma-direction-histogram';
+// Volume-Weighted MA Crossover
+import * as volumeWeightedMaCrossoverIndicator from './community/volume-weighted-ma-crossover';
+export { VolumeWeightedMaCrossover, calculate as calculateVolumeWeightedMaCrossover } from './community/volume-weighted-ma-crossover';
+export type { VolumeWeightedMaCrossoverInputs } from './community/volume-weighted-ma-crossover';
+// Golden Ratio Trend Persistence
+import * as goldenRatioTrendPersistenceIndicator from './community/golden-ratio-trend-persistence';
+export { GoldenRatioTrendPersistence, calculate as calculateGoldenRatioTrendPersistence } from './community/golden-ratio-trend-persistence';
+export type { GoldenRatioTrendPersistenceInputs } from './community/golden-ratio-trend-persistence';
+// Dual MA SD Oscillator
+import * as dualMaSdOscillatorIndicator from './community/dual-ma-sd-oscillator';
+export { DualMaSdOscillator, calculate as calculateDualMaSdOscillator } from './community/dual-ma-sd-oscillator';
+export type { DualMaSdOscillatorInputs } from './community/dual-ma-sd-oscillator';
+// EMA Cloud Trend
+import * as emaCloudTrendIndicator from './community/ema-cloud-trend';
+export { EmaCloudTrend, calculate as calculateEmaCloudTrend } from './community/ema-cloud-trend';
+export type { EmaCloudTrendInputs } from './community/ema-cloud-trend';
+// ANDROMEDA - TrendSync
+import * as andromedaTrendsyncIndicator from './community/andromeda-trendsync';
+export { AndromedaTrendSync, calculate as calculateAndromedaTrendSync } from './community/andromeda-trendsync';
+export type { AndromedaTrendSyncInputs } from './community/andromeda-trendsync';
+// AI Volume Signals
+import * as aiVolumeSignalsIndicator from './community/ai-volume-signals';
+export { AiVolumeSignals, calculate as calculateAiVolumeSignals } from './community/ai-volume-signals';
+export type { AiVolumeSignalsInputs } from './community/ai-volume-signals';
+// Sequential Pattern Strength
+import * as sequentialPatternStrengthIndicator from './community/sequential-pattern-strength';
+export { SequentialPatternStrength, calculate as calculateSequentialPatternStrength } from './community/sequential-pattern-strength';
+export type { SequentialPatternStrengthInputs } from './community/sequential-pattern-strength';
+// Aura Trend & Candlestick Matrix
+import * as auraTrendCandlestickMatrixIndicator from './community/aura-trend-candlestick-matrix';
+export { AuraTrendCandlestickMatrix, calculate as calculateAuraTrendCandlestickMatrix } from './community/aura-trend-candlestick-matrix';
+export type { AuraTrendCandlestickMatrixInputs } from './community/aura-trend-candlestick-matrix';
+// Efficiency Ratio Trend
+import * as efficiencyRatioTrendIndicator from './community/efficiency-ratio-trend';
+export { EfficiencyRatioTrend, calculate as calculateEfficiencyRatioTrend } from './community/efficiency-ratio-trend';
+export type { EfficiencyRatioTrendInputs } from './community/efficiency-ratio-trend';
+// Linear Volume MACD | Lyro RS
+import * as linearVolumeMacdLyroRsIndicator from './community/linear-volume-macd-lyro-rs';
+export { LinearVolumeMacdLyroRs, calculate as calculateLinearVolumeMacdLyroRs } from './community/linear-volume-macd-lyro-rs';
+export type { LinearVolumeMacdLyroRsInputs } from './community/linear-volume-macd-lyro-rs';
+// Mean Angles
+import * as meanAnglesIndicator from './community/mean-angles';
+export { MeanAngles, calculate as calculateMeanAngles } from './community/mean-angles';
+export type { MeanAnglesInputs } from './community/mean-angles';
+// Adaptive Kinetic Ribbon
+import * as adaptiveKineticRibbonIndicator from './community/adaptive-kinetic-ribbon';
+export { AdaptiveKineticRibbon, calculate as calculateAdaptiveKineticRibbon } from './community/adaptive-kinetic-ribbon';
+export type { AdaptiveKineticRibbonInputs } from './community/adaptive-kinetic-ribbon';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -10046,6 +10127,266 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     fillConfig: rsiMulticolorEditableIndicator.fillConfig,
     defaultInputs: { ...rsiMulticolorEditableIndicator.defaultInputs },
     calculate: rsiMulticolorEditableIndicator.calculate,
+  },
+  {
+    id: 'double-rsi',
+    group: 'community',
+    name: 'Double RSI',
+    shortName: doubleRsiIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: doubleRsiIndicator.metadata,
+    inputConfig: doubleRsiIndicator.inputConfig as InputConfig[],
+    plotConfig: doubleRsiIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...doubleRsiIndicator.defaultInputs },
+    calculate: doubleRsiIndicator.calculate,
+  },
+  {
+    id: 'dynamic-testing',
+    group: 'community',
+    name: 'Dynamic Testing',
+    shortName: dynamicTestingIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: true,
+    metadata: dynamicTestingIndicator.metadata,
+    inputConfig: dynamicTestingIndicator.inputConfig as InputConfig[],
+    plotConfig: dynamicTestingIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...dynamicTestingIndicator.defaultInputs },
+    calculate: dynamicTestingIndicator.calculate,
+  },
+  {
+    id: 'iir-one-pole-price-filter',
+    group: 'community',
+    name: 'IIR One-Pole Price Filter',
+    shortName: iirOnePolePriceFilterIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: iirOnePolePriceFilterIndicator.metadata,
+    inputConfig: iirOnePolePriceFilterIndicator.inputConfig as InputConfig[],
+    plotConfig: iirOnePolePriceFilterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...iirOnePolePriceFilterIndicator.defaultInputs },
+    calculate: iirOnePolePriceFilterIndicator.calculate,
+  },
+  {
+    id: 'volatility-gated-trend-oscillator',
+    group: 'community',
+    name: 'Volatility-Gated Trend Oscillator',
+    shortName: volatilityGatedTrendOscillatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: volatilityGatedTrendOscillatorIndicator.metadata,
+    inputConfig: volatilityGatedTrendOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: volatilityGatedTrendOscillatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volatilityGatedTrendOscillatorIndicator.defaultInputs },
+    calculate: volatilityGatedTrendOscillatorIndicator.calculate,
+  },
+  {
+    id: 'adaptive-alma-2-0',
+    group: 'community',
+    name: 'Adaptive ALMA 2.0',
+    shortName: adaptiveAlma20Indicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: adaptiveAlma20Indicator.metadata,
+    inputConfig: adaptiveAlma20Indicator.inputConfig as InputConfig[],
+    plotConfig: adaptiveAlma20Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adaptiveAlma20Indicator.defaultInputs },
+    calculate: adaptiveAlma20Indicator.calculate,
+  },
+  {
+    id: 'vwap-deviation-oscillator',
+    group: 'community',
+    name: 'VWAP Deviation Oscillator',
+    shortName: vwapDeviationOscillatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: vwapDeviationOscillatorIndicator.metadata,
+    inputConfig: vwapDeviationOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: vwapDeviationOscillatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...vwapDeviationOscillatorIndicator.defaultInputs },
+    calculate: vwapDeviationOscillatorIndicator.calculate,
+  },
+  {
+    id: 'quantum-trend-signal',
+    group: 'community',
+    name: 'Quantum Trend Signal',
+    shortName: quantumTrendSignalIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: quantumTrendSignalIndicator.metadata,
+    inputConfig: quantumTrendSignalIndicator.inputConfig as InputConfig[],
+    plotConfig: quantumTrendSignalIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...quantumTrendSignalIndicator.defaultInputs },
+    calculate: quantumTrendSignalIndicator.calculate,
+  },
+  {
+    id: 'loacally-weighted-ma-direction-histogram',
+    group: 'community',
+    name: 'Loacally Weighted MA (LWMA) Direction Histogram',
+    shortName: loacallyWeightedMaDirectionHistogramIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: false,
+    metadata: loacallyWeightedMaDirectionHistogramIndicator.metadata,
+    inputConfig: loacallyWeightedMaDirectionHistogramIndicator.inputConfig as InputConfig[],
+    plotConfig: loacallyWeightedMaDirectionHistogramIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...loacallyWeightedMaDirectionHistogramIndicator.defaultInputs },
+    calculate: loacallyWeightedMaDirectionHistogramIndicator.calculate,
+  },
+  {
+    id: 'volume-weighted-ma-crossover',
+    group: 'community',
+    name: 'Volume-Weighted MA Crossover',
+    shortName: volumeWeightedMaCrossoverIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: volumeWeightedMaCrossoverIndicator.metadata,
+    inputConfig: volumeWeightedMaCrossoverIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeWeightedMaCrossoverIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeWeightedMaCrossoverIndicator.defaultInputs },
+    calculate: volumeWeightedMaCrossoverIndicator.calculate,
+  },
+  {
+    id: 'golden-ratio-trend-persistence',
+    group: 'community',
+    name: 'Golden Ratio Trend Persistence',
+    shortName: goldenRatioTrendPersistenceIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: goldenRatioTrendPersistenceIndicator.metadata,
+    inputConfig: goldenRatioTrendPersistenceIndicator.inputConfig as InputConfig[],
+    plotConfig: goldenRatioTrendPersistenceIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...goldenRatioTrendPersistenceIndicator.defaultInputs },
+    calculate: goldenRatioTrendPersistenceIndicator.calculate,
+  },
+  {
+    id: 'dual-ma-sd-oscillator',
+    group: 'community',
+    name: 'Dual MA SD Oscillator',
+    shortName: dualMaSdOscillatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: dualMaSdOscillatorIndicator.metadata,
+    inputConfig: dualMaSdOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: dualMaSdOscillatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...dualMaSdOscillatorIndicator.defaultInputs },
+    calculate: dualMaSdOscillatorIndicator.calculate,
+  },
+  {
+    id: 'ema-cloud-trend',
+    group: 'community',
+    name: 'EMA Cloud Trend',
+    shortName: emaCloudTrendIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: emaCloudTrendIndicator.metadata,
+    inputConfig: emaCloudTrendIndicator.inputConfig as InputConfig[],
+    plotConfig: emaCloudTrendIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...emaCloudTrendIndicator.defaultInputs },
+    calculate: emaCloudTrendIndicator.calculate,
+  },
+  {
+    id: 'andromeda-trendsync',
+    group: 'community',
+    name: 'ANDROMEDA - TrendSync',
+    shortName: andromedaTrendsyncIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: andromedaTrendsyncIndicator.metadata,
+    inputConfig: andromedaTrendsyncIndicator.inputConfig as InputConfig[],
+    plotConfig: andromedaTrendsyncIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...andromedaTrendsyncIndicator.defaultInputs },
+    calculate: andromedaTrendsyncIndicator.calculate,
+  },
+  {
+    id: 'ai-volume-signals',
+    group: 'community',
+    name: 'AI Volume Signals',
+    shortName: aiVolumeSignalsIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: aiVolumeSignalsIndicator.metadata,
+    inputConfig: aiVolumeSignalsIndicator.inputConfig as InputConfig[],
+    plotConfig: aiVolumeSignalsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...aiVolumeSignalsIndicator.defaultInputs },
+    calculate: aiVolumeSignalsIndicator.calculate,
+  },
+  {
+    id: 'sequential-pattern-strength',
+    group: 'community',
+    name: 'Sequential Pattern Strength',
+    shortName: sequentialPatternStrengthIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: sequentialPatternStrengthIndicator.metadata,
+    inputConfig: sequentialPatternStrengthIndicator.inputConfig as InputConfig[],
+    plotConfig: sequentialPatternStrengthIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...sequentialPatternStrengthIndicator.defaultInputs },
+    calculate: sequentialPatternStrengthIndicator.calculate,
+  },
+  {
+    id: 'aura-trend-candlestick-matrix',
+    group: 'community',
+    name: 'Aura Trend & Candlestick Matrix',
+    shortName: auraTrendCandlestickMatrixIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: auraTrendCandlestickMatrixIndicator.metadata,
+    inputConfig: auraTrendCandlestickMatrixIndicator.inputConfig as InputConfig[],
+    plotConfig: auraTrendCandlestickMatrixIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...auraTrendCandlestickMatrixIndicator.defaultInputs },
+    calculate: auraTrendCandlestickMatrixIndicator.calculate,
+  },
+  {
+    id: 'efficiency-ratio-trend',
+    group: 'community',
+    name: 'Efficiency Ratio Trend',
+    shortName: efficiencyRatioTrendIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: efficiencyRatioTrendIndicator.metadata,
+    inputConfig: efficiencyRatioTrendIndicator.inputConfig as InputConfig[],
+    plotConfig: efficiencyRatioTrendIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...efficiencyRatioTrendIndicator.defaultInputs },
+    calculate: efficiencyRatioTrendIndicator.calculate,
+  },
+  {
+    id: 'linear-volume-macd-lyro-rs',
+    group: 'community',
+    name: 'Linear Volume MACD | Lyro RS',
+    shortName: linearVolumeMacdLyroRsIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: linearVolumeMacdLyroRsIndicator.metadata,
+    inputConfig: linearVolumeMacdLyroRsIndicator.inputConfig as InputConfig[],
+    plotConfig: linearVolumeMacdLyroRsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...linearVolumeMacdLyroRsIndicator.defaultInputs },
+    calculate: linearVolumeMacdLyroRsIndicator.calculate,
+  },
+  {
+    id: 'mean-angles',
+    group: 'community',
+    name: 'Mean Angles',
+    shortName: meanAnglesIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: meanAnglesIndicator.metadata,
+    inputConfig: meanAnglesIndicator.inputConfig as InputConfig[],
+    plotConfig: meanAnglesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...meanAnglesIndicator.defaultInputs },
+    calculate: meanAnglesIndicator.calculate,
+  },
+  {
+    id: 'adaptive-kinetic-ribbon',
+    group: 'community',
+    name: 'Adaptive Kinetic Ribbon',
+    shortName: adaptiveKineticRibbonIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: adaptiveKineticRibbonIndicator.metadata,
+    inputConfig: adaptiveKineticRibbonIndicator.inputConfig as InputConfig[],
+    plotConfig: adaptiveKineticRibbonIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adaptiveKineticRibbonIndicator.defaultInputs },
+    calculate: adaptiveKineticRibbonIndicator.calculate,
   },
   ...candlestickEntries(
     candlestickPortEntries.map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
