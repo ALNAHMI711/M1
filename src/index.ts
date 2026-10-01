@@ -2994,6 +2994,83 @@ export type { HtcPeppermint07CciRsiInputs } from './community/htc-peppermint-07-
 import * as sexiSuperExhaustionIndicatorIndicator from './community/sexi-super-exhaustion-indicator';
 export { SExISuperExhaustionIndicator, calculate as calculateSExISuperExhaustionIndicator } from './community/sexi-super-exhaustion-indicator';
 export type { SExISuperExhaustionIndicatorInputs } from './community/sexi-super-exhaustion-indicator';
+// ── Community batch 15 (Pine v6 ports) ──
+// Price Action Bands | Trend & Volatility
+import * as priceActionBandsTrendVolatilityIndicator from './community/price-action-bands-trend-volatility';
+export { PriceActionBandsTrendVolatility, calculate as calculatePriceActionBandsTrendVolatility } from './community/price-action-bands-trend-volatility';
+export type { PriceActionBandsTrendVolatilityInputs } from './community/price-action-bands-trend-volatility';
+// Median Gaussian Trend | NAL
+import * as medianGaussianTrendNalIndicator from './community/median-gaussian-trend-nal';
+export { MedianGaussianTrendNal, calculate as calculateMedianGaussianTrendNal } from './community/median-gaussian-trend-nal';
+export type { MedianGaussianTrendNalInputs } from './community/median-gaussian-trend-nal';
+// Guppy MMA
+import * as guppyMmaIndicator from './community/guppy-mma';
+export { GuppyMMA, calculate as calculateGuppyMMA } from './community/guppy-mma';
+export type { GuppyMMAInputs } from './community/guppy-mma';
+// STH Unrealized Profit/Loss Ratio (STH-NUPL)
+import * as sthUnrealizedProfitLossRatioIndicator from './community/sth-unrealized-profit-loss-ratio';
+export { STHUnrealizedProfitLossRatio, calculate as calculateSTHUnrealizedProfitLossRatio } from './community/sth-unrealized-profit-loss-ratio';
+export type { STHUnrealizedProfitLossRatioInputs } from './community/sth-unrealized-profit-loss-ratio';
+// KERPD Noise Filter - Kaufman Efficiency Ratio and Price Density
+import * as kerpdNoiseFilterKaufmanEfficiencyRatioAndPriceDensityIndicator from './community/kerpd-noise-filter-kaufman-efficiency-ratio-and-price-density';
+export { KERPDNoiseFilter, calculate as calculateKERPDNoiseFilter } from './community/kerpd-noise-filter-kaufman-efficiency-ratio-and-price-density';
+export type { KERPDNoiseFilterInputs } from './community/kerpd-noise-filter-kaufman-efficiency-ratio-and-price-density';
+// Buy Low Sell High Composite Upgraded V6
+import * as buyLowSellHighCompositeUpgradedV6Indicator from './community/buy-low-sell-high-composite-upgraded-v6';
+export { BuyLowSellHighCompositeUpgradedV6, calculate as calculateBuyLowSellHighCompositeUpgradedV6 } from './community/buy-low-sell-high-composite-upgraded-v6';
+export type { BuyLowSellHighCompositeUpgradedV6Inputs } from './community/buy-low-sell-high-composite-upgraded-v6';
+// MACD Sniper
+import * as macdSniperIndicator from './community/macd-sniper';
+export { MacdSniper, calculate as calculateMacdSniper } from './community/macd-sniper';
+export type { MacdSniperInputs } from './community/macd-sniper';
+// TMO (True Momentum Oscillator)
+import * as tmoIndicator from './community/tmo';
+export { TrueMomentumOscillator, calculate as calculateTrueMomentumOscillator } from './community/tmo';
+export type { TrueMomentumOscillatorInputs } from './community/tmo';
+// Candle Range Theory (CRT) by Lucas
+import * as candleRangeTheoryByLucasIndicator from './community/candle-range-theory-by-lucas';
+export { CandleRangeTheoryByLucas, calculate as calculateCandleRangeTheoryByLucas } from './community/candle-range-theory-by-lucas';
+export type { CandleRangeTheoryByLucasInputs } from './community/candle-range-theory-by-lucas';
+// TASC 2026.09 Adaptive SuperSmoother
+import * as tasc202609AdaptiveSupersmootherIndicator from './community/tasc-2026-09-adaptive-supersmoother';
+export { TascAdaptiveSuperSmoother, calculate as calculateTascAdaptiveSuperSmoother } from './community/tasc-2026-09-adaptive-supersmoother';
+export type { TascAdaptiveSuperSmootherInputs } from './community/tasc-2026-09-adaptive-supersmoother';
+// MPO4 Lines – Modal Engine
+import * as mpo4LinesModalEngineIndicator from './community/mpo4-lines-modal-engine';
+export { Mpo4LinesModalEngine, calculate as calculateMpo4LinesModalEngine } from './community/mpo4-lines-modal-engine';
+export type { Mpo4LinesModalEngineInputs } from './community/mpo4-lines-modal-engine';
+// Filter Wave
+import * as filterWaveIndicator from './community/filter-wave';
+export { FilterWave, calculate as calculateFilterWave } from './community/filter-wave';
+export type { FilterWaveInputs } from './community/filter-wave';
+// Carrier Volatility
+import * as carrierVolatilityIndicator from './community/carrier-volatility';
+export { CarrierVolatility, calculate as calculateCarrierVolatility } from './community/carrier-volatility';
+export type { CarrierVolatilityInputs } from './community/carrier-volatility';
+// Aura: Adaptive Statistical Smoother
+import * as auraAdaptiveStatisticalSmootherIndicator from './community/aura-adaptive-statistical-smoother';
+export { AuraAdaptiveStatisticalSmoother, calculate as calculateAuraAdaptiveStatisticalSmoother } from './community/aura-adaptive-statistical-smoother';
+export type { AuraAdaptiveStatisticalSmootherInputs } from './community/aura-adaptive-statistical-smoother';
+// Savitzky-Golay Hampel Filter | AlphaNatt
+import * as savitzkyGolayHampelFilterAlphanattIndicator from './community/savitzky-golay-hampel-filter-alphanatt';
+export { SavitzkyGolayHampelFilterAlphanatt, calculate as calculateSavitzkyGolayHampelFilterAlphanatt } from './community/savitzky-golay-hampel-filter-alphanatt';
+export type { SavitzkyGolayHampelFilterAlphanattInputs } from './community/savitzky-golay-hampel-filter-alphanatt';
+// Inverse Distance Weighted Moving Average
+import * as inverseDistanceWeightedMovingAverageIndicator from './community/inverse-distance-weighted-moving-average';
+export { InverseDistanceWeightedMovingAverage, calculate as calculateInverseDistanceWeightedMovingAverage } from './community/inverse-distance-weighted-moving-average';
+export type { InverseDistanceWeightedMovingAverageInputs } from './community/inverse-distance-weighted-moving-average';
+// Moving Averages With Continuous Periods
+import * as movingAveragesWithContinuousPeriodsIndicator from './community/moving-averages-with-continuous-periods';
+export { MovingAveragesWithContinuousPeriods, calculate as calculateMovingAveragesWithContinuousPeriods } from './community/moving-averages-with-continuous-periods';
+export type { MovingAveragesWithContinuousPeriodsInputs } from './community/moving-averages-with-continuous-periods';
+// The Mean Goose v1
+import * as theMeanGooseV1Indicator from './community/the-mean-goose-v1';
+export { TheMeanGooseV1, calculate as calculateTheMeanGooseV1 } from './community/the-mean-goose-v1';
+export type { TheMeanGooseV1Inputs } from './community/the-mean-goose-v1';
+// Enhanced KLSE Banker Flow Oscillator
+import * as enhancedKlseBankerFlowOscillatorIndicator from './community/enhanced-klse-banker-flow-oscillator';
+export { EnhancedKLSEBankerFlowOscillator, calculate as calculateEnhancedKLSEBankerFlowOscillator } from './community/enhanced-klse-banker-flow-oscillator';
+export type { EnhancedKLSEBankerFlowOscillatorInputs } from './community/enhanced-klse-banker-flow-oscillator';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -12113,6 +12190,255 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: sexiSuperExhaustionIndicatorIndicator.plotConfig as PlotConfig[],
     defaultInputs: { ...sexiSuperExhaustionIndicatorIndicator.defaultInputs },
     calculate: sexiSuperExhaustionIndicatorIndicator.calculate,
+  },
+  {
+    id: 'price-action-bands-trend-volatility',
+    group: 'community',
+    name: 'Price Action Bands | Trend & Volatility',
+    shortName: priceActionBandsTrendVolatilityIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: priceActionBandsTrendVolatilityIndicator.metadata,
+    inputConfig: priceActionBandsTrendVolatilityIndicator.inputConfig as InputConfig[],
+    plotConfig: priceActionBandsTrendVolatilityIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...priceActionBandsTrendVolatilityIndicator.defaultInputs },
+    calculate: priceActionBandsTrendVolatilityIndicator.calculate,
+  },
+  {
+    id: 'median-gaussian-trend-nal',
+    group: 'community',
+    name: 'Median Gaussian Trend | NAL',
+    shortName: medianGaussianTrendNalIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: medianGaussianTrendNalIndicator.metadata,
+    inputConfig: medianGaussianTrendNalIndicator.inputConfig as InputConfig[],
+    plotConfig: medianGaussianTrendNalIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...medianGaussianTrendNalIndicator.defaultInputs },
+    calculate: medianGaussianTrendNalIndicator.calculate,
+  },
+  {
+    id: 'guppy-mma',
+    group: 'community',
+    name: 'Guppy MMA',
+    shortName: guppyMmaIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: false,
+    metadata: guppyMmaIndicator.metadata,
+    inputConfig: guppyMmaIndicator.inputConfig as InputConfig[],
+    plotConfig: guppyMmaIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...guppyMmaIndicator.defaultInputs },
+    calculate: guppyMmaIndicator.calculate,
+  },
+  {
+    id: 'sth-unrealized-profit-loss-ratio',
+    group: 'community',
+    name: 'STH Unrealized Profit/Loss Ratio (STH-NUPL)',
+    shortName: sthUnrealizedProfitLossRatioIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: sthUnrealizedProfitLossRatioIndicator.metadata,
+    inputConfig: sthUnrealizedProfitLossRatioIndicator.inputConfig as InputConfig[],
+    plotConfig: sthUnrealizedProfitLossRatioIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...sthUnrealizedProfitLossRatioIndicator.defaultInputs },
+    calculate: sthUnrealizedProfitLossRatioIndicator.calculate,
+  },
+  {
+    id: 'kerpd-noise-filter-kaufman-efficiency-ratio-and-price-density',
+    group: 'community',
+    name: 'KERPD Noise Filter - Kaufman Efficiency Ratio and Price Density',
+    shortName: kerpdNoiseFilterKaufmanEfficiencyRatioAndPriceDensityIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: false,
+    metadata: kerpdNoiseFilterKaufmanEfficiencyRatioAndPriceDensityIndicator.metadata,
+    inputConfig: kerpdNoiseFilterKaufmanEfficiencyRatioAndPriceDensityIndicator.inputConfig as InputConfig[],
+    plotConfig: kerpdNoiseFilterKaufmanEfficiencyRatioAndPriceDensityIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...kerpdNoiseFilterKaufmanEfficiencyRatioAndPriceDensityIndicator.defaultInputs },
+    calculate: kerpdNoiseFilterKaufmanEfficiencyRatioAndPriceDensityIndicator.calculate,
+  },
+  {
+    id: 'buy-low-sell-high-composite-upgraded-v6',
+    group: 'community',
+    name: 'Buy Low Sell High Composite Upgraded V6',
+    shortName: buyLowSellHighCompositeUpgradedV6Indicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: buyLowSellHighCompositeUpgradedV6Indicator.metadata,
+    inputConfig: buyLowSellHighCompositeUpgradedV6Indicator.inputConfig as InputConfig[],
+    plotConfig: buyLowSellHighCompositeUpgradedV6Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...buyLowSellHighCompositeUpgradedV6Indicator.defaultInputs },
+    calculate: buyLowSellHighCompositeUpgradedV6Indicator.calculate,
+  },
+  {
+    id: 'macd-sniper',
+    group: 'community',
+    name: 'MACD Sniper',
+    shortName: macdSniperIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: macdSniperIndicator.metadata,
+    inputConfig: macdSniperIndicator.inputConfig as InputConfig[],
+    plotConfig: macdSniperIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...macdSniperIndicator.defaultInputs },
+    calculate: macdSniperIndicator.calculate,
+  },
+  {
+    id: 'tmo',
+    group: 'community',
+    name: 'TMO (True Momentum Oscillator)',
+    shortName: tmoIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: tmoIndicator.metadata,
+    inputConfig: tmoIndicator.inputConfig as InputConfig[],
+    plotConfig: tmoIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...tmoIndicator.defaultInputs },
+    calculate: tmoIndicator.calculate,
+  },
+  {
+    id: 'candle-range-theory-by-lucas',
+    group: 'community',
+    name: 'Candle Range Theory (CRT) by Lucas',
+    shortName: candleRangeTheoryByLucasIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: candleRangeTheoryByLucasIndicator.metadata,
+    inputConfig: candleRangeTheoryByLucasIndicator.inputConfig as InputConfig[],
+    plotConfig: candleRangeTheoryByLucasIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...candleRangeTheoryByLucasIndicator.defaultInputs },
+    calculate: candleRangeTheoryByLucasIndicator.calculate,
+  },
+  {
+    id: 'tasc-2026-09-adaptive-supersmoother',
+    group: 'community',
+    name: 'TASC 2026.09 Adaptive SuperSmoother',
+    shortName: tasc202609AdaptiveSupersmootherIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: false,
+    metadata: tasc202609AdaptiveSupersmootherIndicator.metadata,
+    inputConfig: tasc202609AdaptiveSupersmootherIndicator.inputConfig as InputConfig[],
+    plotConfig: tasc202609AdaptiveSupersmootherIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...tasc202609AdaptiveSupersmootherIndicator.defaultInputs },
+    calculate: tasc202609AdaptiveSupersmootherIndicator.calculate,
+  },
+  {
+    id: 'mpo4-lines-modal-engine',
+    group: 'community',
+    name: 'MPO4 Lines – Modal Engine',
+    shortName: mpo4LinesModalEngineIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: mpo4LinesModalEngineIndicator.metadata,
+    inputConfig: mpo4LinesModalEngineIndicator.inputConfig as InputConfig[],
+    plotConfig: mpo4LinesModalEngineIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...mpo4LinesModalEngineIndicator.defaultInputs },
+    calculate: mpo4LinesModalEngineIndicator.calculate,
+  },
+  {
+    id: 'filter-wave',
+    group: 'community',
+    name: 'Filter Wave',
+    shortName: filterWaveIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: filterWaveIndicator.metadata,
+    inputConfig: filterWaveIndicator.inputConfig as InputConfig[],
+    plotConfig: filterWaveIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...filterWaveIndicator.defaultInputs },
+    calculate: filterWaveIndicator.calculate,
+  },
+  {
+    id: 'carrier-volatility',
+    group: 'community',
+    name: 'Carrier Volatility',
+    shortName: carrierVolatilityIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: carrierVolatilityIndicator.metadata,
+    inputConfig: carrierVolatilityIndicator.inputConfig as InputConfig[],
+    plotConfig: carrierVolatilityIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...carrierVolatilityIndicator.defaultInputs },
+    calculate: carrierVolatilityIndicator.calculate,
+  },
+  {
+    id: 'aura-adaptive-statistical-smoother',
+    group: 'community',
+    name: 'Aura: Adaptive Statistical Smoother',
+    shortName: auraAdaptiveStatisticalSmootherIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: auraAdaptiveStatisticalSmootherIndicator.metadata,
+    inputConfig: auraAdaptiveStatisticalSmootherIndicator.inputConfig as InputConfig[],
+    plotConfig: auraAdaptiveStatisticalSmootherIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...auraAdaptiveStatisticalSmootherIndicator.defaultInputs },
+    calculate: auraAdaptiveStatisticalSmootherIndicator.calculate,
+  },
+  {
+    id: 'savitzky-golay-hampel-filter-alphanatt',
+    group: 'community',
+    name: 'Savitzky-Golay Hampel Filter | AlphaNatt',
+    shortName: savitzkyGolayHampelFilterAlphanattIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: savitzkyGolayHampelFilterAlphanattIndicator.metadata,
+    inputConfig: savitzkyGolayHampelFilterAlphanattIndicator.inputConfig as InputConfig[],
+    plotConfig: savitzkyGolayHampelFilterAlphanattIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...savitzkyGolayHampelFilterAlphanattIndicator.defaultInputs },
+    calculate: savitzkyGolayHampelFilterAlphanattIndicator.calculate,
+  },
+  {
+    id: 'inverse-distance-weighted-moving-average',
+    group: 'community',
+    name: 'Inverse Distance Weighted Moving Average',
+    shortName: inverseDistanceWeightedMovingAverageIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: inverseDistanceWeightedMovingAverageIndicator.metadata,
+    inputConfig: inverseDistanceWeightedMovingAverageIndicator.inputConfig as InputConfig[],
+    plotConfig: inverseDistanceWeightedMovingAverageIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...inverseDistanceWeightedMovingAverageIndicator.defaultInputs },
+    calculate: inverseDistanceWeightedMovingAverageIndicator.calculate,
+  },
+  {
+    id: 'moving-averages-with-continuous-periods',
+    group: 'community',
+    name: 'Moving Averages With Continuous Periods',
+    shortName: movingAveragesWithContinuousPeriodsIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: movingAveragesWithContinuousPeriodsIndicator.metadata,
+    inputConfig: movingAveragesWithContinuousPeriodsIndicator.inputConfig as InputConfig[],
+    plotConfig: movingAveragesWithContinuousPeriodsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...movingAveragesWithContinuousPeriodsIndicator.defaultInputs },
+    calculate: movingAveragesWithContinuousPeriodsIndicator.calculate,
+  },
+  {
+    id: 'the-mean-goose-v1',
+    group: 'community',
+    name: 'The Mean Goose v1',
+    shortName: theMeanGooseV1Indicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: theMeanGooseV1Indicator.metadata,
+    inputConfig: theMeanGooseV1Indicator.inputConfig as InputConfig[],
+    plotConfig: theMeanGooseV1Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...theMeanGooseV1Indicator.defaultInputs },
+    calculate: theMeanGooseV1Indicator.calculate,
+  },
+  {
+    id: 'enhanced-klse-banker-flow-oscillator',
+    group: 'community',
+    name: 'Enhanced KLSE Banker Flow Oscillator',
+    shortName: enhancedKlseBankerFlowOscillatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: enhancedKlseBankerFlowOscillatorIndicator.metadata,
+    inputConfig: enhancedKlseBankerFlowOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: enhancedKlseBankerFlowOscillatorIndicator.plotConfig as PlotConfig[],
+    hlineConfig: enhancedKlseBankerFlowOscillatorIndicator.hlineConfig,
+    fillConfig: enhancedKlseBankerFlowOscillatorIndicator.fillConfig,
+    defaultInputs: { ...enhancedKlseBankerFlowOscillatorIndicator.defaultInputs },
+    calculate: enhancedKlseBankerFlowOscillatorIndicator.calculate,
   },
   ...candlestickEntries(
     [...candlestickPortEntries, candlestickPortAllPatterns].map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
