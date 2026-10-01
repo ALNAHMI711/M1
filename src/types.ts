@@ -60,6 +60,8 @@ export interface BarColorData {
 export interface BgColorData {
   time: number;
   color: string; // includes alpha
+  /** Pine bgcolor(..., force_overlay = true): drawn on the price pane even for a non-overlay indicator */
+  forceOverlay?: boolean;
 }
 
 /**

@@ -1263,8 +1263,8 @@ export class ChartManager {
   private lineBrPrimitives: Map<string, LineBrPrimitive> = new Map();
   private lineBrAnchorSeries: Map<string, ISeriesApi<'Line'>> = new Map();
   private candlePlotSeries: Map<string, ISeriesApi<'Candlestick'>> = new Map();
-  private bgColorPrimitive: BgColorPrimitive | null = null;
-  private bgColorAnchorSeries: ISeriesApi<'Line'> | null = null;
+  // one background primitive per pane (indicator pane, price pane for forceOverlay entries)
+  private bgColorLayers: Array<{ primitive: BgColorPrimitive; anchor: ISeriesApi<'Line'> }> = [];
   private extendedMarkerPrimitive: ExtendedMarkerPrimitive | null = null;
   // atPrice* markers of a non-overlay indicator, in the indicator pane
   private paneMarkerAnchor: ISeriesApi<'Line'> | null = null;
@@ -1628,42 +1628,48 @@ export class ChartManager {
   setBgColors(bgColors: BgColorData[], paneIndex: number): void {
     this.clearBgColors();
 
-    // Create invisible anchor series
-    const anchor = this.chart.addSeries(LineSeries, {
-      color: 'transparent',
-      lineVisible: false,
-      lastValueVisible: false,
-      priceLineVisible: false,
-      crosshairMarkerVisible: false,
-    });
-    anchor.moveToPane(paneIndex);
-
-    // Set minimal data
-    if (bgColors.length > 0) {
-      anchor.setData([
-        { time: bgColors[0].time as unknown as Time, value: 0 },
-        { time: bgColors[bgColors.length - 1].time as unknown as Time, value: 0 },
-      ] as LineData<Time>[]);
+    // Pine bgcolor(force_overlay = true): those bars go to the price pane (pane 0)
+    const byPane = new Map<number, BgColorData[]>();
+    for (const bg of bgColors) {
+      const pane = bg.forceOverlay ? 0 : paneIndex;
+      if (!byPane.has(pane)) byPane.set(pane, []);
+      byPane.get(pane)!.push(bg);
     }
 
-    const primitive = new BgColorPrimitive();
-    anchor.attachPrimitive(primitive as ISeriesPrimitive<Time>);
-    primitive.setData(bgColors);
+    for (const [pane, list] of byPane) {
+      // Create invisible anchor series (its value 0 must not take part in the price scale range)
+      const anchor = this.chart.addSeries(LineSeries, {
+        color: 'transparent',
+        lineVisible: false,
+        lastValueVisible: false,
+        priceLineVisible: false,
+        crosshairMarkerVisible: false,
+        autoscaleInfoProvider: () => null,
+      });
+      anchor.moveToPane(pane);
 
-    this.bgColorPrimitive = primitive;
-    this.bgColorAnchorSeries = anchor;
+      // Set minimal data
+      anchor.setData([
+        { time: list[0].time as unknown as Time, value: 0 },
+        { time: list[list.length - 1].time as unknown as Time, value: 0 },
+      ] as LineData<Time>[]);
+
+      const primitive = new BgColorPrimitive();
+      anchor.attachPrimitive(primitive as ISeriesPrimitive<Time>);
+      primitive.setData(list);
+      this.bgColorLayers.push({ primitive, anchor });
+    }
   }
 
   /**
    * Clear background colors
    */
   private clearBgColors(): void {
-    if (this.bgColorPrimitive && this.bgColorAnchorSeries) {
-      this.bgColorAnchorSeries.detachPrimitive(this.bgColorPrimitive as ISeriesPrimitive<Time>);
-      this.chart.removeSeries(this.bgColorAnchorSeries);
-      this.bgColorPrimitive = null;
-      this.bgColorAnchorSeries = null;
+    for (const { primitive, anchor } of this.bgColorLayers) {
+      anchor.detachPrimitive(primitive as ISeriesPrimitive<Time>);
+      this.chart.removeSeries(anchor);
     }
+    this.bgColorLayers = [];
   }
 
   // ─── Phase 4: plotcandle ───────────────────────────────────────────────

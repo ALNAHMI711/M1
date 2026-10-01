@@ -2425,6 +2425,87 @@ export type { AroonWithRsiConfirmationInputs } from './community/aroon-with-rsi-
 import * as directionalIndicatorCrossoversV1Indicator from './community/directional-indicator-crossovers-v1';
 export { DirectionalIndicatorCrossoversV1, calculate as calculateDirectionalIndicatorCrossoversV1 } from './community/directional-indicator-crossovers-v1';
 export type { DirectionalIndicatorCrossoversV1Inputs } from './community/directional-indicator-crossovers-v1';
+// ── Community batch 8 (Pine v6 ports) ──
+// Voss Predictive Filter
+import * as vossPredictiveFilterIndicator from './community/voss-predictive-filter';
+export { VossPredictiveFilter, calculate as calculateVossPredictiveFilter } from './community/voss-predictive-filter';
+export type { VossPredictiveFilterInputs } from './community/voss-predictive-filter';
+// Aggregated Scores Oscillator
+import * as aggregatedScoresOscillatorIndicator from './community/aggregated-scores-oscillator';
+export { AggregatedScoresOscillator, calculate as calculateAggregatedScoresOscillator } from './community/aggregated-scores-oscillator';
+export type { AggregatedScoresOscillatorInputs } from './community/aggregated-scores-oscillator';
+// Sweep2Trade Pro
+import * as sweep2tradeProIndicator from './community/sweep2trade-pro';
+export { Sweep2TradePro, calculate as calculateSweep2TradePro } from './community/sweep2trade-pro';
+export type { Sweep2TradeProInputs } from './community/sweep2trade-pro';
+// Smoothed Low-Pass Butterworth Filtered Median
+import * as butterworthFilteredMedianIndicator from './community/butterworth-filtered-median';
+export { ButterworthFilteredMedian, calculate as calculateButterworthFilteredMedian } from './community/butterworth-filtered-median';
+export type { ButterworthFilteredMedianInputs } from './community/butterworth-filtered-median';
+// PolyFilter
+import * as polyfilterIndicator from './community/polyfilter';
+export { PolyFilter, calculate as calculatePolyFilter } from './community/polyfilter';
+export type { PolyFilterInputs } from './community/polyfilter';
+// Quant VWAP System 3.8
+import * as quantVwapSystem38Indicator from './community/quant-vwap-system-3-8';
+export { QuantVwapSystem38, calculate as calculateQuantVwapSystem38 } from './community/quant-vwap-system-3-8';
+export type { QuantVwapSystem38Inputs } from './community/quant-vwap-system-3-8';
+// Accumulation/Distribution Money Flow v1.0
+import * as adMoneyFlowIndicator from './community/ad-money-flow';
+export { AdMoneyFlow, calculate as calculateAdMoneyFlow } from './community/ad-money-flow';
+export type { AdMoneyFlowInputs } from './community/ad-money-flow';
+// Dual RSI Smoother
+import * as dualRsiSmootherIndicator from './community/dual-rsi-smoother';
+export { DualRsiSmoother, calculate as calculateDualRsiSmoother } from './community/dual-rsi-smoother';
+export type { DualRsiSmootherInputs } from './community/dual-rsi-smoother';
+// Asian & London Session High/Low
+import * as asianLondonSessionHighLowIndicator from './community/asian-london-session-high-low';
+export { AsianLondonSessionHighLow, calculate as calculateAsianLondonSessionHighLow } from './community/asian-london-session-high-low';
+export type { AsianLondonSessionHighLowInputs } from './community/asian-london-session-high-low';
+// XAUUSD Buy/Sell Alerts with SL & TP
+import * as xauusdBuySellAlertsWithSlTpIndicator from './community/xauusd-buy-sell-alerts-with-sl-tp';
+export { XauusdBuySellAlertsWithSlTp, calculate as calculateXauusdBuySellAlertsWithSlTp } from './community/xauusd-buy-sell-alerts-with-sl-tp';
+export type { XauusdBuySellAlertsWithSlTpInputs } from './community/xauusd-buy-sell-alerts-with-sl-tp';
+// XAUUSD Family Scalping (5min)
+import * as xauusdFamilyScalpingIndicator from './community/xauusd-family-scalping';
+export { XauusdFamilyScalping, calculate as calculateXauusdFamilyScalping } from './community/xauusd-family-scalping';
+export type { XauusdFamilyScalpingInputs } from './community/xauusd-family-scalping';
+// Smooth RSI
+import * as smoothRsiIndicator from './community/smooth-rsi';
+export { SmoothRSI, calculate as calculateSmoothRSI } from './community/smooth-rsi';
+export type { SmoothRSIInputs } from './community/smooth-rsi';
+// Market Pressure Oscillator
+import * as marketPressureOscillatorIndicator from './community/market-pressure-oscillator';
+export { MarketPressureOscillator, calculate as calculateMarketPressureOscillator } from './community/market-pressure-oscillator';
+export type { MarketPressureOscillatorInputs } from './community/market-pressure-oscillator';
+// TASC 2026.05 The AutoTune Filter
+import * as tasc202605TheAutotuneFilterIndicator from './community/tasc-2026-05-the-autotune-filter';
+export { TascAutoTuneFilter, calculate as calculateTascAutoTuneFilter } from './community/tasc-2026-05-the-autotune-filter';
+export type { TascAutoTuneFilterInputs } from './community/tasc-2026-05-the-autotune-filter';
+// Median MACD - Mattes
+import * as medianMacdMattesIndicator from './community/median-macd-mattes';
+export { MedianMacdMattes, calculate as calculateMedianMacdMattes } from './community/median-macd-mattes';
+export type { MedianMacdMattesInputs } from './community/median-macd-mattes';
+// MESA Adaptive Ehlers Flow | AlphaNatt
+import * as mesaAdaptiveEhlersFlowIndicator from './community/mesa-adaptive-ehlers-flow';
+export { MesaAdaptiveEhlersFlow, calculate as calculateMesaAdaptiveEhlersFlow } from './community/mesa-adaptive-ehlers-flow';
+export type { MesaAdaptiveEhlersFlowInputs } from './community/mesa-adaptive-ehlers-flow';
+// MACD XD
+import * as macdXdIndicator from './community/macd-xd';
+export { MacdXd, calculate as calculateMacdXd } from './community/macd-xd';
+export type { MacdXdInputs } from './community/macd-xd';
+// RSI BB StdDev Signal
+import * as rsiBbStddevSignalIndicator from './community/rsi-bb-stddev-signal';
+export { RsiBbStddevSignal, calculate as calculateRsiBbStddevSignal } from './community/rsi-bb-stddev-signal';
+export type { RsiBbStddevSignalInputs } from './community/rsi-bb-stddev-signal';
+// Dynamic Score PSAR
+import * as dynamicScorePsarIndicator from './community/dynamic-score-psar';
+export { DynamicScorePsar, calculate as calculateDynamicScorePsar } from './community/dynamic-score-psar';
+export type { DynamicScorePsarInputs } from './community/dynamic-score-psar';
+// RSI Multicolor editable
+import * as rsiMulticolorEditableIndicator from './community/rsi-multicolor-editable';
+export { RsiMulticolorEditable, calculate as calculateRsiMulticolorEditable } from './community/rsi-multicolor-editable';
+export type { RsiMulticolorEditableInputs } from './community/rsi-multicolor-editable';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -9698,6 +9779,273 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: directionalIndicatorCrossoversV1Indicator.plotConfig as PlotConfig[],
     defaultInputs: { ...directionalIndicatorCrossoversV1Indicator.defaultInputs },
     calculate: directionalIndicatorCrossoversV1Indicator.calculate,
+  },
+  {
+    id: 'voss-predictive-filter',
+    group: 'community',
+    name: 'Voss Predictive Filter',
+    shortName: vossPredictiveFilterIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: vossPredictiveFilterIndicator.metadata,
+    inputConfig: vossPredictiveFilterIndicator.inputConfig as InputConfig[],
+    plotConfig: vossPredictiveFilterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...vossPredictiveFilterIndicator.defaultInputs },
+    calculate: vossPredictiveFilterIndicator.calculate,
+  },
+  {
+    id: 'aggregated-scores-oscillator',
+    group: 'community',
+    name: 'Aggregated Scores Oscillator',
+    shortName: aggregatedScoresOscillatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: aggregatedScoresOscillatorIndicator.metadata,
+    inputConfig: aggregatedScoresOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: aggregatedScoresOscillatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...aggregatedScoresOscillatorIndicator.defaultInputs },
+    calculate: aggregatedScoresOscillatorIndicator.calculate,
+  },
+  {
+    id: 'sweep2trade-pro',
+    group: 'community',
+    name: 'Sweep2Trade Pro',
+    shortName: sweep2tradeProIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: sweep2tradeProIndicator.metadata,
+    inputConfig: sweep2tradeProIndicator.inputConfig as InputConfig[],
+    plotConfig: sweep2tradeProIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...sweep2tradeProIndicator.defaultInputs },
+    calculate: sweep2tradeProIndicator.calculate,
+  },
+  {
+    id: 'butterworth-filtered-median',
+    group: 'community',
+    name: 'Smoothed Low-Pass Butterworth Filtered Median',
+    shortName: butterworthFilteredMedianIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: butterworthFilteredMedianIndicator.metadata,
+    inputConfig: butterworthFilteredMedianIndicator.inputConfig as InputConfig[],
+    plotConfig: butterworthFilteredMedianIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...butterworthFilteredMedianIndicator.defaultInputs },
+    calculate: butterworthFilteredMedianIndicator.calculate,
+  },
+  {
+    id: 'polyfilter',
+    group: 'community',
+    name: 'PolyFilter',
+    shortName: polyfilterIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: polyfilterIndicator.metadata,
+    inputConfig: polyfilterIndicator.inputConfig as InputConfig[],
+    plotConfig: polyfilterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...polyfilterIndicator.defaultInputs },
+    calculate: polyfilterIndicator.calculate,
+  },
+  {
+    id: 'quant-vwap-system-3-8',
+    group: 'community',
+    name: 'Quant VWAP System 3.8',
+    shortName: quantVwapSystem38Indicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: quantVwapSystem38Indicator.metadata,
+    inputConfig: quantVwapSystem38Indicator.inputConfig as InputConfig[],
+    plotConfig: quantVwapSystem38Indicator.plotConfig as PlotConfig[],
+    hlineConfig: quantVwapSystem38Indicator.hlineConfig,
+    fillConfig: quantVwapSystem38Indicator.fillConfig,
+    defaultInputs: { ...quantVwapSystem38Indicator.defaultInputs },
+    calculate: quantVwapSystem38Indicator.calculate,
+  },
+  {
+    id: 'ad-money-flow',
+    group: 'community',
+    name: 'Accumulation/Distribution Money Flow v1.0',
+    shortName: adMoneyFlowIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: adMoneyFlowIndicator.metadata,
+    inputConfig: adMoneyFlowIndicator.inputConfig as InputConfig[],
+    plotConfig: adMoneyFlowIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adMoneyFlowIndicator.defaultInputs },
+    calculate: adMoneyFlowIndicator.calculate,
+  },
+  {
+    id: 'dual-rsi-smoother',
+    group: 'community',
+    name: 'Dual RSI Smoother',
+    shortName: dualRsiSmootherIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: dualRsiSmootherIndicator.metadata,
+    inputConfig: dualRsiSmootherIndicator.inputConfig as InputConfig[],
+    plotConfig: dualRsiSmootherIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...dualRsiSmootherIndicator.defaultInputs },
+    calculate: dualRsiSmootherIndicator.calculate,
+  },
+  {
+    id: 'asian-london-session-high-low',
+    group: 'community',
+    name: 'Asian & London Session High/Low',
+    shortName: asianLondonSessionHighLowIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: asianLondonSessionHighLowIndicator.metadata,
+    inputConfig: asianLondonSessionHighLowIndicator.inputConfig as InputConfig[],
+    plotConfig: asianLondonSessionHighLowIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...asianLondonSessionHighLowIndicator.defaultInputs },
+    calculate: asianLondonSessionHighLowIndicator.calculate,
+  },
+  {
+    id: 'xauusd-buy-sell-alerts-with-sl-tp',
+    group: 'community',
+    name: 'XAUUSD Buy/Sell Alerts with SL & TP',
+    shortName: xauusdBuySellAlertsWithSlTpIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: xauusdBuySellAlertsWithSlTpIndicator.metadata,
+    inputConfig: xauusdBuySellAlertsWithSlTpIndicator.inputConfig as InputConfig[],
+    plotConfig: xauusdBuySellAlertsWithSlTpIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...xauusdBuySellAlertsWithSlTpIndicator.defaultInputs },
+    calculate: xauusdBuySellAlertsWithSlTpIndicator.calculate,
+  },
+  {
+    id: 'xauusd-family-scalping',
+    group: 'community',
+    name: 'XAUUSD Family Scalping (5min)',
+    shortName: xauusdFamilyScalpingIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: true,
+    metadata: xauusdFamilyScalpingIndicator.metadata,
+    inputConfig: xauusdFamilyScalpingIndicator.inputConfig as InputConfig[],
+    plotConfig: xauusdFamilyScalpingIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...xauusdFamilyScalpingIndicator.defaultInputs },
+    calculate: xauusdFamilyScalpingIndicator.calculate,
+  },
+  {
+    id: 'smooth-rsi',
+    group: 'community',
+    name: 'Smooth RSI',
+    shortName: smoothRsiIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: smoothRsiIndicator.metadata,
+    inputConfig: smoothRsiIndicator.inputConfig as InputConfig[],
+    plotConfig: smoothRsiIndicator.plotConfig as PlotConfig[],
+    hlineConfig: smoothRsiIndicator.hlineConfig,
+    defaultInputs: { ...smoothRsiIndicator.defaultInputs },
+    calculate: smoothRsiIndicator.calculate,
+  },
+  {
+    id: 'market-pressure-oscillator',
+    group: 'community',
+    name: 'Market Pressure Oscillator',
+    shortName: marketPressureOscillatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: marketPressureOscillatorIndicator.metadata,
+    inputConfig: marketPressureOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: marketPressureOscillatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...marketPressureOscillatorIndicator.defaultInputs },
+    calculate: marketPressureOscillatorIndicator.calculate,
+  },
+  {
+    id: 'tasc-2026-05-the-autotune-filter',
+    group: 'community',
+    name: 'TASC 2026.05 The AutoTune Filter',
+    shortName: tasc202605TheAutotuneFilterIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: tasc202605TheAutotuneFilterIndicator.metadata,
+    inputConfig: tasc202605TheAutotuneFilterIndicator.inputConfig as InputConfig[],
+    plotConfig: tasc202605TheAutotuneFilterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...tasc202605TheAutotuneFilterIndicator.defaultInputs },
+    calculate: tasc202605TheAutotuneFilterIndicator.calculate,
+  },
+  {
+    id: 'median-macd-mattes',
+    group: 'community',
+    name: 'Median MACD - Mattes',
+    shortName: medianMacdMattesIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: medianMacdMattesIndicator.metadata,
+    inputConfig: medianMacdMattesIndicator.inputConfig as InputConfig[],
+    plotConfig: medianMacdMattesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...medianMacdMattesIndicator.defaultInputs },
+    calculate: medianMacdMattesIndicator.calculate,
+  },
+  {
+    id: 'mesa-adaptive-ehlers-flow',
+    group: 'community',
+    name: 'MESA Adaptive Ehlers Flow | AlphaNatt',
+    shortName: mesaAdaptiveEhlersFlowIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: mesaAdaptiveEhlersFlowIndicator.metadata,
+    inputConfig: mesaAdaptiveEhlersFlowIndicator.inputConfig as InputConfig[],
+    plotConfig: mesaAdaptiveEhlersFlowIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...mesaAdaptiveEhlersFlowIndicator.defaultInputs },
+    calculate: mesaAdaptiveEhlersFlowIndicator.calculate,
+  },
+  {
+    id: 'macd-xd',
+    group: 'community',
+    name: 'MACD XD',
+    shortName: macdXdIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: macdXdIndicator.metadata,
+    inputConfig: macdXdIndicator.inputConfig as InputConfig[],
+    plotConfig: macdXdIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...macdXdIndicator.defaultInputs },
+    calculate: macdXdIndicator.calculate,
+  },
+  {
+    id: 'rsi-bb-stddev-signal',
+    group: 'community',
+    name: 'RSI BB StdDev Signal',
+    shortName: rsiBbStddevSignalIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: rsiBbStddevSignalIndicator.metadata,
+    inputConfig: rsiBbStddevSignalIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiBbStddevSignalIndicator.plotConfig as PlotConfig[],
+    hlineConfig: rsiBbStddevSignalIndicator.hlineConfig,
+    fillConfig: rsiBbStddevSignalIndicator.fillConfig,
+    defaultInputs: { ...rsiBbStddevSignalIndicator.defaultInputs },
+    calculate: rsiBbStddevSignalIndicator.calculate,
+  },
+  {
+    id: 'dynamic-score-psar',
+    group: 'community',
+    name: 'Dynamic Score PSAR',
+    shortName: dynamicScorePsarIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: false,
+    metadata: dynamicScorePsarIndicator.metadata,
+    inputConfig: dynamicScorePsarIndicator.inputConfig as InputConfig[],
+    plotConfig: dynamicScorePsarIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...dynamicScorePsarIndicator.defaultInputs },
+    calculate: dynamicScorePsarIndicator.calculate,
+  },
+  {
+    id: 'rsi-multicolor-editable',
+    group: 'community',
+    name: 'RSI Multicolor editable',
+    shortName: rsiMulticolorEditableIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: rsiMulticolorEditableIndicator.metadata,
+    inputConfig: rsiMulticolorEditableIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiMulticolorEditableIndicator.plotConfig as PlotConfig[],
+    hlineConfig: rsiMulticolorEditableIndicator.hlineConfig,
+    fillConfig: rsiMulticolorEditableIndicator.fillConfig,
+    defaultInputs: { ...rsiMulticolorEditableIndicator.defaultInputs },
+    calculate: rsiMulticolorEditableIndicator.calculate,
   },
   ...candlestickEntries(
     candlestickPortEntries.map((e) => [e.id, e.indicator] as [string, typeof e.indicator])

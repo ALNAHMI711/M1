@@ -173,7 +173,7 @@ export function calculate(
     candles.push({ time: b.time, open: b.open, high: b.high, low: b.low, close: b.close, color: c, borderColor: c,
       wickColor: c, forceOverlay: true });
     // bgcolor(bgCol, force_overlay = true, display = showBGCol ? display.all : display.none)
-    if (cfg.showBGCol && bgCol) bgColors.push({ time: b.time, color: bgCol });
+    if (cfg.showBGCol && bgCol) bgColors.push({ time: b.time, color: bgCol, forceOverlay: true });
   }
 
   // hline(downT ? lowerMD : na) / hline(downT ? lowerB : na): an na hline is not drawn
