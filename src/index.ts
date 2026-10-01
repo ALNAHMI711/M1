@@ -2344,6 +2344,87 @@ export type { TascAutocorrelationInputs } from './community/tasc-2025-02-autocor
 import * as volumeBandsIndicator from './community/volume-bands';
 export { VolumeBands, calculate as calculateVolumeBands } from './community/volume-bands';
 export type { VolumeBandsInputs } from './community/volume-bands';
+// ── Community batch 7 (Pine v6 ports) ──
+// Curved Trend Channels
+import * as curvedTrendChannelsIndicator from './community/curved-trend-channels';
+export { CurvedTrendChannels, calculate as calculateCurvedTrendChannels } from './community/curved-trend-channels';
+export type { CurvedTrendChannelsInputs } from './community/curved-trend-channels';
+// Triple MA For Loop
+import * as tripleMaForLoopIndicator from './community/triple-ma-for-loop';
+export { TripleMaForLoop, calculate as calculateTripleMaForLoop } from './community/triple-ma-for-loop';
+export type { TripleMaForLoopInputs } from './community/triple-ma-for-loop';
+// Buy & Sell - Accurate Signals
+import * as buySellAccurateSignalsIndicator from './community/buy-sell-accurate-signals';
+export { BuySellAccurateSignals, calculate as calculateBuySellAccurateSignals } from './community/buy-sell-accurate-signals';
+export type { BuySellAccurateSignalsInputs } from './community/buy-sell-accurate-signals';
+// SuperBands
+import * as superbandsIndicator from './community/superbands';
+export { SuperBands, calculate as calculateSuperBands } from './community/superbands';
+export type { SuperBandsInputs } from './community/superbands';
+// MA Zones
+import * as maZonesIndicator from './community/ma-zones';
+export { MAZones, calculate as calculateMAZones } from './community/ma-zones';
+export type { MAZonesInputs } from './community/ma-zones';
+// PulseWave + Divergence
+import * as pulsewaveDivergenceIndicator from './community/pulsewave-divergence';
+export { PulsewaveDivergence, calculate as calculatePulsewaveDivergence } from './community/pulsewave-divergence';
+export type { PulsewaveDivergenceInputs } from './community/pulsewave-divergence';
+// Luminous Mean Reversion Channels
+import * as luminousMeanReversionChannelsIndicator from './community/luminous-mean-reversion-channels';
+export { LuminousMeanReversionChannels, calculate as calculateLuminousMeanReversionChannels } from './community/luminous-mean-reversion-channels';
+export type { LuminousMeanReversionChannelsInputs } from './community/luminous-mean-reversion-channels';
+// Pure Coca
+import * as pureCocaIndicator from './community/pure-coca';
+export { PureCoca, calculate as calculatePureCoca } from './community/pure-coca';
+export type { PureCocaInputs } from './community/pure-coca';
+// Q KAMA Clarity Trend
+import * as qKamaClarityTrendIndicator from './community/q-kama-clarity-trend';
+export { QKamaClarityTrend, calculate as calculateQKamaClarityTrend } from './community/q-kama-clarity-trend';
+export type { QKamaClarityTrendInputs } from './community/q-kama-clarity-trend';
+// H-Infinity Volatility Filter
+import * as hInfinityVolatilityFilterIndicator from './community/h-infinity-volatility-filter';
+export { HInfinityVolatilityFilter, calculate as calculateHInfinityVolatilityFilter } from './community/h-infinity-volatility-filter';
+export type { HInfinityVolatilityFilterInputs } from './community/h-infinity-volatility-filter';
+// Percentile-Based BB% Trend - Mattes
+import * as percentileBasedBbTrendMattesIndicator from './community/percentile-based-bb-trend-mattes';
+export { PercentileBasedBbTrendMattes, calculate as calculatePercentileBasedBbTrendMattes } from './community/percentile-based-bb-trend-mattes';
+export type { PercentileBasedBbTrendMattesInputs } from './community/percentile-based-bb-trend-mattes';
+// Gaussian RSI | NAL
+import * as gaussianRsiNalIndicator from './community/gaussian-rsi-nal';
+export { GaussianRsiNal, calculate as calculateGaussianRsiNal } from './community/gaussian-rsi-nal';
+export type { GaussianRsiNalInputs } from './community/gaussian-rsi-nal';
+// IU Smart Flow System
+import * as iuSmartFlowSystemIndicator from './community/iu-smart-flow-system';
+export { IuSmartFlowSystem, calculate as calculateIuSmartFlowSystem } from './community/iu-smart-flow-system';
+export type { IuSmartFlowSystemInputs } from './community/iu-smart-flow-system';
+// TASC 2026.04 A Synthetic Oscillator
+import * as tasc202604ASyntheticOscillatorIndicator from './community/tasc-2026-04-a-synthetic-oscillator';
+export { TascSyntheticOscillator, calculate as calculateTascSyntheticOscillator } from './community/tasc-2026-04-a-synthetic-oscillator';
+export type { TascSyntheticOscillatorInputs } from './community/tasc-2026-04-a-synthetic-oscillator';
+// Kinetic Slippage Index (KSI)
+import * as kineticSlippageIndexIndicator from './community/kinetic-slippage-index';
+export { KineticSlippageIndex, calculate as calculateKineticSlippageIndex } from './community/kinetic-slippage-index';
+export type { KineticSlippageIndexInputs } from './community/kinetic-slippage-index';
+// Setup 9.1 (Larry Williams) + EMA 50
+import * as setup91Ema50Indicator from './community/setup-9-1-ema-50';
+export { Setup91Ema50, calculate as calculateSetup91Ema50 } from './community/setup-9-1-ema-50';
+export type { Setup91Ema50Inputs } from './community/setup-9-1-ema-50';
+// DEMA Flow
+import * as demaFlowIndicator from './community/dema-flow';
+export { DemaFlow, calculate as calculateDemaFlow } from './community/dema-flow';
+export type { DemaFlowInputs } from './community/dema-flow';
+// Volume + RSI & MA Differential
+import * as volumeRsiMaDifferentialIndicator from './community/volume-rsi-ma-differential';
+export { VolumeRsiMaDifferential, calculate as calculateVolumeRsiMaDifferential } from './community/volume-rsi-ma-differential';
+export type { VolumeRsiMaDifferentialInputs } from './community/volume-rsi-ma-differential';
+// Aroon with RSI Confirmation (92.86%)
+import * as aroonWithRsiConfirmationIndicator from './community/aroon-with-rsi-confirmation';
+export { AroonWithRsiConfirmation, calculate as calculateAroonWithRsiConfirmation } from './community/aroon-with-rsi-confirmation';
+export type { AroonWithRsiConfirmationInputs } from './community/aroon-with-rsi-confirmation';
+// Directional Indicator Crossovers v1
+import * as directionalIndicatorCrossoversV1Indicator from './community/directional-indicator-crossovers-v1';
+export { DirectionalIndicatorCrossoversV1, calculate as calculateDirectionalIndicatorCrossoversV1 } from './community/directional-indicator-crossovers-v1';
+export type { DirectionalIndicatorCrossoversV1Inputs } from './community/directional-indicator-crossovers-v1';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -9357,6 +9438,266 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: volumeBandsIndicator.plotConfig as PlotConfig[],
     defaultInputs: { ...volumeBandsIndicator.defaultInputs },
     calculate: volumeBandsIndicator.calculate,
+  },
+  {
+    id: 'curved-trend-channels',
+    group: 'community',
+    name: 'Curved Trend Channels',
+    shortName: curvedTrendChannelsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: curvedTrendChannelsIndicator.metadata,
+    inputConfig: curvedTrendChannelsIndicator.inputConfig as InputConfig[],
+    plotConfig: curvedTrendChannelsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...curvedTrendChannelsIndicator.defaultInputs },
+    calculate: curvedTrendChannelsIndicator.calculate,
+  },
+  {
+    id: 'triple-ma-for-loop',
+    group: 'community',
+    name: 'Triple MA For Loop',
+    shortName: tripleMaForLoopIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: false,
+    metadata: tripleMaForLoopIndicator.metadata,
+    inputConfig: tripleMaForLoopIndicator.inputConfig as InputConfig[],
+    plotConfig: tripleMaForLoopIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...tripleMaForLoopIndicator.defaultInputs },
+    calculate: tripleMaForLoopIndicator.calculate,
+  },
+  {
+    id: 'buy-sell-accurate-signals',
+    group: 'community',
+    name: 'Buy & Sell - Accurate Signals',
+    shortName: buySellAccurateSignalsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: buySellAccurateSignalsIndicator.metadata,
+    inputConfig: buySellAccurateSignalsIndicator.inputConfig as InputConfig[],
+    plotConfig: buySellAccurateSignalsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...buySellAccurateSignalsIndicator.defaultInputs },
+    calculate: buySellAccurateSignalsIndicator.calculate,
+  },
+  {
+    id: 'superbands',
+    group: 'community',
+    name: 'SuperBands',
+    shortName: superbandsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: superbandsIndicator.metadata,
+    inputConfig: superbandsIndicator.inputConfig as InputConfig[],
+    plotConfig: superbandsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...superbandsIndicator.defaultInputs },
+    calculate: superbandsIndicator.calculate,
+  },
+  {
+    id: 'ma-zones',
+    group: 'community',
+    name: 'MA Zones',
+    shortName: maZonesIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: maZonesIndicator.metadata,
+    inputConfig: maZonesIndicator.inputConfig as InputConfig[],
+    plotConfig: maZonesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...maZonesIndicator.defaultInputs },
+    calculate: maZonesIndicator.calculate,
+  },
+  {
+    id: 'pulsewave-divergence',
+    group: 'community',
+    name: 'PulseWave + Divergence',
+    shortName: pulsewaveDivergenceIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: pulsewaveDivergenceIndicator.metadata,
+    inputConfig: pulsewaveDivergenceIndicator.inputConfig as InputConfig[],
+    plotConfig: pulsewaveDivergenceIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...pulsewaveDivergenceIndicator.defaultInputs },
+    calculate: pulsewaveDivergenceIndicator.calculate,
+  },
+  {
+    id: 'luminous-mean-reversion-channels',
+    group: 'community',
+    name: 'Luminous Mean Reversion Channels',
+    shortName: luminousMeanReversionChannelsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: luminousMeanReversionChannelsIndicator.metadata,
+    inputConfig: luminousMeanReversionChannelsIndicator.inputConfig as InputConfig[],
+    plotConfig: luminousMeanReversionChannelsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...luminousMeanReversionChannelsIndicator.defaultInputs },
+    calculate: luminousMeanReversionChannelsIndicator.calculate,
+  },
+  {
+    id: 'pure-coca',
+    group: 'community',
+    name: 'Pure Coca',
+    shortName: pureCocaIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: pureCocaIndicator.metadata,
+    inputConfig: pureCocaIndicator.inputConfig as InputConfig[],
+    plotConfig: pureCocaIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...pureCocaIndicator.defaultInputs },
+    calculate: pureCocaIndicator.calculate,
+  },
+  {
+    id: 'q-kama-clarity-trend',
+    group: 'community',
+    name: 'Q KAMA Clarity Trend',
+    shortName: qKamaClarityTrendIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: qKamaClarityTrendIndicator.metadata,
+    inputConfig: qKamaClarityTrendIndicator.inputConfig as InputConfig[],
+    plotConfig: qKamaClarityTrendIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...qKamaClarityTrendIndicator.defaultInputs },
+    calculate: qKamaClarityTrendIndicator.calculate,
+  },
+  {
+    id: 'h-infinity-volatility-filter',
+    group: 'community',
+    name: 'H-Infinity Volatility Filter',
+    shortName: hInfinityVolatilityFilterIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: hInfinityVolatilityFilterIndicator.metadata,
+    inputConfig: hInfinityVolatilityFilterIndicator.inputConfig as InputConfig[],
+    plotConfig: hInfinityVolatilityFilterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...hInfinityVolatilityFilterIndicator.defaultInputs },
+    calculate: hInfinityVolatilityFilterIndicator.calculate,
+  },
+  {
+    id: 'percentile-based-bb-trend-mattes',
+    group: 'community',
+    name: 'Percentile-Based BB% Trend - Mattes',
+    shortName: percentileBasedBbTrendMattesIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: percentileBasedBbTrendMattesIndicator.metadata,
+    inputConfig: percentileBasedBbTrendMattesIndicator.inputConfig as InputConfig[],
+    plotConfig: percentileBasedBbTrendMattesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...percentileBasedBbTrendMattesIndicator.defaultInputs },
+    calculate: percentileBasedBbTrendMattesIndicator.calculate,
+  },
+  {
+    id: 'gaussian-rsi-nal',
+    group: 'community',
+    name: 'Gaussian RSI | NAL',
+    shortName: gaussianRsiNalIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: gaussianRsiNalIndicator.metadata,
+    inputConfig: gaussianRsiNalIndicator.inputConfig as InputConfig[],
+    plotConfig: gaussianRsiNalIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...gaussianRsiNalIndicator.defaultInputs },
+    calculate: gaussianRsiNalIndicator.calculate,
+  },
+  {
+    id: 'iu-smart-flow-system',
+    group: 'community',
+    name: 'IU Smart Flow System',
+    shortName: iuSmartFlowSystemIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: iuSmartFlowSystemIndicator.metadata,
+    inputConfig: iuSmartFlowSystemIndicator.inputConfig as InputConfig[],
+    plotConfig: iuSmartFlowSystemIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...iuSmartFlowSystemIndicator.defaultInputs },
+    calculate: iuSmartFlowSystemIndicator.calculate,
+  },
+  {
+    id: 'tasc-2026-04-a-synthetic-oscillator',
+    group: 'community',
+    name: 'TASC 2026.04 A Synthetic Oscillator',
+    shortName: tasc202604ASyntheticOscillatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: tasc202604ASyntheticOscillatorIndicator.metadata,
+    inputConfig: tasc202604ASyntheticOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: tasc202604ASyntheticOscillatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...tasc202604ASyntheticOscillatorIndicator.defaultInputs },
+    calculate: tasc202604ASyntheticOscillatorIndicator.calculate,
+  },
+  {
+    id: 'kinetic-slippage-index',
+    group: 'community',
+    name: 'Kinetic Slippage Index (KSI)',
+    shortName: kineticSlippageIndexIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: kineticSlippageIndexIndicator.metadata,
+    inputConfig: kineticSlippageIndexIndicator.inputConfig as InputConfig[],
+    plotConfig: kineticSlippageIndexIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...kineticSlippageIndexIndicator.defaultInputs },
+    calculate: kineticSlippageIndexIndicator.calculate,
+  },
+  {
+    id: 'setup-9-1-ema-50',
+    group: 'community',
+    name: 'Setup 9.1 (Larry Williams) + EMA 50',
+    shortName: setup91Ema50Indicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: setup91Ema50Indicator.metadata,
+    inputConfig: setup91Ema50Indicator.inputConfig as InputConfig[],
+    plotConfig: setup91Ema50Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...setup91Ema50Indicator.defaultInputs },
+    calculate: setup91Ema50Indicator.calculate,
+  },
+  {
+    id: 'dema-flow',
+    group: 'community',
+    name: 'DEMA Flow',
+    shortName: demaFlowIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: demaFlowIndicator.metadata,
+    inputConfig: demaFlowIndicator.inputConfig as InputConfig[],
+    plotConfig: demaFlowIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...demaFlowIndicator.defaultInputs },
+    calculate: demaFlowIndicator.calculate,
+  },
+  {
+    id: 'volume-rsi-ma-differential',
+    group: 'community',
+    name: 'Volume + RSI & MA Differential',
+    shortName: volumeRsiMaDifferentialIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: volumeRsiMaDifferentialIndicator.metadata,
+    inputConfig: volumeRsiMaDifferentialIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeRsiMaDifferentialIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeRsiMaDifferentialIndicator.defaultInputs },
+    calculate: volumeRsiMaDifferentialIndicator.calculate,
+  },
+  {
+    id: 'aroon-with-rsi-confirmation',
+    group: 'community',
+    name: 'Aroon with RSI Confirmation (92.86%)',
+    shortName: aroonWithRsiConfirmationIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: aroonWithRsiConfirmationIndicator.metadata,
+    inputConfig: aroonWithRsiConfirmationIndicator.inputConfig as InputConfig[],
+    plotConfig: aroonWithRsiConfirmationIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...aroonWithRsiConfirmationIndicator.defaultInputs },
+    calculate: aroonWithRsiConfirmationIndicator.calculate,
+  },
+  {
+    id: 'directional-indicator-crossovers-v1',
+    group: 'community',
+    name: 'Directional Indicator Crossovers v1',
+    shortName: directionalIndicatorCrossoversV1Indicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: false,
+    metadata: directionalIndicatorCrossoversV1Indicator.metadata,
+    inputConfig: directionalIndicatorCrossoversV1Indicator.inputConfig as InputConfig[],
+    plotConfig: directionalIndicatorCrossoversV1Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...directionalIndicatorCrossoversV1Indicator.defaultInputs },
+    calculate: directionalIndicatorCrossoversV1Indicator.calculate,
   },
   ...candlestickEntries(
     candlestickPortEntries.map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
