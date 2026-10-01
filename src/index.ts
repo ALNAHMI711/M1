@@ -2590,6 +2590,87 @@ export type { MeanAnglesInputs } from './community/mean-angles';
 import * as adaptiveKineticRibbonIndicator from './community/adaptive-kinetic-ribbon';
 export { AdaptiveKineticRibbon, calculate as calculateAdaptiveKineticRibbon } from './community/adaptive-kinetic-ribbon';
 export type { AdaptiveKineticRibbonInputs } from './community/adaptive-kinetic-ribbon';
+// ── Community batch 10 (Pine v6 ports) ──
+// Linear Regression Volume | Lyro RS
+import * as linearRegressionVolumeLyroRsIndicator from './community/linear-regression-volume-lyro-rs';
+export { LinearRegressionVolumeLyroRs, calculate as calculateLinearRegressionVolumeLyroRs } from './community/linear-regression-volume-lyro-rs';
+export type { LinearRegressionVolumeLyroRsInputs } from './community/linear-regression-volume-lyro-rs';
+// Adaptive Friction Filter (AFF)
+import * as adaptiveFrictionFilterIndicator from './community/adaptive-friction-filter';
+export { AdaptiveFrictionFilter, calculate as calculateAdaptiveFrictionFilter } from './community/adaptive-friction-filter';
+export type { AdaptiveFrictionFilterInputs } from './community/adaptive-friction-filter';
+// CHN BUY SELL with EMA 200
+import * as chnBuySellWithEma200Indicator from './community/chn-buy-sell-with-ema-200';
+export { ChnBuySellWithEma200, calculate as calculateChnBuySellWithEma200 } from './community/chn-buy-sell-with-ema-200';
+export type { ChnBuySellWithEma200Inputs } from './community/chn-buy-sell-with-ema-200';
+// Adaptive Nadaraya-Watson (Non Repainting)
+import * as adaptiveNadarayaWatsonIndicator from './community/adaptive-nadaraya-watson';
+export { AdaptiveNadarayaWatson, calculate as calculateAdaptiveNadarayaWatson } from './community/adaptive-nadaraya-watson';
+export type { AdaptiveNadarayaWatsonInputs } from './community/adaptive-nadaraya-watson';
+// MFI Nexus Pro
+import * as mfiNexusProIndicator from './community/mfi-nexus-pro';
+export { MfiNexusPro, calculate as calculateMfiNexusPro } from './community/mfi-nexus-pro';
+export type { MfiNexusProInputs } from './community/mfi-nexus-pro';
+// Pulse RSI | Lyro RS
+import * as pulseRsiLyroRsIndicator from './community/pulse-rsi-lyro-rs';
+export { PulseRsiLyroRs, calculate as calculatePulseRsiLyroRs } from './community/pulse-rsi-lyro-rs';
+export type { PulseRsiLyroRsInputs } from './community/pulse-rsi-lyro-rs';
+// Early MACD Reversal Indicator
+import * as earlyMacdReversalIndicatorIndicator from './community/early-macd-reversal-indicator';
+export { EarlyMacdReversalIndicator, calculate as calculateEarlyMacdReversalIndicator } from './community/early-macd-reversal-indicator';
+export type { EarlyMacdReversalIndicatorInputs } from './community/early-macd-reversal-indicator';
+// ALMA SD Bands | RakoQuant
+import * as almaSdBandsRakoquantIndicator from './community/alma-sd-bands-rakoquant';
+export { AlmaSdBandsRakoquant, calculate as calculateAlmaSdBandsRakoquant } from './community/alma-sd-bands-rakoquant';
+export type { AlmaSdBandsRakoquantInputs } from './community/alma-sd-bands-rakoquant';
+// Gravity Well Trend | Lyro RS
+import * as gravityWellTrendLyroRsIndicator from './community/gravity-well-trend-lyro-rs';
+export { GravityWellTrend, calculate as calculateGravityWellTrend } from './community/gravity-well-trend-lyro-rs';
+export type { GravityWellTrendInputs } from './community/gravity-well-trend-lyro-rs';
+// ATR Volatility and Trend Analysis
+import * as atrVolatilityAndTrendAnalysisIndicator from './community/atr-volatility-and-trend-analysis';
+export { AtrVolatilityAndTrendAnalysis, calculate as calculateAtrVolatilityAndTrendAnalysis } from './community/atr-volatility-and-trend-analysis';
+export type { AtrVolatilityAndTrendAnalysisInputs } from './community/atr-volatility-and-trend-analysis';
+// RSI Bars - OnlyFlow
+import * as rsiBarsOnlyflowIndicator from './community/rsi-bars-onlyflow';
+export { RsiBarsOnlyflow, calculate as calculateRsiBarsOnlyflow } from './community/rsi-bars-onlyflow';
+export type { RsiBarsOnlyflowInputs } from './community/rsi-bars-onlyflow';
+// ADX and RSI Combo
+import * as adxAndRsiComboIndicator from './community/adx-and-rsi-combo';
+export { AdxAndRsiCombo, calculate as calculateAdxAndRsiCombo } from './community/adx-and-rsi-combo';
+export type { AdxAndRsiComboInputs } from './community/adx-and-rsi-combo';
+// RSI Trend Navigator
+import * as rsiTrendNavigatorIndicator from './community/rsi-trend-navigator';
+export { RSITrendNavigator, calculate as calculateRSITrendNavigator } from './community/rsi-trend-navigator';
+export type { RSITrendNavigatorInputs } from './community/rsi-trend-navigator';
+// Disparity Index
+import * as disparityIndexIndicator from './community/disparity-index';
+export { DisparityIndex, calculate as calculateDisparityIndex } from './community/disparity-index';
+export type { DisparityIndexInputs } from './community/disparity-index';
+// Alpha-Sutte Model
+import * as alphaSutteModelIndicator from './community/alpha-sutte-model';
+export { AlphaSutteModel, calculate as calculateAlphaSutteModel } from './community/alpha-sutte-model';
+export type { AlphaSutteModelInputs } from './community/alpha-sutte-model';
+// Weighted percentile nearest rank
+import * as weightedPercentileNearestRankIndicator from './community/weighted-percentile-nearest-rank';
+export { WeightedPercentileNearestRank, calculate as calculateWeightedPercentileNearestRank } from './community/weighted-percentile-nearest-rank';
+export type { WeightedPercentileNearestRankInputs } from './community/weighted-percentile-nearest-rank';
+// TR High/Low meter
+import * as trHighLowMeterIndicator from './community/tr-high-low-meter';
+export { TrHighLowMeter, calculate as calculateTrHighLowMeter } from './community/tr-high-low-meter';
+export type { TrHighLowMeterInputs } from './community/tr-high-low-meter';
+// ATR-Normalized VWMA Deviation
+import * as atrNormalizedVwmaDeviationIndicator from './community/atr-normalized-vwma-deviation';
+export { ATRNormalizedVWMADeviation, calculate as calculateATRNormalizedVWMADeviation } from './community/atr-normalized-vwma-deviation';
+export type { ATRNormalizedVWMADeviationInputs } from './community/atr-normalized-vwma-deviation';
+// Dan's Ironclad OB - Simple
+import * as danSIroncladObSimpleIndicator from './community/dan-s-ironclad-ob-simple';
+export { DanSIroncladObSimple, calculate as calculateDanSIroncladObSimple } from './community/dan-s-ironclad-ob-simple';
+export type { DanSIroncladObSimpleInputs } from './community/dan-s-ironclad-ob-simple';
+// Lumina Trend Channels
+import * as luminaTrendChannelsIndicator from './community/lumina-trend-channels';
+export { LuminaTrendChannels, calculate as calculateLuminaTrendChannels } from './community/lumina-trend-channels';
+export type { LuminaTrendChannelsInputs } from './community/lumina-trend-channels';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -10390,6 +10471,272 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: adaptiveKineticRibbonIndicator.plotConfig as PlotConfig[],
     defaultInputs: { ...adaptiveKineticRibbonIndicator.defaultInputs },
     calculate: adaptiveKineticRibbonIndicator.calculate,
+  },
+  {
+    id: 'linear-regression-volume-lyro-rs',
+    group: 'community',
+    name: 'Linear Regression Volume | Lyro RS',
+    shortName: linearRegressionVolumeLyroRsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: linearRegressionVolumeLyroRsIndicator.metadata,
+    inputConfig: linearRegressionVolumeLyroRsIndicator.inputConfig as InputConfig[],
+    plotConfig: linearRegressionVolumeLyroRsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...linearRegressionVolumeLyroRsIndicator.defaultInputs },
+    calculate: linearRegressionVolumeLyroRsIndicator.calculate,
+  },
+  {
+    id: 'adaptive-friction-filter',
+    group: 'community',
+    name: 'Adaptive Friction Filter (AFF)',
+    shortName: adaptiveFrictionFilterIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: adaptiveFrictionFilterIndicator.metadata,
+    inputConfig: adaptiveFrictionFilterIndicator.inputConfig as InputConfig[],
+    plotConfig: adaptiveFrictionFilterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adaptiveFrictionFilterIndicator.defaultInputs },
+    calculate: adaptiveFrictionFilterIndicator.calculate,
+  },
+  {
+    id: 'chn-buy-sell-with-ema-200',
+    group: 'community',
+    name: 'CHN BUY SELL with EMA 200',
+    shortName: chnBuySellWithEma200Indicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: chnBuySellWithEma200Indicator.metadata,
+    inputConfig: chnBuySellWithEma200Indicator.inputConfig as InputConfig[],
+    plotConfig: chnBuySellWithEma200Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...chnBuySellWithEma200Indicator.defaultInputs },
+    calculate: chnBuySellWithEma200Indicator.calculate,
+  },
+  {
+    id: 'adaptive-nadaraya-watson',
+    group: 'community',
+    name: 'Adaptive Nadaraya-Watson (Non Repainting)',
+    shortName: adaptiveNadarayaWatsonIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: adaptiveNadarayaWatsonIndicator.metadata,
+    inputConfig: adaptiveNadarayaWatsonIndicator.inputConfig as InputConfig[],
+    plotConfig: adaptiveNadarayaWatsonIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adaptiveNadarayaWatsonIndicator.defaultInputs },
+    calculate: adaptiveNadarayaWatsonIndicator.calculate,
+  },
+  {
+    id: 'mfi-nexus-pro',
+    group: 'community',
+    name: 'MFI Nexus Pro',
+    shortName: mfiNexusProIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: mfiNexusProIndicator.metadata,
+    inputConfig: mfiNexusProIndicator.inputConfig as InputConfig[],
+    plotConfig: mfiNexusProIndicator.plotConfig as PlotConfig[],
+    hlineConfig: mfiNexusProIndicator.hlineConfig,
+    fillConfig: mfiNexusProIndicator.fillConfig,
+    defaultInputs: { ...mfiNexusProIndicator.defaultInputs },
+    calculate: mfiNexusProIndicator.calculate,
+  },
+  {
+    id: 'pulse-rsi-lyro-rs',
+    group: 'community',
+    name: 'Pulse RSI | Lyro RS',
+    shortName: pulseRsiLyroRsIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: pulseRsiLyroRsIndicator.metadata,
+    inputConfig: pulseRsiLyroRsIndicator.inputConfig as InputConfig[],
+    plotConfig: pulseRsiLyroRsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...pulseRsiLyroRsIndicator.defaultInputs },
+    calculate: pulseRsiLyroRsIndicator.calculate,
+  },
+  {
+    id: 'early-macd-reversal-indicator',
+    group: 'community',
+    name: 'Early MACD Reversal Indicator',
+    shortName: earlyMacdReversalIndicatorIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: earlyMacdReversalIndicatorIndicator.metadata,
+    inputConfig: earlyMacdReversalIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: earlyMacdReversalIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...earlyMacdReversalIndicatorIndicator.defaultInputs },
+    calculate: earlyMacdReversalIndicatorIndicator.calculate,
+  },
+  {
+    id: 'alma-sd-bands-rakoquant',
+    group: 'community',
+    name: 'ALMA SD Bands | RakoQuant',
+    shortName: almaSdBandsRakoquantIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: almaSdBandsRakoquantIndicator.metadata,
+    inputConfig: almaSdBandsRakoquantIndicator.inputConfig as InputConfig[],
+    plotConfig: almaSdBandsRakoquantIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...almaSdBandsRakoquantIndicator.defaultInputs },
+    calculate: almaSdBandsRakoquantIndicator.calculate,
+  },
+  {
+    id: 'gravity-well-trend-lyro-rs',
+    group: 'community',
+    name: 'Gravity Well Trend | Lyro RS',
+    shortName: gravityWellTrendLyroRsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: gravityWellTrendLyroRsIndicator.metadata,
+    inputConfig: gravityWellTrendLyroRsIndicator.inputConfig as InputConfig[],
+    plotConfig: gravityWellTrendLyroRsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...gravityWellTrendLyroRsIndicator.defaultInputs },
+    calculate: gravityWellTrendLyroRsIndicator.calculate,
+  },
+  {
+    id: 'atr-volatility-and-trend-analysis',
+    group: 'community',
+    name: 'ATR Volatility and Trend Analysis',
+    shortName: atrVolatilityAndTrendAnalysisIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: true,
+    metadata: atrVolatilityAndTrendAnalysisIndicator.metadata,
+    inputConfig: atrVolatilityAndTrendAnalysisIndicator.inputConfig as InputConfig[],
+    plotConfig: atrVolatilityAndTrendAnalysisIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...atrVolatilityAndTrendAnalysisIndicator.defaultInputs },
+    calculate: atrVolatilityAndTrendAnalysisIndicator.calculate,
+  },
+  {
+    id: 'rsi-bars-onlyflow',
+    group: 'community',
+    name: 'RSI Bars - OnlyFlow',
+    shortName: rsiBarsOnlyflowIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: rsiBarsOnlyflowIndicator.metadata,
+    inputConfig: rsiBarsOnlyflowIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiBarsOnlyflowIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsiBarsOnlyflowIndicator.defaultInputs },
+    calculate: rsiBarsOnlyflowIndicator.calculate,
+  },
+  {
+    id: 'adx-and-rsi-combo',
+    group: 'community',
+    name: 'ADX and RSI Combo',
+    shortName: adxAndRsiComboIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: adxAndRsiComboIndicator.metadata,
+    inputConfig: adxAndRsiComboIndicator.inputConfig as InputConfig[],
+    plotConfig: adxAndRsiComboIndicator.plotConfig as PlotConfig[],
+    hlineConfig: adxAndRsiComboIndicator.hlineConfig,
+    fillConfig: adxAndRsiComboIndicator.fillConfig,
+    defaultInputs: { ...adxAndRsiComboIndicator.defaultInputs },
+    calculate: adxAndRsiComboIndicator.calculate,
+  },
+  {
+    id: 'rsi-trend-navigator',
+    group: 'community',
+    name: 'RSI Trend Navigator',
+    shortName: rsiTrendNavigatorIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: rsiTrendNavigatorIndicator.metadata,
+    inputConfig: rsiTrendNavigatorIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiTrendNavigatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsiTrendNavigatorIndicator.defaultInputs },
+    calculate: rsiTrendNavigatorIndicator.calculate,
+  },
+  {
+    id: 'disparity-index',
+    group: 'community',
+    name: 'Disparity Index',
+    shortName: disparityIndexIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: disparityIndexIndicator.metadata,
+    inputConfig: disparityIndexIndicator.inputConfig as InputConfig[],
+    plotConfig: disparityIndexIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...disparityIndexIndicator.defaultInputs },
+    calculate: disparityIndexIndicator.calculate,
+  },
+  {
+    id: 'alpha-sutte-model',
+    group: 'community',
+    name: 'Alpha-Sutte Model',
+    shortName: alphaSutteModelIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: alphaSutteModelIndicator.metadata,
+    inputConfig: alphaSutteModelIndicator.inputConfig as InputConfig[],
+    plotConfig: alphaSutteModelIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...alphaSutteModelIndicator.defaultInputs },
+    calculate: alphaSutteModelIndicator.calculate,
+  },
+  {
+    id: 'weighted-percentile-nearest-rank',
+    group: 'community',
+    name: 'Weighted percentile nearest rank',
+    shortName: weightedPercentileNearestRankIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: weightedPercentileNearestRankIndicator.metadata,
+    inputConfig: weightedPercentileNearestRankIndicator.inputConfig as InputConfig[],
+    plotConfig: weightedPercentileNearestRankIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...weightedPercentileNearestRankIndicator.defaultInputs },
+    calculate: weightedPercentileNearestRankIndicator.calculate,
+  },
+  {
+    id: 'tr-high-low-meter',
+    group: 'community',
+    name: 'TR High/Low meter',
+    shortName: trHighLowMeterIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: trHighLowMeterIndicator.metadata,
+    inputConfig: trHighLowMeterIndicator.inputConfig as InputConfig[],
+    plotConfig: trHighLowMeterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...trHighLowMeterIndicator.defaultInputs },
+    calculate: trHighLowMeterIndicator.calculate,
+  },
+  {
+    id: 'atr-normalized-vwma-deviation',
+    group: 'community',
+    name: 'ATR-Normalized VWMA Deviation',
+    shortName: atrNormalizedVwmaDeviationIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: atrNormalizedVwmaDeviationIndicator.metadata,
+    inputConfig: atrNormalizedVwmaDeviationIndicator.inputConfig as InputConfig[],
+    plotConfig: atrNormalizedVwmaDeviationIndicator.plotConfig as PlotConfig[],
+    hlineConfig: atrNormalizedVwmaDeviationIndicator.hlineConfig,
+    fillConfig: atrNormalizedVwmaDeviationIndicator.fillConfig,
+    defaultInputs: { ...atrNormalizedVwmaDeviationIndicator.defaultInputs },
+    calculate: atrNormalizedVwmaDeviationIndicator.calculate,
+  },
+  {
+    id: 'dan-s-ironclad-ob-simple',
+    group: 'community',
+    name: 'Dan\'s Ironclad OB - Simple',
+    shortName: danSIroncladObSimpleIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: danSIroncladObSimpleIndicator.metadata,
+    inputConfig: danSIroncladObSimpleIndicator.inputConfig as InputConfig[],
+    plotConfig: danSIroncladObSimpleIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...danSIroncladObSimpleIndicator.defaultInputs },
+    calculate: danSIroncladObSimpleIndicator.calculate,
+  },
+  {
+    id: 'lumina-trend-channels',
+    group: 'community',
+    name: 'Lumina Trend Channels',
+    shortName: luminaTrendChannelsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: luminaTrendChannelsIndicator.metadata,
+    inputConfig: luminaTrendChannelsIndicator.inputConfig as InputConfig[],
+    plotConfig: luminaTrendChannelsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...luminaTrendChannelsIndicator.defaultInputs },
+    calculate: luminaTrendChannelsIndicator.calculate,
   },
   ...candlestickEntries(
     [...candlestickPortEntries, candlestickPortAllPatterns].map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
