@@ -2182,6 +2182,87 @@ export type { SimplifiedPercentileClusteringInputs } from './community/simplifie
 import * as atrBasedZigzagWEmaIndicator from './community/atr-based-zigzag-w-ema';
 export { AtrBasedZigzagWEma, calculate as calculateAtrBasedZigzagWEma } from './community/atr-based-zigzag-w-ema';
 export type { AtrBasedZigzagWEmaInputs } from './community/atr-based-zigzag-w-ema';
+// ── Community batch 5 (Pine v6 ports) ──
+// Kalman Flow | Lyro RS
+import * as kalmanFlowLyroRsIndicator from './community/kalman-flow-lyro-rs';
+export { KalmanFlowLyroRs, calculate as calculateKalmanFlowLyroRs } from './community/kalman-flow-lyro-rs';
+export type { KalmanFlowLyroRsInputs } from './community/kalman-flow-lyro-rs';
+// Weighted Regression Bands
+import * as weightedRegressionBandsIndicator from './community/weighted-regression-bands';
+export { WeightedRegressionBands, calculate as calculateWeightedRegressionBands } from './community/weighted-regression-bands';
+export type { WeightedRegressionBandsInputs } from './community/weighted-regression-bands';
+// RSI Modified
+import * as rsiModifiedIndicator from './community/rsi-modified';
+export { RsiModified, calculate as calculateRsiModified } from './community/rsi-modified';
+export type { RsiModifiedInputs } from './community/rsi-modified';
+// Dynamic Trailing
+import * as dynamicTrailingIndicator from './community/dynamic-trailing';
+export { DynamicTrailing, calculate as calculateDynamicTrailing } from './community/dynamic-trailing';
+export type { DynamicTrailingInputs } from './community/dynamic-trailing';
+// Dual Bayesian For Loop
+import * as dualBayesianForLoopIndicator from './community/dual-bayesian-for-loop';
+export { DualBayesianForLoop, calculate as calculateDualBayesianForLoop } from './community/dual-bayesian-for-loop';
+export type { DualBayesianForLoopInputs } from './community/dual-bayesian-for-loop';
+// RSI Multi Levels kiawosch 7-14-42 Consolidation
+import * as rsiMultiLevelsIndicator from './community/rsi-multi-levels';
+export { RSIMultiLevels, calculate as calculateRSIMultiLevels } from './community/rsi-multi-levels';
+export type { RSIMultiLevelsInputs } from './community/rsi-multi-levels';
+// FSVZO
+import * as fsvzoIndicator from './community/fsvzo';
+export { Fsvzo, calculate as calculateFsvzo } from './community/fsvzo';
+export type { FsvzoInputs } from './community/fsvzo';
+// Laguerre Filter
+import * as laguerreFilterIndicator from './community/laguerre-filter';
+export { LaguerreFilter, calculate as calculateLaguerreFilter } from './community/laguerre-filter';
+export type { LaguerreFilterInputs } from './community/laguerre-filter';
+// Price Action Breakout Trend
+import * as priceActionBreakoutTrendIndicator from './community/price-action-breakout-trend';
+export { PriceActionBreakoutTrend, calculate as calculatePriceActionBreakoutTrend } from './community/price-action-breakout-trend';
+export type { PriceActionBreakoutTrendInputs } from './community/price-action-breakout-trend';
+// RSI-50 Step Line
+import * as rsi50StepLineIndicator from './community/rsi-50-step-line';
+export { Rsi50StepLine, calculate as calculateRsi50StepLine } from './community/rsi-50-step-line';
+export type { Rsi50StepLineInputs } from './community/rsi-50-step-line';
+// RedK Vol_Weighted RSI: Extending the power of the classic RSI
+import * as redkVolWeightedRsiIndicator from './community/redk-vol-weighted-rsi';
+export { RedKVolWeightedRsi, calculate as calculateRedKVolWeightedRsi } from './community/redk-vol-weighted-rsi';
+export type { RedKVolWeightedRsiInputs } from './community/redk-vol-weighted-rsi';
+// Volume Candle Highlighter
+import * as volumeCandleHighlighterIndicator from './community/volume-candle-highlighter';
+export { VolumeCandleHighlighter, calculate as calculateVolumeCandleHighlighter } from './community/volume-candle-highlighter';
+export type { VolumeCandleHighlighterInputs } from './community/volume-candle-highlighter';
+// ICT FVG Buy/Sell Signals
+import * as ictFvgBuySellSignalsIndicator from './community/ict-fvg-buy-sell-signals';
+export { IctFvgBuySellSignals, calculate as calculateIctFvgBuySellSignals } from './community/ict-fvg-buy-sell-signals';
+export type { IctFvgBuySellSignalsInputs } from './community/ict-fvg-buy-sell-signals';
+// TASC 2025.06 Cybernetic Oscillator
+import * as tasc202506CyberneticOscillatorIndicator from './community/tasc-2025-06-cybernetic-oscillator';
+export { TascCyberneticOscillator, calculate as calculateTascCyberneticOscillator } from './community/tasc-2025-06-cybernetic-oscillator';
+export type { TascCyberneticOscillatorInputs } from './community/tasc-2025-06-cybernetic-oscillator';
+// Rolling Trendline
+import * as rollingTrendlineIndicator from './community/rolling-trendline';
+export { RollingTrendline, calculate as calculateRollingTrendline } from './community/rolling-trendline';
+export type { RollingTrendlineInputs } from './community/rolling-trendline';
+// QuantumTrend SwiftEdge
+import * as quantumtrendSwiftedgeIndicator from './community/quantumtrend-swiftedge';
+export { QuantumTrendSwiftEdge, calculate as calculateQuantumTrendSwiftEdge } from './community/quantumtrend-swiftedge';
+export type { QuantumTrendSwiftEdgeInputs } from './community/quantumtrend-swiftedge';
+// Adaptive ML Trailing Stop
+import * as adaptiveMlTrailingStopIndicator from './community/adaptive-ml-trailing-stop';
+export { AdaptiveMLTrailingStop, calculate as calculateAdaptiveMLTrailingStop } from './community/adaptive-ml-trailing-stop';
+export type { AdaptiveMLTrailingStopInputs } from './community/adaptive-ml-trailing-stop';
+// Inside Bars (Multiple / Consecutive)
+import * as insideBarsIndicator from './community/inside-bars';
+export { InsideBars, calculate as calculateInsideBars } from './community/inside-bars';
+export type { InsideBarsInputs } from './community/inside-bars';
+// Real-Time Big Trades Bubbles & Absorbtions & Deep Pressure
+import * as bigTradesBubblesIndicator from './community/big-trades-bubbles';
+export { BigTradesBubbles, calculate as calculateBigTradesBubbles } from './community/big-trades-bubbles';
+export type { BigTradesBubblesInputs } from './community/big-trades-bubbles';
+// MACD Overlay v1
+import * as macdOverlayV1Indicator from './community/macd-overlay-v1';
+export { MacdOverlayV1, calculate as calculateMacdOverlayV1 } from './community/macd-overlay-v1';
+export type { MacdOverlayV1Inputs } from './community/macd-overlay-v1';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -8671,6 +8752,268 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: atrBasedZigzagWEmaIndicator.plotConfig as PlotConfig[],
     defaultInputs: { ...atrBasedZigzagWEmaIndicator.defaultInputs },
     calculate: atrBasedZigzagWEmaIndicator.calculate,
+  },
+  {
+    id: 'kalman-flow-lyro-rs',
+    group: 'community',
+    name: 'Kalman Flow | Lyro RS',
+    shortName: kalmanFlowLyroRsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: kalmanFlowLyroRsIndicator.metadata,
+    inputConfig: kalmanFlowLyroRsIndicator.inputConfig as InputConfig[],
+    plotConfig: kalmanFlowLyroRsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...kalmanFlowLyroRsIndicator.defaultInputs },
+    calculate: kalmanFlowLyroRsIndicator.calculate,
+  },
+  {
+    id: 'weighted-regression-bands',
+    group: 'community',
+    name: 'Weighted Regression Bands',
+    shortName: weightedRegressionBandsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: weightedRegressionBandsIndicator.metadata,
+    inputConfig: weightedRegressionBandsIndicator.inputConfig as InputConfig[],
+    plotConfig: weightedRegressionBandsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...weightedRegressionBandsIndicator.defaultInputs },
+    calculate: weightedRegressionBandsIndicator.calculate,
+  },
+  {
+    id: 'rsi-modified',
+    group: 'community',
+    name: 'RSI Modified',
+    shortName: rsiModifiedIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: rsiModifiedIndicator.metadata,
+    inputConfig: rsiModifiedIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiModifiedIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsiModifiedIndicator.defaultInputs },
+    calculate: rsiModifiedIndicator.calculate,
+  },
+  {
+    id: 'dynamic-trailing',
+    group: 'community',
+    name: 'Dynamic Trailing',
+    shortName: dynamicTrailingIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: dynamicTrailingIndicator.metadata,
+    inputConfig: dynamicTrailingIndicator.inputConfig as InputConfig[],
+    plotConfig: dynamicTrailingIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...dynamicTrailingIndicator.defaultInputs },
+    calculate: dynamicTrailingIndicator.calculate,
+  },
+  {
+    id: 'dual-bayesian-for-loop',
+    group: 'community',
+    name: 'Dual Bayesian For Loop',
+    shortName: dualBayesianForLoopIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: dualBayesianForLoopIndicator.metadata,
+    inputConfig: dualBayesianForLoopIndicator.inputConfig as InputConfig[],
+    plotConfig: dualBayesianForLoopIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...dualBayesianForLoopIndicator.defaultInputs },
+    calculate: dualBayesianForLoopIndicator.calculate,
+  },
+  {
+    id: 'rsi-multi-levels',
+    group: 'community',
+    name: 'RSI Multi Levels kiawosch 7-14-42 Consolidation',
+    shortName: rsiMultiLevelsIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: rsiMultiLevelsIndicator.metadata,
+    inputConfig: rsiMultiLevelsIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiMultiLevelsIndicator.plotConfig as PlotConfig[],
+    hlineConfig: rsiMultiLevelsIndicator.hlineConfig,
+    fillConfig: rsiMultiLevelsIndicator.fillConfig,
+    defaultInputs: { ...rsiMultiLevelsIndicator.defaultInputs },
+    calculate: rsiMultiLevelsIndicator.calculate,
+  },
+  {
+    id: 'fsvzo',
+    group: 'community',
+    name: 'FSVZO',
+    shortName: fsvzoIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: fsvzoIndicator.metadata,
+    inputConfig: fsvzoIndicator.inputConfig as InputConfig[],
+    plotConfig: fsvzoIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...fsvzoIndicator.defaultInputs },
+    calculate: fsvzoIndicator.calculate,
+  },
+  {
+    id: 'laguerre-filter',
+    group: 'community',
+    name: 'Laguerre Filter',
+    shortName: laguerreFilterIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: laguerreFilterIndicator.metadata,
+    inputConfig: laguerreFilterIndicator.inputConfig as InputConfig[],
+    plotConfig: laguerreFilterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...laguerreFilterIndicator.defaultInputs },
+    calculate: laguerreFilterIndicator.calculate,
+  },
+  {
+    id: 'price-action-breakout-trend',
+    group: 'community',
+    name: 'Price Action Breakout Trend',
+    shortName: priceActionBreakoutTrendIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: priceActionBreakoutTrendIndicator.metadata,
+    inputConfig: priceActionBreakoutTrendIndicator.inputConfig as InputConfig[],
+    plotConfig: priceActionBreakoutTrendIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...priceActionBreakoutTrendIndicator.defaultInputs },
+    calculate: priceActionBreakoutTrendIndicator.calculate,
+  },
+  {
+    id: 'rsi-50-step-line',
+    group: 'community',
+    name: 'RSI-50 Step Line',
+    shortName: rsi50StepLineIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: rsi50StepLineIndicator.metadata,
+    inputConfig: rsi50StepLineIndicator.inputConfig as InputConfig[],
+    plotConfig: rsi50StepLineIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsi50StepLineIndicator.defaultInputs },
+    calculate: rsi50StepLineIndicator.calculate,
+  },
+  {
+    id: 'redk-vol-weighted-rsi',
+    group: 'community',
+    name: 'RedK Vol_Weighted RSI: Extending the power of the classic RSI',
+    shortName: redkVolWeightedRsiIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: redkVolWeightedRsiIndicator.metadata,
+    inputConfig: redkVolWeightedRsiIndicator.inputConfig as InputConfig[],
+    plotConfig: redkVolWeightedRsiIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...redkVolWeightedRsiIndicator.defaultInputs },
+    calculate: redkVolWeightedRsiIndicator.calculate,
+  },
+  {
+    id: 'volume-candle-highlighter',
+    group: 'community',
+    name: 'Volume Candle Highlighter',
+    shortName: volumeCandleHighlighterIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: volumeCandleHighlighterIndicator.metadata,
+    inputConfig: volumeCandleHighlighterIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeCandleHighlighterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeCandleHighlighterIndicator.defaultInputs },
+    calculate: volumeCandleHighlighterIndicator.calculate,
+  },
+  {
+    id: 'ict-fvg-buy-sell-signals',
+    group: 'community',
+    name: 'ICT FVG Buy/Sell Signals',
+    shortName: ictFvgBuySellSignalsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: ictFvgBuySellSignalsIndicator.metadata,
+    inputConfig: ictFvgBuySellSignalsIndicator.inputConfig as InputConfig[],
+    plotConfig: ictFvgBuySellSignalsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...ictFvgBuySellSignalsIndicator.defaultInputs },
+    calculate: ictFvgBuySellSignalsIndicator.calculate,
+  },
+  {
+    id: 'tasc-2025-06-cybernetic-oscillator',
+    group: 'community',
+    name: 'TASC 2025.06 Cybernetic Oscillator',
+    shortName: tasc202506CyberneticOscillatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: tasc202506CyberneticOscillatorIndicator.metadata,
+    inputConfig: tasc202506CyberneticOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: tasc202506CyberneticOscillatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...tasc202506CyberneticOscillatorIndicator.defaultInputs },
+    calculate: tasc202506CyberneticOscillatorIndicator.calculate,
+  },
+  {
+    id: 'rolling-trendline',
+    group: 'community',
+    name: 'Rolling Trendline',
+    shortName: rollingTrendlineIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: rollingTrendlineIndicator.metadata,
+    inputConfig: rollingTrendlineIndicator.inputConfig as InputConfig[],
+    plotConfig: rollingTrendlineIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rollingTrendlineIndicator.defaultInputs },
+    calculate: rollingTrendlineIndicator.calculate,
+  },
+  {
+    id: 'quantumtrend-swiftedge',
+    group: 'community',
+    name: 'QuantumTrend SwiftEdge',
+    shortName: quantumtrendSwiftedgeIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: quantumtrendSwiftedgeIndicator.metadata,
+    inputConfig: quantumtrendSwiftedgeIndicator.inputConfig as InputConfig[],
+    plotConfig: quantumtrendSwiftedgeIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...quantumtrendSwiftedgeIndicator.defaultInputs },
+    calculate: quantumtrendSwiftedgeIndicator.calculate,
+  },
+  {
+    id: 'adaptive-ml-trailing-stop',
+    group: 'community',
+    name: 'Adaptive ML Trailing Stop',
+    shortName: adaptiveMlTrailingStopIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: adaptiveMlTrailingStopIndicator.metadata,
+    inputConfig: adaptiveMlTrailingStopIndicator.inputConfig as InputConfig[],
+    plotConfig: adaptiveMlTrailingStopIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adaptiveMlTrailingStopIndicator.defaultInputs },
+    calculate: adaptiveMlTrailingStopIndicator.calculate,
+  },
+  {
+    id: 'inside-bars',
+    group: 'community',
+    name: 'Inside Bars (Multiple / Consecutive)',
+    shortName: insideBarsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: insideBarsIndicator.metadata,
+    inputConfig: insideBarsIndicator.inputConfig as InputConfig[],
+    plotConfig: insideBarsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...insideBarsIndicator.defaultInputs },
+    calculate: insideBarsIndicator.calculate,
+  },
+  {
+    id: 'big-trades-bubbles',
+    group: 'community',
+    name: 'Real-Time Big Trades Bubbles & Absorbtions & Deep Pressure',
+    shortName: bigTradesBubblesIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: bigTradesBubblesIndicator.metadata,
+    inputConfig: bigTradesBubblesIndicator.inputConfig as InputConfig[],
+    plotConfig: bigTradesBubblesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...bigTradesBubblesIndicator.defaultInputs },
+    calculate: bigTradesBubblesIndicator.calculate,
+  },
+  {
+    id: 'macd-overlay-v1',
+    group: 'community',
+    name: 'MACD Overlay v1',
+    shortName: macdOverlayV1Indicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: macdOverlayV1Indicator.metadata,
+    inputConfig: macdOverlayV1Indicator.inputConfig as InputConfig[],
+    plotConfig: macdOverlayV1Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...macdOverlayV1Indicator.defaultInputs },
+    calculate: macdOverlayV1Indicator.calculate,
   },
   ...candlestickEntries(
     candlestickPortEntries.map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
