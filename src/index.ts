@@ -2263,6 +2263,87 @@ export type { BigTradesBubblesInputs } from './community/big-trades-bubbles';
 import * as macdOverlayV1Indicator from './community/macd-overlay-v1';
 export { MacdOverlayV1, calculate as calculateMacdOverlayV1 } from './community/macd-overlay-v1';
 export type { MacdOverlayV1Inputs } from './community/macd-overlay-v1';
+// ── Community batch 6 (Pine v6 ports) ──
+// Volume-Weighted Price Z-Score
+import * as volumeWeightedPriceZScoreIndicator from './community/volume-weighted-price-z-score';
+export { VolumeWeightedPriceZScore, calculate as calculateVolumeWeightedPriceZScore } from './community/volume-weighted-price-z-score';
+export type { VolumeWeightedPriceZScoreInputs } from './community/volume-weighted-price-z-score';
+// Uptrick: Dynamic Z-Score Deviation
+import * as uptrickDynamicZScoreDeviationIndicator from './community/uptrick-dynamic-z-score-deviation';
+export { UptrickDynamicZScoreDeviation, calculate as calculateUptrickDynamicZScoreDeviation } from './community/uptrick-dynamic-z-score-deviation';
+export type { UptrickDynamicZScoreDeviationInputs } from './community/uptrick-dynamic-z-score-deviation';
+// Volatility Halo | NAL
+import * as volatilityHaloNalIndicator from './community/volatility-halo-nal';
+export { VolatilityHaloNal, calculate as calculateVolatilityHaloNal } from './community/volatility-halo-nal';
+export type { VolatilityHaloNalInputs } from './community/volatility-halo-nal';
+// Quartile For Loop
+import * as quartileForLoopIndicator from './community/quartile-for-loop';
+export { QuartileForLoop, calculate as calculateQuartileForLoop } from './community/quartile-for-loop';
+export type { QuartileForLoopInputs } from './community/quartile-for-loop';
+// Volatility Adaptive Filtered Trend
+import * as volatilityAdaptiveFilteredTrendIndicator from './community/volatility-adaptive-filtered-trend';
+export { VolatilityAdaptiveFilteredTrend, calculate as calculateVolatilityAdaptiveFilteredTrend } from './community/volatility-adaptive-filtered-trend';
+export type { VolatilityAdaptiveFilteredTrendInputs } from './community/volatility-adaptive-filtered-trend';
+// Reflex & Trendflex
+import * as reflexTrendflexIndicator from './community/reflex-trendflex';
+export { ReflexTrendflex, calculate as calculateReflexTrendflex } from './community/reflex-trendflex';
+export type { ReflexTrendflexInputs } from './community/reflex-trendflex';
+// Institutional Volume RSI
+import * as institutionalVolumeRsiIndicator from './community/institutional-volume-rsi';
+export { InstitutionalVolumeRSI, calculate as calculateInstitutionalVolumeRSI } from './community/institutional-volume-rsi';
+export type { InstitutionalVolumeRSIInputs } from './community/institutional-volume-rsi';
+// Money Flow Extended
+import * as moneyFlowExtendedIndicator from './community/money-flow-extended';
+export { MoneyFlowExtended, calculate as calculateMoneyFlowExtended } from './community/money-flow-extended';
+export type { MoneyFlowExtendedInputs } from './community/money-flow-extended';
+// Adaptive Gaussian AFR
+import * as adaptiveGaussianAfrIndicator from './community/adaptive-gaussian-afr';
+export { AdaptiveGaussianAFR, calculate as calculateAdaptiveGaussianAFR } from './community/adaptive-gaussian-afr';
+export type { AdaptiveGaussianAFRInputs } from './community/adaptive-gaussian-afr';
+// ADX-vALMA (N)
+import * as adxValmaIndicator from './community/adx-valma';
+export { ADXvALMA, calculate as calculateADXvALMA } from './community/adx-valma';
+export type { ADXvALMAInputs } from './community/adx-valma';
+// Adaptive Entropy Trend
+import * as adaptiveEntropyTrendIndicator from './community/adaptive-entropy-trend';
+export { AdaptiveEntropyTrend, calculate as calculateAdaptiveEntropyTrend } from './community/adaptive-entropy-trend';
+export type { AdaptiveEntropyTrendInputs } from './community/adaptive-entropy-trend';
+// Kernel Channel
+import * as kernelChannelIndicator from './community/kernel-channel';
+export { KernelChannel, calculate as calculateKernelChannel } from './community/kernel-channel';
+export type { KernelChannelInputs } from './community/kernel-channel';
+// Exhaustion Zone
+import * as exhaustionZoneIndicator from './community/exhaustion-zone';
+export { ExhaustionZone, calculate as calculateExhaustionZone } from './community/exhaustion-zone';
+export type { ExhaustionZoneInputs } from './community/exhaustion-zone';
+// Change-Point Detection (CUSUM)
+import * as changePointDetectionIndicator from './community/change-point-detection';
+export { ChangePointDetection, calculate as calculateChangePointDetection } from './community/change-point-detection';
+export type { ChangePointDetectionInputs } from './community/change-point-detection';
+// Moneyball EMA-MACD indicator
+import * as moneyballEmaMacdIndicatorIndicator from './community/moneyball-ema-macd-indicator';
+export { MoneyballEmaMacd, calculate as calculateMoneyballEmaMacd } from './community/moneyball-ema-macd-indicator';
+export type { MoneyballEmaMacdInputs } from './community/moneyball-ema-macd-indicator';
+// Trend Predictor Ribbon Clone - Fixed roj karo moj karo
+import * as trendPredictorRibbonIndicator from './community/trend-predictor-ribbon';
+export { TrendPredictorRibbon, calculate as calculateTrendPredictorRibbon } from './community/trend-predictor-ribbon';
+export type { TrendPredictorRibbonInputs } from './community/trend-predictor-ribbon';
+// Institutional Composite Moving Average (ICMA)
+import * as institutionalCompositeMovingAverageIndicator from './community/institutional-composite-moving-average';
+export { InstitutionalCompositeMovingAverage, calculate as calculateInstitutionalCompositeMovingAverage } from './community/institutional-composite-moving-average';
+export type { InstitutionalCompositeMovingAverageInputs } from './community/institutional-composite-moving-average';
+// Oscillator Matrix
+import * as oscillatorMatrixIndicator from './community/oscillator-matrix';
+export { OscillatorMatrix, calculate as calculateOscillatorMatrix } from './community/oscillator-matrix';
+export type { OscillatorMatrixInputs } from './community/oscillator-matrix';
+// TASC 2025.02 Autocorrelation Indicator
+import * as tasc202502AutocorrelationIndicator from './community/tasc-2025-02-autocorrelation';
+export { TascAutocorrelation, calculate as calculateTascAutocorrelation } from './community/tasc-2025-02-autocorrelation';
+export type { TascAutocorrelationInputs } from './community/tasc-2025-02-autocorrelation';
+// Volume Bands
+import * as volumeBandsIndicator from './community/volume-bands';
+export { VolumeBands, calculate as calculateVolumeBands } from './community/volume-bands';
+export type { VolumeBandsInputs } from './community/volume-bands';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -9014,6 +9095,268 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: macdOverlayV1Indicator.plotConfig as PlotConfig[],
     defaultInputs: { ...macdOverlayV1Indicator.defaultInputs },
     calculate: macdOverlayV1Indicator.calculate,
+  },
+  {
+    id: 'volume-weighted-price-z-score',
+    group: 'community',
+    name: 'Volume-Weighted Price Z-Score',
+    shortName: volumeWeightedPriceZScoreIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: volumeWeightedPriceZScoreIndicator.metadata,
+    inputConfig: volumeWeightedPriceZScoreIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeWeightedPriceZScoreIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeWeightedPriceZScoreIndicator.defaultInputs },
+    calculate: volumeWeightedPriceZScoreIndicator.calculate,
+  },
+  {
+    id: 'uptrick-dynamic-z-score-deviation',
+    group: 'community',
+    name: 'Uptrick: Dynamic Z-Score Deviation',
+    shortName: uptrickDynamicZScoreDeviationIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: uptrickDynamicZScoreDeviationIndicator.metadata,
+    inputConfig: uptrickDynamicZScoreDeviationIndicator.inputConfig as InputConfig[],
+    plotConfig: uptrickDynamicZScoreDeviationIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...uptrickDynamicZScoreDeviationIndicator.defaultInputs },
+    calculate: uptrickDynamicZScoreDeviationIndicator.calculate,
+  },
+  {
+    id: 'volatility-halo-nal',
+    group: 'community',
+    name: 'Volatility Halo | NAL',
+    shortName: volatilityHaloNalIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: true,
+    metadata: volatilityHaloNalIndicator.metadata,
+    inputConfig: volatilityHaloNalIndicator.inputConfig as InputConfig[],
+    plotConfig: volatilityHaloNalIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volatilityHaloNalIndicator.defaultInputs },
+    calculate: volatilityHaloNalIndicator.calculate,
+  },
+  {
+    id: 'quartile-for-loop',
+    group: 'community',
+    name: 'Quartile For Loop',
+    shortName: quartileForLoopIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: false,
+    metadata: quartileForLoopIndicator.metadata,
+    inputConfig: quartileForLoopIndicator.inputConfig as InputConfig[],
+    plotConfig: quartileForLoopIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...quartileForLoopIndicator.defaultInputs },
+    calculate: quartileForLoopIndicator.calculate,
+  },
+  {
+    id: 'volatility-adaptive-filtered-trend',
+    group: 'community',
+    name: 'Volatility Adaptive Filtered Trend',
+    shortName: volatilityAdaptiveFilteredTrendIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: volatilityAdaptiveFilteredTrendIndicator.metadata,
+    inputConfig: volatilityAdaptiveFilteredTrendIndicator.inputConfig as InputConfig[],
+    plotConfig: volatilityAdaptiveFilteredTrendIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volatilityAdaptiveFilteredTrendIndicator.defaultInputs },
+    calculate: volatilityAdaptiveFilteredTrendIndicator.calculate,
+  },
+  {
+    id: 'reflex-trendflex',
+    group: 'community',
+    name: 'Reflex & Trendflex',
+    shortName: reflexTrendflexIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: reflexTrendflexIndicator.metadata,
+    inputConfig: reflexTrendflexIndicator.inputConfig as InputConfig[],
+    plotConfig: reflexTrendflexIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...reflexTrendflexIndicator.defaultInputs },
+    calculate: reflexTrendflexIndicator.calculate,
+  },
+  {
+    id: 'institutional-volume-rsi',
+    group: 'community',
+    name: 'Institutional Volume RSI',
+    shortName: institutionalVolumeRsiIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: institutionalVolumeRsiIndicator.metadata,
+    inputConfig: institutionalVolumeRsiIndicator.inputConfig as InputConfig[],
+    plotConfig: institutionalVolumeRsiIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...institutionalVolumeRsiIndicator.defaultInputs },
+    calculate: institutionalVolumeRsiIndicator.calculate,
+  },
+  {
+    id: 'money-flow-extended',
+    group: 'community',
+    name: 'Money Flow Extended',
+    shortName: moneyFlowExtendedIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: moneyFlowExtendedIndicator.metadata,
+    inputConfig: moneyFlowExtendedIndicator.inputConfig as InputConfig[],
+    plotConfig: moneyFlowExtendedIndicator.plotConfig as PlotConfig[],
+    hlineConfig: moneyFlowExtendedIndicator.hlineConfig,
+    fillConfig: moneyFlowExtendedIndicator.fillConfig,
+    defaultInputs: { ...moneyFlowExtendedIndicator.defaultInputs },
+    calculate: moneyFlowExtendedIndicator.calculate,
+  },
+  {
+    id: 'adaptive-gaussian-afr',
+    group: 'community',
+    name: 'Adaptive Gaussian AFR',
+    shortName: adaptiveGaussianAfrIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: adaptiveGaussianAfrIndicator.metadata,
+    inputConfig: adaptiveGaussianAfrIndicator.inputConfig as InputConfig[],
+    plotConfig: adaptiveGaussianAfrIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adaptiveGaussianAfrIndicator.defaultInputs },
+    calculate: adaptiveGaussianAfrIndicator.calculate,
+  },
+  {
+    id: 'adx-valma',
+    group: 'community',
+    name: 'ADX-vALMA (N)',
+    shortName: adxValmaIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: false,
+    metadata: adxValmaIndicator.metadata,
+    inputConfig: adxValmaIndicator.inputConfig as InputConfig[],
+    plotConfig: adxValmaIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adxValmaIndicator.defaultInputs },
+    calculate: adxValmaIndicator.calculate,
+  },
+  {
+    id: 'adaptive-entropy-trend',
+    group: 'community',
+    name: 'Adaptive Entropy Trend',
+    shortName: adaptiveEntropyTrendIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: adaptiveEntropyTrendIndicator.metadata,
+    inputConfig: adaptiveEntropyTrendIndicator.inputConfig as InputConfig[],
+    plotConfig: adaptiveEntropyTrendIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adaptiveEntropyTrendIndicator.defaultInputs },
+    calculate: adaptiveEntropyTrendIndicator.calculate,
+  },
+  {
+    id: 'kernel-channel',
+    group: 'community',
+    name: 'Kernel Channel',
+    shortName: kernelChannelIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: kernelChannelIndicator.metadata,
+    inputConfig: kernelChannelIndicator.inputConfig as InputConfig[],
+    plotConfig: kernelChannelIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...kernelChannelIndicator.defaultInputs },
+    calculate: kernelChannelIndicator.calculate,
+  },
+  {
+    id: 'exhaustion-zone',
+    group: 'community',
+    name: 'Exhaustion Zone',
+    shortName: exhaustionZoneIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: exhaustionZoneIndicator.metadata,
+    inputConfig: exhaustionZoneIndicator.inputConfig as InputConfig[],
+    plotConfig: exhaustionZoneIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...exhaustionZoneIndicator.defaultInputs },
+    calculate: exhaustionZoneIndicator.calculate,
+  },
+  {
+    id: 'change-point-detection',
+    group: 'community',
+    name: 'Change-Point Detection (CUSUM)',
+    shortName: changePointDetectionIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: changePointDetectionIndicator.metadata,
+    inputConfig: changePointDetectionIndicator.inputConfig as InputConfig[],
+    plotConfig: changePointDetectionIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...changePointDetectionIndicator.defaultInputs },
+    calculate: changePointDetectionIndicator.calculate,
+  },
+  {
+    id: 'moneyball-ema-macd-indicator',
+    group: 'community',
+    name: 'Moneyball EMA-MACD indicator',
+    shortName: moneyballEmaMacdIndicatorIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: moneyballEmaMacdIndicatorIndicator.metadata,
+    inputConfig: moneyballEmaMacdIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: moneyballEmaMacdIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...moneyballEmaMacdIndicatorIndicator.defaultInputs },
+    calculate: moneyballEmaMacdIndicatorIndicator.calculate,
+  },
+  {
+    id: 'trend-predictor-ribbon',
+    group: 'community',
+    name: 'Trend Predictor Ribbon Clone - Fixed roj karo moj karo',
+    shortName: trendPredictorRibbonIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: trendPredictorRibbonIndicator.metadata,
+    inputConfig: trendPredictorRibbonIndicator.inputConfig as InputConfig[],
+    plotConfig: trendPredictorRibbonIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...trendPredictorRibbonIndicator.defaultInputs },
+    calculate: trendPredictorRibbonIndicator.calculate,
+  },
+  {
+    id: 'institutional-composite-moving-average',
+    group: 'community',
+    name: 'Institutional Composite Moving Average (ICMA)',
+    shortName: institutionalCompositeMovingAverageIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: institutionalCompositeMovingAverageIndicator.metadata,
+    inputConfig: institutionalCompositeMovingAverageIndicator.inputConfig as InputConfig[],
+    plotConfig: institutionalCompositeMovingAverageIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...institutionalCompositeMovingAverageIndicator.defaultInputs },
+    calculate: institutionalCompositeMovingAverageIndicator.calculate,
+  },
+  {
+    id: 'oscillator-matrix',
+    group: 'community',
+    name: 'Oscillator Matrix',
+    shortName: oscillatorMatrixIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: oscillatorMatrixIndicator.metadata,
+    inputConfig: oscillatorMatrixIndicator.inputConfig as InputConfig[],
+    plotConfig: oscillatorMatrixIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...oscillatorMatrixIndicator.defaultInputs },
+    calculate: oscillatorMatrixIndicator.calculate,
+  },
+  {
+    id: 'tasc-2025-02-autocorrelation',
+    group: 'community',
+    name: 'TASC 2025.02 Autocorrelation Indicator',
+    shortName: tasc202502AutocorrelationIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: tasc202502AutocorrelationIndicator.metadata,
+    inputConfig: tasc202502AutocorrelationIndicator.inputConfig as InputConfig[],
+    plotConfig: tasc202502AutocorrelationIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...tasc202502AutocorrelationIndicator.defaultInputs },
+    calculate: tasc202502AutocorrelationIndicator.calculate,
+  },
+  {
+    id: 'volume-bands',
+    group: 'community',
+    name: 'Volume Bands',
+    shortName: volumeBandsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: volumeBandsIndicator.metadata,
+    inputConfig: volumeBandsIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeBandsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeBandsIndicator.defaultInputs },
+    calculate: volumeBandsIndicator.calculate,
   },
   ...candlestickEntries(
     candlestickPortEntries.map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
