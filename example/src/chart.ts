@@ -2289,12 +2289,14 @@ export class ChartManager {
    * transp the colour is drawn as given (Pine draws fill(p1, p2, color.blue) opaque).
    * `fill.gradient` (Pine fill(p1, p2, top_value, bottom_value, top_color, bottom_color)) replaces the colour: bar i
    * (index in `bars`, found by the time of the plot1 point) gets the vertical gradient of gradient[...][i].
+   * Pane: `paneIndex`, or the price pane when both plots are in `forceOverlayPlots` (Pine plot force_overlay).
    */
   setPlotFills(
     fills: PlotFill[],
     plotData: Record<string, Array<{ time: number; value: number }>>,
     paneIndex: number,
-    bars: Bar[]
+    bars: Bar[],
+    forceOverlayPlots: Set<string> = new Set()
   ): void {
     this.clearPlotFills();
     const barIndex = new Map(bars.map((b, i) => [b.time, i]));
@@ -2356,7 +2358,9 @@ export class ChartManager {
         priceLineVisible: false,
         crosshairMarkerVisible: false,
       });
-      anchor.moveToPane(paneIndex);
+      // a fill between two force_overlay plots follows its plots to the price pane
+      const bothOverlay = forceOverlayPlots.has(String(fill.plot1)) && forceOverlayPlots.has(String(fill.plot2));
+      anchor.moveToPane(bothOverlay ? 0 : paneIndex);
       // Set anchor data to all valid fill bars so price scale includes the fill range
       anchor.setData(valid.map(p => ({ time: p.time as unknown as Time, value: Math.max(p.v1, p.v2) })));
 

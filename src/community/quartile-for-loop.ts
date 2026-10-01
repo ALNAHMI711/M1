@@ -75,8 +75,8 @@ export const plotConfig: PlotConfig[] = [
   { id: 'plot0', title: 'Score', color: '#606060', lineWidth: 3 },
   { id: 'plot1', title: 'Threshold Uptrend', color: String(color.new('#00ff73', 50)), lineWidth: 2 },
   { id: 'plot2', title: 'Threshold Downtrend', color: String(color.new('#ff0040', 50)), lineWidth: 2 },
-  // Pine force_overlay = true: the SMA belongs to the price pane (PlotConfig has no force_overlay)
-  { id: 'plot3', title: 'SMA', color: '#606060', lineWidth: 4 },
+  // Pine force_overlay = true: the SMA is drawn on the price pane
+  { id: 'plot3', title: 'SMA', color: '#606060', lineWidth: 4, forceOverlay: true },
 ];
 
 export const metadata = {

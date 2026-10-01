@@ -485,12 +485,13 @@ export class IndicatorUI {
         const isVisible = this.evaluatePlotVisibility(plotDef, result);
 
         if (plotData && plotData.length > 0 && isVisible) {
+          // Pine plot(force_overlay = true): drawn on the price pane even for a non-overlay indicator
           const seriesConfig = {
             color: plotDef.color,
             lineWidth: plotDef.lineWidth,
             histBase: plotDef.histbase,
-            overlay: indicator.overlay,
-            paneIndex: indicatorPaneIndex,
+            overlay: indicator.overlay || plotDef.forceOverlay === true,
+            paneIndex: plotDef.forceOverlay ? 0 : indicatorPaneIndex,
           };
 
           const style = plotDef.style ?? 'line';
@@ -581,7 +582,8 @@ export class IndicatorUI {
 
       // Render plot-to-plot fills (cloud/band) if returned by calculate()
       if (result.fills?.length) {
-        this.chartManager.setPlotFills(result.fills, result.plots, indicatorPaneIndex, this.bars);
+        const overlayPlots = new Set(indicator.plotConfig.filter((p) => p.forceOverlay).map((p) => p.id));
+        this.chartManager.setPlotFills(result.fills, result.plots, indicatorPaneIndex, this.bars, overlayPlots);
       }
 
       // Markers (pane and drawing chosen by ChartManager.setIndicatorMarkers)

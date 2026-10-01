@@ -39,7 +39,7 @@ const LINE = String(color.new(color.aqua, 0));
 
 export const plotConfig: PlotConfig[] = [
   { id: 'plot0', title: 'MA Direction Histogram', color: ABOVE, lineWidth: 2, style: 'columns' },
-  { id: 'plot1', title: 'Plot LWMA', color: LINE, lineWidth: 1, display: 'none' },
+  { id: 'plot1', title: 'Plot LWMA', color: LINE, lineWidth: 1, display: 'none', forceOverlay: true },
 ];
 
 export const metadata = {
