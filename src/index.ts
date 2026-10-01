@@ -2671,6 +2671,87 @@ export type { DanSIroncladObSimpleInputs } from './community/dan-s-ironclad-ob-s
 import * as luminaTrendChannelsIndicator from './community/lumina-trend-channels';
 export { LuminaTrendChannels, calculate as calculateLuminaTrendChannels } from './community/lumina-trend-channels';
 export type { LuminaTrendChannelsInputs } from './community/lumina-trend-channels';
+// ── Community batch 11 (Pine v6 ports) ──
+// Buyers & Sellers / Range
+import * as buyersSellersRangeIndicator from './community/buyers-sellers-range';
+export { BuyersSellersRange, calculate as calculateBuyersSellersRange } from './community/buyers-sellers-range';
+export type { BuyersSellersRangeInputs } from './community/buyers-sellers-range';
+// Laguerre-Kalman Adaptive Filter | AlphaNatt
+import * as laguerreKalmanAdaptiveFilterAlphanattIndicator from './community/laguerre-kalman-adaptive-filter-alphanatt';
+export { LaguerreKalmanAdaptiveFilterAlphanatt, calculate as calculateLaguerreKalmanAdaptiveFilterAlphanatt } from './community/laguerre-kalman-adaptive-filter-alphanatt';
+export type { LaguerreKalmanAdaptiveFilterAlphanattInputs } from './community/laguerre-kalman-adaptive-filter-alphanatt';
+// VPSA-VTD
+import * as vpsaVtdIndicator from './community/vpsa-vtd';
+export { VpsaVtd, calculate as calculateVpsaVtd } from './community/vpsa-vtd';
+export type { VpsaVtdInputs } from './community/vpsa-vtd';
+// Pivot Market Structure
+import * as pivotMarketStructureIndicator from './community/pivot-market-structure';
+export { PivotMarketStructure, calculate as calculatePivotMarketStructure } from './community/pivot-market-structure';
+export type { PivotMarketStructureInputs } from './community/pivot-market-structure';
+// Consecutive Candles DevisSo
+import * as consecutiveCandlesDevissoIndicator from './community/consecutive-candles-devisso';
+export { ConsecutiveCandlesDevisso, calculate as calculateConsecutiveCandlesDevisso } from './community/consecutive-candles-devisso';
+export type { ConsecutiveCandlesDevissoInputs } from './community/consecutive-candles-devisso';
+// Sigmoid RSI | NAL
+import * as sigmoidRsiNalIndicator from './community/sigmoid-rsi-nal';
+export { SigmoidRsiNal, calculate as calculateSigmoidRsiNal } from './community/sigmoid-rsi-nal';
+export type { SigmoidRsiNalInputs } from './community/sigmoid-rsi-nal';
+// AI Infinity
+import * as aiInfinityIndicator from './community/ai-infinity';
+export { AiInfinity, calculate as calculateAiInfinity } from './community/ai-infinity';
+export type { AiInfinityInputs } from './community/ai-infinity';
+// Price Action Signals Filtered +EMA
+import * as priceActionSignalsFilteredEmaIndicator from './community/price-action-signals-filtered-ema';
+export { PriceActionSignalsFilteredEma, calculate as calculatePriceActionSignalsFilteredEma } from './community/price-action-signals-filtered-ema';
+export type { PriceActionSignalsFilteredEmaInputs } from './community/price-action-signals-filtered-ema';
+// Logit RSI
+import * as logitRsiIndicator from './community/logit-rsi';
+export { LogitRsi, calculate as calculateLogitRsi } from './community/logit-rsi';
+export type { LogitRsiInputs } from './community/logit-rsi';
+// Peak Reversal v2
+import * as peakReversalV2Indicator from './community/peak-reversal-v2';
+export { PeakReversalV2, calculate as calculatePeakReversalV2 } from './community/peak-reversal-v2';
+export type { PeakReversalV2Inputs } from './community/peak-reversal-v2';
+// Long Short dom
+import * as longShortDomIndicator from './community/long-short-dom';
+export { LongShortDom, calculate as calculateLongShortDom } from './community/long-short-dom';
+export type { LongShortDomInputs } from './community/long-short-dom';
+// RSI Confirm Trend with Williams (W%R)
+import * as rsiConfirmTrendWithWilliamsIndicator from './community/rsi-confirm-trend-with-williams';
+export { RsiConfirmTrendWithWilliams, calculate as calculateRsiConfirmTrendWithWilliams } from './community/rsi-confirm-trend-with-williams';
+export type { RsiConfirmTrendWithWilliamsInputs } from './community/rsi-confirm-trend-with-williams';
+// Adjusted RSI -
+import * as adjustedRsiIndicator from './community/adjusted-rsi';
+export { AdjustedRsi, calculate as calculateAdjustedRsi } from './community/adjusted-rsi';
+export type { AdjustedRsiInputs } from './community/adjusted-rsi';
+// RSI Zone Step Lines
+import * as rsiZoneStepLinesIndicator from './community/rsi-zone-step-lines';
+export { RsiZoneStepLines, calculate as calculateRsiZoneStepLines } from './community/rsi-zone-step-lines';
+export type { RsiZoneStepLinesInputs } from './community/rsi-zone-step-lines';
+// HMA Breakdown
+import * as hmaBreakdownIndicator from './community/hma-breakdown';
+export { HmaBreakdown, calculate as calculateHmaBreakdown } from './community/hma-breakdown';
+export type { HmaBreakdownInputs } from './community/hma-breakdown';
+// AI Adaptive Oscillator
+import * as aiAdaptiveOscillatorIndicator from './community/ai-adaptive-oscillator';
+export { AiAdaptiveOscillator, calculate as calculateAiAdaptiveOscillator } from './community/ai-adaptive-oscillator';
+export type { AiAdaptiveOscillatorInputs } from './community/ai-adaptive-oscillator';
+// Buy/Sell Hull Crossover Signals (Fast & Slow)
+import * as buySellHullCrossoverSignalsIndicator from './community/buy-sell-hull-crossover-signals';
+export { BuySellHullCrossoverSignals, calculate as calculateBuySellHullCrossoverSignals } from './community/buy-sell-hull-crossover-signals';
+export type { BuySellHullCrossoverSignalsInputs } from './community/buy-sell-hull-crossover-signals';
+// SSL Hybrid Scalper
+import * as sslHybridScalperIndicator from './community/ssl-hybrid-scalper';
+export { SslHybridScalper, calculate as calculateSslHybridScalper } from './community/ssl-hybrid-scalper';
+export type { SslHybridScalperInputs } from './community/ssl-hybrid-scalper';
+// Machine Learning: kNN Trend Predictor
+import * as machineLearningKnnTrendPredictorIndicator from './community/machine-learning-knn-trend-predictor';
+export { MachineLearningKnnTrendPredictor, calculate as calculateMachineLearningKnnTrendPredictor } from './community/machine-learning-knn-trend-predictor';
+export type { MachineLearningKnnTrendPredictorInputs } from './community/machine-learning-knn-trend-predictor';
+// Tenkan Cloud Signals
+import * as tenkanCloudSignalsIndicator from './community/tenkan-cloud-signals';
+export { TenkanCloudSignals, calculate as calculateTenkanCloudSignals } from './community/tenkan-cloud-signals';
+export type { TenkanCloudSignalsInputs } from './community/tenkan-cloud-signals';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -10737,6 +10818,270 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: luminaTrendChannelsIndicator.plotConfig as PlotConfig[],
     defaultInputs: { ...luminaTrendChannelsIndicator.defaultInputs },
     calculate: luminaTrendChannelsIndicator.calculate,
+  },
+  {
+    id: 'buyers-sellers-range',
+    group: 'community',
+    name: 'Buyers & Sellers / Range',
+    shortName: buyersSellersRangeIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: buyersSellersRangeIndicator.metadata,
+    inputConfig: buyersSellersRangeIndicator.inputConfig as InputConfig[],
+    plotConfig: buyersSellersRangeIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...buyersSellersRangeIndicator.defaultInputs },
+    calculate: buyersSellersRangeIndicator.calculate,
+  },
+  {
+    id: 'laguerre-kalman-adaptive-filter-alphanatt',
+    group: 'community',
+    name: 'Laguerre-Kalman Adaptive Filter | AlphaNatt',
+    shortName: laguerreKalmanAdaptiveFilterAlphanattIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: laguerreKalmanAdaptiveFilterAlphanattIndicator.metadata,
+    inputConfig: laguerreKalmanAdaptiveFilterAlphanattIndicator.inputConfig as InputConfig[],
+    plotConfig: laguerreKalmanAdaptiveFilterAlphanattIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...laguerreKalmanAdaptiveFilterAlphanattIndicator.defaultInputs },
+    calculate: laguerreKalmanAdaptiveFilterAlphanattIndicator.calculate,
+  },
+  {
+    id: 'vpsa-vtd',
+    group: 'community',
+    name: 'VPSA-VTD',
+    shortName: vpsaVtdIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: vpsaVtdIndicator.metadata,
+    inputConfig: vpsaVtdIndicator.inputConfig as InputConfig[],
+    plotConfig: vpsaVtdIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...vpsaVtdIndicator.defaultInputs },
+    calculate: vpsaVtdIndicator.calculate,
+  },
+  {
+    id: 'pivot-market-structure',
+    group: 'community',
+    name: 'Pivot Market Structure',
+    shortName: pivotMarketStructureIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: pivotMarketStructureIndicator.metadata,
+    inputConfig: pivotMarketStructureIndicator.inputConfig as InputConfig[],
+    plotConfig: pivotMarketStructureIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...pivotMarketStructureIndicator.defaultInputs },
+    calculate: pivotMarketStructureIndicator.calculate,
+  },
+  {
+    id: 'consecutive-candles-devisso',
+    group: 'community',
+    name: 'Consecutive Candles DevisSo',
+    shortName: consecutiveCandlesDevissoIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: consecutiveCandlesDevissoIndicator.metadata,
+    inputConfig: consecutiveCandlesDevissoIndicator.inputConfig as InputConfig[],
+    plotConfig: consecutiveCandlesDevissoIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...consecutiveCandlesDevissoIndicator.defaultInputs },
+    calculate: consecutiveCandlesDevissoIndicator.calculate,
+  },
+  {
+    id: 'sigmoid-rsi-nal',
+    group: 'community',
+    name: 'Sigmoid RSI | NAL',
+    shortName: sigmoidRsiNalIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: sigmoidRsiNalIndicator.metadata,
+    inputConfig: sigmoidRsiNalIndicator.inputConfig as InputConfig[],
+    plotConfig: sigmoidRsiNalIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...sigmoidRsiNalIndicator.defaultInputs },
+    calculate: sigmoidRsiNalIndicator.calculate,
+  },
+  {
+    id: 'ai-infinity',
+    group: 'community',
+    name: 'AI Infinity',
+    shortName: aiInfinityIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: aiInfinityIndicator.metadata,
+    inputConfig: aiInfinityIndicator.inputConfig as InputConfig[],
+    plotConfig: aiInfinityIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...aiInfinityIndicator.defaultInputs },
+    calculate: aiInfinityIndicator.calculate,
+  },
+  {
+    id: 'price-action-signals-filtered-ema',
+    group: 'community',
+    name: 'Price Action Signals Filtered +EMA',
+    shortName: priceActionSignalsFilteredEmaIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: priceActionSignalsFilteredEmaIndicator.metadata,
+    inputConfig: priceActionSignalsFilteredEmaIndicator.inputConfig as InputConfig[],
+    plotConfig: priceActionSignalsFilteredEmaIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...priceActionSignalsFilteredEmaIndicator.defaultInputs },
+    calculate: priceActionSignalsFilteredEmaIndicator.calculate,
+  },
+  {
+    id: 'logit-rsi',
+    group: 'community',
+    name: 'Logit RSI',
+    shortName: logitRsiIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: logitRsiIndicator.metadata,
+    inputConfig: logitRsiIndicator.inputConfig as InputConfig[],
+    plotConfig: logitRsiIndicator.plotConfig as PlotConfig[],
+    fillConfig: logitRsiIndicator.fillConfig,
+    defaultInputs: { ...logitRsiIndicator.defaultInputs },
+    calculate: logitRsiIndicator.calculate,
+  },
+  {
+    id: 'peak-reversal-v2',
+    group: 'community',
+    name: 'Peak Reversal v2',
+    shortName: peakReversalV2Indicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: peakReversalV2Indicator.metadata,
+    inputConfig: peakReversalV2Indicator.inputConfig as InputConfig[],
+    plotConfig: peakReversalV2Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...peakReversalV2Indicator.defaultInputs },
+    calculate: peakReversalV2Indicator.calculate,
+  },
+  {
+    id: 'long-short-dom',
+    group: 'community',
+    name: 'Long Short dom',
+    shortName: longShortDomIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: false,
+    metadata: longShortDomIndicator.metadata,
+    inputConfig: longShortDomIndicator.inputConfig as InputConfig[],
+    plotConfig: longShortDomIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...longShortDomIndicator.defaultInputs },
+    calculate: longShortDomIndicator.calculate,
+  },
+  {
+    id: 'rsi-confirm-trend-with-williams',
+    group: 'community',
+    name: 'RSI Confirm Trend with Williams (W%R)',
+    shortName: rsiConfirmTrendWithWilliamsIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: rsiConfirmTrendWithWilliamsIndicator.metadata,
+    inputConfig: rsiConfirmTrendWithWilliamsIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiConfirmTrendWithWilliamsIndicator.plotConfig as PlotConfig[],
+    hlineConfig: rsiConfirmTrendWithWilliamsIndicator.hlineConfig,
+    fillConfig: rsiConfirmTrendWithWilliamsIndicator.fillConfig,
+    defaultInputs: { ...rsiConfirmTrendWithWilliamsIndicator.defaultInputs },
+    calculate: rsiConfirmTrendWithWilliamsIndicator.calculate,
+  },
+  {
+    id: 'adjusted-rsi',
+    group: 'community',
+    name: 'Adjusted RSI',
+    shortName: adjustedRsiIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: adjustedRsiIndicator.metadata,
+    inputConfig: adjustedRsiIndicator.inputConfig as InputConfig[],
+    plotConfig: adjustedRsiIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adjustedRsiIndicator.defaultInputs },
+    calculate: adjustedRsiIndicator.calculate,
+  },
+  {
+    id: 'rsi-zone-step-lines',
+    group: 'community',
+    name: 'RSI Zone Step Lines',
+    shortName: rsiZoneStepLinesIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: rsiZoneStepLinesIndicator.metadata,
+    inputConfig: rsiZoneStepLinesIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiZoneStepLinesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsiZoneStepLinesIndicator.defaultInputs },
+    calculate: rsiZoneStepLinesIndicator.calculate,
+  },
+  {
+    id: 'hma-breakdown',
+    group: 'community',
+    name: 'HMA Breakdown',
+    shortName: hmaBreakdownIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: hmaBreakdownIndicator.metadata,
+    inputConfig: hmaBreakdownIndicator.inputConfig as InputConfig[],
+    plotConfig: hmaBreakdownIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...hmaBreakdownIndicator.defaultInputs },
+    calculate: hmaBreakdownIndicator.calculate,
+  },
+  {
+    id: 'ai-adaptive-oscillator',
+    group: 'community',
+    name: 'AI Adaptive Oscillator',
+    shortName: aiAdaptiveOscillatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: aiAdaptiveOscillatorIndicator.metadata,
+    inputConfig: aiAdaptiveOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: aiAdaptiveOscillatorIndicator.plotConfig as PlotConfig[],
+    hlineConfig: aiAdaptiveOscillatorIndicator.hlineConfig,
+    defaultInputs: { ...aiAdaptiveOscillatorIndicator.defaultInputs },
+    calculate: aiAdaptiveOscillatorIndicator.calculate,
+  },
+  {
+    id: 'buy-sell-hull-crossover-signals',
+    group: 'community',
+    name: 'Buy/Sell Hull Crossover Signals (Fast & Slow)',
+    shortName: buySellHullCrossoverSignalsIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: buySellHullCrossoverSignalsIndicator.metadata,
+    inputConfig: buySellHullCrossoverSignalsIndicator.inputConfig as InputConfig[],
+    plotConfig: buySellHullCrossoverSignalsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...buySellHullCrossoverSignalsIndicator.defaultInputs },
+    calculate: buySellHullCrossoverSignalsIndicator.calculate,
+  },
+  {
+    id: 'ssl-hybrid-scalper',
+    group: 'community',
+    name: 'SSL Hybrid Scalper',
+    shortName: sslHybridScalperIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: sslHybridScalperIndicator.metadata,
+    inputConfig: sslHybridScalperIndicator.inputConfig as InputConfig[],
+    plotConfig: sslHybridScalperIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...sslHybridScalperIndicator.defaultInputs },
+    calculate: sslHybridScalperIndicator.calculate,
+  },
+  {
+    id: 'machine-learning-knn-trend-predictor',
+    group: 'community',
+    name: 'Machine Learning: kNN Trend Predictor',
+    shortName: machineLearningKnnTrendPredictorIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: machineLearningKnnTrendPredictorIndicator.metadata,
+    inputConfig: machineLearningKnnTrendPredictorIndicator.inputConfig as InputConfig[],
+    plotConfig: machineLearningKnnTrendPredictorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...machineLearningKnnTrendPredictorIndicator.defaultInputs },
+    calculate: machineLearningKnnTrendPredictorIndicator.calculate,
+  },
+  {
+    id: 'tenkan-cloud-signals',
+    group: 'community',
+    name: 'Tenkan Cloud Signals',
+    shortName: tenkanCloudSignalsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: tenkanCloudSignalsIndicator.metadata,
+    inputConfig: tenkanCloudSignalsIndicator.inputConfig as InputConfig[],
+    plotConfig: tenkanCloudSignalsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...tenkanCloudSignalsIndicator.defaultInputs },
+    calculate: tenkanCloudSignalsIndicator.calculate,
   },
   ...candlestickEntries(
     [...candlestickPortEntries, candlestickPortAllPatterns].map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
