@@ -81,8 +81,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
 
 const PRESETS: Record<string, { start: number; inc: number; max: number; window: number; up: number; down: number }> = {
   'Fast Response': { start: 0.04, inc: 0.002, max: 0.3, window: 30, up: 15, down: -10 },
@@ -133,10 +131,10 @@ export function calculate(
     }
     const longCondition = gt(v, 0) && gt(score, p.up);
     const shortCondition = lt(v, 0) && lt(score, p.down);
-    // ta.crossover(x, 0): x > 0 and x[1] <= 0; ta.crossunder(x, 0): x < 0 and x[1] >= 0
+    // ta.crossover(x, 0): x > 0 and x[1] <= 0; ta.crossunder(x, 0): x < 0 and x[1] >= 0 (exact comparisons)
     const prev = i > 0 ? np[i - 1] : NaN;
-    const bullishSignal = gt(v, 0) && le(prev, 0) && longCondition;
-    const bearishSignal = lt(v, 0) && ge(prev, 0) && shortCondition;
+    const bullishSignal = v > 0 && prev <= 0 && longCondition;
+    const bearishSignal = v < 0 && prev >= 0 && shortCondition;
 
     const uptrendColor = color.from_gradient(v, 0, 400, bullFaded, cfg.bullishColor);
     const downtrendColor = color.from_gradient(v, -400, 0, cfg.bearishColor, bearFaded);

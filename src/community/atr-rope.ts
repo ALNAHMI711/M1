@@ -119,10 +119,10 @@ export function calculate(
     dirVar = gt(rope[i], prevRope) ? 1 : lt(rope[i], prevRope) ? -1 : dirVar;
     // if ta.cross(src, rope): dir := 0. Pine's cross needs a strict inequality on the previous bar too
     // (src[1] < rope[1] before a cross up, src[1] > rope[1] before a cross down): a bar where src == rope does
-    // not start a cross.
+    // not start a cross. ta.cross compares exactly (no 1e-10 tolerance).
     if (i > 0) {
-      const crossUp = gt(src[i], rope[i]) && lt(src[i - 1], rope[i - 1]);
-      const crossDown = lt(src[i], rope[i]) && gt(src[i - 1], rope[i - 1]);
+      const crossUp = src[i] > rope[i] && src[i - 1] < rope[i - 1];
+      const crossDown = src[i] < rope[i] && src[i - 1] > rope[i - 1];
       if (crossUp || crossDown) dirVar = 0;
     }
     dir[i] = dirVar;

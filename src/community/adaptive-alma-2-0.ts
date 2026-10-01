@@ -148,8 +148,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 const eq = (a: number, b: number) => Math.abs(a - b) <= EPS;
 const nz = (x: number, y = 0) => (Number.isFinite(x) ? x : y);
 /** Pine math.max / math.min: na when an argument is na */
@@ -336,7 +334,8 @@ export function calculate(
   const bbSd = A(ta.stdev(S(src), cfg.bbLen));
   const bbUpper = bbBasis.map((v, i) => v + cfg.bbMult * bbSd[i]);
   const bbLower = bbBasis.map((v, i) => v - cfg.bbMult * bbSd[i]);
-  // ta.crossover / ta.crossunder: compared with the last bar where both values were not na; a tie there counts
+  // ta.crossover / ta.crossunder: compared with the last bar where both values were not na; a tie there counts.
+  // The comparisons are exact (no 1e-10 tolerance).
   const crossover = new Array<boolean>(n).fill(false);
   const crossunder = new Array<boolean>(n).fill(false);
   let pS1 = NaN;
@@ -345,8 +344,8 @@ export function calculate(
   let pU = NaN;
   for (let i = 0; i < n; i++) {
     const s = src[i];
-    crossover[i] = gt(s, bbLower[i]) && le(pS1, pL);
-    crossunder[i] = lt(s, bbUpper[i]) && ge(pS2, pU);
+    crossover[i] = s > bbLower[i] && pS1 <= pL;
+    crossunder[i] = s < bbUpper[i] && pS2 >= pU;
     if (!isNaN(s) && !isNaN(bbLower[i])) {
       pS1 = s;
       pL = bbLower[i];

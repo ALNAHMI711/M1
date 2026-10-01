@@ -67,7 +67,6 @@ export const metadata = {
 };
 
 /** Pine float comparisons with the 1e-10 tolerance; na operands give false */
-const gt = (a: number, b: number): boolean => a - b > 1e-10;
 const ge = (a: number, b: number): boolean => !isNaN(a) && !isNaN(b) && !(b - a > 1e-10);
 
 /** Pine array.avg / array.max / array.min / array.median of a float array (na when empty) */
@@ -126,10 +125,10 @@ export function calculate(
 
     const close = bars[i].close;
     const prevClose = i > 0 ? bars[i - 1].close : NaN;
-    // ta.crossover(close, fractalLineUpper): close > upper and close[1] <= upper[1]
-    if (i > 0 && gt(close, lineUpper[i]) && ge(lineUpper[i - 1], prevClose)) tr = true;
-    // ta.crossunder(close, fractalLineLower): close < lower and close[1] >= lower[1]
-    if (i > 0 && gt(lineLower[i], close) && ge(prevClose, lineLower[i - 1])) tr = false;
+    // ta.crossover(close, fractalLineUpper): close > upper and close[1] <= upper[1], exact comparisons (no tolerance)
+    if (i > 0 && close > lineUpper[i] && prevClose <= lineUpper[i - 1]) tr = true;
+    // ta.crossunder(close, fractalLineLower): close < lower and close[1] >= lower[1], exact comparisons
+    if (i > 0 && close < lineLower[i] && prevClose >= lineLower[i - 1]) tr = false;
     trend[i] = tr;
   }
 

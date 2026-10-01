@@ -82,11 +82,6 @@ export const metadata = {
   overlay: true,
 };
 
-/** Pine float comparison: a == b when |a - b| <= 1e-10 */
-const EPS = 1e-10;
-const lt = (a: number, b: number) => b - a > EPS;
-const gt = (a: number, b: number) => a - b > EPS;
-
 export function calculate(
   bars: Bar[],
   inputs: Partial<AutoTrendlineInputs> = {},
@@ -170,9 +165,9 @@ export function calculate(
     if (cfg.showCrosses && t >= 1) {
       const c = bars[t].close;
       const c1 = bars[t - 1].close;
-      // ta.cross: na operands give false; Pine float comparisons use a 1e-10 tolerance
+      // ta.cross: na operands give false; exact comparisons (ta.cross does not use the 1e-10 tolerance)
       const cross = (y: number, y1: number) =>
-        !Number.isNaN(y) && !Number.isNaN(y1) && ((gt(c, y) && !gt(c1, y1)) || (lt(c, y) && !lt(c1, y1)));
+        !Number.isNaN(y) && !Number.isNaN(y1) && ((c > y && c1 <= y1) || (c < y && c1 >= y1));
       if (cross(yUp, yUpPrev)) {
         markers.push({ time: bars[t].time, position: 'belowBar', shape: 'xcross', color: 'rgba(41,98,255,0.5)', size: 'small' });
       }

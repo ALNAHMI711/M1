@@ -105,8 +105,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 export function calculate(
   bars: Bar[],
@@ -145,15 +143,15 @@ export function calculate(
   const trendArr: number[] = new Array(n);
   let trend = 0; // var int trend = 0
   // ta.crossover(src, bandLo) / ta.crossunder(src, bandHi) run on every bar: compared with the last bar where both
-  // values were not na (a tie there counts)
+  // values were not na (a tie there counts); exact comparisons (no tolerance)
   let pSrcLo = NaN;
   let pLo = NaN;
   let pSrcHi = NaN;
   let pHi = NaN;
   for (let i = 0; i < n; i++) {
     const s = src[i];
-    const reclaimUp = gt(s, bandLo[i]) && le(pSrcLo, pLo);
-    const reclaimDn = lt(s, bandHi[i]) && ge(pSrcHi, pHi);
+    const reclaimUp = s > bandLo[i] && pSrcLo <= pLo;
+    const reclaimDn = s < bandHi[i] && pSrcHi >= pHi;
     if (!isNaN(s) && !isNaN(bandLo[i])) {
       pSrcLo = s;
       pLo = bandLo[i];

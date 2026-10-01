@@ -51,8 +51,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
 const ne = (a: number, b: number) => Math.abs(a - b) > EPS;
 const nz = (x: number) => (isNaN(x) ? 0 : x);
 
@@ -159,10 +157,11 @@ export function calculate(bars: Bar[], inputs: Partial<TascSyntheticOscillatorIn
     let dc = ne(denom, 0.0) ? (6.28 * (re[i] * re[i] + im[i] * im[i])) / denom : 0.0;
     dc = Math.max(lb, Math.min(ub, dc));
 
-    // Cumulative phase, reset at 0 and 180 degrees (ta.crossover / ta.crossunder of bp and 0)
+    // Cumulative phase, reset at 0 and 180 degrees (ta.crossover / ta.crossunder of bp and 0: exact comparisons,
+    // no 1e-10 tolerance, unlike the operators)
     ph += (2 * Math.PI) / dc;
-    const xo = i > 0 && gt(bp[i], 0.0) && le(bp[i - 1], 0.0);
-    const xu = i > 0 && lt(bp[i], 0.0) && ge(bp[i - 1], 0.0);
+    const xo = i > 0 && bp[i] > 0.0 && bp[i - 1] <= 0.0;
+    const xu = i > 0 && bp[i] < 0.0 && bp[i - 1] >= 0.0;
     if (xo) ph = Math.PI / dc;
     else if (xu) ph = Math.PI + Math.PI / dc;
 

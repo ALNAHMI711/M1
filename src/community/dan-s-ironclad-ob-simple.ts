@@ -50,8 +50,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 export function calculate(bars: Bar[], inputs: Partial<DanSIroncladObSimpleInputs> = {}): IndicatorResult {
   const cfg = { ...defaultInputs, ...inputs };
@@ -81,8 +79,10 @@ export function calculate(bars: Bar[], inputs: Partial<DanSIroncladObSimpleInput
     if (!isNaN(pH[i])) lastHigh = pH[i];
     if (!isNaN(pL[i])) lastLow = pL[i];
 
-    const bullBreak = gt(close, lastHigh) && le(pcH, pH1);
-    const bearBreak = lt(close, lastLow) && ge(pcL, pL1);
+    // ta.crossover(close, lastHigh) / ta.crossunder(close, lastLow) compare exactly (no 1e-10 tolerance; na compares
+    // false)
+    const bullBreak = close > lastHigh && pcH <= pH1;
+    const bearBreak = close < lastLow && pcL >= pL1;
     if (!isNaN(close) && !isNaN(lastHigh)) {
       pcH = close;
       pH1 = lastHigh;

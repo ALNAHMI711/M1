@@ -311,8 +311,9 @@ export function calculate(
   const showZero = cfg.signalType === 'Zero Line' || cfg.signalType === 'All';
   const showMaZero = cfg.signalType === 'MA Zero Line' || cfg.signalType === 'All';
   // ta.crossover(a, b): a > b and a[1] <= b[1]; ta.crossunder(a, b): a < b and a[1] >= b[1]
-  const crossover = (a: number[], b: number, i: number) => i > 0 && gt(a[i], b) && le(a[i - 1], b);
-  const crossunder = (a: number[], b: number, i: number) => i > 0 && lt(a[i], b) && ge(a[i - 1], b);
+  // (exact comparisons, no 1e-10 tolerance; na gives false)
+  const crossover = (a: number[], b: number, i: number) => i > 0 && a[i] > b && a[i - 1] <= b;
+  const crossunder = (a: number[], b: number, i: number) => i > 0 && a[i] < b && a[i - 1] >= b;
   for (let i = 0; i < n; i++) {
     // plotshape(bullCond ? oscLbr : na, offset = -lookbackRight, text = ' Bull ', shape.labelup, location.absolute,
     //   color.new(bullDivColor, bandTransparency), textcolor = textColor, display = calculateDivergence ? all : none)

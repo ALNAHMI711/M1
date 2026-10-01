@@ -156,7 +156,8 @@ export function calculate(
           : cfg.sigType2Enable && lt(r, 50) ? dnC
             : null));
 
-  // ta.crossover / ta.crossunder: compared with the last bar where both values were not na
+  // ta.crossover / ta.crossunder: compared with the last bar where both values were not na (exact comparisons:
+  // no 1e-10 tolerance, unlike the operators)
   const crosses = (b: (i: number) => number) => {
     const over: boolean[] = new Array(n).fill(false);
     const under: boolean[] = new Array(n).fill(false);
@@ -167,8 +168,8 @@ export function calculate(
       const bv = b(i);
       if (isNaN(a) || isNaN(bv)) continue;
       if (!isNaN(pa)) {
-        over[i] = gt(a, bv) && !gt(pa, pb);
-        under[i] = lt(a, bv) && !lt(pa, pb);
+        over[i] = a > bv && !(pa > pb);
+        under[i] = a < bv && !(pa < pb);
       }
       pa = a;
       pb = bv;

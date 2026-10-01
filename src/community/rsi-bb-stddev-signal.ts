@@ -323,7 +323,8 @@ export function calculate(
   }
 
   // ta.crossover(a, b): a > b and a <= b on the previous bar where both were not na (Pine keeps the last
-  // non-na pair: the KAMA average is na on every other bar during its warm-up); crossunder likewise
+  // non-na pair: the KAMA average is na on every other bar during its warm-up); crossunder likewise. Exact
+  // comparisons: ta.crossover / ta.crossunder do not use the 1e-10 tolerance of the operators
   const lastPair = (a: number[], b: number[]) => {
     const prev: number[] = new Array(n).fill(-1);
     let last = -1;
@@ -334,9 +335,9 @@ export function calculate(
     return prev;
   };
   const crossover = (a: number[], b: number[], prev: number[], i: number) =>
-    prev[i] >= 0 && gt(a[i], b[i]) && le(a[prev[i]], b[prev[i]]);
+    prev[i] >= 0 && a[i] > b[i] && a[prev[i]] <= b[prev[i]];
   const crossunder = (a: number[], b: number[], prev: number[], i: number) =>
-    prev[i] >= 0 && lt(a[i], b[i]) && ge(a[prev[i]], b[prev[i]]);
+    prev[i] >= 0 && a[i] < b[i] && a[prev[i]] >= b[prev[i]];
   const prevMA = lastPair(rsi, smoothingMA);
   const prevLower = lastPair(rsi, bbLower);
   const prevUpper = lastPair(rsi, bbUpper);

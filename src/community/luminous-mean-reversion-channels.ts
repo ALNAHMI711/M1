@@ -54,9 +54,6 @@ export const metadata = {
 /** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
-const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 /** Pine a != b: false when a value is na */
 const ne = (a: number, b: number) => !isNaN(a) && !isNaN(b) && Math.abs(a - b) > EPS;
 
@@ -90,12 +87,12 @@ export function calculate(
 
   const markers: MarkerData[] = [];
   for (let i = 1; i < n; i++) {
-    // buy_signal = ta.crossover(src, lower_band); sell_signal = ta.crossunder(src, upper_band)
-    if (gt(src[i], lower[i]) && le(src[i - 1], lower[i - 1])) {
+    // buy_signal = ta.crossover(src, lower_band); sell_signal = ta.crossunder(src, upper_band): exact comparisons
+    if (src[i] > lower[i] && src[i - 1] <= lower[i - 1]) {
       markers.push({ time: bars[i].time, position: 'belowBar', shape: 'labelUp', color: GREEN, text: 'BUY',
         textColor: color.white, size: 'small' });
     }
-    if (lt(src[i], upper[i]) && ge(src[i - 1], upper[i - 1])) {
+    if (src[i] < upper[i] && src[i - 1] >= upper[i - 1]) {
       markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'labelDown', color: RED, text: 'SELL',
         textColor: color.white, size: 'small' });
     }

@@ -77,8 +77,6 @@ export const metadata = {
 
 /** Pine float comparison: a > b only when a - b > 1e-10 (false with na) */
 const gt = (a: number, b: number) => a - b > 1e-10;
-/** Pine a <= b: b - a >= -1e-10 (false with na) */
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !gt(a, b);
 
 /** Start of a new UTC day (Pine ta.vwap anchor: timeframe.change("D")); true on the first bar */
 function newDay(bars: Bar[]): boolean[] {
@@ -118,8 +116,9 @@ export function calculate(
   const atr = A(ta.atr(bars, atrLength));
   const lower = hma.map((v, i) => v - signalMultiplier * atr[i]);
   const upper = hma.map((v, i) => v + signalMultiplier * atr[i]);
-  const crossover = (a: number[], b: number[], i: number) => i > 0 && gt(a[i], b[i]) && le(a[i - 1], b[i - 1]);
-  const crossunder = (a: number[], b: number[], i: number) => i > 0 && gt(b[i], a[i]) && le(b[i - 1], a[i - 1]);
+  // ta.crossover / ta.crossunder compare exactly (no 1e-10 tolerance); na operands give false
+  const crossover = (a: number[], b: number[], i: number) => i > 0 && a[i] > b[i] && a[i - 1] <= b[i - 1];
+  const crossunder = (a: number[], b: number[], i: number) => i > 0 && a[i] < b[i] && a[i - 1] >= b[i - 1];
   const markers: MarkerData[] = [];
   for (let i = 0; i < n; i++) {
     const t = bars[i].time;

@@ -79,8 +79,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 export function calculate(
   bars: Bar[],
@@ -129,11 +127,11 @@ export function calculate(
   let col = 'transparent'; // var color col = na
   let trendDir = 0;
   for (let i = 0; i < n; i++) {
-    // ta.crossover(trail, trail[1]): trail > trail[1] and trail[1] <= trail[2]
+    // ta.crossover(trail, trail[1]): trail > trail[1] and trail[1] <= trail[2], compared exactly (no 1e-10 tolerance)
     const a1 = i > 0 ? trail[i - 1] : NaN;
     const a2 = i > 1 ? trail[i - 2] : NaN;
-    const long = gt(trail[i], a1) && le(a1, a2);
-    const short = lt(trail[i], a1) && ge(a1, a2);
+    const long = trail[i] > a1 && a1 <= a2;
+    const short = trail[i] < a1 && a1 >= a2;
     if (long) col = cfg.longCol;
     else if (short) col = cfg.shortCol;
     if (long) trendDir = 1;

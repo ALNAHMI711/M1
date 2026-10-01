@@ -51,9 +51,8 @@ export const metadata = {
   overlay: true,
 };
 
-/** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
+/** Pine float comparisons: a >= b unless b - a > 1e-10 (na compares false) */
 const EPS = 1e-10;
-const gt = (a: number, b: number) => a - b > EPS;
 const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
 const le = (a: number, b: number) => ge(b, a);
 /** Pine math.max / math.min: na when an argument is na */
@@ -95,9 +94,10 @@ export function calculate(
   const weakSellCol = String(color.new(color.red, 70));
   const weakBuyCol = String(color.new(color.green, 70));
   for (let i = 0; i < n; i++) {
-    // longSignal = ta.crossunder(close, reversalLower); shortSignal = ta.crossover(close, reversalUpper)
-    const longSignal = i > 0 && gt(lower[i], close[i]) && ge(close[i - 1], lower[i - 1]);
-    const shortSignal = i > 0 && gt(close[i], upper[i]) && le(close[i - 1], upper[i - 1]);
+    // longSignal = ta.crossunder(close, reversalLower); shortSignal = ta.crossover(close, reversalUpper); both compare
+    // exactly (no 1e-10 tolerance; na compares false)
+    const longSignal = i > 0 && close[i] < lower[i] && close[i - 1] >= lower[i - 1];
+    const shortSignal = i > 0 && close[i] > upper[i] && close[i - 1] <= upper[i - 1];
     if (longSignal) {
       markers.push({ time: t(i), position: 'belowBar', shape: 'labelUp', color: longCol, text: '▲+', textColor: color.white, size: 'small' });
     }

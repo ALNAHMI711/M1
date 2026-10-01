@@ -56,8 +56,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
 /** Pine math.max / math.min: na when an argument is na */
 const max = (a: number, b: number) => (isNaN(a) || isNaN(b) ? NaN : Math.max(a, b));
 const min = (a: number, b: number) => (isNaN(a) || isNaN(b) ? NaN : Math.min(a, b));
@@ -98,12 +96,13 @@ export function calculate(
     const t = bars[i].time;
     const c = bars[i].close;
     const c1 = bars[i - 1].close;
+    // ta.crossover / ta.crossunder compare exactly (no 1e-10 tolerance, unlike the operators)
     // plotshape(ta.crossover(close, trendStop), "Buy Signal", shape.triangleup, location.belowbar, color.green, size.small)
-    if (gt(c, stop[i]) && le(c1, stop[i - 1])) {
+    if (c > stop[i] && c1 <= stop[i - 1]) {
       markers.push({ time: t, position: 'belowBar', shape: 'triangleUp', color: color.green, size: 'small' });
     }
     // plotshape(ta.crossunder(close, trendStop), "Sell Signal", shape.triangledown, location.abovebar, color.red, size.small)
-    if (lt(c, stop[i]) && ge(c1, stop[i - 1])) {
+    if (c < stop[i] && c1 >= stop[i - 1]) {
       markers.push({ time: t, position: 'aboveBar', shape: 'triangleDown', color: color.red, size: 'small' });
     }
   }

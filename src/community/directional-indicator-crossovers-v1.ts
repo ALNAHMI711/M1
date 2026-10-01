@@ -70,7 +70,6 @@ export const metadata = {
 /** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 const eq = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS) && !(b - a > EPS);
 
 export function calculate(
@@ -112,8 +111,8 @@ export function calculate(
   const adx = smooth(dx, cfg.adxLen).map((v) => 100.0 * v);
 
   const markers: MarkerData[] = [];
-  // ta.crossover(a, b): a > b and a[1] <= b[1]
-  const crossover = (a: number[], b: number[], i: number) => i > 0 && gt(a[i], b[i]) && le(a[i - 1], b[i - 1]);
+  // ta.crossover(a, b): a > b and a[1] <= b[1], compared exactly (no 1e-10 tolerance; na compares false)
+  const crossover = (a: number[], b: number[], i: number) => i > 0 && a[i] > b[i] && a[i - 1] <= b[i - 1];
   for (let i = 0; i < n; i++) {
     const bullX = crossover(plusDI, minusDI, i);
     const bearX = crossover(minusDI, plusDI, i);

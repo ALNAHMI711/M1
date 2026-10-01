@@ -185,9 +185,9 @@ export function calculate(
   const isExpanding = histP.map((h, i) => i > 0 && gt(h, histP[i - 1]));
   const expFlip = isExpanding.map((e, i) => (i > 0 ? e !== isExpanding[i - 1] : false));
 
-  // Crosses: a > b and a[1] <= b[1] (crossover); a < b and a[1] >= b[1] (crossunder)
-  const crossUp = macdP.map((m, i) => i > 0 && gt(m, signalP[i]) && le(macdP[i - 1], signalP[i - 1]));
-  const crossDown = macdP.map((m, i) => i > 0 && lt(m, signalP[i]) && ge(macdP[i - 1], signalP[i - 1]));
+  // Crosses: a > b and a[1] <= b[1] (crossover); a < b and a[1] >= b[1] (crossunder), compared exactly (no 1e-10 tolerance)
+  const crossUp = macdP.map((m, i) => i > 0 && m > signalP[i] && macdP[i - 1] <= signalP[i - 1]);
+  const crossDown = macdP.map((m, i) => i > 0 && m < signalP[i] && macdP[i - 1] >= signalP[i - 1]);
   const signalProx = crossUp.map((c, i) => c || crossDown[i] || (i > 0 && (crossUp[i - 1] || crossDown[i - 1])));
 
   // Weakness-Lite measures

@@ -238,13 +238,14 @@ export function calculate(
   ];
 
   // longSignalObos = ta.crossover(osc_scaled, osLevel); shortSignalObos = ta.crossunder(osc_scaled, obLevel)
+  // (exact comparisons: crossover / crossunder have no 1e-10 tolerance)
   // plotshape(..., location.bottom / location.top, osColor / obColor, triangleup / triangledown, size.tiny).
   const markers: MarkerData[] = [];
   for (let i = 1; i < n; i++) {
-    if (gt(osc[i], cfg.osLevel) && le(osc[i - 1], cfg.osLevel)) {
+    if (osc[i] > cfg.osLevel && osc[i - 1] <= cfg.osLevel) {
       markers.push({ time: t(i), position: 'bottom', shape: 'triangleUp', color: cfg.osColor, size: 'tiny' });
     }
-    if (lt(osc[i], cfg.obLevel) && ge(osc[i - 1], cfg.obLevel)) {
+    if (osc[i] < cfg.obLevel && osc[i - 1] >= cfg.obLevel) {
       markers.push({ time: t(i), position: 'top', shape: 'triangleDown', color: cfg.obColor, size: 'tiny' });
     }
   }

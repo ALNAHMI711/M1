@@ -93,9 +93,6 @@ export const metadata = {
 /** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
-const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 export function calculate(
   bars: Bar[],
@@ -119,8 +116,9 @@ export function calculate(
   const smf = smoothNorm.map((s, i) => (3 * s - 2 * doubleSmooth[i] - 50) * mWeight + 50);
 
   // ta.crossover(smf, 0) / ta.crossunder(smf, 100): a tie on the previous bar counts
-  const entry = smf.map((v, i) => i > 0 && gt(v, 0) && le(smf[i - 1], 0));
-  const exit = smf.map((v, i) => i > 0 && lt(v, 100) && ge(smf[i - 1], 100));
+  // (exact comparisons: ta.crossover / ta.crossunder do not use the 1e-10 tolerance of the operators)
+  const entry = smf.map((v, i) => i > 0 && v > 0 && smf[i - 1] <= 0);
+  const exit = smf.map((v, i) => i > 0 && v < 100 && smf[i - 1] >= 100);
   // filtered_entry = entry_signal[1] and close > close[1]
   const filtered = bars.map((b, i) => i > 0 && entry[i - 1] && gt(b.close, bars[i - 1].close));
 

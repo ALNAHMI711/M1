@@ -64,8 +64,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 export function calculate(
   bars: Bar[],
@@ -135,11 +133,12 @@ export function calculate(
   const bullFillStrong = String(color.new(cfg.uptrendPaint, 45));
   const bearFillStrong = String(color.new(cfg.downtrendPaint, 45));
 
-  // ta.crossover(regime, 0) / ta.crossunder(regime, 0): na on the previous bar gives false
+  // ta.crossover(regime, 0) / ta.crossunder(regime, 0): exact comparisons (no 1e-10 tolerance); na on the previous
+  // bar gives false
   const markers: MarkerData[] = [];
   for (let i = 1; i < n; i++) {
-    const flipUp = gt(regimeArr[i], 0) && le(regimeArr[i - 1], 0);
-    const flipDown = lt(regimeArr[i], 0) && ge(regimeArr[i - 1], 0);
+    const flipUp = regimeArr[i] > 0 && regimeArr[i - 1] <= 0;
+    const flipDown = regimeArr[i] < 0 && regimeArr[i - 1] >= 0;
     if (flipDown && !isNaN(roof[i])) {
       markers.push({ time: bars[i].time, position: 'atPriceMiddle', price: roof[i], shape: 'circle',
         color: cfg.downtrendPaint, size: 'small' });

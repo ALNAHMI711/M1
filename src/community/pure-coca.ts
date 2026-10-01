@@ -81,9 +81,6 @@ export const metadata = {
 /** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
-const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 /** Start of a new UTC day (Pine ta.vwap anchor on daily bars); true on the first bar */
 function newDay(bars: Bar[]): boolean[] {
@@ -127,9 +124,9 @@ export function calculate(
   const sd = A(ta.stdev(S(smoothed), cfg.lookback));
   const z = smoothed.map((v, i) => (v - mean[i]) / sd[i]);
 
-  // ta.crossover(a, b): a > b and a[1] <= b[1]; ta.crossunder(a, b): a < b and a[1] >= b[1]
-  const crossover = (i: number, level: number) => i > 0 && gt(z[i], level) && le(z[i - 1], level);
-  const crossunder = (i: number, level: number) => i > 0 && lt(z[i], level) && ge(z[i - 1], level);
+  // ta.crossover(a, b): a > b and a[1] <= b[1]; ta.crossunder(a, b): a < b and a[1] >= b[1] (exact, no 1e-10 tolerance)
+  const crossover = (i: number, level: number) => i > 0 && z[i] > level && z[i - 1] <= level;
+  const crossunder = (i: number, level: number) => i > 0 && z[i] < level && z[i - 1] >= level;
 
   const red = '#ff0000';
   const white = '#ffffff';
@@ -150,7 +147,7 @@ export function calculate(
     const co = crossover(i, cfg.lowerMD);
     let cu = false;
     if (!co) {
-      cu = cuRan && lt(z[i], cfg.upperMD) && ge(cuPrevZ, cfg.upperMD);
+      cu = cuRan && z[i] < cfg.upperMD && cuPrevZ >= cfg.upperMD;
       cuPrevZ = z[i];
       cuRan = true;
     }

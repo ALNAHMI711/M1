@@ -56,7 +56,7 @@ export const metadata = {
   overlay: true,
 };
 
-// Pine compares floats with a tolerance of 1e-10; a comparison with na is false.
+// Pine operators compare floats with a tolerance of 1e-10; a comparison with na is false.
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
@@ -101,9 +101,9 @@ export function calculate(
     lastLow[i] = lastPivotLow;
 
     // bullBreakout = ta.crossover(close, lastPivotHigh); bearBreakout = ta.crossunder(close, lastPivotLow)
-    // (a tie on the previous bar counts: close[1] <= level[1])
-    const bullBreakout = i > 0 && gt(close[i], lastHigh[i]) && le(close[i - 1], lastHigh[i - 1]);
-    const bearBreakout = i > 0 && gt(lastLow[i], close[i]) && ge(close[i - 1], lastLow[i - 1]);
+    // (exact comparisons, no 1e-10 tolerance; a tie on the previous bar counts: close[1] <= level[1]; na gives false)
+    const bullBreakout = i > 0 && close[i] > lastHigh[i] && close[i - 1] <= lastHigh[i - 1];
+    const bearBreakout = i > 0 && close[i] < lastLow[i] && close[i - 1] >= lastLow[i - 1];
     if (bullBreakout) {
       bullLevel = lastPivotHigh;
       waitingBullRetest = true;

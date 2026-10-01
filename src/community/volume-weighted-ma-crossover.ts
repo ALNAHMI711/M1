@@ -44,13 +44,6 @@ export const metadata = {
   overlay: true,
 };
 
-/** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
-const EPS = 1e-10;
-const gt = (a: number, b: number) => a - b > EPS;
-const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
-
 export function calculate(bars: Bar[], inputs: Partial<VolumeWeightedMaCrossoverInputs> = {}): IndicatorResult {
   const cfg = { ...defaultInputs, ...inputs };
   const n = bars.length;
@@ -63,15 +56,15 @@ export function calculate(bars: Bar[], inputs: Partial<VolumeWeightedMaCrossover
 
   const plot0: { time: number; value: number; color: string }[] = [];
   // var color signal_color = na: set on the crosses (crossover / crossunder compared with the last bar where both
-  // values were not na; a tie there counts)
+  // values were not na; a tie there counts; exact comparisons: no 1e-10 tolerance, unlike the operators)
   let signal = '';
   let pv = NaN;
   let ps = NaN;
   for (let i = 0; i < n; i++) {
     const v = vwma[i];
     const s = sma[i];
-    const longCondition = gt(v, s) && le(pv, ps);
-    const shortCondition = lt(v, s) && ge(pv, ps);
+    const longCondition = v > s && pv <= ps;
+    const shortCondition = v < s && pv >= ps;
     if (!isNaN(v) && !isNaN(s)) {
       pv = v;
       ps = s;

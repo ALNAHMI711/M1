@@ -65,9 +65,6 @@ export const metadata = {
 /** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
-const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 /** Non-finite values (na, +-infinity) are na for the averages and the plots */
 const fin = (x: number) => (Number.isFinite(x) ? x : NaN);
 
@@ -85,14 +82,15 @@ export function calculate(bars: Bar[], inputs: Partial<DynamicTestingInputs> = {
   const wt1 = A(ta.ema(S(ci.map(fin)), cfg.n2));
   const wt2 = A(ta.sma(S(wt1), 4));
 
-  // ta.cross(wt1, wt2): compared with the last bar where both values were not na; a tie there counts
+  // ta.cross(wt1, wt2): compared with the last bar where both values were not na; a tie there counts; exact
+  // comparisons (no tolerance)
   const cross: boolean[] = new Array(n).fill(false);
   let p1 = NaN;
   let p2 = NaN;
   for (let i = 0; i < n; i++) {
     const a = wt1[i];
     const b = wt2[i];
-    cross[i] = (gt(a, b) && le(p1, p2)) || (lt(a, b) && ge(p1, p2));
+    cross[i] = (a > b && p1 <= p2) || (a < b && p1 >= p2);
     if (!isNaN(a) && !isNaN(b)) {
       p1 = a;
       p2 = b;

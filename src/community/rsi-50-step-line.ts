@@ -61,7 +61,6 @@ export const metadata = {
 /** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 export function calculate(
   bars: Bar[],
@@ -76,9 +75,10 @@ export function calculate(
   let level = NaN; // var float level = na
   for (let i = 0; i < n; i++) {
     const close = bars[i].close;
-    // ta.cross(rsiValue, 50): (a[1] <= 50 and a > 50) or (a[1] >= 50 and a < 50)
+    // ta.cross(rsiValue, 50): (a[1] <= 50 and a > 50) or (a[1] >= 50 and a < 50), compared exactly (no 1e-10
+    // tolerance; na compares false)
     const prev = i > 0 ? rsi[i - 1] : NaN;
-    const crossed = (le(prev, 50) && gt(rsi[i], 50)) || (le(50, prev) && gt(50, rsi[i]));
+    const crossed = (prev <= 50 && rsi[i] > 50) || (prev >= 50 && rsi[i] < 50);
     if (crossed) level = close;
     const above = gt(close, level);
     const rising = gt(rsi[i], prev);

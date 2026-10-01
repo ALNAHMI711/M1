@@ -73,9 +73,7 @@ export const metadata = {
 /** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
-const lt = (a: number, b: number) => b - a > EPS;
 const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 export function calculate(
   bars: Bar[],
@@ -99,15 +97,16 @@ export function calculate(
   const markers: MarkerData[] = [];
   const bgColors: BgColorData[] = [];
   const ribbon: string[] = new Array(n);
-  // ta.crossover / ta.crossunder compare with the last bar where both values were not na
+  // ta.crossover / ta.crossunder compare with the last bar where both values were not na; exact comparisons (no
+  // tolerance)
   let prevF = NaN;
   let prevS = NaN;
   for (let i = 0; i < n; i++) {
     const f = hmaFast[i];
     const s = hmaSlow[i];
     const both = !isNaN(f) && !isNaN(s);
-    const rawLong = both && gt(f, s) && le(prevF, prevS);
-    const rawShort = both && lt(f, s) && ge(prevF, prevS);
+    const rawLong = both && f > s && prevF <= prevS;
+    const rawShort = both && f < s && prevF >= prevS;
     if (both) {
       prevF = f;
       prevS = s;

@@ -150,7 +150,6 @@ const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
 const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 type Point = { time: number; value: number; color?: string };
 
@@ -397,11 +396,12 @@ export function calculate(
       }
     }
     // bull_signal = ta.crossover(vzo, vzo[1]); bear_signal = ta.crossover(vzo[1], vzo)
+    // (exact comparisons, no 1e-10 tolerance; na gives false)
     const v0 = vzo[i];
     const v1 = i > 0 ? vzo[i - 1] : NaN;
     const v2 = i > 1 ? vzo[i - 2] : NaN;
-    const bullSignal = gt(v0, v1) && le(v1, v2);
-    const bearSignal = gt(v1, v0) && le(v2, v1);
+    const bullSignal = v0 > v1 && v1 <= v2;
+    const bearSignal = v1 > v0 && v2 <= v1;
     const char = (price: number, text: string, textColor: string) => markers.push({ time: t(i), position: 'atPriceMiddle',
       price, shape: 'circle', color: 'transparent', text, textColor, size: 'tiny' });
     if (bullSignal && gt(v0, 90)) char(125, '×', white80);

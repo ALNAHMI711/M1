@@ -155,14 +155,16 @@ export function calculate(
     prevBull = bullishSweep;
     prevBear = bearishSweep;
 
-    // Confirmation; ta.crossover(close, level): close > level and close[1] <= level[1]
+    // Confirmation; ta.crossover(close, level): close > level and close[1] <= level[1]; ta.crossunder(close, level):
+    // close < level and close[1] >= level[1]; both compare exactly (no 1e-10 tolerance; na compares false). The wick
+    // tests are Pine operators (1e-10 tolerance).
     const lvlH = prev(bosHigh, i);
     const lvlH1 = prev(bosHigh, i, 2);
     const lvlL = prev(bosLow, i);
     const lvlL1 = prev(bosLow, i, 2);
     const close1 = i > 0 ? bars[i - 1].close : NaN;
-    const bosLong = cfg.useWickBOS ? gt(b.high, lvlH) : gt(b.close, lvlH) && le(close1, lvlH1);
-    const bosShort = cfg.useWickBOS ? lt(b.low, lvlL) : lt(b.close, lvlL) && ge(close1, lvlL1);
+    const bosLong = cfg.useWickBOS ? gt(b.high, lvlH) : b.close > lvlH && close1 <= lvlH1;
+    const bosShort = cfg.useWickBOS ? lt(b.low, lvlL) : b.close < lvlL && close1 >= lvlL1;
     const bullClose = ge(b.close, b.high - (b.high - b.low) * 0.25);
     const bearClose = le(b.close, b.low + (b.high - b.low) * 0.25);
     const aboveT3 = isNaN(t3[i]) ? true : gt(b.close, t3[i]);

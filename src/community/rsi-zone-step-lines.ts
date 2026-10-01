@@ -74,8 +74,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 export function calculate(
   bars: Bar[],
@@ -96,9 +94,9 @@ export function calculate(
     const t = bars[i].time;
     const close = bars[i].close;
     const r = rsi[i];
-    // ta.crossover(rsiValue, upperThresh) / ta.crossunder(rsiValue, lowerThresh)
-    const crossUp = gt(r, cfg.upperThresh) && le(prev, cfg.upperThresh);
-    const crossDown = lt(r, cfg.lowerThresh) && ge(prev, cfg.lowerThresh);
+    // ta.crossover(rsiValue, upperThresh) / ta.crossunder(rsiValue, lowerThresh), compared exactly (no 1e-10 tolerance)
+    const crossUp = r > cfg.upperThresh && prev <= cfg.upperThresh;
+    const crossDown = r < cfg.lowerThresh && prev >= cfg.lowerThresh;
     if (!isNaN(r)) prev = r;
     if (crossUp) upperLevel = close;
     if (crossDown) lowerLevel = close;

@@ -117,8 +117,9 @@ export function calculate(
   let last = NaN; // ta.crossover / crossunder: the last bar where the source was not na
   for (let i = 0; i < n; i++) {
     const x = result[i];
-    const xUp = !isNaN(x) && !isNaN(last) && gt(x, 0) && !gt(last, 0);
-    const xDn = !isNaN(x) && !isNaN(last) && lt(x, 0) && !lt(last, 0);
+    // ta.crossover(_source, 0) / ta.crossunder(_source, 0) compare exactly (no 1e-10 tolerance)
+    const xUp = !isNaN(x) && !isNaN(last) && x > 0 && last <= 0;
+    const xDn = !isNaN(x) && !isNaN(last) && x < 0 && last >= 0;
     if (!isNaN(x)) last = x;
     const chg = i > 0 ? x - result[i - 1] : NaN;
     const up = gt(chg, 0);

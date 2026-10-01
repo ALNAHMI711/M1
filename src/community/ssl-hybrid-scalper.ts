@@ -61,8 +61,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 export function calculate(
   bars: Bar[],
@@ -79,15 +77,16 @@ export function calculate(
   const rsi = A(ta.rsi(close, cfg.rsiLength));
 
   const markers: MarkerData[] = [];
-  // ta.crossover / ta.crossunder compare with the last bar where both values were not na
+  // ta.crossover / ta.crossunder compare with the last bar where both values were not na (exact comparisons:
+  // no 1e-10 tolerance, unlike the operators)
   let prevF = NaN;
   let prevS = NaN;
   for (let i = 0; i < n; i++) {
     const f = fastEMA[i];
     const s = slowEMA[i];
     const both = !isNaN(f) && !isNaN(s);
-    const crossUp = both && gt(f, s) && le(prevF, prevS);
-    const crossDown = both && lt(f, s) && ge(prevF, prevS);
+    const crossUp = both && f > s && prevF <= prevS;
+    const crossDown = both && f < s && prevF >= prevS;
     if (both) {
       prevF = f;
       prevS = s;

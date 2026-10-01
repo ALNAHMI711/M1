@@ -54,8 +54,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 export function calculate(
   bars: Bar[],
@@ -71,9 +69,9 @@ export function calculate(
 
   const markers: MarkerData[] = [];
   for (let i = 1; i < n; i++) {
-    // ta.crossover / ta.crossunder: a tie on the previous bar counts
-    const crossUp = gt(emaFast[i], emaSlow[i]) && le(emaFast[i - 1], emaSlow[i - 1]);
-    const crossDown = lt(emaFast[i], emaSlow[i]) && ge(emaFast[i - 1], emaSlow[i - 1]);
+    // ta.crossover / ta.crossunder: exact comparisons (no tolerance), a tie on the previous bar counts
+    const crossUp = emaFast[i] > emaSlow[i] && emaFast[i - 1] <= emaSlow[i - 1];
+    const crossDown = emaFast[i] < emaSlow[i] && emaFast[i - 1] >= emaSlow[i - 1];
     // plotshape(buySignal, "Buy Signal", location.belowbar, color.green, shape.labelup, text = "BUY")
     if (crossUp && lt(rsi[i], 60)) {
       markers.push({ time: bars[i].time, position: 'belowBar', shape: 'labelUp', color: color.green, text: 'BUY', textColor: color.blue });

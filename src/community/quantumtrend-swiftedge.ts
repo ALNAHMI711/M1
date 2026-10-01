@@ -150,8 +150,8 @@ export function calculate(
   const showUp: boolean[] = new Array(n);
   const showDn: boolean[] = new Array(n);
   const markers: MarkerData[] = [];
-  // ta.crossover(a, b): a > b and a[1] <= b[1]
-  const crossover = (a: number[], b: number[], i: number) => i > 0 && gt(a[i], b[i]) && le(a[i - 1], b[i - 1]);
+  // ta.crossover(a, b): a > b and a[1] <= b[1] (exact comparisons: no 1e-10 tolerance, unlike the operators)
+  const crossover = (a: number[], b: number[], i: number) => i > 0 && a[i] > b[i] && a[i - 1] <= b[i - 1];
   for (let i = 0; i < n; i++) {
     const threshold = atr[i] * thresholdFactor;
     const distanceUp = close[i] - up[i];

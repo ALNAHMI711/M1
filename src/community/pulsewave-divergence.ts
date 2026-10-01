@@ -119,7 +119,6 @@ const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
 const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 type Point = { time: number; value: number; color?: string };
 
@@ -262,8 +261,9 @@ export function calculate(
   const showObos = cfg.signalType === 'Overbought/Oversold' || cfg.signalType === 'Both';
   const showZero = cfg.signalType === 'Zero Line' || cfg.signalType === 'Both';
   // ta.crossover(a, b): a > b and a[1] <= b[1]; ta.crossunder(a, b): a < b and a[1] >= b[1]
-  const crossover = (b: number, i: number) => i > 0 && gt(osc[i], b) && le(osc[i - 1], b);
-  const crossunder = (b: number, i: number) => i > 0 && lt(osc[i], b) && ge(osc[i - 1], b);
+  // (exact comparisons, no 1e-10 tolerance; na gives false)
+  const crossover = (b: number, i: number) => i > 0 && osc[i] > b && osc[i - 1] <= b;
+  const crossunder = (b: number, i: number) => i > 0 && osc[i] < b && osc[i - 1] >= b;
   for (let i = 0; i < n; i++) {
     // plotshape(bullCond ? oscLbr : na, offset = -lookbackRight, text = ' Bull ', shape.labelup, location.absolute,
     //   color = bullDivColor, textcolor = textColor, display = calculateDivergence ? display.pane : display.none)

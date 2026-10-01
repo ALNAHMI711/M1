@@ -56,11 +56,6 @@ export const metadata = {
   overlay: true,
 };
 
-/** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
-const EPS = 1e-10;
-const gt = (a: number, b: number) => a - b > EPS;
-const lt = (a: number, b: number) => b - a > EPS;
-
 export function calculate(
   bars: Bar[],
   inputs: Partial<LuminaTrendChannelsInputs> = {},
@@ -107,8 +102,9 @@ export function calculate(
     let crossDown = false;
     if (!isNaN(b.close) && !isNaN(bs)) {
       if (!isNaN(lastClose)) {
-        crossUp = gt(b.close, bs) && !gt(lastClose, lastBasis);
-        crossDown = lt(b.close, bs) && !lt(lastClose, lastBasis);
+        // exact comparisons (no 1e-10 tolerance): close > basis and close[1] <= basis[1]
+        crossUp = b.close > bs && lastClose <= lastBasis;
+        crossDown = b.close < bs && lastClose >= lastBasis;
       }
       lastClose = b.close;
       lastBasis = bs;

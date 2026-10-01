@@ -133,10 +133,11 @@ export function calculate(
   const upperEma = A(ta.percentile_nearest_rank(S(sEma), cfg.meanLookback, 95));
 
   // ta.crossover(a, b): a > b and a[1] <= b[1]; ta.crossunder(a, b): a < b and a[1] >= b[1]
+  // (exact comparisons: ta.crossover / ta.crossunder do not use the 1e-10 tolerance of the operators)
   const crossover = (a: number[], b: number[], k: number) =>
-    k > 0 && gt(a[k], b[k]) && !isNaN(a[k - 1]) && !isNaN(b[k - 1]) && !gt(a[k - 1], b[k - 1]);
+    k > 0 && a[k] > b[k] && !isNaN(a[k - 1]) && !isNaN(b[k - 1]) && !(a[k - 1] > b[k - 1]);
   const crossunder = (a: number[], b: number[], k: number) =>
-    k > 0 && lt(a[k], b[k]) && !isNaN(a[k - 1]) && !isNaN(b[k - 1]) && !lt(a[k - 1], b[k - 1]);
+    k > 0 && a[k] < b[k] && !isNaN(a[k - 1]) && !isNaN(b[k - 1]) && !(a[k - 1] < b[k - 1]);
   const cyc = (k: number) => (k >= 0 ? sSmaCycle[k] : NaN);
 
   const mrBuy: boolean[] = new Array(n);

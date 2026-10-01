@@ -90,18 +90,17 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 /**
  * One ta.crossover / ta.crossunder call site: compared with the last bar where the call ran with both values not na
  * (a tie there counts). A call on the right side of a lazy `or` only runs (and keeps its history) when it is reached.
+ * Exact comparisons: ta.crossover / ta.crossunder do not use the 1e-10 tolerance of the operators.
  */
 function crossSite(over: boolean) {
   let pa = NaN;
   let pb = NaN;
   return (a: number, b: number): boolean => {
-    const r = over ? gt(a, b) && le(pa, pb) : lt(a, b) && ge(pa, pb);
+    const r = over ? a > b && pa <= pb : a < b && pa >= pb;
     if (!isNaN(a) && !isNaN(b)) {
       pa = a;
       pb = b;

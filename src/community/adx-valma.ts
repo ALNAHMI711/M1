@@ -82,9 +82,7 @@ export const metadata = {
 /** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
-const lt = (a: number, b: number) => b - a > EPS;
 const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 /** Division: a 0 denominator here has a 0 numerator (0 / 0 is NaN in Pine too) or is kept >= 1e-10 by math.max */
 const div = (x: number, y: number) => (y === 0 ? NaN : x / y);
 /** Pine math.max: na when an argument is na */
@@ -143,12 +141,13 @@ export function calculate(
       const j = i + cfg.visualOffset;
       if (j < 0) continue;
       const t = barTime(bars, j, interval);
-      // ta.crossover(diPlus, diMinus): triangle up below the bar, color.green, size.small
-      if (gt(diPlus[i], diMinus[i]) && le(diPlus[i - 1], diMinus[i - 1])) {
+      // ta.crossover(diPlus, diMinus) (exact comparisons, no tolerance): triangle up below the bar, color.green,
+      // size.small
+      if (diPlus[i] > diMinus[i] && diPlus[i - 1] <= diMinus[i - 1]) {
         markers.push({ time: t, position: 'belowBar', shape: 'triangleUp', color: color.green, size: 'small', forceOverlay: true });
       }
-      // ta.crossunder(diPlus, diMinus): triangle down above the bar, color.red, size.small
-      if (lt(diPlus[i], diMinus[i]) && ge(diPlus[i - 1], diMinus[i - 1])) {
+      // ta.crossunder(diPlus, diMinus) (exact comparisons): triangle down above the bar, color.red, size.small
+      if (diPlus[i] < diMinus[i] && diPlus[i - 1] >= diMinus[i - 1]) {
         markers.push({ time: t, position: 'aboveBar', shape: 'triangleDown', color: color.red, size: 'small', forceOverlay: true });
       }
     }

@@ -56,8 +56,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 export function calculate(
   bars: Bar[],
@@ -92,11 +90,12 @@ export function calculate(
     if (gt(osc[i], sig[i])) bgColors.push({ time: t, color: bull });
     else if (lt(osc[i], sig[i])) bgColors.push({ time: t, color: bear });
     if (i === 0) continue;
-    // ta.crossover(osc, oversold) / ta.crossunder(osc, overbought): a tie on the previous bar counts
-    if (gt(osc[i], cfg.oversold) && le(osc[i - 1], cfg.oversold)) {
+    // ta.crossover(osc, oversold) / ta.crossunder(osc, overbought): exact comparisons (no 1e-10 tolerance), a tie on
+    // the previous bar counts, na gives false
+    if (osc[i] > cfg.oversold && osc[i - 1] <= cfg.oversold) {
       markers.push({ time: t, position: 'belowBar', shape: 'triangleUp', color: color.lime, size: 'large', text: 'BUY', textColor: color.white });
     }
-    if (lt(osc[i], cfg.overbought) && ge(osc[i - 1], cfg.overbought)) {
+    if (osc[i] < cfg.overbought && osc[i - 1] >= cfg.overbought) {
       markers.push({ time: t, position: 'aboveBar', shape: 'triangleDown', color: color.red, size: 'large', text: 'SELL', textColor: color.white });
     }
   }

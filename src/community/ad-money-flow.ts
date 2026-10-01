@@ -118,8 +118,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 const nz = (x: number) => (isNaN(x) ? 0 : x);
 
 export function calculate(
@@ -236,9 +234,10 @@ export function calculate(
     let under = NaN;
     let over = NaN;
     if (cfg.crossMrk) {
-      // ta.crossunder(ma2, ma1): ma2 < ma1 and ma2[1] >= ma1[1]; ta.crossover(ma2, ma1): ma2 > ma1 and ma2[1] <= ma1[1]
-      if (i > 0 && lt(ma2[i], ma1[i]) && ge(ma2[i - 1], ma1[i - 1])) under = ma1[i];
-      if (i > 0 && gt(ma2[i], ma1[i]) && le(ma2[i - 1], ma1[i - 1])) over = ma2[i];
+      // ta.crossunder(ma2, ma1): ma2 < ma1 and ma2[1] >= ma1[1]; ta.crossover(ma2, ma1): ma2 > ma1 and ma2[1] <= ma1[1];
+      // both compare exactly (no 1e-10 tolerance; na compares false)
+      if (i > 0 && ma2[i] < ma1[i] && ma2[i - 1] >= ma1[i - 1]) under = ma1[i];
+      if (i > 0 && ma2[i] > ma1[i] && ma2[i - 1] <= ma1[i - 1]) over = ma2[i];
     } else {
       // ta.rising(ma1[1], 1) and not ta.rising(ma1, 1); ta.falling(ma1[1], 1) and not ta.falling(ma1, 1)
       if (i > 0 && rising(ma1, i - 1)) {

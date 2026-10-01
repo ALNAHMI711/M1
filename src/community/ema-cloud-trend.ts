@@ -45,7 +45,6 @@ export const metadata = {
 /** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
-const lt = (a: number, b: number) => b - a > EPS;
 
 export function calculate(
   bars: Bar[],
@@ -65,30 +64,32 @@ export function calculate(
   const outerDn = String(color.new('#ff5252', 70));
 
   const markers: MarkerData[] = [];
-  // ta.crossover(ema8, ema36) / ta.crossunder(ema8, ema36): compared with the last bar where both were not na
-  let prevDiff = NaN;
+  // ta.crossover(ema8, ema36) / ta.crossunder(ema8, ema36): compared with the last bar where both were not na,
+  // exact comparisons (no 1e-10 tolerance)
+  let prevA = NaN;
+  let prevB = NaN;
   for (let i = 0; i < n; i++) {
     const a = ema8[i];
     const b = ema36[i];
     if (isNaN(a) || isNaN(b)) continue;
-    if (!isNaN(prevDiff)) {
+    if (!isNaN(prevA)) {
       const t = bars[i].time;
-      const pa = prevDiff;
       // previous bar: a[1] <= b[1] (tie counted) / a[1] >= b[1]
-      if (gt(a, b) && !(pa > EPS)) {
+      if (a > b && prevA <= prevB) {
         // plotshape(bullCross, "BUY", location.belowbar, #07914e, shape.triangleup, size.small)
         markers.push({ time: t, position: 'belowBar', shape: 'triangleUp', color: '#07914e', size: 'small' });
         // plotshape(bullCross, "BUY", location.belowbar, color.new(#07914e, 0), shape.labelup, size.tiny, "BUY", white)
         markers.push({ time: t, position: 'belowBar', shape: 'labelUp', color: String(color.new('#07914e', 0)),
           size: 'tiny', text: 'BUY', textColor: color.white });
       }
-      if (lt(a, b) && !(-pa > EPS)) {
+      if (a < b && prevA >= prevB) {
         markers.push({ time: t, position: 'aboveBar', shape: 'triangleDown', color: '#9e0a0a', size: 'small' });
         markers.push({ time: t, position: 'aboveBar', shape: 'labelDown', color: String(color.new('#9e0a0a', 0)),
           size: 'tiny', text: 'SELL', textColor: color.white });
       }
     }
-    prevDiff = a - b;
+    prevA = a;
+    prevB = b;
   }
 
   return {

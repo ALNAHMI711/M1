@@ -303,12 +303,12 @@ export function calculate(
     }
   }
 
-  // ta.crossover / ta.crossunder: compared with the last bar where both values were not na
+  // ta.crossover / ta.crossunder: compared with the last bar where both values were not na, exactly (no 1e-10 tolerance)
   const crossState = () => ({ a: NaN, b: NaN });
   const cross = (st: { a: number; b: number }, a: number, b: number, over: boolean) => {
     let res = false;
     if (!isNaN(a) && !isNaN(b)) {
-      res = over ? gt(a, b) && le(st.a, st.b) : lt(a, b) && ge(st.a, st.b);
+      res = over ? a > b && st.a <= st.b : a < b && st.a >= st.b;
       st.a = a;
       st.b = b;
     }

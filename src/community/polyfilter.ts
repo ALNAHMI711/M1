@@ -85,9 +85,6 @@ export const metadata = {
 /** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
-const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 const nz = (x: number) => (isNaN(x) ? 0 : x);
 
 function fractionalMa(src: number[], length: number, fraction: number): number[] {
@@ -181,12 +178,12 @@ export function calculate(
     if (cfg.paintCandles) barColors.push({ time: t, color: col });
     if (cfg.bgCol) bgColors.push({ time: t, color: col });
 
-    // ta.crossover(a, b): a > b and a[1] <= b[1]; ta.crossunder(a, b): a < b and a[1] >= b[1]
+    // ta.crossover(a, b): a > b and a[1] <= b[1]; ta.crossunder(a, b): a < b and a[1] >= b[1] (exact, no 1e-10 tolerance)
     const src1 = i > 0 ? src[i - 1] : NaN;
-    const alertUp = gt(signal[i], s1) && le(s1, s2);
-    const alertDown = lt(signal[i], s1) && ge(s1, s2);
-    const alertAbove = gt(signal[i], src[i]) && le(s1, src1);
-    const alertBelow = lt(signal[i], src[i]) && ge(s1, src1);
+    const alertUp = signal[i] > s1 && s1 <= s2;
+    const alertDown = signal[i] < s1 && s1 >= s2;
+    const alertAbove = signal[i] > src[i] && s1 <= src1;
+    const alertBelow = signal[i] < src[i] && s1 >= src1;
     if (cfg.col1or2 ? alertUp : alertAbove) {
       markers.push({ time: t, position: 'belowBar', shape: 'triangleUp', color: cfg.longColor, text: 'L',
         textColor: cfg.longColor, size: 'tiny' });

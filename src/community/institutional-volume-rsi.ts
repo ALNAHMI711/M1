@@ -61,9 +61,6 @@ export const metadata = {
 /** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
-const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 export function calculate(bars: Bar[], inputs: Partial<InstitutionalVolumeRSIInputs> = {}): IndicatorResult {
   const cfg = { ...defaultInputs, ...inputs };
@@ -83,8 +80,9 @@ export function calculate(bars: Bar[], inputs: Partial<InstitutionalVolumeRSIInp
   const lower = basis.map((b, i) => b - dev[i] * cfg.bbMult);
 
   // ta.crossover(a, b): a > b and a[1] <= b[1]; ta.crossunder(a, b): a < b and a[1] >= b[1]
-  const crossUp = (i: number) => i > 0 && gt(rsi[i], upper[i]) && le(rsi[i - 1], upper[i - 1]);
-  const crossDn = (i: number) => i > 0 && lt(rsi[i], lower[i]) && ge(rsi[i - 1], lower[i - 1]);
+  // (exact comparisons, no 1e-10 tolerance; na gives false)
+  const crossUp = (i: number) => i > 0 && rsi[i] > upper[i] && rsi[i - 1] <= upper[i - 1];
+  const crossDn = (i: number) => i > 0 && rsi[i] < lower[i] && rsi[i - 1] >= lower[i - 1];
 
   const t = (i: number) => bars[i].time;
   const plot0 = bars.map((_b, i) => ({ time: t(i), value: upper[i], color: BAND_COL }));

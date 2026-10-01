@@ -197,10 +197,11 @@ export function calculate(
   const upperRetest: boolean[] = new Array(n);
   const lowerRetest: boolean[] = new Array(n);
   for (let i = 0; i < n; i++) {
-    // ta.crossover(close, VPMavg_U): close > VPMavg_U and close[1] <= VPMavg_U[1]
-    const crossover = i > 0 && gt(close[i], vpmU[i]) && le(close[i - 1], vpmU[i - 1]);
-    // ta.crossunder(close, VPMavg_L): close < VPMavg_L and close[1] >= VPMavg_L[1]
-    const crossunder = i > 0 && lt(close[i], vpmL[i]) && ge(close[i - 1], vpmL[i - 1]);
+    // ta.crossover(close, VPMavg_U): close > VPMavg_U and close[1] <= VPMavg_U[1], compared exactly (no 1e-10
+    // tolerance; na compares false)
+    const crossover = i > 0 && close[i] > vpmU[i] && close[i - 1] <= vpmU[i - 1];
+    // ta.crossunder(close, VPMavg_L): close < VPMavg_L and close[1] >= VPMavg_L[1], compared exactly
+    const crossunder = i > 0 && close[i] < vpmL[i] && close[i - 1] >= vpmL[i - 1];
     const sinceU = i - lastRetestU[i];
     const sinceL = i - lastRetestL[i];
     upperRetest[i] = cfg.retestSignals && crossover && !!up[i] && sinceU >= cfg.minBarsBetweenSignals

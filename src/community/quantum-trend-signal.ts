@@ -54,8 +54,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 export function calculate(
   bars: Bar[],
@@ -77,14 +75,15 @@ export function calculate(
   const bgColors: BgColorData[] = [];
   const upCol = String(color.new(color.green, 92));
   const downCol = String(color.new(color.red, 92));
-  // ta.crossover / ta.crossunder: compared with the last bar where both values were not na; a tie there counts
+  // ta.crossover / ta.crossunder: compared with the last bar where both values were not na; a tie there counts.
+  // The comparisons are exact (no 1e-10 tolerance).
   let prevF = NaN;
   let prevS = NaN;
   for (let i = 0; i < n; i++) {
     const f = emaFast[i];
     const s = emaSlow[i];
-    const crossUp = gt(f, s) && le(prevF, prevS);
-    const crossDown = lt(f, s) && ge(prevF, prevS);
+    const crossUp = f > s && prevF <= prevS;
+    const crossDown = f < s && prevF >= prevS;
     if (!isNaN(f) && !isNaN(s)) {
       prevF = f;
       prevS = s;

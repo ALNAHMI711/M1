@@ -89,7 +89,6 @@ export const metadata = {
 
 /** Pine float comparisons with the 1e-10 tolerance (false with na) */
 const EPS = 1e-10;
-const gt = (a: number, b: number) => a - b > EPS;
 const le = (a: number, b: number) => a - b <= EPS;
 const ge = (a: number, b: number) => b - a <= EPS;
 
@@ -133,8 +132,9 @@ export function calculate(
     const f1 = i > 0 ? fastMA[i - 1] : NaN;
     const s1 = i > 0 ? slowMA[i - 1] : NaN;
     // ta.crossover(fast_ma, slow_ma): fast > slow and fast[1] <= slow[1]; ta.crossunder the other way
-    const trendUp = gt(f, s) && le(f1, s1);
-    const trendDown = gt(s, f) && ge(f1, s1);
+    // (exact comparisons: ta.crossover / ta.crossunder do not use the 1e-10 tolerance of the operators)
+    const trendUp = f > s && f1 <= s1;
+    const trendDown = f < s && f1 >= s1;
     const c = close[i];
 
     const longSignal = trendUp && !inLong;

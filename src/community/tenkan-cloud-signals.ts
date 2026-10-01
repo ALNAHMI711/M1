@@ -97,7 +97,6 @@ const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
 const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 
 /**
  * One Pine ta.highest / ta.lowest call site that only runs on some bars (right side of a lazy `and`); rule of
@@ -171,8 +170,9 @@ export function calculate(
     const kj = kijun[i];
     const sb = spanBNow[i];
     const both = !isNaN(kj) && !isNaN(sb);
-    crossUp[i] = both && gt(kj, sb) && le(prevK, prevB);
-    crossDown[i] = both && lt(kj, sb) && ge(prevK, prevB);
+    // compared exactly (no 1e-10 tolerance; na compares false)
+    crossUp[i] = both && kj > sb && prevK <= prevB;
+    crossDown[i] = both && kj < sb && prevK >= prevB;
     if (both) {
       prevK = kj;
       prevB = sb;
