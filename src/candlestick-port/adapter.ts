@@ -12,6 +12,7 @@ import type { Bar, IndicatorResult, InputConfig, PlotConfig } from 'oakscriptjs'
 import type { BarColorData, BgColorData, MarkerData } from '../types';
 import { patternScript, type PatternDef } from './pattern-runner';
 import { ALL_PATTERNS } from './registry';
+import { allPatternsScript } from './all-patterns';
 
 /** oakscriptjs MarkerLocation -> local marker position. */
 const POSITION: Record<string, MarkerData['position']> = {
@@ -88,18 +89,18 @@ const PROBE_BARS: Bar[] = [
   { time: 2, open: 11, high: 13, low: 10, close: 12, volume: 100 },
 ];
 
-function buildIndicator(def: PatternDef): PortIndicator {
-  const probe = executeScript(() => patternScript(def), PROBE_BARS, {});
+function buildIndicator(body: () => void, shortName: string): PortIndicator {
+  const probe = executeScript(body, PROBE_BARS, {});
   return {
     metadata: {
       title: probe.metadata.title,
-      shortTitle: probe.metadata.shortTitle ?? def.shortName,
+      shortTitle: probe.metadata.shortTitle ?? shortName,
       overlay: probe.metadata.overlay,
     },
     inputConfig: probe.inputConfig as InputConfig[],
     plotConfig: probe.plotConfig as PlotConfig[],
     defaultInputs: probe.defaultInputs,
-    calculate: (bars, inputs = {}) => convert(executeScript(() => patternScript(def), bars, inputs)),
+    calculate: (bars, inputs = {}) => convert(executeScript(body, bars, inputs)),
   };
 }
 
@@ -173,7 +174,14 @@ export const candlestickPortIndicators: Record<string, PortIndicator> = {};
 /** Ordered registry entries built from the port. */
 export const candlestickPortEntries: PortEntry[] = ALL_PATTERNS.map((def, i) => {
   const meta = PATTERN_META[i];
-  const indicator = buildIndicator(def);
+  const indicator = buildIndicator(() => patternScript(def), def.shortName);
   candlestickPortIndicators[meta.id] = indicator;
   return { id: meta.id, exportName: meta.exportName, indicator };
 });
+
+/** The composite "*All Candlestick Patterns*" indicator (all patterns, family toggles, Pattern Type filter). */
+export const candlestickPortAllPatterns: PortEntry = {
+  id: 'all-patterns',
+  exportName: 'AllPatterns',
+  indicator: buildIndicator(allPatternsScript, 'All Patterns'),
+};

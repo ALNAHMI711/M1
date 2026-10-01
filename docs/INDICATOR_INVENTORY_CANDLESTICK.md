@@ -7,8 +7,8 @@ This document provides a comprehensive inventory of the standard PineScript cand
 | Category             | Count |
 |----------------------|-------|
 | **Total Patterns**   | 45    |
-| **Implemented**      | 44    |
-| **Pending**          | 1     |
+| **Implemented**      | 45    |
+| **Pending**          | 0     |
 
 ---
 
@@ -16,7 +16,7 @@ This document provides a comprehensive inventory of the standard PineScript cand
 
 | Pattern | Signal | Status |
 |---------|--------|--------|
-| All Candlestick Patterns (combined) | Multi | Pending |
+| All Candlestick Patterns (combined) | Multi | Done |
 | Abandoned Baby - Bearish | Bearish | Done |
 | Abandoned Baby - Bullish | Bullish | Done |
 | Dark Cloud Cover - Bearish | Bearish | Done |

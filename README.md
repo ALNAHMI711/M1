@@ -2,7 +2,7 @@
 
 **[Live Demo](https://deepentropy.github.io/lightweight-charts-indicators/)**
 
-446 technical analysis indicators for TradingView's lightweight-charts library — 82 standard indicators, 317 community indicators, and 44 candlestick patterns. PineScript v6 compatible with full drawing primitive support (lines, boxes, labels, tables).
+638 technical analysis indicators for TradingView's lightweight-charts library — 95 standard indicators, 498 community indicators, and 45 candlestick patterns. PineScript v6 compatible with full drawing primitive support (lines, boxes, labels, tables).
 
 ## Installation
 
@@ -107,7 +107,7 @@ chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
 });
 ```
 
-## Available Indicators (446)
+## Available Indicators (638)
 
 ### Moving Averages
 
@@ -243,17 +243,17 @@ chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
 | Colored Volume Bars | `ColoredVolume` | Volume colored by price/volume trend |
 | OBV MACD | `OBVMACD` | MACD applied to On Balance Volume |
 
-### Community Indicators (317)
+### Community Indicators (498)
 
-317 community indicators ported from PineScript sources, covering trend systems, divergence detectors, multi-MA strategies, volume analysis, market structure, and more. Full list in [docs/INDICATOR_INVENTORY_COMMUNITY.md](docs/INDICATOR_INVENTORY_COMMUNITY.md).
+498 community indicators ported from PineScript sources, covering trend systems, divergence detectors, multi-MA strategies, volume analysis, market structure, and more. Full list in [docs/INDICATOR_INVENTORY_COMMUNITY.md](docs/INDICATOR_INVENTORY_COMMUNITY.md).
 
 Categories include: Hyper Trend, AlphaTrend, HalfTrend, QQE MOD, Hull Suite, SuperTrend variants, Market Structure Trailing Stop, Liquidity Levels, Order Blocks, ZigZag Fibonacci, Trendlines with Breaks, and many more.
 
 Drawing primitive support: Lines (`LineDrawingData`), Boxes (`BoxData`), Labels (`LabelData`), Tables (`TableData`), Markers, Bar Colors, Background Colors, and Plot Candles.
 
-### Candlestick Patterns (44)
+### Candlestick Patterns (45)
 
-All 44 patterns from the standard candlestick pattern set, rendered as chart markers.
+All 44 patterns from the standard candlestick pattern set, rendered as chart markers, and the combined "*All Candlestick Patterns*" indicator (`AllPatterns`, id `all-patterns`) with its per-pattern toggles and Pattern Type filter.
 
 | Pattern | Signal | Candles |
 |---------|--------|---------|

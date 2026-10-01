@@ -42,7 +42,8 @@ const DIRECTION_STYLE: Record<PatternDirection, DirectionStyle> = {
 
 /** Emits alert + label marker + background highlight for a detected pattern. */
 export function emitPattern(def: PatternDef, cond: Series, labelColor: string): void {
-  alertcondition(cond, 'New pattern detected', `New ${def.name} pattern detected`);
+  // Pine messages use an en dash: "New Hammer – Bullish pattern detected"
+  alertcondition(cond, 'New pattern detected', `New ${def.name.replace(' - ', ' – ')} pattern detected`);
   const s = DIRECTION_STYLE[def.direction];
   plotshape(cond, def.name, {
     style: s.style,

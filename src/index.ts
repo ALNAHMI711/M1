@@ -1747,8 +1747,8 @@ export type { VolumeFootprintInputs } from './community/volume-footprint';
 
 
 // Candlestick Patterns
-import { candlestickPortIndicators, candlestickPortEntries } from './candlestick-port/adapter';
-export { candlestickPortIndicators, candlestickPortEntries } from './candlestick-port/adapter';
+import { candlestickPortIndicators, candlestickPortEntries, candlestickPortAllPatterns } from './candlestick-port/adapter';
+export { candlestickPortIndicators, candlestickPortEntries, candlestickPortAllPatterns } from './candlestick-port/adapter';
 
 // Individual candlestick pattern indicators (backed by the oakscriptjs 0.5.0 port)
 export const Hammer = candlestickPortIndicators['hammer'];
@@ -1795,6 +1795,9 @@ export const DownsideTasukiGap = candlestickPortIndicators['downside-tasuki-gap'
 export const UpsideTasukiGap = candlestickPortIndicators['upside-tasuki-gap'];
 export const FallingThreeMethods = candlestickPortIndicators['falling-three-methods'];
 export const RisingThreeMethods = candlestickPortIndicators['rising-three-methods'];
+
+// "*All Candlestick Patterns*": every pattern in one indicator
+export const AllPatterns = candlestickPortAllPatterns.indicator;
 
 // InputConfig, PlotConfig, HLineConfig, FillConfig re-exported from oakscriptjs above
 
@@ -10389,7 +10392,7 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     calculate: adaptiveKineticRibbonIndicator.calculate,
   },
   ...candlestickEntries(
-    candlestickPortEntries.map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
+    [...candlestickPortEntries, candlestickPortAllPatterns].map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
   ),
   // ── Built-in studies ──
   {
