@@ -57,9 +57,12 @@ export interface RSIMultiLevelsInputs {
 }
 
 const LEVELS = [10, 15, 22, 30, 38, 42, 50, 58, 62, 70, 78, 85, 90];
-const LP_COLOR = '#2e10d783';
+// Pine input defaults #2e10d783, #ffc13c52, #10d7d44b: Pine stores an input.color hex default with an alpha of
+// 2 decimals, round(AA / 255, 2) (oakscriptjs #122): 0x83 -> 0.51, 0x52 -> 0.32, 0x4b -> 0.29. For 0x83 and 0x4b
+// this changes the alpha byte (131 -> 130, 75 -> 74).
+const LP_COLOR = 'rgba(46, 16, 215, 0.51)';
 const MP_COLOR = '#ffc13c52';
-const HP_COLOR = '#10d7d44b';
+const HP_COLOR = 'rgba(16, 215, 212, 0.29)';
 /** Pine hline default colour */
 const HLINE_COLOR = '#787B86';
 

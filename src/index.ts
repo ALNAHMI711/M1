@@ -2913,6 +2913,87 @@ export type { FixedRangeVolumeProfileZonesInputs } from './community/fixed-range
 import * as terminalVelocityStopLyroRsIndicator from './community/terminal-velocity-stop-lyro-rs';
 export { TerminalVelocityStopLyroRs, calculate as calculateTerminalVelocityStopLyroRs } from './community/terminal-velocity-stop-lyro-rs';
 export type { TerminalVelocityStopLyroRsInputs } from './community/terminal-velocity-stop-lyro-rs';
+// ── Community batch 14 (Pine v6 ports) ──
+// LineReg Candles with Hma filter
+import * as lineregCandlesWithHmaFilterIndicator from './community/linereg-candles-with-hma-filter';
+export { AdvancedLinRegCandles, calculate as calculateAdvancedLinRegCandles } from './community/linereg-candles-with-hma-filter';
+export type { AdvancedLinRegCandlesInputs } from './community/linereg-candles-with-hma-filter';
+// Automated Z-scoring
+import * as automatedZScoringIndicator from './community/automated-z-scoring';
+export { AutomatedZScoring, calculate as calculateAutomatedZScoring } from './community/automated-z-scoring';
+export type { AutomatedZScoringInputs } from './community/automated-z-scoring';
+// Price Linear Sequence Counter
+import * as priceLinearSequenceCounterIndicator from './community/price-linear-sequence-counter';
+export { PriceLinearSequenceCounter, calculate as calculatePriceLinearSequenceCounter } from './community/price-linear-sequence-counter';
+export type { PriceLinearSequenceCounterInputs } from './community/price-linear-sequence-counter';
+// Dope DPO
+import * as dopeDpoIndicator from './community/dope-dpo';
+export { DopeDpo, calculate as calculateDopeDpo } from './community/dope-dpo';
+export type { DopeDpoInputs } from './community/dope-dpo';
+// OBV + Custom MA Strategy
+import * as obvCustomMaStrategyIndicator from './community/obv-custom-ma-strategy';
+export { ObvCustomMaStrategy, calculate as calculateObvCustomMaStrategy } from './community/obv-custom-ma-strategy';
+export type { ObvCustomMaStrategyInputs } from './community/obv-custom-ma-strategy';
+// L2 Risk Assessment for Trend Strength
+import * as l2RiskAssessmentForTrendStrengthIndicator from './community/l2-risk-assessment-for-trend-strength';
+export { L2RiskAssessmentForTrendStrength, calculate as calculateL2RiskAssessmentForTrendStrength } from './community/l2-risk-assessment-for-trend-strength';
+export type { L2RiskAssessmentForTrendStrengthInputs } from './community/l2-risk-assessment-for-trend-strength';
+// Relative Valuation Oscillator
+import * as relativeValuationOscillatorIndicator from './community/relative-valuation-oscillator';
+export { RelativeValuationOscillator, calculate as calculateRelativeValuationOscillator } from './community/relative-valuation-oscillator';
+export type { RelativeValuationOscillatorInputs } from './community/relative-valuation-oscillator';
+// 5-Minute Buy/Sell Signal
+import * as p5MinuteBuySellSignalIndicator from './community/5-minute-buy-sell-signal';
+export { FiveMinuteBuySellSignal, calculate as calculateFiveMinuteBuySellSignal } from './community/5-minute-buy-sell-signal';
+export type { FiveMinuteBuySellSignalInputs } from './community/5-minute-buy-sell-signal';
+// Volume Weighted Median Price (VWMP)
+import * as volumeWeightedMedianPriceIndicator from './community/volume-weighted-median-price';
+export { VolumeWeightedMedianPrice, calculate as calculateVolumeWeightedMedianPrice } from './community/volume-weighted-median-price';
+export type { VolumeWeightedMedianPriceInputs } from './community/volume-weighted-median-price';
+// TASC 2025.09 The Continuation Index
+import * as tasc202509TheContinuationIndexIndicator from './community/tasc-2025-09-the-continuation-index';
+export { Tasc202509TheContinuationIndex, calculate as calculateTasc202509TheContinuationIndex } from './community/tasc-2025-09-the-continuation-index';
+export type { Tasc202509TheContinuationIndexInputs } from './community/tasc-2025-09-the-continuation-index';
+// IPO Date Screener
+import * as ipoDateScreenerIndicator from './community/ipo-date-screener';
+export { IpoDateScreener, calculate as calculateIpoDateScreener } from './community/ipo-date-screener';
+export type { IpoDateScreenerInputs } from './community/ipo-date-screener';
+// Bilateral Filter For Loop
+import * as bilateralFilterForLoopIndicator from './community/bilateral-filter-for-loop';
+export { BilateralFilterForLoop, calculate as calculateBilateralFilterForLoop } from './community/bilateral-filter-for-loop';
+export type { BilateralFilterForLoopInputs } from './community/bilateral-filter-for-loop';
+// Ehlers Adaptive RSI
+import * as ehlersAdaptiveRsiIndicator from './community/ehlers-adaptive-rsi';
+export { EhlersAdaptiveRsi, calculate as calculateEhlersAdaptiveRsi } from './community/ehlers-adaptive-rsi';
+export type { EhlersAdaptiveRsiInputs } from './community/ehlers-adaptive-rsi';
+// Volumetric Compressed MA
+import * as volumetricCompressedMaIndicator from './community/volumetric-compressed-ma';
+export { VolumetricCompressedMA, calculate as calculateVolumetricCompressedMA } from './community/volumetric-compressed-ma';
+export type { VolumetricCompressedMAInputs } from './community/volumetric-compressed-ma';
+// Swing Points
+import * as swingPointsIndicator from './community/swing-points';
+export { SwingPoints, calculate as calculateSwingPoints } from './community/swing-points';
+export type { SwingPointsInputs } from './community/swing-points';
+// VWMA/SMA Delta Volatility (Statistical Anomaly Detector)
+import * as vwmaSmaDeltaVolatilityIndicator from './community/vwma-sma-delta-volatility';
+export { VwmaSmaDeltaVolatility, calculate as calculateVwmaSmaDeltaVolatility } from './community/vwma-sma-delta-volatility';
+export type { VwmaSmaDeltaVolatilityInputs } from './community/vwma-sma-delta-volatility';
+// Hilega-Milega-RSI-EMA-WMA indicator designed by NK
+import * as hilegaMilegaRsiEmaWmaIndicatorDesignedByNkIndicator from './community/hilega-milega-rsi-ema-wma-indicator-designed-by-nk';
+export { HilegaMilegaRsiEmaWma, calculate as calculateHilegaMilegaRsiEmaWma } from './community/hilega-milega-rsi-ema-wma-indicator-designed-by-nk';
+export type { HilegaMilegaRsiEmaWmaInputs } from './community/hilega-milega-rsi-ema-wma-indicator-designed-by-nk';
+// Uptrick: Trend Analysis
+import * as uptrickTrendAnalysisIndicator from './community/uptrick-trend-analysis';
+export { UptrickTrendAnalysis, calculate as calculateUptrickTrendAnalysis } from './community/uptrick-trend-analysis';
+export type { UptrickTrendAnalysisInputs } from './community/uptrick-trend-analysis';
+// HTC peppermint_07 CCI w signal + s&r RSI
+import * as htcPeppermint07CciWSignalSRRsiIndicator from './community/htc-peppermint-07-cci-w-signal-s-r-rsi';
+export { HtcPeppermint07CciRsi, calculate as calculateHtcPeppermint07CciRsi } from './community/htc-peppermint-07-cci-w-signal-s-r-rsi';
+export type { HtcPeppermint07CciRsiInputs } from './community/htc-peppermint-07-cci-w-signal-s-r-rsi';
+// SExI - Super Exhaustion Indicator
+import * as sexiSuperExhaustionIndicatorIndicator from './community/sexi-super-exhaustion-indicator';
+export { SExISuperExhaustionIndicator, calculate as calculateSExISuperExhaustionIndicator } from './community/sexi-super-exhaustion-indicator';
+export type { SExISuperExhaustionIndicatorInputs } from './community/sexi-super-exhaustion-indicator';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -11768,6 +11849,270 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: terminalVelocityStopLyroRsIndicator.plotConfig as PlotConfig[],
     defaultInputs: { ...terminalVelocityStopLyroRsIndicator.defaultInputs },
     calculate: terminalVelocityStopLyroRsIndicator.calculate,
+  },
+  {
+    id: 'linereg-candles-with-hma-filter',
+    group: 'community',
+    name: 'LineReg Candles with Hma filter',
+    shortName: lineregCandlesWithHmaFilterIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: lineregCandlesWithHmaFilterIndicator.metadata,
+    inputConfig: lineregCandlesWithHmaFilterIndicator.inputConfig as InputConfig[],
+    plotConfig: lineregCandlesWithHmaFilterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...lineregCandlesWithHmaFilterIndicator.defaultInputs },
+    calculate: lineregCandlesWithHmaFilterIndicator.calculate,
+  },
+  {
+    id: 'automated-z-scoring',
+    group: 'community',
+    name: 'Automated Z-scoring',
+    shortName: automatedZScoringIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: automatedZScoringIndicator.metadata,
+    inputConfig: automatedZScoringIndicator.inputConfig as InputConfig[],
+    plotConfig: automatedZScoringIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...automatedZScoringIndicator.defaultInputs },
+    calculate: automatedZScoringIndicator.calculate,
+  },
+  {
+    id: 'price-linear-sequence-counter',
+    group: 'community',
+    name: 'Price Linear Sequence Counter',
+    shortName: priceLinearSequenceCounterIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: priceLinearSequenceCounterIndicator.metadata,
+    inputConfig: priceLinearSequenceCounterIndicator.inputConfig as InputConfig[],
+    plotConfig: priceLinearSequenceCounterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...priceLinearSequenceCounterIndicator.defaultInputs },
+    calculate: priceLinearSequenceCounterIndicator.calculate,
+  },
+  {
+    id: 'dope-dpo',
+    group: 'community',
+    name: 'Dope DPO',
+    shortName: dopeDpoIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: dopeDpoIndicator.metadata,
+    inputConfig: dopeDpoIndicator.inputConfig as InputConfig[],
+    plotConfig: dopeDpoIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...dopeDpoIndicator.defaultInputs },
+    calculate: dopeDpoIndicator.calculate,
+  },
+  {
+    id: 'obv-custom-ma-strategy',
+    group: 'community',
+    name: 'OBV + Custom MA Strategy',
+    shortName: obvCustomMaStrategyIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: obvCustomMaStrategyIndicator.metadata,
+    inputConfig: obvCustomMaStrategyIndicator.inputConfig as InputConfig[],
+    plotConfig: obvCustomMaStrategyIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...obvCustomMaStrategyIndicator.defaultInputs },
+    calculate: obvCustomMaStrategyIndicator.calculate,
+  },
+  {
+    id: 'l2-risk-assessment-for-trend-strength',
+    group: 'community',
+    name: 'L2 Risk Assessment for Trend Strength',
+    shortName: l2RiskAssessmentForTrendStrengthIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: false,
+    metadata: l2RiskAssessmentForTrendStrengthIndicator.metadata,
+    inputConfig: l2RiskAssessmentForTrendStrengthIndicator.inputConfig as InputConfig[],
+    plotConfig: l2RiskAssessmentForTrendStrengthIndicator.plotConfig as PlotConfig[],
+    hlineConfig: l2RiskAssessmentForTrendStrengthIndicator.hlineConfig,
+    fillConfig: l2RiskAssessmentForTrendStrengthIndicator.fillConfig,
+    defaultInputs: { ...l2RiskAssessmentForTrendStrengthIndicator.defaultInputs },
+    calculate: l2RiskAssessmentForTrendStrengthIndicator.calculate,
+  },
+  {
+    id: 'relative-valuation-oscillator',
+    group: 'community',
+    name: 'Relative Valuation Oscillator',
+    shortName: relativeValuationOscillatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: relativeValuationOscillatorIndicator.metadata,
+    inputConfig: relativeValuationOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: relativeValuationOscillatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...relativeValuationOscillatorIndicator.defaultInputs },
+    calculate: relativeValuationOscillatorIndicator.calculate,
+  },
+  {
+    id: '5-minute-buy-sell-signal',
+    group: 'community',
+    name: '5-Minute Buy/Sell Signal',
+    shortName: p5MinuteBuySellSignalIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: p5MinuteBuySellSignalIndicator.metadata,
+    inputConfig: p5MinuteBuySellSignalIndicator.inputConfig as InputConfig[],
+    plotConfig: p5MinuteBuySellSignalIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...p5MinuteBuySellSignalIndicator.defaultInputs },
+    calculate: p5MinuteBuySellSignalIndicator.calculate,
+  },
+  {
+    id: 'volume-weighted-median-price',
+    group: 'community',
+    name: 'Volume Weighted Median Price (VWMP)',
+    shortName: volumeWeightedMedianPriceIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: volumeWeightedMedianPriceIndicator.metadata,
+    inputConfig: volumeWeightedMedianPriceIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeWeightedMedianPriceIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeWeightedMedianPriceIndicator.defaultInputs },
+    calculate: volumeWeightedMedianPriceIndicator.calculate,
+  },
+  {
+    id: 'tasc-2025-09-the-continuation-index',
+    group: 'community',
+    name: 'TASC 2025.09 The Continuation Index',
+    shortName: tasc202509TheContinuationIndexIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: false,
+    metadata: tasc202509TheContinuationIndexIndicator.metadata,
+    inputConfig: tasc202509TheContinuationIndexIndicator.inputConfig as InputConfig[],
+    plotConfig: tasc202509TheContinuationIndexIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...tasc202509TheContinuationIndexIndicator.defaultInputs },
+    calculate: tasc202509TheContinuationIndexIndicator.calculate,
+  },
+  {
+    id: 'ipo-date-screener',
+    group: 'community',
+    name: 'IPO Date Screener',
+    shortName: ipoDateScreenerIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: ipoDateScreenerIndicator.metadata,
+    inputConfig: ipoDateScreenerIndicator.inputConfig as InputConfig[],
+    plotConfig: ipoDateScreenerIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...ipoDateScreenerIndicator.defaultInputs },
+    calculate: ipoDateScreenerIndicator.calculate,
+  },
+  {
+    id: 'bilateral-filter-for-loop',
+    group: 'community',
+    name: 'Bilateral Filter For Loop',
+    shortName: bilateralFilterForLoopIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: false,
+    metadata: bilateralFilterForLoopIndicator.metadata,
+    inputConfig: bilateralFilterForLoopIndicator.inputConfig as InputConfig[],
+    plotConfig: bilateralFilterForLoopIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...bilateralFilterForLoopIndicator.defaultInputs },
+    calculate: bilateralFilterForLoopIndicator.calculate,
+  },
+  {
+    id: 'ehlers-adaptive-rsi',
+    group: 'community',
+    name: 'Ehlers Adaptive RSI',
+    shortName: ehlersAdaptiveRsiIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: ehlersAdaptiveRsiIndicator.metadata,
+    inputConfig: ehlersAdaptiveRsiIndicator.inputConfig as InputConfig[],
+    plotConfig: ehlersAdaptiveRsiIndicator.plotConfig as PlotConfig[],
+    hlineConfig: ehlersAdaptiveRsiIndicator.hlineConfig,
+    fillConfig: ehlersAdaptiveRsiIndicator.fillConfig,
+    defaultInputs: { ...ehlersAdaptiveRsiIndicator.defaultInputs },
+    calculate: ehlersAdaptiveRsiIndicator.calculate,
+  },
+  {
+    id: 'volumetric-compressed-ma',
+    group: 'community',
+    name: 'Volumetric Compressed MA',
+    shortName: volumetricCompressedMaIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: volumetricCompressedMaIndicator.metadata,
+    inputConfig: volumetricCompressedMaIndicator.inputConfig as InputConfig[],
+    plotConfig: volumetricCompressedMaIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumetricCompressedMaIndicator.defaultInputs },
+    calculate: volumetricCompressedMaIndicator.calculate,
+  },
+  {
+    id: 'swing-points',
+    group: 'community',
+    name: 'Swing Points',
+    shortName: swingPointsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: swingPointsIndicator.metadata,
+    inputConfig: swingPointsIndicator.inputConfig as InputConfig[],
+    plotConfig: swingPointsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...swingPointsIndicator.defaultInputs },
+    calculate: swingPointsIndicator.calculate,
+  },
+  {
+    id: 'vwma-sma-delta-volatility',
+    group: 'community',
+    name: 'VWMA/SMA Delta Volatility (Statistical Anomaly Detector)',
+    shortName: vwmaSmaDeltaVolatilityIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: false,
+    metadata: vwmaSmaDeltaVolatilityIndicator.metadata,
+    inputConfig: vwmaSmaDeltaVolatilityIndicator.inputConfig as InputConfig[],
+    plotConfig: vwmaSmaDeltaVolatilityIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...vwmaSmaDeltaVolatilityIndicator.defaultInputs },
+    calculate: vwmaSmaDeltaVolatilityIndicator.calculate,
+  },
+  {
+    id: 'hilega-milega-rsi-ema-wma-indicator-designed-by-nk',
+    group: 'community',
+    name: 'Hilega-Milega-RSI-EMA-WMA indicator designed by NK',
+    shortName: hilegaMilegaRsiEmaWmaIndicatorDesignedByNkIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: hilegaMilegaRsiEmaWmaIndicatorDesignedByNkIndicator.metadata,
+    inputConfig: hilegaMilegaRsiEmaWmaIndicatorDesignedByNkIndicator.inputConfig as InputConfig[],
+    plotConfig: hilegaMilegaRsiEmaWmaIndicatorDesignedByNkIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...hilegaMilegaRsiEmaWmaIndicatorDesignedByNkIndicator.defaultInputs },
+    calculate: hilegaMilegaRsiEmaWmaIndicatorDesignedByNkIndicator.calculate,
+  },
+  {
+    id: 'uptrick-trend-analysis',
+    group: 'community',
+    name: 'Uptrick: Trend Analysis',
+    shortName: uptrickTrendAnalysisIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: uptrickTrendAnalysisIndicator.metadata,
+    inputConfig: uptrickTrendAnalysisIndicator.inputConfig as InputConfig[],
+    plotConfig: uptrickTrendAnalysisIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...uptrickTrendAnalysisIndicator.defaultInputs },
+    calculate: uptrickTrendAnalysisIndicator.calculate,
+  },
+  {
+    id: 'htc-peppermint-07-cci-w-signal-s-r-rsi',
+    group: 'community',
+    name: 'HTC peppermint_07 CCI w signal + s&r RSI',
+    shortName: htcPeppermint07CciWSignalSRRsiIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: htcPeppermint07CciWSignalSRRsiIndicator.metadata,
+    inputConfig: htcPeppermint07CciWSignalSRRsiIndicator.inputConfig as InputConfig[],
+    plotConfig: htcPeppermint07CciWSignalSRRsiIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...htcPeppermint07CciWSignalSRRsiIndicator.defaultInputs },
+    calculate: htcPeppermint07CciWSignalSRRsiIndicator.calculate,
+  },
+  {
+    id: 'sexi-super-exhaustion-indicator',
+    group: 'community',
+    name: 'SExI - Super Exhaustion Indicator',
+    shortName: sexiSuperExhaustionIndicatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: sexiSuperExhaustionIndicatorIndicator.metadata,
+    inputConfig: sexiSuperExhaustionIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: sexiSuperExhaustionIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...sexiSuperExhaustionIndicatorIndicator.defaultInputs },
+    calculate: sexiSuperExhaustionIndicatorIndicator.calculate,
   },
   ...candlestickEntries(
     [...candlestickPortEntries, candlestickPortAllPatterns].map((e) => [e.id, e.indicator] as [string, typeof e.indicator])

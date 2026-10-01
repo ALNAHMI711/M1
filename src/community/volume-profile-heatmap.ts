@@ -37,7 +37,10 @@ export interface VolumeProfileHeatmapInputs {
 }
 
 const DEF_HIGH_VOL = String(color.new('#FF0000', 60));
-const DEF_LOW_VOL = String(color.new('#FFFFE0', 90));
+// Pine input default color.new(#FFFFE0, 90): Pine stores an input.color default with an alpha of 2 decimals
+// (rgba(255,255,224,0.1)) and the script receives the alpha byte round(255 * 0.1) = 26 (0x1A), where
+// color.new(#FFFFE0, 90) inside a script has the byte 25 (oakscriptjs #122).
+const DEF_LOW_VOL = '#FFFFE01A';
 
 export const defaultInputs: VolumeProfileHeatmapInputs = {
   lookback: 100,
