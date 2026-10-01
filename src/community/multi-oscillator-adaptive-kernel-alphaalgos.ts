@@ -108,7 +108,7 @@ function smoothValue(src: number[], len: number, type: string): number[] {
       sum += src[b - i] * w;
       weightSum += w;
     }
-    // x / 0 is na in Pine
+    // The weight of i = 0 is 1: weightSum >= 1, the 0 test is never true
     return weightSum === 0 ? NaN : sum / weightSum;
   });
 }

@@ -106,8 +106,13 @@ const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
 const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
-/** Pine x / y: na when y is 0 */
+/**
+ * raw_bw = stdev * 4 / sma: na for sma = 0. Pine gives +infinity (stdev >= 0) or 0 / 0 = na there; both act the same
+ * in its uses (`<` false, ta.sma / ta.stdev skip it, the bw z-score `<` tests false).
+ */
 const div = (x: number, y: number) => (y === 0 ? NaN : x / y);
+/** Pine na() / plots treat +-infinity as na */
+const finite = (v: number) => (Number.isFinite(v) ? v : NaN);
 
 export function calculate(
   bars: Bar[],
@@ -121,7 +126,8 @@ export function calculate(
   const close = bars.map((b) => b.close);
   const vwapCurr = A(ta.sma(S(close), cfg.len));
   const stdev = A(ta.stdev(S(close), cfg.len));
-  const priceZ = close.map((c, i) => div(c - vwapCurr[i], stdev[i]));
+  // z-scores: a non-zero value / 0 stays +-infinity (the colour and squeeze comparisons use it), 0 / 0 is na
+  const priceZ = close.map((c, i) => (c - vwapCurr[i]) / stdev[i]);
 
   const rawBw = stdev.map((s, i) => div(s * 4, vwapCurr[i]));
   const bwMean = A(ta.sma(S(rawBw), cfg.lookback));
@@ -129,7 +135,7 @@ export function calculate(
   const bwRatioAvg = A(ta.sma(S(rawBw), 20));
 
   const isSqueeze = bars.map((_b, i) => {
-    const bwZ = div(rawBw[i] - bwMean[i], bwStdev[i]);
+    const bwZ = (rawBw[i] - bwMean[i]) / bwStdev[i];
     const sqQuant = lt(bwZ, cfg.zThresh);
     const sqClassic = lt(rawBw[i], bwRatioAvg[i] * cfg.ratioThresh);
     const sqHybrid = sqClassic || lt(bwZ, -1.0);
@@ -162,7 +168,7 @@ export function calculate(
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
     plots: {
       plot0: bars.map((b) => ({ time: b.time, value: 0, color: cfg.zeroColor })),
-      plot1: bars.map((b, i) => ({ time: b.time, value: priceZ[i], color: finalColor(i) })),
+      plot1: bars.map((b, i) => ({ time: b.time, value: finite(priceZ[i]), color: finalColor(i) })),
       plot2: bars.map((b, i) => ({ time: b.time, value: isValid[i] ? 0 : NaN, color: cfg.squeezeColor })),
     },
     hlines: [

@@ -151,8 +151,6 @@ const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
 const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
 const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
-/** Pine x / y: na when y is 0 */
-const div = (x: number, y: number) => (y === 0 ? NaN : x / y);
 
 type Point = { time: number; value: number; color?: string };
 
@@ -182,7 +180,8 @@ export function calculate(
     trend = new Array(n).fill(1.0);
   }
   const volSma = A(ta.sma(S(bars.map((b) => b.volume ?? NaN)), cfg.length));
-  const relVolume = bars.map((b, i) => div(b.volume ?? NaN, volSma[i]));
+  // rel_volume = volume / ta.sma(volume, length): a plain division (x / 0 is +-infinity, 0 / 0 NaN)
+  const relVolume = bars.map((b, i) => (b.volume ?? NaN) / volSma[i]);
   const smoothedVol = A(ta.ema(S(relVolume), cfg.smoothingLength));
   const priceChange = bars.map((b, i) => (i > 0 ? b.close - bars[i - 1].close : NaN));
   const smoothedChange = A(ta.ema(S(priceChange), cfg.smoothingLength));

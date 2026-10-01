@@ -95,10 +95,10 @@ function pineFor(from: number, to: number, body: (i: number) => void): void {
   else for (let i = from; i >= to; i--) body(i);
 }
 
-/** Pine array.max of a float array: na values are skipped */
+/** Pine array.max / matrix column max of a float array: na and +/-infinity values are skipped */
 function arrMax(a: number[]): number {
   let m = NaN;
-  for (const v of a) if (!isNaN(v) && (isNaN(m) || v > m)) m = v;
+  for (const v of a) if (Number.isFinite(v) && (isNaN(m) || v > m)) m = v;
   return m;
 }
 
@@ -228,7 +228,7 @@ export function calculate(
           im += Coef[count] * s[count];
         });
         const denom = Math.pow(1.0 - re, 2.0) + Math.pow(im, 2.0);
-        pwr[period] = denom === 0 ? NaN : 0.1 / denom; // x / 0 is na
+        pwr[period] = 0.1 / denom; // 0.1 / 0 is +infinity (skipped by the max, drawn white below)
       });
       const MaxPwr = arrMax(pwr);
 
@@ -248,7 +248,8 @@ export function calculate(
         const p0 = norm[period];
         const r = ge(p0, 0.5) ? 255.0 : 255.0 * 2.0 * p0;
         const g = ge(p0, 0.5) ? 255.0 * (2.0 * p0 - 1.0) : 0.0;
-        sp[period] = String(color.rgb(r, g, 0.0));
+        // color.rgb(255, +infinity, 0) (power +infinity) is white in Pine
+        sp[period] = Number.isFinite(g) ? String(color.rgb(r, g, 0.0)) : String(color.rgb(255, 255, 255));
       });
       SPECTRUM_PERIODS.forEach((k, j) => { spectrum[j][i] = sp[k]; });
     }

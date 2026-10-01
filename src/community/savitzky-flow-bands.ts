@@ -99,9 +99,13 @@ export function calculate(
     return sum / normFactor;
   });
   // for i = 1 to length - 1: polynomial := math.sum(sum / norm_factor, i) / i
-  // The value kept is the one of the last loop index, length - 1 (length 1: i = 0, x / 0 is na)
+  // The value kept is the one of the last loop index, length - 1. With length <= 1 the loop (counting down) reaches
+  // i = 0, and Pine stops with a runtime error: math.sum length must be > 0.
+  if (length < 2) {
+    throw new Error("Invalid value of the 'length' argument (0) in the 'sum' function. It must be > 0.");
+  }
   const last = length - 1;
-  const basis = last >= 1 ? A(math.sum(S(filtered), last) as Series).map((v) => v / last) : new Array<number>(n).fill(NaN);
+  const basis = A(math.sum(S(filtered), last) as Series).map((v) => v / last);
 
   // distance = ta.sma(high - low, 100) * 2
   const distance = A(ta.sma(S(bars.map((b) => b.high - b.low)), 100)).map((v) => v * 2);

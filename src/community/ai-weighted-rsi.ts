@@ -66,8 +66,10 @@ export const metadata = {
 // Pine compares floats with a tolerance of 1e-10; a comparison with na is false.
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
-const nz = (v: number, r = 0) => (isNaN(v) ? r : v);
-/** Pine division: x / 0 is na */
+// Pine nz(): na and +-infinity (log(0), x / 0) give the replacement
+const nz = (v: number, r = 0) => (Number.isFinite(v) ? v : r);
+/** Division: Pine x / 0 is +-Infinity, but each use here is guarded, has a price denominator, or goes through
+ * nz() (volLogChg), where NaN gives the same value */
 const div = (a: number, b: number) => (b === 0 ? NaN : a / b);
 
 /** f_topk_indices(arr) of the script: indices of the 5 largest values (nz), first index on ties */

@@ -69,7 +69,8 @@ export function calculate(
   const maxVol = ta.highest(volS, length).toArray().map((v) => v ?? NaN);
   const minVol = ta.lowest(volS, length).toArray().map((v) => v ?? NaN);
 
-  // rti = 100 * (volatility - min_volatility) / (max_volatility - min_volatility)   (x / 0 is na)
+  // rti = 100 * (volatility - min_volatility) / (max_volatility - min_volatility). When max = min, volatility = min:
+  // Pine gives 0 / 0 = NaN
   const rti = volatility.map((v, i) => {
     const den = maxVol[i] - minVol[i];
     return den === 0 || isNaN(den) ? NaN : (100 * (v - minVol[i])) / den;

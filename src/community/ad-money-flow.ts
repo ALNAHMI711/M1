@@ -203,8 +203,9 @@ export function calculate(
     for (let i = 0; i < n; i++) {
       let c: string | null;
       if (cfg.colorGrad) {
-        const range = histMax[i] - histMin[i];
-        const grad = range === 0 ? NaN : (100 * hist[i]) / range;
+        // histGrad = 100 * hist / histRange: a plain division (x / 0 is +-infinity, 0 / 0 NaN); color.from_gradient
+        // uses the infinite value
+        const grad = (100 * hist[i]) / (histMax[i] - histMin[i]);
         c = gt(hist[i], 0)
           ? color.from_gradient(grad, 0, 100, String(color.new('#bdffbd', 0)), String(color.new('#00ff00', 0)))
           : color.from_gradient(grad, -100, 0, String(color.new('#ff0000', 0)), String(color.new('#ffbdbd', 0)));

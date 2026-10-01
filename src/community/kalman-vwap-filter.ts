@@ -108,24 +108,25 @@ export function calculate(
   const vwapPrice = A(getSourceSeries(bars, cfg.vwapPriceSrc));
   const volume = bars.map((b) => b.volume ?? NaN);
 
-  // sessionVWAP = ta.vwap(hlc3); rollingVWAP = sma(price * volume, len) / sma(volume, len) (x / 0 is na)
+  // sessionVWAP = ta.vwap(hlc3); rollingVWAP = sma(price * volume, len) / sma(volume, len) (x / 0 is +-infinity)
   const sessionVwap = A(ta.vwap(S(bars.map((b) => (b.high + b.low + b.close) / 3)), S(volume), S(newDay(bars).map(Number))));
   const vwN = A(ta.sma(S(vwapPrice.map((p, i) => p * volume[i])), cfg.vwapLen));
   const vwD = A(ta.sma(S(volume), cfg.vwapLen));
-  const rollingVwap = vwN.map((v, i) => (vwD[i] === 0 ? NaN : v / vwD[i]));
-  // vwapBase = useSession ? nz(sessionVWAP, rollingVWAP) : rollingVWAP
+  const rollingVwap = vwN.map((v, i) => v / vwD[i]);
+  // vwapBase = useSession ? nz(sessionVWAP, rollingVWAP) : rollingVWAP (nz replaces na and +-infinity)
   const vwapBase = bars.map((_, i) => (cfg.vwapMode === 'Session'
-    ? (isNaN(sessionVwap[i]) ? rollingVwap[i] : sessionVwap[i]) : rollingVwap[i]));
+    ? (Number.isFinite(sessionVwap[i]) ? sessionVwap[i] : rollingVwap[i]) : rollingVwap[i]));
   const meas = price.map((p, i) => (1.0 - cfg.vwapWeight) * p + cfg.vwapWeight * vwapBase[i]);
 
   // Kalman filter: the N states of the Pine script start and update the same way, so one state is kept.
-  // var stateEstimate = na, errorCovariance = 100; f_init: when the state is na, state = meas and covariance = 1.
+  // var stateEstimate = na, errorCovariance = 100; f_init: when the state is na (na() is also true for +-infinity),
+  // state = meas and covariance = 1.
   const kalman: number[] = new Array(n);
   let x = NaN;
   let P = 100.0;
   for (let i = 0; i < n; i++) {
     const z = meas[i];
-    if (isNaN(x)) {
+    if (!Number.isFinite(x)) {
       x = z;
       P = 1.0;
     }
@@ -136,9 +137,9 @@ export function calculate(
     kalman[i] = x;
   }
 
-  // up = kalmanVW > nz(kalmanVW[1], kalmanVW)
+  // up = kalmanVW > nz(kalmanVW[1], kalmanVW) (nz replaces na and +-infinity; > uses an infinite value)
   const barCol = kalman.map((k, i) => {
-    const prev = i > 0 && !isNaN(kalman[i - 1]) ? kalman[i - 1] : k;
+    const prev = i > 0 && Number.isFinite(kalman[i - 1]) ? kalman[i - 1] : k;
     return gt(k, prev) ? cfg.longColor : cfg.shortColor;
   });
 
@@ -150,7 +151,9 @@ export function calculate(
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay, precision: 2 },
     plots: {
       plot0: bars.map((b, i) => ({
-        time: b.time, value: cfg.showkalman ? kalman[i] : NaN, color: String(color.new(barCol[i], cfg.transp)),
+        // a plot draws nothing for +-infinity
+        time: b.time, value: cfg.showkalman && Number.isFinite(kalman[i]) ? kalman[i] : NaN,
+        color: String(color.new(barCol[i], cfg.transp)),
       })),
     },
     barColors,

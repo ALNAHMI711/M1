@@ -138,8 +138,13 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-/** Pine x / y: na when y is 0 */
+/**
+ * x / y with NaN when y is 0: only used where Pine can only get 0 / 0 (NaN) or where Pine itself guards y == 0.
+ * A plain Pine division with a non-zero x / 0 gives +/-infinity (see zScore and mar).
+ */
 const div = (x: number, y: number) => (y === 0 ? NaN : x / y);
+/** Pine na() is also true for +/-infinity, and a plot draws nothing for it */
+const fin = (v: number) => (Number.isFinite(v) ? v : NaN);
 
 /**
  * get_centers: the last `lookback` values in a var array, sorted ascending with the na values last (Pine
@@ -197,11 +202,13 @@ export function calculate(
   const close = bars.map((b) => b.close);
   const closeS = S(close);
 
-  // z_score(src, length) = (src - ta.sma(src, length)) / ta.stdev(src, length)
+  // z_score(src, length) = (src - ta.sma(src, length)) / ta.stdev(src, length): a plain division (x / 0 is
+  // +/-infinity). ta.sma / ta.stdev skip +/-infinity values like na, so they get the series with NaN there.
   const zScore = (src: number[], length: number) => {
-    const mean = A(ta.sma(S(src), length));
-    const sd = A(ta.stdev(S(src), length));
-    return src.map((v, i) => div(v - mean[i], sd[i]));
+    const finite = S(src.map(fin));
+    const mean = A(ta.sma(finite, length));
+    const sd = A(ta.stdev(finite, length));
+    return src.map((v, i) => (v - mean[i]) / sd[i]);
   };
 
   // RSI, CCI
@@ -254,12 +261,13 @@ export function calculate(
 
   // close / MA
   const ma = A(cfg.maType === 'EMA' ? ta.ema(closeS, cfg.marLength) : ta.sma(closeS, cfg.marLength));
-  const mar = close.map((c, i) => div(c, ma[i]));
+  const mar = close.map((c, i) => c / ma[i]); // plain division: x / 0 is +/-infinity
   const marVal = cfg.marStandardize ? zScore(mar, lookback) : mar;
 
   // centers of each feature
   const feats = [rsiVal, cciVal, fisherVal, dmiVal, zscVal, marVal];
-  const centers = feats.map((x) => centersOf(x, A(ta.sma(S(x), lookback)), lookback, cfg.pLow, cfg.pHigh, k));
+  // x_mid = ta.sma(x, lookback) (skips +/-infinity like na); the sorted window keeps +/-infinity in numeric order
+  const centers = feats.map((x) => centersOf(x, A(ta.sma(S(x.map(fin)), lookback)), lookback, cfg.pLow, cfg.pHigh, k));
   const uses: number[] = [cfg.useRsi, cfg.useCci, cfg.useFisher, cfg.useDmi, cfg.useZscore, cfg.useMar].map((u) => (u ? 1 : 0));
   const useCount = uses.reduce((a, b) => a + b, 0);
   const single: Record<string, number> = { RSI: 0, CCI: 1, Fisher: 2, DMI: 3, 'Z-Score': 4, MAR: 5 };
@@ -288,12 +296,13 @@ export function calculate(
         for (let j = 0; j < 6; j++) sum += Math.abs(feats[j][t] - centers[j][t][i]) * uses[j];
         dist = div(sum, useCount);
       }
-      if (isNaN(minDist) || lt(dist, minDist)) {
+      // na(min_dist) or dist < min_dist (na() is true for +/-infinity)
+      if (!Number.isFinite(minDist) || lt(dist, minDist)) {
         secondMinDist = minDist;
         second = curr;
         minDist = dist;
         curr = i;
-      } else if (isNaN(secondMinDist) || lt(dist, secondMinDist)) {
+      } else if (!Number.isFinite(secondMinDist) || lt(dist, secondMinDist)) {
         secondMinDist = dist;
         second = i;
       }
@@ -306,7 +315,7 @@ export function calculate(
     const pv = f >= 0 ? feats[f][t] : realClust;
     plotVal[t] = pv;
     clusterVal[t] = cluster;
-    currColor[t] = isNaN(pv) ? GRAY80 : colorOf(cluster);
+    currColor[t] = !Number.isFinite(pv) ? GRAY80 : colorOf(cluster); // if na(plot_val): gray
     kCenter[0][t] = f >= 0 ? centers[f][t][0] : 0;
     kCenter[1][t] = f >= 0 ? centers[f][t][1] : 1;
     kCenter[2][t] = f >= 0 ? (k > 2 ? centers[f][t][2] : NaN) : k > 2 ? 2 : 0;
@@ -314,8 +323,8 @@ export function calculate(
 
   const clusters = mainPlot === 'Clusters';
   const P = (value: (i: number) => number, col: (i: number) => string) =>
-    bars.map((b, i) => ({ time: b.time, value: value(i), color: col(i) }));
-  const has = (i: number) => !isNaN(plotVal[i]);
+    bars.map((b, i) => ({ time: b.time, value: fin(value(i)), color: col(i) }));
+  const has = (i: number) => Number.isFinite(plotVal[i]);
   const cur = (i: number) => currColor[i];
   const hist = (c: number) => P((i) => (clusters && clusterVal[i] === c ? plotVal[i] : NaN), cur);
   return {

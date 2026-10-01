@@ -75,7 +75,10 @@ export const metadata = {
 
 /** Pine float comparison: a > b only when a - b > 1e-10 (false with na) */
 const gt = (a: number, b: number) => a - b > 1e-10;
-/** Pine x / 0 is na */
+/**
+ * x / 0 gives NaN. In Pine a non-zero x / 0 is +/-infinity, but here x is always 0 when the denominator is 0 (the sums
+ * of the same weights; a value between its own lowest and highest), and Pine 0 / 0 is NaN too.
+ */
 const div = (a: number, b: number) => (b === 0 ? NaN : a / b);
 /** Pine array.sum: the na elements are skipped */
 const sum = (a: number[]) => a.reduce((s, v) => (isNaN(v) ? s : s + v), 0);

@@ -72,8 +72,9 @@ export function calculate(
     const cmaPrev = isNaN(prev) ? sma[i] : prev;
     const dev = cmaPrev - sma[i];
     const v2 = dev * dev;
-    // v3 = v1 == 0 or v2 == 0 ? 1 : v2 / (v1 + v2) (na == 0 is false; x / 0 is na)
-    const v3 = v1[i] === 0 || v2 === 0 ? 1 : v1[i] + v2 === 0 ? NaN : v2 / (v1[i] + v2);
+    // v3 = v1 == 0 or v2 == 0 ? 1 : v2 / (v1 + v2) (na == 0 is false). Plain division: v2 / 0 is +infinity,
+    // then 1 / v3 is 0 and k is 2
+    const v3 = v1[i] === 0 || v2 === 0 ? 1 : v2 / (v1[i] + v2);
     // k = math.max(0.0, 2 - 1 / v3) (na when v3 is na)
     const k = isNaN(v3) ? NaN : Math.max(0.0, 2 - 1 / v3);
     cma[i] = cmaPrev + k * (sma[i] - cmaPrev);

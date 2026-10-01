@@ -112,7 +112,7 @@ export function calculate(
   const hh = A(ta.highest(S(bars.map((b) => b.high)), cfg.pricePer));
   const norm = bars.map((b, i) => {
     const range = hh[i] - ll[i];
-    return range === 0 ? NaN : ((b.close - ll[i]) / range) * 100; // x / 0 is na
+    return range === 0 ? NaN : ((b.close - ll[i]) / range) * 100; // range 0: close = lowest low, Pine 0 / 0 is NaN
   });
   const smoothNorm = A(ta.sma(S(norm), cfg.flowPeriod));
   const doubleSmooth = A(ta.sma(S(smoothNorm), 3));

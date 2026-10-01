@@ -124,7 +124,8 @@ export function calculate(
 
   let raw: number[];
   if (cfg.meanReversion) {
-    // Pine division by zero gives na (the profile of one bar has a deviation of 0)
+    // A deviation of 0 (profile of one bar) gives +-Infinity in Pine (0 / 0: NaN). The value only feeds ta.ema,
+    // which skips an infinite value as na, so NaN gives the same result.
     raw = price.map((p, i) => {
       const d = dev[i] * cfg.sensitivity;
       return d === 0 ? NaN : 50 + ((p - vwap[i]) / d) * 25;

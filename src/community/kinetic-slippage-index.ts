@@ -65,7 +65,8 @@ export function calculate(bars: Bar[], inputs: Partial<KineticSlippageIndexInput
   const volume = bars.map((b) => b.volume ?? NaN);
   const emaVolume = A(ta.ema(S(volume), cfg.volEmaLength));
   const ksi = bars.map((_b, i) => {
-    // emaVolume > 0 ? tr^2 / (volume * emaVolume) : 0; x / 0 = na
+    // emaVolume > 0 ? tr^2 / (volume * emaVolume) : 0. Pine tr^2 / 0 is +infinity, but the plot draws nothing for it,
+    // ta.ema skips it like na (its value is na on that bar, so ksi > signal is false): NaN gives the same outputs
     if (!gt(emaVolume[i], 0)) return 0;
     const den = volume[i] * emaVolume[i];
     return (den === 0 ? NaN : Math.pow(trueRange[i], 2) / den) * 1000000;

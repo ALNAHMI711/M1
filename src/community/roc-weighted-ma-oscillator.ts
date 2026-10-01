@@ -86,8 +86,10 @@ const SCHEMES: Record<RocWeightedColorScheme, [string, string, string]> = {
 
 /** Pine float comparison: a > b only when a - b > 1e-10 (false with na) */
 const gt = (a: number, b: number) => a - b > 1e-10;
-/** Pine x / 0 is na */
+/** x / 0 of the normalised ROC: highest = lowest means roc = lowest, so Pine also gives 0 / 0 = na */
 const div = (a: number, b: number) => (b === 0 ? NaN : a / b);
+/** Pine na() / plots / ta.ema treat +-infinity as na */
+const finite = (v: number) => (Number.isFinite(v) ? v : NaN);
 
 export function calculate(
   bars: Bar[],
@@ -113,8 +115,9 @@ export function calculate(
   // oscillator = zscore(rwma, rocLen) = (rwma - sma) / stdev
   const mean = A(ta.sma(S(rwma), rocLen));
   const sd = A(ta.stdev(S(rwma), rocLen));
-  const osc = rwma.map((v, i) => div(v - mean[i], sd[i]));
-  const signal = A(ta.ema(S(osc), sigLen));
+  // a non-zero value / 0 stays +-infinity (comparisons and fill gradients use it), 0 / 0 is na
+  const osc = rwma.map((v, i) => (v - mean[i]) / sd[i]);
+  const signal = A(ta.ema(S(osc.map(finite)), sigLen));
 
   const oscPlot: { time: number; value: number; color: string }[] = [];
   const upperFill: string[] = [];
@@ -132,7 +135,7 @@ export function calculate(
     const shortSignal = currentCol === bear && prevColor === bull;
     prevColor = currentCol;
 
-    oscPlot.push({ time: t, value: o, color: currentCol ?? 'transparent' });
+    oscPlot.push({ time: t, value: finite(o), color: currentCol ?? 'transparent' });
     // oscillator > 0 ? color.from_gradient(oscillator, 0, 3, #0e0e0e, bear) : na
     upperFill.push(gt(o, 0) ? String(color.from_gradient(o, 0, 3, '#0e0e0e', bear)) : 'transparent');
     // oscillator < 0 ? color.from_gradient(oscillator, -3, 0, bull, #0e0e0e) : na

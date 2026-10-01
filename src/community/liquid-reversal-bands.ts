@@ -103,8 +103,6 @@ const gt = (a: number, b: number) => a - b > EPS;
 const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
 const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
 const ne = (a: number, b: number) => Math.abs(a - b) > EPS;
-/** Pine division: x / 0 is na */
-const div = (a: number, b: number) => (b === 0 ? NaN : a / b);
 /** f_clamp(x, min, max) = math.max(min, math.min(x, max)) (na stays na) */
 const clamp = (x: number, lo: number, hi: number) => Math.max(lo, Math.min(x, hi));
 
@@ -158,7 +156,7 @@ export function calculate(
   });
   const fairSlopeAvg = A(ta.ema(S(fairSlopeRaw.map((v) => Math.abs(v))), lineSlopeLen));
   // fairSlopeNorm = fairSlopeAvg != 0.0 ? fairSlopeRaw / fairSlopeAvg : 0.0
-  const fairSlopeNorm = fairSlopeAvg.map((a, i) => (ne(a, 0) ? div(fairSlopeRaw[i], a) : 0));
+  const fairSlopeNorm = fairSlopeAvg.map((a, i) => (ne(a, 0) ? fairSlopeRaw[i] / a : 0));
   const fairSlopeSmooth = A(ta.ema(S(fairSlopeNorm), lineSlopeLen));
 
   const close = bars.map((b) => b.close);
@@ -171,7 +169,8 @@ export function calculate(
     const b = bars[i];
     const t = b.time;
     // lineRatio = f_clamp(0.5 + fairSlopeSmooth / (2.0 * lineSlopeSensitivity), 0.0, 1.0)
-    const lineRatio = clamp(0.5 + div(fairSlopeSmooth[i], 2.0 * lineSlopeSensitivity), 0.0, 1.0);
+    // (sensitivity 0: a non-zero value / 0 is +-infinity, clamped to 1 / 0 as in Pine; 0 / 0 is na)
+    const lineRatio = clamp(0.5 + fairSlopeSmooth[i] / (2.0 * lineSlopeSensitivity), 0.0, 1.0);
     fairPlot.push({ time: t, value: fair[i], color: colorGradient(lineRatio, BEAR_MAIN, BULL_MAIN) });
 
     // rawBuy = close[1] <= lowerBand[1] and close > lowerBand; rawSell = close[1] >= upperBand[1] and close < upperBand
@@ -192,7 +191,7 @@ export function calculate(
 
     // bandRange = upperBand - lowerBand; ratioRaw = bandRange != 0.0 ? (src - lowerBand) / bandRange : 0.5
     const bandRange = upperBand[i] - lowerBand[i];
-    const ratioRaw = ne(bandRange, 0) ? div(src[i] - lowerBand[i], bandRange) : 0.5;
+    const ratioRaw = ne(bandRange, 0) ? (src[i] - lowerBand[i]) / bandRange : 0.5;
     const ratioClamped = clamp(isNaN(ratioRaw) ? 0.5 : ratioRaw, 0.0, 1.0);
     const reversalCandleCol = colorGradient(ratioClamped, BULL_MAIN, BEAR_MAIN);
     const latestSignalCol = lastSignal === 'bull' ? BULL_MAIN : lastSignal === 'bear' ? BEAR_MAIN : reversalCandleCol;

@@ -121,10 +121,11 @@ export function calculate(
     default: smoothed = new Array(n).fill(NaN); // TEMA, DEMA, KAMA: na
   }
 
-  // z_score = (smoothed - mean) / stdev (x / 0 is na)
+  // z_score = (smoothed - mean) / stdev: a plain division (x / 0 is +-infinity, 0 / 0 NaN); the comparisons use the
+  // infinite value, the plot shows na for it
   const mean = A(ta.sma(S(smoothed), cfg.lookback));
   const sd = A(ta.stdev(S(smoothed), cfg.lookback));
-  const z = smoothed.map((v, i) => (sd[i] === 0 ? NaN : (v - mean[i]) / sd[i]));
+  const z = smoothed.map((v, i) => (v - mean[i]) / sd[i]);
 
   // ta.crossover(a, b): a > b and a[1] <= b[1]; ta.crossunder(a, b): a < b and a[1] >= b[1]
   const crossover = (i: number, level: number) => i > 0 && gt(z[i], level) && le(z[i - 1], level);
@@ -192,7 +193,7 @@ export function calculate(
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
     plots: {
       // plot(z_score, style = plot.style_histogram, color = z_score > 0 ? #ff0000 : #ffffff, title = 'Z-Score')
-      plot0: bars.map((b, i) => ({ time: b.time, value: z[i], color: gt(z[i], 0) ? red : white })),
+      plot0: bars.map((b, i) => ({ time: b.time, value: Number.isFinite(z[i]) ? z[i] : NaN, color: gt(z[i], 0) ? red : white })),
     },
     hlines,
     bgColors,

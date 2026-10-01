@@ -56,7 +56,7 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-/** Pine x / y: na when y is 0 */
+/** Division: Pine x / 0 is +-Infinity, but pb_percent only feeds ta.ema, which skips an infinite value as na */
 const div = (x: number, y: number) => (y === 0 ? NaN : x / y);
 
 export function calculate(

@@ -108,7 +108,7 @@ const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
 const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
 const ne = (a: number, b: number) => Math.abs(a - b) > EPS;
-/** Pine division: x / 0 is na */
+/** Division whose denominator is guarded by the Pine code (or is |overbought level| >= 20): never 0 here */
 const div = (a: number, b: number) => (b === 0 ? NaN : a / b);
 
 export function calculate(

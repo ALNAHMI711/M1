@@ -67,8 +67,6 @@ const nz = (x: number) => (isNaN(x) ? 0 : x);
 /** Pine math.min / math.max: na when an argument is na */
 const min = (a: number, b: number) => (isNaN(a) || isNaN(b) ? NaN : Math.min(a, b));
 const max = (a: number, b: number) => (isNaN(a) || isNaN(b) ? NaN : Math.max(a, b));
-/** Pine x / y: na when y is 0 */
-const div = (x: number, y: number) => (y === 0 ? NaN : x / y);
 
 export function calculate(bars: Bar[], inputs: Partial<MesaAdaptiveEhlersFlowInputs> = {}): IndicatorResult {
   const cfg = { ...defaultInputs, ...inputs };
@@ -114,7 +112,8 @@ export function calculate(bars: Bar[], inputs: Partial<MesaAdaptiveEhlersFlowInp
     im[i] = 0.2 * (i2[i] * q2p - q2[i] * i2p) + 0.8 * nz(at(im, i - 1));
     // var float period: keeps its previous value when not computed
     let p = per1;
-    if (nonZero(im[i]) && nonZero(re[i])) p = div(2 * Math.PI, Math.atan(div(im[i], re[i])));
+    // 2 * pi / math.atan(im / re): a plain division (x / 0 is +/-infinity, then math.min / math.max clamp it)
+    if (nonZero(im[i]) && nonZero(re[i])) p = (2 * Math.PI) / Math.atan(im[i] / re[i]);
     p = max(1.5, min(p, 50));
     period[i] = 0.2 * p + 0.8 * nz(per1);
 
@@ -123,7 +122,7 @@ export function calculate(bars: Bar[], inputs: Partial<MesaAdaptiveEhlersFlowInp
     phase[i] = (Math.atan(q1[i] / i1[i]) * 180) / Math.PI;
     let dp = nz(at(phase, i - 1)) - phase[i];
     dp = max(1, min(dp, 50));
-    let a = div(fastLimit, dp);
+    let a = fastLimit / dp; // dp is at least 1 here
     a = max(slowLimit, min(a, fastLimit));
     alpha[i] = a;
     mama[i] = a * price[i] + (1 - a) * nz(at(mama, i - 1));

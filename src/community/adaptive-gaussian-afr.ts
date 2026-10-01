@@ -54,8 +54,6 @@ export const metadata = {
 };
 
 const nz = (v: number) => (isNaN(v) ? 0 : v);
-/** Pine x / y: na when y is 0 */
-const div = (x: number, y: number) => (y === 0 ? NaN : x / y);
 /** Pine math.max / math.min: na when an argument is na */
 const max = (a: number, b: number) => (isNaN(a) || isNaN(b) ? NaN : Math.max(a, b));
 const min = (a: number, b: number) => (isNaN(a) || isNaN(b) ? NaN : Math.min(a, b));
@@ -80,7 +78,8 @@ export function calculate(
   let prevAfr = 0; // var float afr_level = 0.0
   for (let i = 0; i < n; i++) {
     const b = bars[i];
-    const volRatio = div(atrShort[i], atrLong[i]);
+    // a plain division: x / 0 is +-infinity (math.max(inf, 0.5) is inf, g_len / inf is 0), 0 / 0 NaN
+    const volRatio = atrShort[i] / atrLong[i];
     // adaptive_len = math.max(2, math.round(g_len / math.max(vol_ratio, 0.5)))
     const adaptiveLen = max(2, Math.round(cfg.gLen / max(volRatio, 0.5)));
     const beta = (1 - Math.cos((2 * Math.PI) / adaptiveLen)) / root;

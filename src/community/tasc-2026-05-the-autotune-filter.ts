@@ -110,7 +110,7 @@ export function calculate(bars: Bar[], inputs: Partial<TascAutoTuneFilterInputs>
       const vx = w * sxx[b] - sx[b] * sx[b];
       const vy = w * syy - sy * sy;
       const den = Math.sqrt(vx * vy);
-      // x / 0 is na
+      // Pine x / 0 is +-Infinity (0 / 0: NaN); nz(corr, 1) replaces both, so NaN gives the same value
       const corr = den === 0 ? NaN : cov / den;
       acf[i] = nz(corr, 1);
     }

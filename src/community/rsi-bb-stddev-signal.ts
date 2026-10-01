@@ -227,7 +227,9 @@ export function calculate(
               : b.high - b.low;
             const volatility = sd(rsi[i]);
             const atrV = atr(tr);
-            const er = atrV === 0 ? NaN : volatility / atrV;
+            // efficiency_ratio = volatility / ta.atr(length): an ATR of 0 gives +infinity (or na for 0 / 0); math.pow
+            // and math.min use the infinite value (sc = 0.666)
+            const er = volatility / atrV;
             let sc = Math.pow(er, 2);
             // math.max(0.666, math.min(0.0645, sc)): na when sc is na
             sc = isNaN(sc) ? NaN : Math.max(0.666, Math.min(0.0645, sc));

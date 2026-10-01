@@ -67,9 +67,11 @@ export function calculate(
   const fastEMA = A(ta.ema(src, cfg.fastLength));
   const slowEMA = A(ta.ema(src, cfg.slowLength));
   const atrValue = A(ta.atr(bars, cfg.atrLength));
-  // macdV = macdLine / atrValue * 100 (x / 0 is na in Pine)
-  const macdV = fastEMA.map((f, i) => (atrValue[i] === 0 ? NaN : ((f - slowEMA[i]) / atrValue[i]) * 100));
-  const signal = A(ta.ema(Series.fromArray(bars, macdV), cfg.signalLength));
+  // macdV = macdLine / atrValue * 100. With an ATR of 0 it is +-Infinity (0 / 0: NaN): na for the plots and for
+  // ta.ema (Pine ta.ema skips an infinite value as na), but `hist > hist[1]` compares the infinite value.
+  const macdV = fastEMA.map((f, i) => ((f - slowEMA[i]) / atrValue[i]) * 100);
+  const finite = (v: number) => (Number.isFinite(v) ? v : NaN);
+  const signal = A(ta.ema(Series.fromArray(bars, macdV.map(finite)), cfg.signalLength));
   const hist = macdV.map((v, i) => v - signal[i]);
 
   const plot0: { time: number; value: number }[] = [];
@@ -77,13 +79,13 @@ export function calculate(
   const plot2: { time: number; value: number; color: string }[] = [];
   for (let i = 0; i < n; i++) {
     const t = bars[i].time;
-    plot0.push({ time: t, value: macdV[i] });
+    plot0.push({ time: t, value: finite(macdV[i]) });
     plot1.push({ time: t, value: signal[i] });
     // hColor = hist >= 0 ? hist > hist[1] ? #26a69a : #b2dfdb : hist > hist[1] ? #ffcdd2 : #ff5252
     const prev = i > 0 ? hist[i - 1] : NaN;
     const rising = gt(hist[i], prev);
     const hColor = ge(hist[i], 0) ? (rising ? '#26A69A' : '#B2DFDB') : rising ? '#FFCDD2' : '#FF5252';
-    plot2.push({ time: t, value: hist[i], color: hColor });
+    plot2.push({ time: t, value: finite(hist[i]), color: hColor });
   }
 
   return {

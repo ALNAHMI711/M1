@@ -115,18 +115,20 @@ export function calculate(
   });
   const mean = A(ta.sma(S(metric), cfg.length));
   const sd = A(ta.stdev(S(metric), cfg.length));
-  // (x - mean) / std: x / 0 is na
-  const z = metric.map((m, i) => (sd[i] === 0 ? NaN : (m - mean[i]) / sd[i]));
+  // (x - mean) / std. With a std of 0 it is +-Infinity (0 / 0: NaN): na for the plot, na() and nz(), but the
+  // gradient colour and the bgcolor tests `z > 2` / `z < -2` use the infinite value.
+  const z = metric.map((m, i) => (m - mean[i]) / sd[i]);
+  const finite = (v: number) => (Number.isFinite(v) ? v : NaN);
 
   // adaptive_ema(z, smoothingLength + int(|z| * 2)): var ema = z (na on bar 0); na(z) keeps ema, else
   // alpha * z + (1 - alpha) * nz(ema)
   const smooth: number[] = new Array(n);
   let ema = n > 0 ? z[0] : NaN;
   for (let i = 0; i < n; i++) {
-    if (!isNaN(z[i])) {
+    if (Number.isFinite(z[i])) {
       const len = cfg.smoothingLength + Math.trunc(Math.abs(z[i]) * 2);
       const alpha = 2.0 / (len + 1.0);
-      ema = alpha * z[i] + (1 - alpha) * (isNaN(ema) ? 0 : ema);
+      ema = alpha * z[i] + (1 - alpha) * (Number.isFinite(ema) ? ema : 0);
     }
     smooth[i] = ema;
   }
@@ -150,8 +152,8 @@ export function calculate(
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay, precision: 2 },
     plots: {
-      plot0: bars.map((b, i) => ({ time: b.time, value: z[i], color: zColor[i] })),
-      plot1: bars.map((b, i) => ({ time: b.time, value: smooth[i], color: zColor[i] })),
+      plot0: bars.map((b, i) => ({ time: b.time, value: finite(z[i]), color: zColor[i] })),
+      plot1: bars.map((b, i) => ({ time: b.time, value: finite(smooth[i]), color: zColor[i] })),
     },
     hlines: hlineConfig.map((h) => ({ value: h.price, options: { title: h.title, color: h.color, linestyle: h.linestyle } })),
     bgColors,

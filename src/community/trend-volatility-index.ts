@@ -63,8 +63,6 @@ export const metadata = {
 
 /** Pine a > b: a - b > 1e-10 (false with na) */
 const gt = (a: number, b: number) => a - b > 1e-10;
-/** Pine x / y: na when y is 0 */
-const div = (x: number, y: number) => (y === 0 ? NaN : x / y);
 
 export function calculate(
   bars: Bar[],
@@ -93,8 +91,9 @@ export function calculate(
     const d = [sma1[i] - sma4[i], sma1[i] - sma6[i], sma1[i] - sma9[i], sma4[i] - sma6[i], sma4[i] - sma9[i], sma6[i] - sma9[i]];
     const cl = d.reduce((acc, x) => acc + Math.abs(Math.pow(x, 1)), 0) / 6;
     tvi[i] = cl;
-    const lowerTVI = Math.floor(div(cl, cfg.tickStep)) * cfg.tickStep;
-    const upperTVI = Math.ceil(div(cl, cfg.tickStep)) * cfg.tickStep;
+    // TVI / tickStep: a plain division (Step Factor 0 gives +-infinity or NaN, as in Pine)
+    const lowerTVI = Math.floor(cl / cfg.tickStep) * cfg.tickStep;
+    const upperTVI = Math.ceil(cl / cfg.tickStep) * cfg.tickStep;
     const op = i > 0 ? tvi[i - 1] : NaN;
     const hi = Math.max(op, upperTVI, cl);
     const lo = Math.min(op, lowerTVI, cl);

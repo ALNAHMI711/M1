@@ -92,7 +92,7 @@ export function calculate(
   for (let i = 0; i < n; i++) {
     const b = bars[i];
     const body = Math.abs(b.close - b.open);
-    // body / atr: na when atr is na or 0
+    // body / atr: atr is 0 only when every true range is 0, then body is 0 too and Pine 0 / 0 is NaN
     const ratio = atr[i] === 0 ? NaN : body / atr[i];
     const isBullDisp = ge(ratio, cfg.displATR) && gt(b.close, b.open);
     const isBearDisp = ge(ratio, cfg.displATR) && lt(b.close, b.open);

@@ -213,10 +213,9 @@ export function calculate(
   // counts_diff = VPMavg_U - VPMavg_L; max_abs_counts_diff = ta.highest(math.abs(counts_diff), 200)
   const countsDiff = vpmU.map((u, i) => u - vpmL[i]);
   const maxAbs = A(ta.highest(S(countsDiff.map(Math.abs)), 200));
-  // counts_diff_norm = (counts_diff + max_abs) / (2 * max_abs) (x / 0 is na); dyn_length = 5 + norm * (max_length - 5)
+  // counts_diff_norm = (counts_diff + max_abs) / (2 * max_abs), a plain division; dyn_length = 5 + norm * (max_length - 5)
   const dynLength = countsDiff.map((d, i) => {
-    const den = 2 * maxAbs[i];
-    const norm = den === 0 ? NaN : (d + maxAbs[i]) / den;
+    const norm = (d + maxAbs[i]) / (2 * maxAbs[i]);
     return 5 + norm * (cfg.maxLength - 5);
   });
   // calc_accel_factor(counts_diff, nz(counts_diff[1])): delta = abs(counts_diff - prev);

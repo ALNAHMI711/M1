@@ -84,12 +84,14 @@ export function calculate(bars: Bar[], inputs: Partial<InstitutionalMacdInputs> 
   const signalLine = A(ta.ema(S(macdLine), cfg.signalLength));
   const hist = macdLine.map((m, i) => m - signalLine[i]);
 
-  // z = (x - ta.sma(x, len)) / ta.stdev(x, len); x / 0 = na
+  // z = (x - ta.sma(x, len)) / ta.stdev(x, len): a plain division (x / 0 is +-infinity, 0 / 0 NaN); the histogram
+  // colour compares the infinite value, the plots show na for it
   const zScore = (x: number[]) => {
     const mean = A(ta.sma(S(x), cfg.zScoreLength));
     const sd = A(ta.stdev(S(x), cfg.zScoreLength));
-    return x.map((v, i) => (sd[i] === 0 ? NaN : (v - mean[i]) / sd[i]));
+    return x.map((v, i) => (v - mean[i]) / sd[i]);
   };
+  const plotValue = (v: number) => (Number.isFinite(v) ? v : NaN);
   const zHist = zScore(hist);
   const macdZ = zScore(macdLine);
   const signalZ = zScore(signalLine);
@@ -98,15 +100,15 @@ export function calculate(bars: Bar[], inputs: Partial<InstitutionalMacdInputs> 
   const plot0 = bars.map((_b, i) => {
     const isRising = i > 0 && gt(zHist[i], zHist[i - 1]);
     const c = ge(zHist[i], 0) ? (isRising ? '#26A69A' : '#B2DFDB') : isRising ? '#FFCDD2' : '#FF5252';
-    return { time: t(i), value: cfg.showZHistogram ? zHist[i] : NaN, color: c };
+    return { time: t(i), value: cfg.showZHistogram ? plotValue(zHist[i]) : NaN, color: c };
   });
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
     plots: {
       plot0,
-      plot1: bars.map((_b, i) => ({ time: t(i), value: cfg.showZLines ? macdZ[i] : NaN })),
-      plot2: bars.map((_b, i) => ({ time: t(i), value: cfg.showZLines ? signalZ[i] : NaN })),
+      plot1: bars.map((_b, i) => ({ time: t(i), value: cfg.showZLines ? plotValue(macdZ[i]) : NaN })),
+      plot2: bars.map((_b, i) => ({ time: t(i), value: cfg.showZLines ? plotValue(signalZ[i]) : NaN })),
       plot3: bars.map((_b, i) => ({ time: t(i), value: cfg.showZBands ? cfg.zScoreThreshold : NaN })),
       plot4: bars.map((_b, i) => ({ time: t(i), value: cfg.showZBands ? -cfg.zScoreThreshold : NaN })),
     },

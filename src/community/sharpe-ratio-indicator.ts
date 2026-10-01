@@ -65,13 +65,13 @@ export function calculate(bars: Bar[], inputs: Partial<SharpeRatioIndicatorInput
 
   const plot0 = bars.map((b, i) => {
     const stdDev = sd[i] * Math.sqrt(lookback);
-    // x / 0 is na in Pine
-    const sharpe = stdDev !== 0 ? (mean[i] * 365 - riskFreeRate) / stdDev : NaN;
+    // A plain division: x / 0 is +-infinity (0 / 0 NaN); the comparisons use the infinite value, the plot shows na
+    const sharpe = (mean[i] * 365 - riskFreeRate) / stdDev;
     const isOver = gt(sharpe, overValued);
     const isUnder = gt(underValued, sharpe) && gt(sharpe, criticallyUnderValued);
     const isCritical = gt(criticallyUnderValued, sharpe);
     const c = isOver ? color.red : isUnder ? color.green : isCritical ? color.blue : color.yellow;
-    return { time: b.time, value: sharpe, color: c };
+    return { time: b.time, value: Number.isFinite(sharpe) ? sharpe : NaN, color: c };
   });
 
   return {

@@ -160,8 +160,9 @@ export function calculate(
     const startWt = 0.01;
     const endWt = length;
     const rMulti = 2.0;
-    // r = math.pow(End_Wt / Start_Wt, 1 / (length - 1)) - 1   (x / 0 is na)
-    const r = length - 1 === 0 ? NaN : Math.pow(endWt / startWt, 1 / (length - 1)) - 1;
+    // r = math.pow(End_Wt / Start_Wt, 1 / (length - 1)) - 1: with length 1, 1 / 0 is +infinity and math.pow uses
+    // it (r = base = +infinity, the weight is infinite and cora_raw = inf / inf is na)
+    const r = Math.pow(endWt / startWt, 1 / (length - 1)) - 1;
     const base = 1 + r * rMulti;
     const raw = source.map((_v, i) => {
       let numerator = 0;

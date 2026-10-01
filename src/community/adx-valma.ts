@@ -85,7 +85,7 @@ const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
 const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
 const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
-/** Pine x / y: na when y is 0 */
+/** Division: a 0 denominator here has a 0 numerator (0 / 0 is NaN in Pine too) or is kept >= 1e-10 by math.max */
 const div = (x: number, y: number) => (y === 0 ? NaN : x / y);
 /** Pine math.max: na when an argument is na */
 const max = (a: number, b: number) => (isNaN(a) || isNaN(b) ? NaN : Math.max(a, b));

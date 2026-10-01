@@ -97,10 +97,12 @@ export function calculate(
     for (let i = cfg.loopstart; step > 0 ? i <= cfg.lookback : i >= cfg.lookback; i += step) {
       sum += t - i >= 0 && gt(s, src[t - i]) ? 1 : -1;
     }
-    return count === 0 ? NaN : sum / count; // x / 0 is na
+    // loop start = lookback + 1: sum / 0 is +-infinity (the > 0 test uses it) or na for 0 / 0
+    return sum / count;
   });
 
-  const loopSma = A(ta.sma(S(loopScore), cfg.length));
+  // ta.sma treats +-infinity as na
+  const loopSma = A(ta.sma(S(loopScore.map((v) => (Number.isFinite(v) ? v : NaN))), cfg.length));
   const final = loopScore.map((v, i) => (bayesian(v) * 100 + bayesian(loopSma[i]) * 100) / 2);
   const signal = A(ta.ema(S(final), 2));
   const binary = signal.map((v) => (gt(v, 50) ? 1 : -1));

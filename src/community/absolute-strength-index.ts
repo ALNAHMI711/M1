@@ -110,8 +110,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-/** Pine division: x / 0 is na */
-const div = (a: number, b: number) => (b === 0 ? NaN : a / b);
 
 export function calculate(
   bars: Bar[],
@@ -131,21 +129,24 @@ export function calculate(
       const c0 = close[b - i];
       const c1 = close[b - i - 1];
       if (isNaN(c0) || isNaN(c1)) continue;
-      returns.push(div(c0, c1) - 1);
+      // a close of 0 gives +-infinity (x / 0) or na (0 / 0), as in Pine
+      returns.push(c0 / c1 - 1);
     }
     let value = 0.0; // ASI = 0.0
     if (returns.length > 0) {
-      const sorted = [...returns].sort((x, y) => x - y);
+      // array.sort(order.ascending): -infinity first, +infinity after the numbers, na last
+      const sorted = [...returns].sort((x, y) => (isNaN(x) ? (isNaN(y) ? 0 : 1) : isNaN(y) ? -1 : x === y ? 0 : x - y));
       const size = sorted.length;
       const winnerIndex = Math.ceil(size * (1 - cfg.topPercentile)) - 1;
       const loserIndex = Math.ceil(size * cfg.bottomPercentile) - 1;
       const thresholdWinner = winnerIndex >= 0 && winnerIndex < size ? sorted[winnerIndex] : 0;
       const thresholdLoser = loserIndex >= 0 && loserIndex < size ? sorted[loserIndex] : 0;
-      // currentReturn = close / close[returnLookback] - 1 (na before bar returnLookback)
-      const currentReturn = b - L >= 0 ? div(close[b], close[b - L]) - 1 : NaN;
+      // currentReturn = close / close[returnLookback] - 1 (na before bar returnLookback; x / 0 is +-infinity)
+      const currentReturn = b - L >= 0 ? close[b] / close[b - L] - 1 : NaN;
       const range = thresholdWinner - thresholdLoser;
-      // (thresholdWinner - thresholdLoser) != 0 (na != 0 is false)
-      if (!isNaN(currentReturn) && !isNaN(range) && range !== 0) {
+      // not na(currentReturn) (false for +-infinity) and (thresholdWinner - thresholdLoser) != 0 (na != 0 is false,
+      // infinity != 0 is true)
+      if (Number.isFinite(currentReturn) && !isNaN(range) && range !== 0) {
         value = ((currentReturn - thresholdLoser) / range) * 2 - 1;
       } else {
         value = 0;
