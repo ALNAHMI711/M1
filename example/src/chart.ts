@@ -1710,14 +1710,20 @@ export class ChartManager {
       this.candlePlotSeries.set(id, series);
     }
 
-    const candleData = data.map(d => ({
-      time: d.time as unknown as Time,
-      open: d.open,
-      high: d.high,
-      low: d.low,
-      close: d.close,
-      ...(d.color && { color: d.color, borderColor: d.borderColor ?? d.color, wickColor: d.wickColor ?? d.color }),
-    })) as CandlestickData<Time>[];
+    // Pine plotcandle: a bar with one na value of open / high / low / close draws no candle (whitespace point;
+    // lightweight-charts rejects NaN values)
+    const candleData: (CandlestickData<Time> | WhitespaceData<Time>)[] = data.map(d => {
+      const time = d.time as unknown as Time;
+      if (![d.open, d.high, d.low, d.close].every(v => Number.isFinite(v))) return { time };
+      return {
+        time,
+        open: d.open,
+        high: d.high,
+        low: d.low,
+        close: d.close,
+        ...(d.color && { color: d.color, borderColor: d.borderColor ?? d.color, wickColor: d.wickColor ?? d.color }),
+      };
+    });
     series.setData(candleData);
   }
 
