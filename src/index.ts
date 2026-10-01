@@ -2752,6 +2752,83 @@ export type { MachineLearningKnnTrendPredictorInputs } from './community/machine
 import * as tenkanCloudSignalsIndicator from './community/tenkan-cloud-signals';
 export { TenkanCloudSignals, calculate as calculateTenkanCloudSignals } from './community/tenkan-cloud-signals';
 export type { TenkanCloudSignalsInputs } from './community/tenkan-cloud-signals';
+// ── Community batch 12 (Pine v6 ports) ──
+// Kalman Hull Kijun
+import * as kalmanHullKijunIndicator from './community/kalman-hull-kijun';
+export { KalmanHullKijun, calculate as calculateKalmanHullKijun } from './community/kalman-hull-kijun';
+export type { KalmanHullKijunInputs } from './community/kalman-hull-kijun';
+// Interpolated Median Volatility LSMA | Otto
+import * as interpolatedMedianVolatilityLsmaOttoIndicator from './community/interpolated-median-volatility-lsma-otto';
+export { InterpolatedMedianVolatilityLSMAOtto, calculate as calculateInterpolatedMedianVolatilityLSMAOtto } from './community/interpolated-median-volatility-lsma-otto';
+export type { InterpolatedMedianVolatilityLSMAOttoInputs } from './community/interpolated-median-volatility-lsma-otto';
+// Zero-Lag GARCH Bands | NAL
+import * as zeroLagGarchBandsNalIndicator from './community/zero-lag-garch-bands-nal';
+export { ZeroLagGarchBandsNal, calculate as calculateZeroLagGarchBandsNal } from './community/zero-lag-garch-bands-nal';
+export type { ZeroLagGarchBandsNalInputs } from './community/zero-lag-garch-bands-nal';
+// Pullback Scalp Trade V2
+import * as pullbackScalpTradeV2Indicator from './community/pullback-scalp-trade-v2';
+export { PullbackScalpTradeV2, calculate as calculatePullbackScalpTradeV2 } from './community/pullback-scalp-trade-v2';
+export type { PullbackScalpTradeV2Inputs } from './community/pullback-scalp-trade-v2';
+// Moving Average Crossover with Shading Signals
+import * as movingAverageCrossoverWithShadingSignalsIndicator from './community/moving-average-crossover-with-shading-signals';
+export { MovingAverageCrossoverWithShadingSignals, calculate as calculateMovingAverageCrossoverWithShadingSignals } from './community/moving-average-crossover-with-shading-signals';
+export type { MovingAverageCrossoverWithShadingSignalsInputs } from './community/moving-average-crossover-with-shading-signals';
+// Fibonacci Weighted Moving Average
+import * as fibonacciWeightedMovingAverageIndicator from './community/fibonacci-weighted-moving-average';
+export { FibonacciWeightedMovingAverage, calculate as calculateFibonacciWeightedMovingAverage } from './community/fibonacci-weighted-moving-average';
+export type { FibonacciWeightedMovingAverageInputs } from './community/fibonacci-weighted-moving-average';
+// RSI + Fibonacci HH LL Support Resistance
+import * as rsiFibonacciHhLlSupportResistanceIndicator from './community/rsi-fibonacci-hh-ll-support-resistance';
+export { RsiFibonacciHhLlSupportResistance, calculate as calculateRsiFibonacciHhLlSupportResistance } from './community/rsi-fibonacci-hh-ll-support-resistance';
+export type { RsiFibonacciHhLlSupportResistanceInputs } from './community/rsi-fibonacci-hh-ll-support-resistance';
+// Z-Score Oscillator
+import * as zScoreOscillatorIndicator from './community/z-score-oscillator';
+export { ZScoreOscillator, calculate as calculateZScoreOscillator } from './community/z-score-oscillator';
+export type { ZScoreOscillatorInputs } from './community/z-score-oscillator';
+// RSI + STOCH RSI - Marx_Capital
+import * as rsiStochRsiMarxCapitalIndicator from './community/rsi-stoch-rsi-marx-capital';
+export { RSIStochRSIMarxCapital, calculate as calculateRSIStochRSIMarxCapital } from './community/rsi-stoch-rsi-marx-capital';
+export type { RSIStochRSIMarxCapitalInputs } from './community/rsi-stoch-rsi-marx-capital';
+// Community MoneyLine
+import * as communityMoneylineIndicator from './community/community-moneyline';
+export { CommunityMoneyline, calculate as calculateCommunityMoneyline } from './community/community-moneyline';
+export type { CommunityMoneylineInputs } from './community/community-moneyline';
+// GANN Level (Salil Sir)
+import * as gannLevelIndicator from './community/gann-level';
+export { GannLevel, calculate as calculateGannLevel } from './community/gann-level';
+export type { GannLevelInputs } from './community/gann-level';
+// Rolling Liquidity Clusters Channel
+import * as rollingLiquidityClustersChannelIndicator from './community/rolling-liquidity-clusters-channel';
+export { RollingLiquidityClustersChannel, calculate as calculateRollingLiquidityClustersChannel } from './community/rolling-liquidity-clusters-channel';
+export type { RollingLiquidityClustersChannelInputs } from './community/rolling-liquidity-clusters-channel';
+// Wavelet Transform Trend
+import * as waveletTransformTrendIndicator from './community/wavelet-transform-trend';
+export { WaveletTransformTrend, calculate as calculateWaveletTransformTrend } from './community/wavelet-transform-trend';
+export type { WaveletTransformTrendInputs } from './community/wavelet-transform-trend';
+// IU Mean Reversion System
+import * as iuMeanReversionSystemIndicator from './community/iu-mean-reversion-system';
+export { IUMeanReversionSystem, calculate as calculateIUMeanReversionSystem } from './community/iu-mean-reversion-system';
+export type { IUMeanReversionSystemInputs } from './community/iu-mean-reversion-system';
+// ScalpMap - EMA Pivot Targets
+import * as scalpmapEmaPivotTargetsIndicator from './community/scalpmap-ema-pivot-targets';
+export { ScalpmapEmaPivotTargets, calculate as calculateScalpmapEmaPivotTargets } from './community/scalpmap-ema-pivot-targets';
+export type { ScalpmapEmaPivotTargetsInputs } from './community/scalpmap-ema-pivot-targets';
+// Intraday vs Overnight Change Tracker
+import * as intradayVsOvernightChangeTrackerIndicator from './community/intraday-vs-overnight-change-tracker';
+export { IntradayVsOvernightChangeTracker, calculate as calculateIntradayVsOvernightChangeTracker } from './community/intraday-vs-overnight-change-tracker';
+export type { IntradayVsOvernightChangeTrackerInputs } from './community/intraday-vs-overnight-change-tracker';
+// Fourier series Model Of The Market
+import * as fourierSeriesModelOfTheMarketIndicator from './community/fourier-series-model-of-the-market';
+export { FourierSeriesModelOfTheMarket, calculate as calculateFourierSeriesModelOfTheMarket } from './community/fourier-series-model-of-the-market';
+export type { FourierSeriesModelOfTheMarketInputs } from './community/fourier-series-model-of-the-market';
+// Uptrick: RSI MA Buying/Selling signals
+import * as uptrickRsiMaBuyingSellingSignalsIndicator from './community/uptrick-rsi-ma-buying-selling-signals';
+export { UptrickRsiMaSignals, calculate as calculateUptrickRsiMaSignals } from './community/uptrick-rsi-ma-buying-selling-signals';
+export type { UptrickRsiMaSignalsInputs } from './community/uptrick-rsi-ma-buying-selling-signals';
+// Market Structure Trend
+import * as marketStructureTrendIndicator from './community/market-structure-trend';
+export { MarketStructureTrend, calculate as calculateMarketStructureTrend } from './community/market-structure-trend';
+export type { MarketStructureTrendInputs } from './community/market-structure-trend';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -11082,6 +11159,258 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: tenkanCloudSignalsIndicator.plotConfig as PlotConfig[],
     defaultInputs: { ...tenkanCloudSignalsIndicator.defaultInputs },
     calculate: tenkanCloudSignalsIndicator.calculate,
+  },
+  {
+    id: 'kalman-hull-kijun',
+    group: 'community',
+    name: 'Kalman Hull Kijun',
+    shortName: kalmanHullKijunIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: kalmanHullKijunIndicator.metadata,
+    inputConfig: kalmanHullKijunIndicator.inputConfig as InputConfig[],
+    plotConfig: kalmanHullKijunIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...kalmanHullKijunIndicator.defaultInputs },
+    calculate: kalmanHullKijunIndicator.calculate,
+  },
+  {
+    id: 'interpolated-median-volatility-lsma-otto',
+    group: 'community',
+    name: 'Interpolated Median Volatility LSMA | Otto',
+    shortName: interpolatedMedianVolatilityLsmaOttoIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: interpolatedMedianVolatilityLsmaOttoIndicator.metadata,
+    inputConfig: interpolatedMedianVolatilityLsmaOttoIndicator.inputConfig as InputConfig[],
+    plotConfig: interpolatedMedianVolatilityLsmaOttoIndicator.plotConfig as PlotConfig[],
+    fillConfig: interpolatedMedianVolatilityLsmaOttoIndicator.fillConfig,
+    defaultInputs: { ...interpolatedMedianVolatilityLsmaOttoIndicator.defaultInputs },
+    calculate: interpolatedMedianVolatilityLsmaOttoIndicator.calculate,
+  },
+  {
+    id: 'zero-lag-garch-bands-nal',
+    group: 'community',
+    name: 'Zero-Lag GARCH Bands | NAL',
+    shortName: zeroLagGarchBandsNalIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: true,
+    metadata: zeroLagGarchBandsNalIndicator.metadata,
+    inputConfig: zeroLagGarchBandsNalIndicator.inputConfig as InputConfig[],
+    plotConfig: zeroLagGarchBandsNalIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...zeroLagGarchBandsNalIndicator.defaultInputs },
+    calculate: zeroLagGarchBandsNalIndicator.calculate,
+  },
+  {
+    id: 'pullback-scalp-trade-v2',
+    group: 'community',
+    name: 'Pullback Scalp Trade V2',
+    shortName: pullbackScalpTradeV2Indicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: pullbackScalpTradeV2Indicator.metadata,
+    inputConfig: pullbackScalpTradeV2Indicator.inputConfig as InputConfig[],
+    plotConfig: pullbackScalpTradeV2Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...pullbackScalpTradeV2Indicator.defaultInputs },
+    calculate: pullbackScalpTradeV2Indicator.calculate,
+  },
+  {
+    id: 'moving-average-crossover-with-shading-signals',
+    group: 'community',
+    name: 'Moving Average Crossover with Shading Signals',
+    shortName: movingAverageCrossoverWithShadingSignalsIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: movingAverageCrossoverWithShadingSignalsIndicator.metadata,
+    inputConfig: movingAverageCrossoverWithShadingSignalsIndicator.inputConfig as InputConfig[],
+    plotConfig: movingAverageCrossoverWithShadingSignalsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...movingAverageCrossoverWithShadingSignalsIndicator.defaultInputs },
+    calculate: movingAverageCrossoverWithShadingSignalsIndicator.calculate,
+  },
+  {
+    id: 'fibonacci-weighted-moving-average',
+    group: 'community',
+    name: 'Fibonacci Weighted Moving Average',
+    shortName: fibonacciWeightedMovingAverageIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: fibonacciWeightedMovingAverageIndicator.metadata,
+    inputConfig: fibonacciWeightedMovingAverageIndicator.inputConfig as InputConfig[],
+    plotConfig: fibonacciWeightedMovingAverageIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...fibonacciWeightedMovingAverageIndicator.defaultInputs },
+    calculate: fibonacciWeightedMovingAverageIndicator.calculate,
+  },
+  {
+    id: 'rsi-fibonacci-hh-ll-support-resistance',
+    group: 'community',
+    name: 'RSI + Fibonacci HH LL Support Resistance',
+    shortName: rsiFibonacciHhLlSupportResistanceIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: rsiFibonacciHhLlSupportResistanceIndicator.metadata,
+    inputConfig: rsiFibonacciHhLlSupportResistanceIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiFibonacciHhLlSupportResistanceIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsiFibonacciHhLlSupportResistanceIndicator.defaultInputs },
+    calculate: rsiFibonacciHhLlSupportResistanceIndicator.calculate,
+  },
+  {
+    id: 'z-score-oscillator',
+    group: 'community',
+    name: 'Z-Score Oscillator',
+    shortName: zScoreOscillatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: zScoreOscillatorIndicator.metadata,
+    inputConfig: zScoreOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: zScoreOscillatorIndicator.plotConfig as PlotConfig[],
+    fillConfig: zScoreOscillatorIndicator.fillConfig,
+    defaultInputs: { ...zScoreOscillatorIndicator.defaultInputs },
+    calculate: zScoreOscillatorIndicator.calculate,
+  },
+  {
+    id: 'rsi-stoch-rsi-marx-capital',
+    group: 'community',
+    name: 'RSI + STOCH RSI - Marx_Capital',
+    shortName: rsiStochRsiMarxCapitalIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: rsiStochRsiMarxCapitalIndicator.metadata,
+    inputConfig: rsiStochRsiMarxCapitalIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiStochRsiMarxCapitalIndicator.plotConfig as PlotConfig[],
+    hlineConfig: rsiStochRsiMarxCapitalIndicator.hlineConfig,
+    fillConfig: rsiStochRsiMarxCapitalIndicator.fillConfig,
+    defaultInputs: { ...rsiStochRsiMarxCapitalIndicator.defaultInputs },
+    calculate: rsiStochRsiMarxCapitalIndicator.calculate,
+  },
+  {
+    id: 'community-moneyline',
+    group: 'community',
+    name: 'Community MoneyLine',
+    shortName: communityMoneylineIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: communityMoneylineIndicator.metadata,
+    inputConfig: communityMoneylineIndicator.inputConfig as InputConfig[],
+    plotConfig: communityMoneylineIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...communityMoneylineIndicator.defaultInputs },
+    calculate: communityMoneylineIndicator.calculate,
+  },
+  {
+    id: 'gann-level',
+    group: 'community',
+    name: 'GANN Level (Salil Sir)',
+    shortName: gannLevelIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: gannLevelIndicator.metadata,
+    inputConfig: gannLevelIndicator.inputConfig as InputConfig[],
+    plotConfig: gannLevelIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...gannLevelIndicator.defaultInputs },
+    calculate: gannLevelIndicator.calculate,
+  },
+  {
+    id: 'rolling-liquidity-clusters-channel',
+    group: 'community',
+    name: 'Rolling Liquidity Clusters Channel',
+    shortName: rollingLiquidityClustersChannelIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: rollingLiquidityClustersChannelIndicator.metadata,
+    inputConfig: rollingLiquidityClustersChannelIndicator.inputConfig as InputConfig[],
+    plotConfig: rollingLiquidityClustersChannelIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rollingLiquidityClustersChannelIndicator.defaultInputs },
+    calculate: rollingLiquidityClustersChannelIndicator.calculate,
+  },
+  {
+    id: 'wavelet-transform-trend',
+    group: 'community',
+    name: 'Wavelet Transform Trend',
+    shortName: waveletTransformTrendIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: waveletTransformTrendIndicator.metadata,
+    inputConfig: waveletTransformTrendIndicator.inputConfig as InputConfig[],
+    plotConfig: waveletTransformTrendIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...waveletTransformTrendIndicator.defaultInputs },
+    calculate: waveletTransformTrendIndicator.calculate,
+  },
+  {
+    id: 'iu-mean-reversion-system',
+    group: 'community',
+    name: 'IU Mean Reversion System',
+    shortName: iuMeanReversionSystemIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: iuMeanReversionSystemIndicator.metadata,
+    inputConfig: iuMeanReversionSystemIndicator.inputConfig as InputConfig[],
+    plotConfig: iuMeanReversionSystemIndicator.plotConfig as PlotConfig[],
+    fillConfig: iuMeanReversionSystemIndicator.fillConfig,
+    defaultInputs: { ...iuMeanReversionSystemIndicator.defaultInputs },
+    calculate: iuMeanReversionSystemIndicator.calculate,
+  },
+  {
+    id: 'scalpmap-ema-pivot-targets',
+    group: 'community',
+    name: 'ScalpMap - EMA Pivot Targets',
+    shortName: scalpmapEmaPivotTargetsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: scalpmapEmaPivotTargetsIndicator.metadata,
+    inputConfig: scalpmapEmaPivotTargetsIndicator.inputConfig as InputConfig[],
+    plotConfig: scalpmapEmaPivotTargetsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...scalpmapEmaPivotTargetsIndicator.defaultInputs },
+    calculate: scalpmapEmaPivotTargetsIndicator.calculate,
+  },
+  {
+    id: 'intraday-vs-overnight-change-tracker',
+    group: 'community',
+    name: 'Intraday vs Overnight Change Tracker',
+    shortName: intradayVsOvernightChangeTrackerIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: intradayVsOvernightChangeTrackerIndicator.metadata,
+    inputConfig: intradayVsOvernightChangeTrackerIndicator.inputConfig as InputConfig[],
+    plotConfig: intradayVsOvernightChangeTrackerIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...intradayVsOvernightChangeTrackerIndicator.defaultInputs },
+    calculate: intradayVsOvernightChangeTrackerIndicator.calculate,
+  },
+  {
+    id: 'fourier-series-model-of-the-market',
+    group: 'community',
+    name: 'Fourier series Model Of The Market',
+    shortName: fourierSeriesModelOfTheMarketIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: fourierSeriesModelOfTheMarketIndicator.metadata,
+    inputConfig: fourierSeriesModelOfTheMarketIndicator.inputConfig as InputConfig[],
+    plotConfig: fourierSeriesModelOfTheMarketIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...fourierSeriesModelOfTheMarketIndicator.defaultInputs },
+    calculate: fourierSeriesModelOfTheMarketIndicator.calculate,
+  },
+  {
+    id: 'uptrick-rsi-ma-buying-selling-signals',
+    group: 'community',
+    name: 'Uptrick: RSI MA Buying/Selling signals',
+    shortName: uptrickRsiMaBuyingSellingSignalsIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: uptrickRsiMaBuyingSellingSignalsIndicator.metadata,
+    inputConfig: uptrickRsiMaBuyingSellingSignalsIndicator.inputConfig as InputConfig[],
+    plotConfig: uptrickRsiMaBuyingSellingSignalsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...uptrickRsiMaBuyingSellingSignalsIndicator.defaultInputs },
+    calculate: uptrickRsiMaBuyingSellingSignalsIndicator.calculate,
+  },
+  {
+    id: 'market-structure-trend',
+    group: 'community',
+    name: 'Market Structure Trend',
+    shortName: marketStructureTrendIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: marketStructureTrendIndicator.metadata,
+    inputConfig: marketStructureTrendIndicator.inputConfig as InputConfig[],
+    plotConfig: marketStructureTrendIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...marketStructureTrendIndicator.defaultInputs },
+    calculate: marketStructureTrendIndicator.calculate,
   },
   ...candlestickEntries(
     [...candlestickPortEntries, candlestickPortAllPatterns].map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
