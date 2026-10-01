@@ -2817,6 +2817,9 @@ export type { ScalpmapEmaPivotTargetsInputs } from './community/scalpmap-ema-piv
 import * as intradayVsOvernightChangeTrackerIndicator from './community/intraday-vs-overnight-change-tracker';
 export { IntradayVsOvernightChangeTracker, calculate as calculateIntradayVsOvernightChangeTracker } from './community/intraday-vs-overnight-change-tracker';
 export type { IntradayVsOvernightChangeTrackerInputs } from './community/intraday-vs-overnight-change-tracker';
+import * as movingVwapKamaCloudIndicator from './community/moving-vwap-kama-cloud';
+export { MovingVwapKamaCloud, calculate as calculateMovingVwapKamaCloud } from './community/moving-vwap-kama-cloud';
+export type { MovingVwapKamaCloudInputs } from './community/moving-vwap-kama-cloud';
 // Fourier series Model Of The Market
 import * as fourierSeriesModelOfTheMarketIndicator from './community/fourier-series-model-of-the-market';
 export { FourierSeriesModelOfTheMarket, calculate as calculateFourierSeriesModelOfTheMarket } from './community/fourier-series-model-of-the-market';
@@ -2829,6 +2832,87 @@ export type { UptrickRsiMaSignalsInputs } from './community/uptrick-rsi-ma-buyin
 import * as marketStructureTrendIndicator from './community/market-structure-trend';
 export { MarketStructureTrend, calculate as calculateMarketStructureTrend } from './community/market-structure-trend';
 export type { MarketStructureTrendInputs } from './community/market-structure-trend';
+// ── Community batch 13 (Pine v6 ports) ──
+// 1m Trend Continuation Signals - SSL + BB Filter
+import * as p1mTrendContinuationSignalsSslBbFilterIndicator from './community/1m-trend-continuation-signals-ssl-bb-filter';
+export { TrendContinuationSslBb, calculate as calculateTrendContinuationSslBb } from './community/1m-trend-continuation-signals-ssl-bb-filter';
+export type { TrendContinuationSslBbInputs } from './community/1m-trend-continuation-signals-ssl-bb-filter';
+// Adaptive RSI | Lyro RS
+import * as adaptiveRsiLyroRsIndicator from './community/adaptive-rsi-lyro-rs';
+export { AdaptiveRsiLyroRs, calculate as calculateAdaptiveRsiLyroRs } from './community/adaptive-rsi-lyro-rs';
+export type { AdaptiveRsiLyroRsInputs } from './community/adaptive-rsi-lyro-rs';
+// Sine Weighted Moving Average
+import * as sineWeightedMovingAverageIndicator from './community/sine-weighted-moving-average';
+export { SineWeightedMovingAverage, calculate as calculateSineWeightedMovingAverage } from './community/sine-weighted-moving-average';
+export type { SineWeightedMovingAverageInputs } from './community/sine-weighted-moving-average';
+// ADX Extreme Zones + Divergences
+import * as adxExtremeZonesDivergencesIndicator from './community/adx-extreme-zones-divergences';
+export { AdxExtremeZonesDivergences, calculate as calculateAdxExtremeZonesDivergences } from './community/adx-extreme-zones-divergences';
+export type { AdxExtremeZonesDivergencesInputs } from './community/adx-extreme-zones-divergences';
+// Gaussian Ribbon
+import * as gaussianRibbonIndicator from './community/gaussian-ribbon';
+export { GaussianRibbon, calculate as calculateGaussianRibbon } from './community/gaussian-ribbon';
+export type { GaussianRibbonInputs } from './community/gaussian-ribbon';
+// Adaptive Heikin Ashi
+import * as adaptiveHeikinAshiIndicator from './community/adaptive-heikin-ashi';
+export { AdaptiveHeikinAshi, calculate as calculateAdaptiveHeikinAshi } from './community/adaptive-heikin-ashi';
+export type { AdaptiveHeikinAshiInputs } from './community/adaptive-heikin-ashi';
+// Smoothed Source Weighted EMA
+import * as smoothedSourceWeightedEmaIndicator from './community/smoothed-source-weighted-ema';
+export { SmoothedSourceWeightedEma, calculate as calculateSmoothedSourceWeightedEma } from './community/smoothed-source-weighted-ema';
+export type { SmoothedSourceWeightedEmaInputs } from './community/smoothed-source-weighted-ema';
+// Rolling Sharpe Ratio Oscillator | Astral Vision
+import * as rollingSharpeRatioOscillatorAstralVisionIndicator from './community/rolling-sharpe-ratio-oscillator-astral-vision';
+export { RollingSharpeRatioOscillatorAstralVision, calculate as calculateRollingSharpeRatioOscillatorAstralVision } from './community/rolling-sharpe-ratio-oscillator-astral-vision';
+export type { RollingSharpeRatioOscillatorAstralVisionInputs } from './community/rolling-sharpe-ratio-oscillator-astral-vision';
+// Edward Smart Channel Reversal
+import * as edwardSmartChannelReversalIndicator from './community/edward-smart-channel-reversal';
+export { EdwardSmartChannelReversal, calculate as calculateEdwardSmartChannelReversal } from './community/edward-smart-channel-reversal';
+export type { EdwardSmartChannelReversalInputs } from './community/edward-smart-channel-reversal';
+// G-Score | NAL
+import * as gScoreNalIndicator from './community/g-score-nal';
+export { GScoreNal, calculate as calculateGScoreNal } from './community/g-score-nal';
+export type { GScoreNalInputs } from './community/g-score-nal';
+// + Average Candle Bodies Range
+import * as averageCandleBodiesRangeIndicator from './community/average-candle-bodies-range';
+export { AverageCandleBodiesRange, calculate as calculateAverageCandleBodiesRange } from './community/average-candle-bodies-range';
+export type { AverageCandleBodiesRangeInputs } from './community/average-candle-bodies-range';
+// Volume Profile Heatmap
+import * as volumeProfileHeatmapIndicator from './community/volume-profile-heatmap';
+export { VolumeProfileHeatmap, calculate as calculateVolumeProfileHeatmap } from './community/volume-profile-heatmap';
+export type { VolumeProfileHeatmapInputs } from './community/volume-profile-heatmap';
+// Multiple Exponential Fibnonacci Moving Averages
+import * as multipleExponentialFibnonacciMovingAveragesIndicator from './community/multiple-exponential-fibnonacci-moving-averages';
+export { MultipleExponentialFibnonacciMovingAverages, calculate as calculateMultipleExponentialFibnonacciMovingAverages } from './community/multiple-exponential-fibnonacci-moving-averages';
+export type { MultipleExponentialFibnonacciMovingAveragesInputs } from './community/multiple-exponential-fibnonacci-moving-averages';
+// Renko Mod
+import * as renkoModIndicator from './community/renko-mod';
+export { RenkoMod, calculate as calculateRenkoMod } from './community/renko-mod';
+export type { RenkoModInputs } from './community/renko-mod';
+// B + A + D v0.4
+import * as bADV04Indicator from './community/b-a-d-v0-4';
+export { BadV04, calculate as calculateBadV04 } from './community/b-a-d-v0-4';
+export type { BadV04Inputs } from './community/b-a-d-v0-4';
+// Relative Volume Indicator (RVOL)
+import * as relativeVolumeIndicatorIndicator from './community/relative-volume-indicator';
+export { RelativeVolumeIndicator, calculate as calculateRelativeVolumeIndicator } from './community/relative-volume-indicator';
+export type { RelativeVolumeIndicatorInputs } from './community/relative-volume-indicator';
+// Pulse Range
+import * as pulseRangeIndicator from './community/pulse-range';
+export { PulseRange, calculate as calculatePulseRange } from './community/pulse-range';
+export type { PulseRangeInputs } from './community/pulse-range';
+// Infinite EMA with Alpha Control
+import * as infiniteEmaWithAlphaControlIndicator from './community/infinite-ema-with-alpha-control';
+export { InfiniteEmaWithAlphaControl, calculate as calculateInfiniteEmaWithAlphaControl } from './community/infinite-ema-with-alpha-control';
+export type { InfiniteEmaWithAlphaControlInputs } from './community/infinite-ema-with-alpha-control';
+// Fixed-Range Volume-Profile Zones
+import * as fixedRangeVolumeProfileZonesIndicator from './community/fixed-range-volume-profile-zones';
+export { FixedRangeVolumeProfileZones, calculate as calculateFixedRangeVolumeProfileZones } from './community/fixed-range-volume-profile-zones';
+export type { FixedRangeVolumeProfileZonesInputs } from './community/fixed-range-volume-profile-zones';
+// Terminal Velocity Stop | Lyro RS
+import * as terminalVelocityStopLyroRsIndicator from './community/terminal-velocity-stop-lyro-rs';
+export { TerminalVelocityStopLyroRs, calculate as calculateTerminalVelocityStopLyroRs } from './community/terminal-velocity-stop-lyro-rs';
+export type { TerminalVelocityStopLyroRsInputs } from './community/terminal-velocity-stop-lyro-rs';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -11374,6 +11458,19 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     calculate: intradayVsOvernightChangeTrackerIndicator.calculate,
   },
   {
+    id: 'moving-vwap-kama-cloud',
+    group: 'community',
+    name: 'Moving VWAP-KAMA Cloud',
+    shortName: movingVwapKamaCloudIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: movingVwapKamaCloudIndicator.metadata,
+    inputConfig: movingVwapKamaCloudIndicator.inputConfig as InputConfig[],
+    plotConfig: movingVwapKamaCloudIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...movingVwapKamaCloudIndicator.defaultInputs },
+    calculate: movingVwapKamaCloudIndicator.calculate,
+  },
+  {
     id: 'fourier-series-model-of-the-market',
     group: 'community',
     name: 'Fourier series Model Of The Market',
@@ -11411,6 +11508,266 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: marketStructureTrendIndicator.plotConfig as PlotConfig[],
     defaultInputs: { ...marketStructureTrendIndicator.defaultInputs },
     calculate: marketStructureTrendIndicator.calculate,
+  },
+  {
+    id: '1m-trend-continuation-signals-ssl-bb-filter',
+    group: 'community',
+    name: '1m Trend Continuation Signals - SSL + BB Filter',
+    shortName: p1mTrendContinuationSignalsSslBbFilterIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: p1mTrendContinuationSignalsSslBbFilterIndicator.metadata,
+    inputConfig: p1mTrendContinuationSignalsSslBbFilterIndicator.inputConfig as InputConfig[],
+    plotConfig: p1mTrendContinuationSignalsSslBbFilterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...p1mTrendContinuationSignalsSslBbFilterIndicator.defaultInputs },
+    calculate: p1mTrendContinuationSignalsSslBbFilterIndicator.calculate,
+  },
+  {
+    id: 'adaptive-rsi-lyro-rs',
+    group: 'community',
+    name: 'Adaptive RSI | Lyro RS',
+    shortName: adaptiveRsiLyroRsIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: adaptiveRsiLyroRsIndicator.metadata,
+    inputConfig: adaptiveRsiLyroRsIndicator.inputConfig as InputConfig[],
+    plotConfig: adaptiveRsiLyroRsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adaptiveRsiLyroRsIndicator.defaultInputs },
+    calculate: adaptiveRsiLyroRsIndicator.calculate,
+  },
+  {
+    id: 'sine-weighted-moving-average',
+    group: 'community',
+    name: 'Sine Weighted Moving Average',
+    shortName: sineWeightedMovingAverageIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: sineWeightedMovingAverageIndicator.metadata,
+    inputConfig: sineWeightedMovingAverageIndicator.inputConfig as InputConfig[],
+    plotConfig: sineWeightedMovingAverageIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...sineWeightedMovingAverageIndicator.defaultInputs },
+    calculate: sineWeightedMovingAverageIndicator.calculate,
+  },
+  {
+    id: 'adx-extreme-zones-divergences',
+    group: 'community',
+    name: 'ADX Extreme Zones + Divergences',
+    shortName: adxExtremeZonesDivergencesIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: false,
+    metadata: adxExtremeZonesDivergencesIndicator.metadata,
+    inputConfig: adxExtremeZonesDivergencesIndicator.inputConfig as InputConfig[],
+    plotConfig: adxExtremeZonesDivergencesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adxExtremeZonesDivergencesIndicator.defaultInputs },
+    calculate: adxExtremeZonesDivergencesIndicator.calculate,
+  },
+  {
+    id: 'gaussian-ribbon',
+    group: 'community',
+    name: 'Gaussian Ribbon',
+    shortName: gaussianRibbonIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: gaussianRibbonIndicator.metadata,
+    inputConfig: gaussianRibbonIndicator.inputConfig as InputConfig[],
+    plotConfig: gaussianRibbonIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...gaussianRibbonIndicator.defaultInputs },
+    calculate: gaussianRibbonIndicator.calculate,
+  },
+  {
+    id: 'adaptive-heikin-ashi',
+    group: 'community',
+    name: 'Adaptive Heikin Ashi',
+    shortName: adaptiveHeikinAshiIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: adaptiveHeikinAshiIndicator.metadata,
+    inputConfig: adaptiveHeikinAshiIndicator.inputConfig as InputConfig[],
+    plotConfig: adaptiveHeikinAshiIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adaptiveHeikinAshiIndicator.defaultInputs },
+    calculate: adaptiveHeikinAshiIndicator.calculate,
+  },
+  {
+    id: 'smoothed-source-weighted-ema',
+    group: 'community',
+    name: 'Smoothed Source Weighted EMA',
+    shortName: smoothedSourceWeightedEmaIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: smoothedSourceWeightedEmaIndicator.metadata,
+    inputConfig: smoothedSourceWeightedEmaIndicator.inputConfig as InputConfig[],
+    plotConfig: smoothedSourceWeightedEmaIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...smoothedSourceWeightedEmaIndicator.defaultInputs },
+    calculate: smoothedSourceWeightedEmaIndicator.calculate,
+  },
+  {
+    id: 'rolling-sharpe-ratio-oscillator-astral-vision',
+    group: 'community',
+    name: 'Rolling Sharpe Ratio Oscillator | Astral Vision',
+    shortName: rollingSharpeRatioOscillatorAstralVisionIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: rollingSharpeRatioOscillatorAstralVisionIndicator.metadata,
+    inputConfig: rollingSharpeRatioOscillatorAstralVisionIndicator.inputConfig as InputConfig[],
+    plotConfig: rollingSharpeRatioOscillatorAstralVisionIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rollingSharpeRatioOscillatorAstralVisionIndicator.defaultInputs },
+    calculate: rollingSharpeRatioOscillatorAstralVisionIndicator.calculate,
+  },
+  {
+    id: 'edward-smart-channel-reversal',
+    group: 'community',
+    name: 'Edward Smart Channel Reversal',
+    shortName: edwardSmartChannelReversalIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: edwardSmartChannelReversalIndicator.metadata,
+    inputConfig: edwardSmartChannelReversalIndicator.inputConfig as InputConfig[],
+    plotConfig: edwardSmartChannelReversalIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...edwardSmartChannelReversalIndicator.defaultInputs },
+    calculate: edwardSmartChannelReversalIndicator.calculate,
+  },
+  {
+    id: 'g-score-nal',
+    group: 'community',
+    name: 'G-Score | NAL',
+    shortName: gScoreNalIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: gScoreNalIndicator.metadata,
+    inputConfig: gScoreNalIndicator.inputConfig as InputConfig[],
+    plotConfig: gScoreNalIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...gScoreNalIndicator.defaultInputs },
+    calculate: gScoreNalIndicator.calculate,
+  },
+  {
+    id: 'average-candle-bodies-range',
+    group: 'community',
+    name: '+ Average Candle Bodies Range',
+    shortName: averageCandleBodiesRangeIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: false,
+    metadata: averageCandleBodiesRangeIndicator.metadata,
+    inputConfig: averageCandleBodiesRangeIndicator.inputConfig as InputConfig[],
+    plotConfig: averageCandleBodiesRangeIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...averageCandleBodiesRangeIndicator.defaultInputs },
+    calculate: averageCandleBodiesRangeIndicator.calculate,
+  },
+  {
+    id: 'volume-profile-heatmap',
+    group: 'community',
+    name: 'Volume Profile Heatmap',
+    shortName: volumeProfileHeatmapIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: volumeProfileHeatmapIndicator.metadata,
+    inputConfig: volumeProfileHeatmapIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeProfileHeatmapIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeProfileHeatmapIndicator.defaultInputs },
+    calculate: volumeProfileHeatmapIndicator.calculate,
+  },
+  {
+    id: 'multiple-exponential-fibnonacci-moving-averages',
+    group: 'community',
+    name: 'Multiple Exponential Fibnonacci Moving Averages',
+    shortName: multipleExponentialFibnonacciMovingAveragesIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: multipleExponentialFibnonacciMovingAveragesIndicator.metadata,
+    inputConfig: multipleExponentialFibnonacciMovingAveragesIndicator.inputConfig as InputConfig[],
+    plotConfig: multipleExponentialFibnonacciMovingAveragesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...multipleExponentialFibnonacciMovingAveragesIndicator.defaultInputs },
+    calculate: multipleExponentialFibnonacciMovingAveragesIndicator.calculate,
+  },
+  {
+    id: 'renko-mod',
+    group: 'community',
+    name: 'Renko Mod',
+    shortName: renkoModIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: renkoModIndicator.metadata,
+    inputConfig: renkoModIndicator.inputConfig as InputConfig[],
+    plotConfig: renkoModIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...renkoModIndicator.defaultInputs },
+    calculate: renkoModIndicator.calculate,
+  },
+  {
+    id: 'b-a-d-v0-4',
+    group: 'community',
+    name: 'B + A + D v0.4',
+    shortName: bADV04Indicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: bADV04Indicator.metadata,
+    inputConfig: bADV04Indicator.inputConfig as InputConfig[],
+    plotConfig: bADV04Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...bADV04Indicator.defaultInputs },
+    calculate: bADV04Indicator.calculate,
+  },
+  {
+    id: 'relative-volume-indicator',
+    group: 'community',
+    name: 'Relative Volume Indicator (RVOL)',
+    shortName: relativeVolumeIndicatorIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: relativeVolumeIndicatorIndicator.metadata,
+    inputConfig: relativeVolumeIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: relativeVolumeIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...relativeVolumeIndicatorIndicator.defaultInputs },
+    calculate: relativeVolumeIndicatorIndicator.calculate,
+  },
+  {
+    id: 'pulse-range',
+    group: 'community',
+    name: 'Pulse Range',
+    shortName: pulseRangeIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: pulseRangeIndicator.metadata,
+    inputConfig: pulseRangeIndicator.inputConfig as InputConfig[],
+    plotConfig: pulseRangeIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...pulseRangeIndicator.defaultInputs },
+    calculate: pulseRangeIndicator.calculate,
+  },
+  {
+    id: 'infinite-ema-with-alpha-control',
+    group: 'community',
+    name: 'Infinite EMA with Alpha Control',
+    shortName: infiniteEmaWithAlphaControlIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: infiniteEmaWithAlphaControlIndicator.metadata,
+    inputConfig: infiniteEmaWithAlphaControlIndicator.inputConfig as InputConfig[],
+    plotConfig: infiniteEmaWithAlphaControlIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...infiniteEmaWithAlphaControlIndicator.defaultInputs },
+    calculate: infiniteEmaWithAlphaControlIndicator.calculate,
+  },
+  {
+    id: 'fixed-range-volume-profile-zones',
+    group: 'community',
+    name: 'Fixed-Range Volume-Profile Zones',
+    shortName: fixedRangeVolumeProfileZonesIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: fixedRangeVolumeProfileZonesIndicator.metadata,
+    inputConfig: fixedRangeVolumeProfileZonesIndicator.inputConfig as InputConfig[],
+    plotConfig: fixedRangeVolumeProfileZonesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...fixedRangeVolumeProfileZonesIndicator.defaultInputs },
+    calculate: fixedRangeVolumeProfileZonesIndicator.calculate,
+  },
+  {
+    id: 'terminal-velocity-stop-lyro-rs',
+    group: 'community',
+    name: 'Terminal Velocity Stop | Lyro RS',
+    shortName: terminalVelocityStopLyroRsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: terminalVelocityStopLyroRsIndicator.metadata,
+    inputConfig: terminalVelocityStopLyroRsIndicator.inputConfig as InputConfig[],
+    plotConfig: terminalVelocityStopLyroRsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...terminalVelocityStopLyroRsIndicator.defaultInputs },
+    calculate: terminalVelocityStopLyroRsIndicator.calculate,
   },
   ...candlestickEntries(
     [...candlestickPortEntries, candlestickPortAllPatterns].map((e) => [e.id, e.indicator] as [string, typeof e.indicator])

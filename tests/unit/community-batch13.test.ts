@@ -1,29 +1,29 @@
 /**
- * Unit tests for the community batch 12 ports (Pine v6 sources).
+ * Unit tests for the community batch 13 ports (Pine v6 sources).
  */
 
 import { describe, it, expect } from 'vitest';
 import {
-  KalmanHullKijun,
-  InterpolatedMedianVolatilityLSMAOtto,
-  ZeroLagGarchBandsNal,
-  PullbackScalpTradeV2,
-  MovingAverageCrossoverWithShadingSignals,
-  FibonacciWeightedMovingAverage,
-  RsiFibonacciHhLlSupportResistance,
-  ZScoreOscillator,
-  RSIStochRSIMarxCapital,
-  CommunityMoneyline,
-  GannLevel,
-  RollingLiquidityClustersChannel,
-  WaveletTransformTrend,
-  IUMeanReversionSystem,
-  ScalpmapEmaPivotTargets,
-  IntradayVsOvernightChangeTracker,
-  MovingVwapKamaCloud,
-  FourierSeriesModelOfTheMarket,
-  UptrickRsiMaSignals,
-  MarketStructureTrend,
+  TrendContinuationSslBb,
+  AdaptiveRsiLyroRs,
+  SineWeightedMovingAverage,
+  AdxExtremeZonesDivergences,
+  GaussianRibbon,
+  AdaptiveHeikinAshi,
+  SmoothedSourceWeightedEma,
+  RollingSharpeRatioOscillatorAstralVision,
+  EdwardSmartChannelReversal,
+  GScoreNal,
+  AverageCandleBodiesRange,
+  VolumeProfileHeatmap,
+  MultipleExponentialFibnonacciMovingAverages,
+  RenkoMod,
+  BadV04,
+  RelativeVolumeIndicator,
+  PulseRange,
+  InfiniteEmaWithAlphaControl,
+  FixedRangeVolumeProfileZones,
+  TerminalVelocityStopLyroRs,
   indicatorRegistry,
 } from '../../src/index';
 
@@ -53,26 +53,26 @@ const bars = makeFixture();
 type Port = { calculate: (b: typeof bars, inputs?: any) => any; metadata: { overlay: boolean } };
 /** id, port, main plot, plots drawn with a negative offset (first bars left out) */
 const ports: Array<[string, Port, string, Record<string, number>?, Record<string, number>?]> = [
-  ['kalman-hull-kijun', KalmanHullKijun, 'plot0'],
-  ['interpolated-median-volatility-lsma-otto', InterpolatedMedianVolatilityLSMAOtto, 'plot0'],
-  ['zero-lag-garch-bands-nal', ZeroLagGarchBandsNal, 'plot0'],
-  ['pullback-scalp-trade-v2', PullbackScalpTradeV2, 'plot0'],
-  ['moving-average-crossover-with-shading-signals', MovingAverageCrossoverWithShadingSignals, 'plot0'],
-  ['fibonacci-weighted-moving-average', FibonacciWeightedMovingAverage, 'plot0'],
-  ['rsi-fibonacci-hh-ll-support-resistance', RsiFibonacciHhLlSupportResistance, 'plot0'],
-  ['z-score-oscillator', ZScoreOscillator, 'plot4', { plot0: 5, plot1: 5, plot2: 5, plot3: 5 }],
-  ['rsi-stoch-rsi-marx-capital', RSIStochRSIMarxCapital, 'plot0'],
-  ['community-moneyline', CommunityMoneyline, 'plot0'],
-  ['gann-level', GannLevel, 'plot0'],
-  ['rolling-liquidity-clusters-channel', RollingLiquidityClustersChannel, 'plot0'],
-  ['wavelet-transform-trend', WaveletTransformTrend, 'plot10'],
-  ['iu-mean-reversion-system', IUMeanReversionSystem, 'plot0'],
-  ['scalpmap-ema-pivot-targets', ScalpmapEmaPivotTargets, 'plot0'],
-  ['intraday-vs-overnight-change-tracker', IntradayVsOvernightChangeTracker, 'plot0'],
-  ['moving-vwap-kama-cloud', MovingVwapKamaCloud, 'plot0'],
-  ['fourier-series-model-of-the-market', FourierSeriesModelOfTheMarket, 'plot0'],
-  ['uptrick-rsi-ma-buying-selling-signals', UptrickRsiMaSignals, 'plot0'],
-  ['market-structure-trend', MarketStructureTrend, 'plot0'],
+  ['1m-trend-continuation-signals-ssl-bb-filter', TrendContinuationSslBb, 'plot0'],
+  ['adaptive-rsi-lyro-rs', AdaptiveRsiLyroRs, 'plot0'],
+  ['sine-weighted-moving-average', SineWeightedMovingAverage, 'plot0'],
+  ['adx-extreme-zones-divergences', AdxExtremeZonesDivergences, 'plot0', { plot4: 1, plot5: 1, plot6: 1, plot7: 1 }],
+  ['gaussian-ribbon', GaussianRibbon, 'plot0', undefined, { plot0: 21, plot1: 21 }],
+  ['adaptive-heikin-ashi', AdaptiveHeikinAshi, 'candles'],
+  ['smoothed-source-weighted-ema', SmoothedSourceWeightedEma, 'plot0'],
+  ['rolling-sharpe-ratio-oscillator-astral-vision', RollingSharpeRatioOscillatorAstralVision, 'plot0'],
+  ['edward-smart-channel-reversal', EdwardSmartChannelReversal, 'plot0'],
+  ['g-score-nal', GScoreNal, 'plot0'],
+  ['average-candle-bodies-range', AverageCandleBodiesRange, 'plot0'],
+  ['volume-profile-heatmap', VolumeProfileHeatmap, 'plot0'],
+  ['multiple-exponential-fibnonacci-moving-averages', MultipleExponentialFibnonacciMovingAverages, 'plot0'],
+  ['renko-mod', RenkoMod, 'plot0'],
+  ['b-a-d-v0-4', BadV04, 'plot0'],
+  ['relative-volume-indicator', RelativeVolumeIndicator, 'plot0'],
+  ['pulse-range', PulseRange, 'plot0'],
+  ['infinite-ema-with-alpha-control', InfiniteEmaWithAlphaControl, 'plot0'],
+  ['fixed-range-volume-profile-zones', FixedRangeVolumeProfileZones, 'plot0'],
+  ['terminal-velocity-stop-lyro-rs', TerminalVelocityStopLyroRs, 'plot0'],
 ];
 
 describe.each(ports)('%s', (id, port, mainPlot, leftOffsets, rightOffsets) => {
@@ -106,17 +106,5 @@ describe.each(ports)('%s', (id, port, mainPlot, leftOffsets, rightOffsets) => {
       : (result.plots[mainPlot] as Array<{ value: number }>).map((p) => p.value).filter((v) => !isNaN(v));
     expect(vals.length).toBeGreaterThan(0);
     vals.forEach((v) => expect(isFinite(v)).toBe(true));
-  });
-});
-
-describe('moving-vwap-kama-cloud timeframe limit', () => {
-  it('throws on intraday bars (ta.vwap needs the exchange session there)', () => {
-    const hourly = bars.slice(0, 200).map((b, i) => ({ ...b, time: 1262304000 + i * 3600 }));
-    expect(() => MovingVwapKamaCloud.calculate(hourly, {})).toThrow(/daily and higher timeframes only/);
-  });
-
-  it('accepts weekly bars', () => {
-    const weekly = bars.slice(0, 200).map((b, i) => ({ ...b, time: 1262304000 + i * 7 * 86400 }));
-    expect(() => MovingVwapKamaCloud.calculate(weekly, {})).not.toThrow();
   });
 });
