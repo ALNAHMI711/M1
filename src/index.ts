@@ -3472,6 +3472,87 @@ export type { RelativeAtrVolatilityInputs } from './community/relative-atr-volat
 import * as mrCrypto731Indicator from './community/mr-crypto731';
 export { MrCrypto731, calculate as calculateMrCrypto731 } from './community/mr-crypto731';
 export type { MrCrypto731Inputs } from './community/mr-crypto731';
+// ── Community batch 21 (Pine v6 ports) ──
+// Intraday vs Overnight OBV
+import * as intradayVsOvernightObvIndicator from './community/intraday-vs-overnight-obv';
+export { IntradayVsOvernightObv, calculate as calculateIntradayVsOvernightObv } from './community/intraday-vs-overnight-obv';
+export type { IntradayVsOvernightObvInputs } from './community/intraday-vs-overnight-obv';
+// Euclidean Range
+import * as euclideanRangeIndicator from './community/euclidean-range';
+export { EuclideanRange, calculate as calculateEuclideanRange } from './community/euclidean-range';
+export type { EuclideanRangeInputs } from './community/euclidean-range';
+// Neighboring Price Bands
+import * as neighboringPriceBandsIndicator from './community/neighboring-price-bands';
+export { NeighboringPriceBands, calculate as calculateNeighboringPriceBands } from './community/neighboring-price-bands';
+export type { NeighboringPriceBandsInputs } from './community/neighboring-price-bands';
+// Heiken Ashi Ribbon
+import * as heikenAshiRibbonIndicator from './community/heiken-ashi-ribbon';
+export { HeikenAshiRibbon, calculate as calculateHeikenAshiRibbon } from './community/heiken-ashi-ribbon';
+export type { HeikenAshiRibbonInputs } from './community/heiken-ashi-ribbon';
+// ICT & RTM Price Action Indicator
+import * as ictRtmPriceActionIndicatorIndicator from './community/ict-rtm-price-action-indicator';
+export { IctRtmPriceActionIndicator, calculate as calculateIctRtmPriceActionIndicator } from './community/ict-rtm-price-action-indicator';
+export type { IctRtmPriceActionIndicatorInputs } from './community/ict-rtm-price-action-indicator';
+// Lorentzian Length Adaptive Moving Average
+import * as lorentzianLengthAdaptiveMovingAverageIndicator from './community/lorentzian-length-adaptive-moving-average';
+export { LorentzianLengthAdaptiveMovingAverage, calculate as calculateLorentzianLengthAdaptiveMovingAverage } from './community/lorentzian-length-adaptive-moving-average';
+export type { LorentzianLengthAdaptiveMovingAverageInputs } from './community/lorentzian-length-adaptive-moving-average';
+// Dynamic Fractal Flow
+import * as dynamicFractalFlowIndicator from './community/dynamic-fractal-flow';
+export { DynamicFractalFlow, calculate as calculateDynamicFractalFlow } from './community/dynamic-fractal-flow';
+export type { DynamicFractalFlowInputs } from './community/dynamic-fractal-flow';
+// Blacklab84 Panel
+import * as blacklab84PanelIndicator from './community/blacklab84-panel';
+export { Blacklab84Panel, calculate as calculateBlacklab84Panel } from './community/blacklab84-panel';
+export type { Blacklab84PanelInputs } from './community/blacklab84-panel';
+// RRR EMA Ignition BUY & SELL (Sideways-Proof)
+import * as rrrEmaIgnitionBuySellIndicator from './community/rrr-ema-ignition-buy-sell';
+export { RrrEmaIgnitionBuySell, calculate as calculateRrrEmaIgnitionBuySell } from './community/rrr-ema-ignition-buy-sell';
+export type { RrrEmaIgnitionBuySellInputs } from './community/rrr-ema-ignition-buy-sell';
+// Peak Reversal v3
+import * as peakReversalV3Indicator from './community/peak-reversal-v3';
+export { PeakReversalV3, calculate as calculatePeakReversalV3 } from './community/peak-reversal-v3';
+export type { PeakReversalV3Inputs } from './community/peak-reversal-v3';
+// Z-Score
+import * as zScoreIndicator from './community/z-score';
+export { ZScore, calculate as calculateZScore } from './community/z-score';
+export type { ZScoreInputs } from './community/z-score';
+// Adaptive Convergence Divergence
+import * as adaptiveConvergenceDivergenceIndicator from './community/adaptive-convergence-divergence';
+export { AdaptiveConvergenceDivergence, calculate as calculateAdaptiveConvergenceDivergence } from './community/adaptive-convergence-divergence';
+export type { AdaptiveConvergenceDivergenceInputs } from './community/adaptive-convergence-divergence';
+// Robby DSS Bressert Colored Dots
+import * as robbyDssBressertColoredDotsIndicator from './community/robby-dss-bressert-colored-dots';
+export { RobbyDssBressertColoredDots, calculate as calculateRobbyDssBressertColoredDots } from './community/robby-dss-bressert-colored-dots';
+export type { RobbyDssBressertColoredDotsInputs } from './community/robby-dss-bressert-colored-dots';
+// BuySell Volume Bar Chart
+import * as buysellVolumeBarChartIndicator from './community/buysell-volume-bar-chart';
+export { BuysellVolumeBarChart, calculate as calculateBuysellVolumeBarChart } from './community/buysell-volume-bar-chart';
+export type { BuysellVolumeBarChartInputs } from './community/buysell-volume-bar-chart';
+// Al Po's Arithmetic Mean
+import * as alPoSArithmeticMeanIndicator from './community/al-po-s-arithmetic-mean';
+export { AlPoSArithmeticMean, calculate as calculateAlPoSArithmeticMean } from './community/al-po-s-arithmetic-mean';
+export type { AlPoSArithmeticMeanInputs } from './community/al-po-s-arithmetic-mean';
+// SMA Angle Alerts
+import * as smaAngleAlertsIndicator from './community/sma-angle-alerts';
+export { SmaAngleAlerts, calculate as calculateSmaAngleAlerts } from './community/sma-angle-alerts';
+export type { SmaAngleAlertsInputs } from './community/sma-angle-alerts';
+// Asset risk metrics
+import * as assetRiskMetricsIndicator from './community/asset-risk-metrics';
+export { AssetRiskMetrics, calculate as calculateAssetRiskMetrics } from './community/asset-risk-metrics';
+export type { AssetRiskMetricsInputs } from './community/asset-risk-metrics';
+// Smart Trend
+import * as smartTrendIndicator from './community/smart-trend';
+export { SmartTrend, calculate as calculateSmartTrend } from './community/smart-trend';
+export type { SmartTrendInputs } from './community/smart-trend';
+// 3 Confirmation Bull
+import * as p3ConfirmationBullIndicator from './community/3-confirmation-bull';
+export { ThreeConfirmationBull, calculate as calculateThreeConfirmationBull } from './community/3-confirmation-bull';
+export type { ThreeConfirmationBullInputs } from './community/3-confirmation-bull';
+// Buy on Volume
+import * as buyOnVolumeIndicator from './community/buy-on-volume';
+export { BuyOnVolume, calculate as calculateBuyOnVolume } from './community/buy-on-volume';
+export type { BuyOnVolumeInputs } from './community/buy-on-volume';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -14144,6 +14225,266 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: mrCrypto731Indicator.plotConfig as PlotConfig[],
     defaultInputs: { ...mrCrypto731Indicator.defaultInputs },
     calculate: mrCrypto731Indicator.calculate,
+  },
+  {
+    id: 'intraday-vs-overnight-obv',
+    group: 'community',
+    name: 'Intraday vs Overnight OBV',
+    shortName: intradayVsOvernightObvIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: intradayVsOvernightObvIndicator.metadata,
+    inputConfig: intradayVsOvernightObvIndicator.inputConfig as InputConfig[],
+    plotConfig: intradayVsOvernightObvIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...intradayVsOvernightObvIndicator.defaultInputs },
+    calculate: intradayVsOvernightObvIndicator.calculate,
+  },
+  {
+    id: 'euclidean-range',
+    group: 'community',
+    name: 'Euclidean Range',
+    shortName: euclideanRangeIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: false,
+    metadata: euclideanRangeIndicator.metadata,
+    inputConfig: euclideanRangeIndicator.inputConfig as InputConfig[],
+    plotConfig: euclideanRangeIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...euclideanRangeIndicator.defaultInputs },
+    calculate: euclideanRangeIndicator.calculate,
+  },
+  {
+    id: 'neighboring-price-bands',
+    group: 'community',
+    name: 'Neighboring Price Bands',
+    shortName: neighboringPriceBandsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: neighboringPriceBandsIndicator.metadata,
+    inputConfig: neighboringPriceBandsIndicator.inputConfig as InputConfig[],
+    plotConfig: neighboringPriceBandsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...neighboringPriceBandsIndicator.defaultInputs },
+    calculate: neighboringPriceBandsIndicator.calculate,
+  },
+  {
+    id: 'heiken-ashi-ribbon',
+    group: 'community',
+    name: 'Heiken Ashi Ribbon',
+    shortName: heikenAshiRibbonIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: heikenAshiRibbonIndicator.metadata,
+    inputConfig: heikenAshiRibbonIndicator.inputConfig as InputConfig[],
+    plotConfig: heikenAshiRibbonIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...heikenAshiRibbonIndicator.defaultInputs },
+    calculate: heikenAshiRibbonIndicator.calculate,
+  },
+  {
+    id: 'ict-rtm-price-action-indicator',
+    group: 'community',
+    name: 'ICT & RTM Price Action Indicator',
+    shortName: ictRtmPriceActionIndicatorIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: ictRtmPriceActionIndicatorIndicator.metadata,
+    inputConfig: ictRtmPriceActionIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: ictRtmPriceActionIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...ictRtmPriceActionIndicatorIndicator.defaultInputs },
+    calculate: ictRtmPriceActionIndicatorIndicator.calculate,
+  },
+  {
+    id: 'lorentzian-length-adaptive-moving-average',
+    group: 'community',
+    name: 'Lorentzian Length Adaptive Moving Average',
+    shortName: lorentzianLengthAdaptiveMovingAverageIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: lorentzianLengthAdaptiveMovingAverageIndicator.metadata,
+    inputConfig: lorentzianLengthAdaptiveMovingAverageIndicator.inputConfig as InputConfig[],
+    plotConfig: lorentzianLengthAdaptiveMovingAverageIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...lorentzianLengthAdaptiveMovingAverageIndicator.defaultInputs },
+    calculate: lorentzianLengthAdaptiveMovingAverageIndicator.calculate,
+  },
+  {
+    id: 'dynamic-fractal-flow',
+    group: 'community',
+    name: 'Dynamic Fractal Flow',
+    shortName: dynamicFractalFlowIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: dynamicFractalFlowIndicator.metadata,
+    inputConfig: dynamicFractalFlowIndicator.inputConfig as InputConfig[],
+    plotConfig: dynamicFractalFlowIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...dynamicFractalFlowIndicator.defaultInputs },
+    calculate: dynamicFractalFlowIndicator.calculate,
+  },
+  {
+    id: 'blacklab84-panel',
+    group: 'community',
+    name: 'Blacklab84 Panel',
+    shortName: blacklab84PanelIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: blacklab84PanelIndicator.metadata,
+    inputConfig: blacklab84PanelIndicator.inputConfig as InputConfig[],
+    plotConfig: blacklab84PanelIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...blacklab84PanelIndicator.defaultInputs },
+    calculate: blacklab84PanelIndicator.calculate,
+  },
+  {
+    id: 'rrr-ema-ignition-buy-sell',
+    group: 'community',
+    name: 'RRR EMA Ignition BUY & SELL (Sideways-Proof)',
+    shortName: rrrEmaIgnitionBuySellIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: rrrEmaIgnitionBuySellIndicator.metadata,
+    inputConfig: rrrEmaIgnitionBuySellIndicator.inputConfig as InputConfig[],
+    plotConfig: rrrEmaIgnitionBuySellIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rrrEmaIgnitionBuySellIndicator.defaultInputs },
+    calculate: rrrEmaIgnitionBuySellIndicator.calculate,
+  },
+  {
+    id: 'peak-reversal-v3',
+    group: 'community',
+    name: 'Peak Reversal v3',
+    shortName: peakReversalV3Indicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: peakReversalV3Indicator.metadata,
+    inputConfig: peakReversalV3Indicator.inputConfig as InputConfig[],
+    plotConfig: peakReversalV3Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...peakReversalV3Indicator.defaultInputs },
+    calculate: peakReversalV3Indicator.calculate,
+  },
+  {
+    id: 'z-score',
+    group: 'community',
+    name: 'Z-Score',
+    shortName: zScoreIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: zScoreIndicator.metadata,
+    inputConfig: zScoreIndicator.inputConfig as InputConfig[],
+    plotConfig: zScoreIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...zScoreIndicator.defaultInputs },
+    calculate: zScoreIndicator.calculate,
+  },
+  {
+    id: 'adaptive-convergence-divergence',
+    group: 'community',
+    name: 'Adaptive Convergence Divergence',
+    shortName: adaptiveConvergenceDivergenceIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: adaptiveConvergenceDivergenceIndicator.metadata,
+    inputConfig: adaptiveConvergenceDivergenceIndicator.inputConfig as InputConfig[],
+    plotConfig: adaptiveConvergenceDivergenceIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adaptiveConvergenceDivergenceIndicator.defaultInputs },
+    calculate: adaptiveConvergenceDivergenceIndicator.calculate,
+  },
+  {
+    id: 'robby-dss-bressert-colored-dots',
+    group: 'community',
+    name: 'Robby DSS Bressert Colored Dots',
+    shortName: robbyDssBressertColoredDotsIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: robbyDssBressertColoredDotsIndicator.metadata,
+    inputConfig: robbyDssBressertColoredDotsIndicator.inputConfig as InputConfig[],
+    plotConfig: robbyDssBressertColoredDotsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...robbyDssBressertColoredDotsIndicator.defaultInputs },
+    calculate: robbyDssBressertColoredDotsIndicator.calculate,
+  },
+  {
+    id: 'buysell-volume-bar-chart',
+    group: 'community',
+    name: 'BuySell Volume Bar Chart',
+    shortName: buysellVolumeBarChartIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: buysellVolumeBarChartIndicator.metadata,
+    inputConfig: buysellVolumeBarChartIndicator.inputConfig as InputConfig[],
+    plotConfig: buysellVolumeBarChartIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...buysellVolumeBarChartIndicator.defaultInputs },
+    calculate: buysellVolumeBarChartIndicator.calculate,
+  },
+  {
+    id: 'al-po-s-arithmetic-mean',
+    group: 'community',
+    name: 'Al Po\'s Arithmetic Mean',
+    shortName: alPoSArithmeticMeanIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: alPoSArithmeticMeanIndicator.metadata,
+    inputConfig: alPoSArithmeticMeanIndicator.inputConfig as InputConfig[],
+    plotConfig: alPoSArithmeticMeanIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...alPoSArithmeticMeanIndicator.defaultInputs },
+    calculate: alPoSArithmeticMeanIndicator.calculate,
+  },
+  {
+    id: 'sma-angle-alerts',
+    group: 'community',
+    name: 'SMA Angle Alerts',
+    shortName: smaAngleAlertsIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: smaAngleAlertsIndicator.metadata,
+    inputConfig: smaAngleAlertsIndicator.inputConfig as InputConfig[],
+    plotConfig: smaAngleAlertsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...smaAngleAlertsIndicator.defaultInputs },
+    calculate: smaAngleAlertsIndicator.calculate,
+  },
+  {
+    id: 'asset-risk-metrics',
+    group: 'community',
+    name: 'Asset risk metrics',
+    shortName: assetRiskMetricsIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: assetRiskMetricsIndicator.metadata,
+    inputConfig: assetRiskMetricsIndicator.inputConfig as InputConfig[],
+    plotConfig: assetRiskMetricsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...assetRiskMetricsIndicator.defaultInputs },
+    calculate: assetRiskMetricsIndicator.calculate,
+  },
+  {
+    id: 'smart-trend',
+    group: 'community',
+    name: 'Smart Trend',
+    shortName: smartTrendIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: smartTrendIndicator.metadata,
+    inputConfig: smartTrendIndicator.inputConfig as InputConfig[],
+    plotConfig: smartTrendIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...smartTrendIndicator.defaultInputs },
+    calculate: smartTrendIndicator.calculate,
+  },
+  {
+    id: '3-confirmation-bull',
+    group: 'community',
+    name: '3 Confirmation Bull',
+    shortName: p3ConfirmationBullIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: p3ConfirmationBullIndicator.metadata,
+    inputConfig: p3ConfirmationBullIndicator.inputConfig as InputConfig[],
+    plotConfig: p3ConfirmationBullIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...p3ConfirmationBullIndicator.defaultInputs },
+    calculate: p3ConfirmationBullIndicator.calculate,
+  },
+  {
+    id: 'buy-on-volume',
+    group: 'community',
+    name: 'Buy on Volume',
+    shortName: buyOnVolumeIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: buyOnVolumeIndicator.metadata,
+    inputConfig: buyOnVolumeIndicator.inputConfig as InputConfig[],
+    plotConfig: buyOnVolumeIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...buyOnVolumeIndicator.defaultInputs },
+    calculate: buyOnVolumeIndicator.calculate,
   },
   ...candlestickEntries(
     [...candlestickPortEntries, candlestickPortAllPatterns].map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
