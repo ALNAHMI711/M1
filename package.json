@@ -60,7 +60,7 @@
     "@types/node": "^20.10.6",
     "esbuild": "^0.19.11",
     "lightweight-charts": "^5.2.1",
-    "oakscriptjs": "github:deepentropy/oakScriptJS#89d79f987a61ba1d418c9ccd8108d2795340cb36",
+    "oakscriptjs": "github:deepentropy/oakScriptJS#8c25d870c06c721927eb402b6f393366ebb95944",
     "rimraf": "^6.1.0",
     "typescript": "^5.3.3",
     "vite": "^5.4.0",

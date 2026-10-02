@@ -3391,6 +3391,87 @@ export type { PolyphaseMacdInputs } from './community/polyphase-macd';
 import * as advancedlinesPaskalIndicator from './community/advancedlines-paskal';
 export { AdvancedLinesPaskal, calculate as calculateAdvancedLinesPaskal } from './community/advancedlines-paskal';
 export type { AdvancedLinesPaskalInputs } from './community/advancedlines-paskal';
+// ── Community batch 20 (Pine v6 ports) ──
+// Volume Bars Color
+import * as volumeBarsColorIndicator from './community/volume-bars-color';
+export { VolumeBarsColor, calculate as calculateVolumeBarsColor } from './community/volume-bars-color';
+export type { VolumeBarsColorInputs } from './community/volume-bars-color';
+// Gamma Hedging Pressure (Normalized -100 to +100)
+import * as gammaHedgingPressureIndicator from './community/gamma-hedging-pressure';
+export { GammaHedgingPressure, calculate as calculateGammaHedgingPressure } from './community/gamma-hedging-pressure';
+export type { GammaHedgingPressureInputs } from './community/gamma-hedging-pressure';
+// VEGA (Velocity of Efficient Gain Adaptation)
+import * as vegaIndicator from './community/vega';
+export { Vega, calculate as calculateVega } from './community/vega';
+export type { VegaInputs } from './community/vega';
+// Entropy Bands
+import * as entropyBandsIndicator from './community/entropy-bands';
+export { EntropyBands, calculate as calculateEntropyBands } from './community/entropy-bands';
+export type { EntropyBandsInputs } from './community/entropy-bands';
+// MACD x BB x STDEV x RVI
+import * as macdXBbXStdevXRviIndicator from './community/macd-x-bb-x-stdev-x-rvi';
+export { MacdXBbXStdevXRvi, calculate as calculateMacdXBbXStdevXRvi } from './community/macd-x-bb-x-stdev-x-rvi';
+export type { MacdXBbXStdevXRviInputs } from './community/macd-x-bb-x-stdev-x-rvi';
+// DECODE Moving Average Toolkit
+import * as decodeMovingAverageToolkitIndicator from './community/decode-moving-average-toolkit';
+export { DecodeMovingAverageToolkit, calculate as calculateDecodeMovingAverageToolkit } from './community/decode-moving-average-toolkit';
+export type { DecodeMovingAverageToolkitInputs } from './community/decode-moving-average-toolkit';
+// Liquidity Sentiment Profile | LUPEN
+import * as liquiditySentimentProfileLupenIndicator from './community/liquidity-sentiment-profile-lupen';
+export { LiquiditySentimentProfileLupen, calculate as calculateLiquiditySentimentProfileLupen } from './community/liquidity-sentiment-profile-lupen';
+export type { LiquiditySentimentProfileLupenInputs } from './community/liquidity-sentiment-profile-lupen';
+// ADX with Shaded Zone
+import * as adxWithShadedZoneIndicator from './community/adx-with-shaded-zone';
+export { AdxWithShadedZone, calculate as calculateAdxWithShadedZone } from './community/adx-with-shaded-zone';
+export type { AdxWithShadedZoneInputs } from './community/adx-with-shaded-zone';
+// Laguerre Ultimate Explorations Multicator
+import * as laguerreUltimateExplorationsMulticatorIndicator from './community/laguerre-ultimate-explorations-multicator';
+export { LaguerreUltimateExplorationsMulticator, calculate as calculateLaguerreUltimateExplorationsMulticator } from './community/laguerre-ultimate-explorations-multicator';
+export type { LaguerreUltimateExplorationsMulticatorInputs } from './community/laguerre-ultimate-explorations-multicator';
+// Williams BBDiv Signal
+import * as williamsBbdivSignalIndicator from './community/williams-bbdiv-signal';
+export { WilliamsBbdivSignal, calculate as calculateWilliamsBbdivSignal } from './community/williams-bbdiv-signal';
+export type { WilliamsBbdivSignalInputs } from './community/williams-bbdiv-signal';
+// ReadyFor401ks Just Tell Me When!
+import * as readyfor401ksJustTellMeWhenIndicator from './community/readyfor401ks-just-tell-me-when';
+export { Readyfor401ksJustTellMeWhen, calculate as calculateReadyfor401ksJustTellMeWhen } from './community/readyfor401ks-just-tell-me-when';
+export type { Readyfor401ksJustTellMeWhenInputs } from './community/readyfor401ks-just-tell-me-when';
+// TrendMasterPro_Fekonomi
+import * as trendmasterproFekonomiIndicator from './community/trendmasterpro-fekonomi';
+export { TrendMasterProFekonomi, calculate as calculateTrendMasterProFekonomi } from './community/trendmasterpro-fekonomi';
+export type { TrendMasterProFekonomiInputs } from './community/trendmasterpro-fekonomi';
+// Liquidity Flow Zones (LFZ)
+import * as liquidityFlowZonesIndicator from './community/liquidity-flow-zones';
+export { LiquidityFlowZones, calculate as calculateLiquidityFlowZones } from './community/liquidity-flow-zones';
+export type { LiquidityFlowZonesInputs } from './community/liquidity-flow-zones';
+// Anchored Bollinger Band Range
+import * as anchoredBollingerBandRangeIndicator from './community/anchored-bollinger-band-range';
+export { AnchoredBollingerBandRange, calculate as calculateAnchoredBollingerBandRange } from './community/anchored-bollinger-band-range';
+export type { AnchoredBollingerBandRangeInputs } from './community/anchored-bollinger-band-range';
+// Suppot and resistance & BUY SELL SIGNALS
+import * as suppotAndResistanceBuySellSignalsIndicator from './community/suppot-and-resistance-buy-sell-signals';
+export { SuppotAndResistanceBuySellSignals, calculate as calculateSuppotAndResistanceBuySellSignals } from './community/suppot-and-resistance-buy-sell-signals';
+export type { SuppotAndResistanceBuySellSignalsInputs } from './community/suppot-and-resistance-buy-sell-signals';
+// Fractal Strength Oscillator
+import * as fractalStrengthOscillatorIndicator from './community/fractal-strength-oscillator';
+export { FractalStrengthOscillator, calculate as calculateFractalStrengthOscillator } from './community/fractal-strength-oscillator';
+export type { FractalStrengthOscillatorInputs } from './community/fractal-strength-oscillator';
+// Keltner-Aroon-EFI Flow
+import * as keltnerAroonEfiFlowIndicator from './community/keltner-aroon-efi-flow';
+export { KeltnerAroonEfiFlow, calculate as calculateKeltnerAroonEfiFlow } from './community/keltner-aroon-efi-flow';
+export type { KeltnerAroonEfiFlowInputs } from './community/keltner-aroon-efi-flow';
+// VCO Fusion
+import * as vcoFusionIndicator from './community/vco-fusion';
+export { VcoFusion, calculate as calculateVcoFusion } from './community/vco-fusion';
+export type { VcoFusionInputs } from './community/vco-fusion';
+// Relative ATR Volatility Indicator
+import * as relativeAtrVolatilityIndicatorIndicator from './community/relative-atr-volatility-indicator';
+export { RelativeAtrVolatility, calculate as calculateRelativeAtrVolatility } from './community/relative-atr-volatility-indicator';
+export type { RelativeAtrVolatilityInputs } from './community/relative-atr-volatility-indicator';
+// mr.crypto731
+import * as mrCrypto731Indicator from './community/mr-crypto731';
+export { MrCrypto731, calculate as calculateMrCrypto731 } from './community/mr-crypto731';
+export type { MrCrypto731Inputs } from './community/mr-crypto731';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -13798,6 +13879,271 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: advancedlinesPaskalIndicator.plotConfig as PlotConfig[],
     defaultInputs: { ...advancedlinesPaskalIndicator.defaultInputs },
     calculate: advancedlinesPaskalIndicator.calculate,
+  },
+  {
+    id: 'volume-bars-color',
+    group: 'community',
+    name: 'Volume Bars Color',
+    shortName: volumeBarsColorIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: volumeBarsColorIndicator.metadata,
+    inputConfig: volumeBarsColorIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeBarsColorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeBarsColorIndicator.defaultInputs },
+    calculate: volumeBarsColorIndicator.calculate,
+  },
+  {
+    id: 'gamma-hedging-pressure',
+    group: 'community',
+    name: 'Gamma Hedging Pressure (Normalized -100 to +100)',
+    shortName: gammaHedgingPressureIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: gammaHedgingPressureIndicator.metadata,
+    inputConfig: gammaHedgingPressureIndicator.inputConfig as InputConfig[],
+    plotConfig: gammaHedgingPressureIndicator.plotConfig as PlotConfig[],
+    hlineConfig: gammaHedgingPressureIndicator.hlineConfig,
+    defaultInputs: { ...gammaHedgingPressureIndicator.defaultInputs },
+    calculate: gammaHedgingPressureIndicator.calculate,
+  },
+  {
+    id: 'vega',
+    group: 'community',
+    name: 'VEGA (Velocity of Efficient Gain Adaptation)',
+    shortName: vegaIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: vegaIndicator.metadata,
+    inputConfig: vegaIndicator.inputConfig as InputConfig[],
+    plotConfig: vegaIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...vegaIndicator.defaultInputs },
+    calculate: vegaIndicator.calculate,
+  },
+  {
+    id: 'entropy-bands',
+    group: 'community',
+    name: 'Entropy Bands',
+    shortName: entropyBandsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: entropyBandsIndicator.metadata,
+    inputConfig: entropyBandsIndicator.inputConfig as InputConfig[],
+    plotConfig: entropyBandsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...entropyBandsIndicator.defaultInputs },
+    calculate: entropyBandsIndicator.calculate,
+  },
+  {
+    id: 'macd-x-bb-x-stdev-x-rvi',
+    group: 'community',
+    name: 'MACD x BB x STDEV x RVI',
+    shortName: macdXBbXStdevXRviIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: macdXBbXStdevXRviIndicator.metadata,
+    inputConfig: macdXBbXStdevXRviIndicator.inputConfig as InputConfig[],
+    plotConfig: macdXBbXStdevXRviIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...macdXBbXStdevXRviIndicator.defaultInputs },
+    calculate: macdXBbXStdevXRviIndicator.calculate,
+  },
+  {
+    id: 'decode-moving-average-toolkit',
+    group: 'community',
+    name: 'DECODE Moving Average Toolkit',
+    shortName: decodeMovingAverageToolkitIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: decodeMovingAverageToolkitIndicator.metadata,
+    inputConfig: decodeMovingAverageToolkitIndicator.inputConfig as InputConfig[],
+    plotConfig: decodeMovingAverageToolkitIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...decodeMovingAverageToolkitIndicator.defaultInputs },
+    calculate: decodeMovingAverageToolkitIndicator.calculate,
+  },
+  {
+    id: 'liquidity-sentiment-profile-lupen',
+    group: 'community',
+    name: 'Liquidity Sentiment Profile | LUPEN',
+    shortName: liquiditySentimentProfileLupenIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: liquiditySentimentProfileLupenIndicator.metadata,
+    inputConfig: liquiditySentimentProfileLupenIndicator.inputConfig as InputConfig[],
+    plotConfig: liquiditySentimentProfileLupenIndicator.plotConfig as PlotConfig[],
+    hlineConfig: liquiditySentimentProfileLupenIndicator.hlineConfig,
+    defaultInputs: { ...liquiditySentimentProfileLupenIndicator.defaultInputs },
+    calculate: liquiditySentimentProfileLupenIndicator.calculate,
+  },
+  {
+    id: 'adx-with-shaded-zone',
+    group: 'community',
+    name: 'ADX with Shaded Zone',
+    shortName: adxWithShadedZoneIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: false,
+    metadata: adxWithShadedZoneIndicator.metadata,
+    inputConfig: adxWithShadedZoneIndicator.inputConfig as InputConfig[],
+    plotConfig: adxWithShadedZoneIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adxWithShadedZoneIndicator.defaultInputs },
+    calculate: adxWithShadedZoneIndicator.calculate,
+  },
+  {
+    id: 'laguerre-ultimate-explorations-multicator',
+    group: 'community',
+    name: 'Laguerre Ultimate Explorations Multicator',
+    shortName: laguerreUltimateExplorationsMulticatorIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: false,
+    metadata: laguerreUltimateExplorationsMulticatorIndicator.metadata,
+    inputConfig: laguerreUltimateExplorationsMulticatorIndicator.inputConfig as InputConfig[],
+    plotConfig: laguerreUltimateExplorationsMulticatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...laguerreUltimateExplorationsMulticatorIndicator.defaultInputs },
+    calculate: laguerreUltimateExplorationsMulticatorIndicator.calculate,
+  },
+  {
+    id: 'williams-bbdiv-signal',
+    group: 'community',
+    name: 'Williams BBDiv Signal',
+    shortName: williamsBbdivSignalIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: williamsBbdivSignalIndicator.metadata,
+    inputConfig: williamsBbdivSignalIndicator.inputConfig as InputConfig[],
+    plotConfig: williamsBbdivSignalIndicator.plotConfig as PlotConfig[],
+    hlineConfig: williamsBbdivSignalIndicator.hlineConfig,
+    fillConfig: williamsBbdivSignalIndicator.fillConfig,
+    defaultInputs: { ...williamsBbdivSignalIndicator.defaultInputs },
+    calculate: williamsBbdivSignalIndicator.calculate,
+  },
+  {
+    id: 'readyfor401ks-just-tell-me-when',
+    group: 'community',
+    name: 'ReadyFor401ks Just Tell Me When!',
+    shortName: readyfor401ksJustTellMeWhenIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: readyfor401ksJustTellMeWhenIndicator.metadata,
+    inputConfig: readyfor401ksJustTellMeWhenIndicator.inputConfig as InputConfig[],
+    plotConfig: readyfor401ksJustTellMeWhenIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...readyfor401ksJustTellMeWhenIndicator.defaultInputs },
+    calculate: readyfor401ksJustTellMeWhenIndicator.calculate,
+  },
+  {
+    id: 'trendmasterpro-fekonomi',
+    group: 'community',
+    name: 'TrendMasterPro_Fekonomi',
+    shortName: trendmasterproFekonomiIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: trendmasterproFekonomiIndicator.metadata,
+    inputConfig: trendmasterproFekonomiIndicator.inputConfig as InputConfig[],
+    plotConfig: trendmasterproFekonomiIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...trendmasterproFekonomiIndicator.defaultInputs },
+    calculate: trendmasterproFekonomiIndicator.calculate,
+  },
+  {
+    id: 'liquidity-flow-zones',
+    group: 'community',
+    name: 'Liquidity Flow Zones (LFZ)',
+    shortName: liquidityFlowZonesIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: liquidityFlowZonesIndicator.metadata,
+    inputConfig: liquidityFlowZonesIndicator.inputConfig as InputConfig[],
+    plotConfig: liquidityFlowZonesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...liquidityFlowZonesIndicator.defaultInputs },
+    calculate: liquidityFlowZonesIndicator.calculate,
+  },
+  {
+    id: 'anchored-bollinger-band-range',
+    group: 'community',
+    name: 'Anchored Bollinger Band Range',
+    shortName: anchoredBollingerBandRangeIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: anchoredBollingerBandRangeIndicator.metadata,
+    inputConfig: anchoredBollingerBandRangeIndicator.inputConfig as InputConfig[],
+    plotConfig: anchoredBollingerBandRangeIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...anchoredBollingerBandRangeIndicator.defaultInputs },
+    calculate: anchoredBollingerBandRangeIndicator.calculate,
+  },
+  {
+    id: 'suppot-and-resistance-buy-sell-signals',
+    group: 'community',
+    name: 'Suppot and resistance & BUY SELL SIGNALS',
+    shortName: suppotAndResistanceBuySellSignalsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: suppotAndResistanceBuySellSignalsIndicator.metadata,
+    inputConfig: suppotAndResistanceBuySellSignalsIndicator.inputConfig as InputConfig[],
+    plotConfig: suppotAndResistanceBuySellSignalsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...suppotAndResistanceBuySellSignalsIndicator.defaultInputs },
+    calculate: suppotAndResistanceBuySellSignalsIndicator.calculate,
+  },
+  {
+    id: 'fractal-strength-oscillator',
+    group: 'community',
+    name: 'Fractal Strength Oscillator',
+    shortName: fractalStrengthOscillatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: fractalStrengthOscillatorIndicator.metadata,
+    inputConfig: fractalStrengthOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: fractalStrengthOscillatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...fractalStrengthOscillatorIndicator.defaultInputs },
+    calculate: fractalStrengthOscillatorIndicator.calculate,
+  },
+  {
+    id: 'keltner-aroon-efi-flow',
+    group: 'community',
+    name: 'Keltner-Aroon-EFI Flow',
+    shortName: keltnerAroonEfiFlowIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: keltnerAroonEfiFlowIndicator.metadata,
+    inputConfig: keltnerAroonEfiFlowIndicator.inputConfig as InputConfig[],
+    plotConfig: keltnerAroonEfiFlowIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...keltnerAroonEfiFlowIndicator.defaultInputs },
+    calculate: keltnerAroonEfiFlowIndicator.calculate,
+  },
+  {
+    id: 'vco-fusion',
+    group: 'community',
+    name: 'VCO Fusion',
+    shortName: vcoFusionIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: vcoFusionIndicator.metadata,
+    inputConfig: vcoFusionIndicator.inputConfig as InputConfig[],
+    plotConfig: vcoFusionIndicator.plotConfig as PlotConfig[],
+    hlineConfig: vcoFusionIndicator.hlineConfig,
+    defaultInputs: { ...vcoFusionIndicator.defaultInputs },
+    calculate: vcoFusionIndicator.calculate,
+  },
+  {
+    id: 'relative-atr-volatility-indicator',
+    group: 'community',
+    name: 'Relative ATR Volatility Indicator',
+    shortName: relativeAtrVolatilityIndicatorIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: false,
+    metadata: relativeAtrVolatilityIndicatorIndicator.metadata,
+    inputConfig: relativeAtrVolatilityIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: relativeAtrVolatilityIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...relativeAtrVolatilityIndicatorIndicator.defaultInputs },
+    calculate: relativeAtrVolatilityIndicatorIndicator.calculate,
+  },
+  {
+    id: 'mr-crypto731',
+    group: 'community',
+    name: 'mr.crypto731',
+    shortName: mrCrypto731Indicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: mrCrypto731Indicator.metadata,
+    inputConfig: mrCrypto731Indicator.inputConfig as InputConfig[],
+    plotConfig: mrCrypto731Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...mrCrypto731Indicator.defaultInputs },
+    calculate: mrCrypto731Indicator.calculate,
   },
   ...candlestickEntries(
     [...candlestickPortEntries, candlestickPortAllPatterns].map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
