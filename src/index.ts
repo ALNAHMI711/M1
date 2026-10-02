@@ -3152,6 +3152,83 @@ export type { Level2SignalfilterLiquidityProtectionInputs } from './community/le
 import * as squeezeChannelIndicator from './community/squeeze-channel';
 export { SqueezeChannel, calculate as calculateSqueezeChannel } from './community/squeeze-channel';
 export type { SqueezeChannelInputs } from './community/squeeze-channel';
+// ── Community batch 17 (Pine v6 ports) ──
+// Anchored VWAP Pro (Final Visibility Enhanced)
+import * as anchoredVwapProIndicator from './community/anchored-vwap-pro';
+export { AnchoredVwapPro, calculate as calculateAnchoredVwapPro } from './community/anchored-vwap-pro';
+export type { AnchoredVwapProInputs } from './community/anchored-vwap-pro';
+// Weierstrass Function (Fractal Cycles)
+import * as weierstrassFunctionIndicator from './community/weierstrass-function';
+export { WeierstrassFunction, calculate as calculateWeierstrassFunction } from './community/weierstrass-function';
+export type { WeierstrassFunctionInputs } from './community/weierstrass-function';
+// Quantile Regression Bands
+import * as quantileRegressionBandsIndicator from './community/quantile-regression-bands';
+export { QuantileRegressionBands, calculate as calculateQuantileRegressionBands } from './community/quantile-regression-bands';
+export type { QuantileRegressionBandsInputs } from './community/quantile-regression-bands';
+// VARIS Zones
+import * as varisZonesIndicator from './community/varis-zones';
+export { VarisZones, calculate as calculateVarisZones } from './community/varis-zones';
+export type { VarisZonesInputs } from './community/varis-zones';
+// Arnaud Legoux Gaussian Flow | AlphaNatt
+import * as arnaudLegouxGaussianFlowAlphanattIndicator from './community/arnaud-legoux-gaussian-flow-alphanatt';
+export { ArnaudLegouxGaussianFlowAlphanatt, calculate as calculateArnaudLegouxGaussianFlowAlphanatt } from './community/arnaud-legoux-gaussian-flow-alphanatt';
+export type { ArnaudLegouxGaussianFlowAlphanattInputs } from './community/arnaud-legoux-gaussian-flow-alphanatt';
+// Adaptive Pivot Zones
+import * as adaptivePivotZonesIndicator from './community/adaptive-pivot-zones';
+export { AdaptivePivotZones, calculate as calculateAdaptivePivotZones } from './community/adaptive-pivot-zones';
+export type { AdaptivePivotZonesInputs } from './community/adaptive-pivot-zones';
+// Trimmed Mean ATR Bands
+import * as trimmedMeanAtrBandsIndicator from './community/trimmed-mean-atr-bands';
+export { TrimmedMeanAtrBands, calculate as calculateTrimmedMeanAtrBands } from './community/trimmed-mean-atr-bands';
+export type { TrimmedMeanAtrBandsInputs } from './community/trimmed-mean-atr-bands';
+// Retail vs Banker Net Positions – Symmetry Break
+import * as retailVsBankerNetPositionsSymmetryBreakIndicator from './community/retail-vs-banker-net-positions-symmetry-break';
+export { RetailVsBankerNetPositionsSymmetryBreak, calculate as calculateRetailVsBankerNetPositionsSymmetryBreak } from './community/retail-vs-banker-net-positions-symmetry-break';
+export type { RetailVsBankerNetPositionsSymmetryBreakInputs } from './community/retail-vs-banker-net-positions-symmetry-break';
+// Dominance Signal Apex
+import * as dominanceSignalApexIndicator from './community/dominance-signal-apex';
+export { DominanceSignalApex, calculate as calculateDominanceSignalApex } from './community/dominance-signal-apex';
+export type { DominanceSignalApexInputs } from './community/dominance-signal-apex';
+// EMA + RSI Autotrade Webhook - Varun
+import * as emaRsiAutotradeWebhookVarunIndicator from './community/ema-rsi-autotrade-webhook-varun';
+export { EmaRsiAutotradeWebhookVarun, calculate as calculateEmaRsiAutotradeWebhookVarun } from './community/ema-rsi-autotrade-webhook-varun';
+export type { EmaRsiAutotradeWebhookVarunInputs } from './community/ema-rsi-autotrade-webhook-varun';
+// Crosby Ratio | QuantumResearch
+import * as crosbyRatioQuantumresearchIndicator from './community/crosby-ratio-quantumresearch';
+export { CrosbyRatioQuantumresearch, calculate as calculateCrosbyRatioQuantumresearch } from './community/crosby-ratio-quantumresearch';
+export type { CrosbyRatioQuantumresearchInputs } from './community/crosby-ratio-quantumresearch';
+// Range Channel by Atilla Yurtseven
+import * as rangeChannelByAtillaYurtsevenIndicator from './community/range-channel-by-atilla-yurtseven';
+export { RangeChannelByAtillaYurtseven, calculate as calculateRangeChannelByAtillaYurtseven } from './community/range-channel-by-atilla-yurtseven';
+export type { RangeChannelByAtillaYurtsevenInputs } from './community/range-channel-by-atilla-yurtseven';
+// Kalman Hull Bands For Loop | RakoQuant
+import * as kalmanHullBandsForLoopRakoquantIndicator from './community/kalman-hull-bands-for-loop-rakoquant';
+export { KalmanHullBandsForLoopRakoquant, calculate as calculateKalmanHullBandsForLoopRakoquant } from './community/kalman-hull-bands-for-loop-rakoquant';
+export type { KalmanHullBandsForLoopRakoquantInputs } from './community/kalman-hull-bands-for-loop-rakoquant';
+// Granville Entry Guide
+import * as granvilleEntryGuideIndicator from './community/granville-entry-guide';
+export { GranvilleEntryGuide, calculate as calculateGranvilleEntryGuide } from './community/granville-entry-guide';
+export type { GranvilleEntryGuideInputs } from './community/granville-entry-guide';
+// rs_MACD
+import * as rsMacdIndicator from './community/rs-macd';
+export { RsMacd, calculate as calculateRsMacd } from './community/rs-macd';
+export type { RsMacdInputs } from './community/rs-macd';
+// Visualisation tendances
+import * as visualisationTendancesIndicator from './community/visualisation-tendances';
+export { VisualisationTendances, calculate as calculateVisualisationTendances } from './community/visualisation-tendances';
+export type { VisualisationTendancesInputs } from './community/visualisation-tendances';
+// Composite Indicator (CCI + ATR)
+import * as compositeIndicatorIndicator from './community/composite-indicator';
+export { CompositeIndicator, calculate as calculateCompositeIndicator } from './community/composite-indicator';
+export type { CompositeIndicatorInputs } from './community/composite-indicator';
+// Force Pulse
+import * as forcePulseIndicator from './community/force-pulse';
+export { ForcePulse, calculate as calculateForcePulse } from './community/force-pulse';
+export type { ForcePulseInputs } from './community/force-pulse';
+// Q Impulse Entry
+import * as qImpulseEntryIndicator from './community/q-impulse-entry';
+export { QImpulseEntry, calculate as calculateQImpulseEntry } from './community/q-impulse-entry';
+export type { QImpulseEntryInputs } from './community/q-impulse-entry';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -12783,6 +12860,255 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: squeezeChannelIndicator.plotConfig as PlotConfig[],
     defaultInputs: { ...squeezeChannelIndicator.defaultInputs },
     calculate: squeezeChannelIndicator.calculate,
+  },
+  {
+    id: 'anchored-vwap-pro',
+    group: 'community',
+    name: 'Anchored VWAP Pro (Final Visibility Enhanced)',
+    shortName: anchoredVwapProIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: anchoredVwapProIndicator.metadata,
+    inputConfig: anchoredVwapProIndicator.inputConfig as InputConfig[],
+    plotConfig: anchoredVwapProIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...anchoredVwapProIndicator.defaultInputs },
+    calculate: anchoredVwapProIndicator.calculate,
+  },
+  {
+    id: 'weierstrass-function',
+    group: 'community',
+    name: 'Weierstrass Function (Fractal Cycles)',
+    shortName: weierstrassFunctionIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: weierstrassFunctionIndicator.metadata,
+    inputConfig: weierstrassFunctionIndicator.inputConfig as InputConfig[],
+    plotConfig: weierstrassFunctionIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...weierstrassFunctionIndicator.defaultInputs },
+    calculate: weierstrassFunctionIndicator.calculate,
+  },
+  {
+    id: 'quantile-regression-bands',
+    group: 'community',
+    name: 'Quantile Regression Bands',
+    shortName: quantileRegressionBandsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: quantileRegressionBandsIndicator.metadata,
+    inputConfig: quantileRegressionBandsIndicator.inputConfig as InputConfig[],
+    plotConfig: quantileRegressionBandsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...quantileRegressionBandsIndicator.defaultInputs },
+    calculate: quantileRegressionBandsIndicator.calculate,
+  },
+  {
+    id: 'varis-zones',
+    group: 'community',
+    name: 'VARIS Zones',
+    shortName: varisZonesIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: varisZonesIndicator.metadata,
+    inputConfig: varisZonesIndicator.inputConfig as InputConfig[],
+    plotConfig: varisZonesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...varisZonesIndicator.defaultInputs },
+    calculate: varisZonesIndicator.calculate,
+  },
+  {
+    id: 'arnaud-legoux-gaussian-flow-alphanatt',
+    group: 'community',
+    name: 'Arnaud Legoux Gaussian Flow | AlphaNatt',
+    shortName: arnaudLegouxGaussianFlowAlphanattIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: arnaudLegouxGaussianFlowAlphanattIndicator.metadata,
+    inputConfig: arnaudLegouxGaussianFlowAlphanattIndicator.inputConfig as InputConfig[],
+    plotConfig: arnaudLegouxGaussianFlowAlphanattIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...arnaudLegouxGaussianFlowAlphanattIndicator.defaultInputs },
+    calculate: arnaudLegouxGaussianFlowAlphanattIndicator.calculate,
+  },
+  {
+    id: 'adaptive-pivot-zones',
+    group: 'community',
+    name: 'Adaptive Pivot Zones',
+    shortName: adaptivePivotZonesIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: adaptivePivotZonesIndicator.metadata,
+    inputConfig: adaptivePivotZonesIndicator.inputConfig as InputConfig[],
+    plotConfig: adaptivePivotZonesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...adaptivePivotZonesIndicator.defaultInputs },
+    calculate: adaptivePivotZonesIndicator.calculate,
+  },
+  {
+    id: 'trimmed-mean-atr-bands',
+    group: 'community',
+    name: 'Trimmed Mean ATR Bands',
+    shortName: trimmedMeanAtrBandsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: trimmedMeanAtrBandsIndicator.metadata,
+    inputConfig: trimmedMeanAtrBandsIndicator.inputConfig as InputConfig[],
+    plotConfig: trimmedMeanAtrBandsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...trimmedMeanAtrBandsIndicator.defaultInputs },
+    calculate: trimmedMeanAtrBandsIndicator.calculate,
+  },
+  {
+    id: 'retail-vs-banker-net-positions-symmetry-break',
+    group: 'community',
+    name: 'Retail vs Banker Net Positions – Symmetry Break',
+    shortName: retailVsBankerNetPositionsSymmetryBreakIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: retailVsBankerNetPositionsSymmetryBreakIndicator.metadata,
+    inputConfig: retailVsBankerNetPositionsSymmetryBreakIndicator.inputConfig as InputConfig[],
+    plotConfig: retailVsBankerNetPositionsSymmetryBreakIndicator.plotConfig as PlotConfig[],
+    hlineConfig: retailVsBankerNetPositionsSymmetryBreakIndicator.hlineConfig,
+    fillConfig: retailVsBankerNetPositionsSymmetryBreakIndicator.fillConfig,
+    defaultInputs: { ...retailVsBankerNetPositionsSymmetryBreakIndicator.defaultInputs },
+    calculate: retailVsBankerNetPositionsSymmetryBreakIndicator.calculate,
+  },
+  {
+    id: 'dominance-signal-apex',
+    group: 'community',
+    name: 'Dominance Signal Apex',
+    shortName: dominanceSignalApexIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: dominanceSignalApexIndicator.metadata,
+    inputConfig: dominanceSignalApexIndicator.inputConfig as InputConfig[],
+    plotConfig: dominanceSignalApexIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...dominanceSignalApexIndicator.defaultInputs },
+    calculate: dominanceSignalApexIndicator.calculate,
+  },
+  {
+    id: 'ema-rsi-autotrade-webhook-varun',
+    group: 'community',
+    name: 'EMA + RSI Autotrade Webhook - Varun',
+    shortName: emaRsiAutotradeWebhookVarunIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: emaRsiAutotradeWebhookVarunIndicator.metadata,
+    inputConfig: emaRsiAutotradeWebhookVarunIndicator.inputConfig as InputConfig[],
+    plotConfig: emaRsiAutotradeWebhookVarunIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...emaRsiAutotradeWebhookVarunIndicator.defaultInputs },
+    calculate: emaRsiAutotradeWebhookVarunIndicator.calculate,
+  },
+  {
+    id: 'crosby-ratio-quantumresearch',
+    group: 'community',
+    name: 'Crosby Ratio | QuantumResearch',
+    shortName: crosbyRatioQuantumresearchIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: crosbyRatioQuantumresearchIndicator.metadata,
+    inputConfig: crosbyRatioQuantumresearchIndicator.inputConfig as InputConfig[],
+    plotConfig: crosbyRatioQuantumresearchIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...crosbyRatioQuantumresearchIndicator.defaultInputs },
+    calculate: crosbyRatioQuantumresearchIndicator.calculate,
+  },
+  {
+    id: 'range-channel-by-atilla-yurtseven',
+    group: 'community',
+    name: 'Range Channel by Atilla Yurtseven',
+    shortName: rangeChannelByAtillaYurtsevenIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: false,
+    metadata: rangeChannelByAtillaYurtsevenIndicator.metadata,
+    inputConfig: rangeChannelByAtillaYurtsevenIndicator.inputConfig as InputConfig[],
+    plotConfig: rangeChannelByAtillaYurtsevenIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rangeChannelByAtillaYurtsevenIndicator.defaultInputs },
+    calculate: rangeChannelByAtillaYurtsevenIndicator.calculate,
+  },
+  {
+    id: 'kalman-hull-bands-for-loop-rakoquant',
+    group: 'community',
+    name: 'Kalman Hull Bands For Loop | RakoQuant',
+    shortName: kalmanHullBandsForLoopRakoquantIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: kalmanHullBandsForLoopRakoquantIndicator.metadata,
+    inputConfig: kalmanHullBandsForLoopRakoquantIndicator.inputConfig as InputConfig[],
+    plotConfig: kalmanHullBandsForLoopRakoquantIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...kalmanHullBandsForLoopRakoquantIndicator.defaultInputs },
+    calculate: kalmanHullBandsForLoopRakoquantIndicator.calculate,
+  },
+  {
+    id: 'granville-entry-guide',
+    group: 'community',
+    name: 'Granville Entry Guide',
+    shortName: granvilleEntryGuideIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: granvilleEntryGuideIndicator.metadata,
+    inputConfig: granvilleEntryGuideIndicator.inputConfig as InputConfig[],
+    plotConfig: granvilleEntryGuideIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...granvilleEntryGuideIndicator.defaultInputs },
+    calculate: granvilleEntryGuideIndicator.calculate,
+  },
+  {
+    id: 'rs-macd',
+    group: 'community',
+    name: 'rs_MACD',
+    shortName: rsMacdIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: rsMacdIndicator.metadata,
+    inputConfig: rsMacdIndicator.inputConfig as InputConfig[],
+    plotConfig: rsMacdIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsMacdIndicator.defaultInputs },
+    calculate: rsMacdIndicator.calculate,
+  },
+  {
+    id: 'visualisation-tendances',
+    group: 'community',
+    name: 'Visualisation tendances',
+    shortName: visualisationTendancesIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: visualisationTendancesIndicator.metadata,
+    inputConfig: visualisationTendancesIndicator.inputConfig as InputConfig[],
+    plotConfig: visualisationTendancesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...visualisationTendancesIndicator.defaultInputs },
+    calculate: visualisationTendancesIndicator.calculate,
+  },
+  {
+    id: 'composite-indicator',
+    group: 'community',
+    name: 'Composite Indicator (CCI + ATR)',
+    shortName: compositeIndicatorIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: compositeIndicatorIndicator.metadata,
+    inputConfig: compositeIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: compositeIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...compositeIndicatorIndicator.defaultInputs },
+    calculate: compositeIndicatorIndicator.calculate,
+  },
+  {
+    id: 'force-pulse',
+    group: 'community',
+    name: 'Force Pulse',
+    shortName: forcePulseIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: forcePulseIndicator.metadata,
+    inputConfig: forcePulseIndicator.inputConfig as InputConfig[],
+    plotConfig: forcePulseIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...forcePulseIndicator.defaultInputs },
+    calculate: forcePulseIndicator.calculate,
+  },
+  {
+    id: 'q-impulse-entry',
+    group: 'community',
+    name: 'Q Impulse Entry',
+    shortName: qImpulseEntryIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: qImpulseEntryIndicator.metadata,
+    inputConfig: qImpulseEntryIndicator.inputConfig as InputConfig[],
+    plotConfig: qImpulseEntryIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...qImpulseEntryIndicator.defaultInputs },
+    calculate: qImpulseEntryIndicator.calculate,
   },
   ...candlestickEntries(
     [...candlestickPortEntries, candlestickPortAllPatterns].map((e) => [e.id, e.indicator] as [string, typeof e.indicator])

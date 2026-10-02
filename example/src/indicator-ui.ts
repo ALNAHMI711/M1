@@ -669,8 +669,8 @@ export class IndicatorUI {
    * Evaluate plot visibility based on plotConfig.visible and plotConfig.display
    */
   private evaluatePlotVisibility(plotDef: any, result: any): boolean {
-    // Check display property first - 'none' means hidden
-    if (plotDef.display === 'none') {
+    // Check display property first - 'none', 'data_window' and 'status_line' are not drawn in the pane
+    if (plotDef.display === 'none' || plotDef.display === 'data_window' || plotDef.display === 'status_line') {
       return false;
     }
 

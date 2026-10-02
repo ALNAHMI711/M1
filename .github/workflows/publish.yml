@@ -23,6 +23,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Local development uses an oakscriptjs commit (devDependencies); a release is built and tested with the
+      # latest oakscriptjs release, which must be inside the peerDependencies range.
+      - name: Use the latest oakscriptjs release
+        run: |
+          npm install --no-save oakscriptjs@latest
+          version=$(node -p "require('oakscriptjs/package.json').version")
+          range=$(node -p "require('./package.json').peerDependencies.oakscriptjs")
+          npx --yes semver@7 -r "$range" "$version" || { echo "oakscriptjs $version is outside the peer range $range"; exit 1; }
+
       - name: Build
         run: npm run build
 
