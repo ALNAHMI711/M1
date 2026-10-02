@@ -1,0 +1,276 @@
+/**
+ * Monotonic Trend Consensus
+ *
+ * Spearman rank correlation between the source and time over up to five windows (default 8, 13, 21, 34): each
+ * window scores -1 (a clean staircase down) to +1 (a clean staircase up). The consensus is the average of the
+ * active window scores; the conviction is the share of windows with the sign of the consensus. A bullish trend is a
+ * consensus above the threshold with enough conviction, a bearish trend below minus the threshold. The consensus
+ * line is coloured by the trend, with four fill layers to zero, threshold lines and optional window lines, bar and
+ * background colours. Presets override the windows, the threshold and the conviction.
+ *
+ * Reference: "Monotonic Trend Consensus [QuantAlgo]" by QuantAlgo
+ * Licence: Mozilla Public License 2.0, as the original Pine script (https://mozilla.org/MPL/2.0/).
+ * Original notice: © QuantAlgo
+ */
+
+import { getSourceSeries, color, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import type { BarColorData, BgColorData } from '../types';
+
+export interface MonotonicTrendConsensusInputs {
+  preset: 'Default' | 'Fast Response' | 'Smooth Trend';
+  src: SourceType;
+  threshold: number;
+  minConviction: number;
+  e1: boolean;
+  l1: number;
+  e2: boolean;
+  l2: number;
+  e3: boolean;
+  l3: number;
+  e4: boolean;
+  l4: number;
+  e5: boolean;
+  l5: number;
+  showNeutral: boolean;
+  showComp: boolean;
+  colorPreset: 'Classic' | 'Aqua' | 'Cosmic' | 'Cyber' | 'Neon' | 'Custom';
+  bullishColor: string;
+  bearishColor: string;
+  neutralColor: string;
+  showCandles: boolean;
+  barTrans: number;
+  showBgcolor: boolean;
+  bgTrans: number;
+}
+
+export const defaultInputs: MonotonicTrendConsensusInputs = {
+  preset: 'Default',
+  src: 'close',
+  threshold: 0.35,
+  minConviction: 60,
+  e1: true,
+  l1: 8,
+  e2: true,
+  l2: 13,
+  e3: true,
+  l3: 21,
+  e4: true,
+  l4: 34,
+  e5: false,
+  l5: 55,
+  showNeutral: true,
+  showComp: false,
+  colorPreset: 'Custom',
+  bullishColor: '#00ffaa',
+  bearishColor: '#ff0000',
+  neutralColor: '#808080',
+  showCandles: false,
+  barTrans: 0,
+  showBgcolor: false,
+  bgTrans: 90,
+};
+
+const G_CORE = '════════ Core Settings ════════';
+const G_TIME = '════════ Timescale Settings ════════';
+const G_VIS = '════════ Visual Settings ════════';
+
+export const inputConfig: InputConfig[] = [
+  { id: 'preset', type: 'string', title: 'Preset Configuration', defval: 'Default', options: ['Default', 'Fast Response', 'Smooth Trend'], group: G_CORE },
+  { id: 'src', type: 'source', title: 'Price Source', defval: 'close', group: G_CORE },
+  { id: 'threshold', type: 'float', title: 'Trend Threshold', defval: 0.35, min: 0.0, max: 1.0, step: 0.05, group: G_CORE },
+  { id: 'minConviction', type: 'int', title: 'Min Conviction %', defval: 60, min: 0, max: 100, step: 10, group: G_CORE },
+  { id: 'e1', type: 'bool', title: 'Window 1', defval: true, group: G_TIME },
+  { id: 'l1', type: 'int', title: 'Window 1 Length', defval: 8, min: 3, max: 200, group: G_TIME },
+  { id: 'e2', type: 'bool', title: 'Window 2', defval: true, group: G_TIME },
+  { id: 'l2', type: 'int', title: 'Window 2 Length', defval: 13, min: 3, max: 200, group: G_TIME },
+  { id: 'e3', type: 'bool', title: 'Window 3', defval: true, group: G_TIME },
+  { id: 'l3', type: 'int', title: 'Window 3 Length', defval: 21, min: 3, max: 200, group: G_TIME },
+  { id: 'e4', type: 'bool', title: 'Window 4', defval: true, group: G_TIME },
+  { id: 'l4', type: 'int', title: 'Window 4 Length', defval: 34, min: 3, max: 200, group: G_TIME },
+  { id: 'e5', type: 'bool', title: 'Window 5', defval: false, group: G_TIME },
+  { id: 'l5', type: 'int', title: 'Window 5 Length', defval: 55, min: 3, max: 200, group: G_TIME },
+  { id: 'showNeutral', type: 'bool', title: 'Show Neutral', defval: true, group: G_VIS },
+  { id: 'showComp', type: 'bool', title: 'Show Component Lines', defval: false, group: G_VIS },
+  { id: 'colorPreset', type: 'string', title: 'Color Preset', defval: 'Custom', options: ['Classic', 'Aqua', 'Cosmic', 'Cyber', 'Neon', 'Custom'], group: G_VIS },
+  { id: 'bullishColor', type: 'color', title: 'Bullish Color', defval: '#00ffaa', group: G_VIS },
+  { id: 'bearishColor', type: 'color', title: 'Bearish Color', defval: '#ff0000', group: G_VIS },
+  { id: 'neutralColor', type: 'color', title: 'Neutral Color', defval: '#808080', group: G_VIS },
+  { id: 'showCandles', type: 'bool', title: 'Enable Bar Coloring', defval: false, group: G_VIS },
+  { id: 'barTrans', type: 'int', title: 'Bar Color Transparency', defval: 0, min: 0, max: 100, group: G_VIS },
+  { id: 'showBgcolor', type: 'bool', title: 'Enable Background Coloring', defval: false, group: G_VIS },
+  { id: 'bgTrans', type: 'int', title: 'Background Color Transparency', defval: 90, min: 0, max: 100, group: G_VIS },
+];
+
+export const plotConfig: PlotConfig[] = [
+  { id: 'plot0', title: 'Consensus', color: '#808080', lineWidth: 3 },
+  { id: 'plot1', title: 'Zero', color: '#808080', lineWidth: 1, display: 'none' },
+  { id: 'plot2', title: 'Gradient 75%', color: '#808080', lineWidth: 1, display: 'none' },
+  { id: 'plot3', title: 'Gradient 50%', color: '#808080', lineWidth: 1, display: 'none' },
+  { id: 'plot4', title: 'Gradient 25%', color: '#808080', lineWidth: 1, display: 'none' },
+  { id: 'plot5', title: 'Window 1', color: color.blue, lineWidth: 1 },
+  { id: 'plot6', title: 'Window 2', color: color.orange, lineWidth: 1 },
+  { id: 'plot7', title: 'Window 3', color: color.lime, lineWidth: 1 },
+  { id: 'plot8', title: 'Window 4', color: color.fuchsia, lineWidth: 1 },
+  { id: 'plot9', title: 'Window 5', color: color.yellow, lineWidth: 1 },
+  { id: 'plot10', title: 'Bull Threshold', color: String(color.new('#00ffaa', 60)), lineWidth: 1 },
+  { id: 'plot11', title: 'Bear Threshold', color: String(color.new('#ff0000', 60)), lineWidth: 1 },
+];
+
+export const metadata = {
+  title: 'Monotonic Trend Consensus [QuantAlgo]',
+  shortTitle: 'Monotonic Trend Consensus [QuantAlgo]',
+  overlay: false,
+};
+
+/** Pine float comparisons: a > b only when a - b > 1e-10, a == b within 1e-10 (na compares false) */
+const EPS = 1e-10;
+const gt = (a: number, b: number) => a - b > EPS;
+const lt = (a: number, b: number) => b - a > EPS;
+const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
+const eq = (a: number, b: number) => !isNaN(a) && !isNaN(b) && Math.abs(a - b) <= EPS;
+
+type Point = { time: number; value: number; color?: string };
+
+export function calculate(
+  bars: Bar[],
+  inputs: Partial<MonotonicTrendConsensusInputs> = {},
+): IndicatorResult & { barColors: BarColorData[]; bgColors: BgColorData[] } {
+  const cfg = { ...defaultInputs, ...inputs };
+  const n = bars.length;
+  let { e1, e2, e3, e4, e5, l1, l2, l3, l4, threshold, minConviction } = cfg;
+  const l5 = cfg.l5;
+  if (cfg.preset === 'Fast Response') {
+    [e1, e2, e3, e4, e5] = [true, true, true, true, false];
+    [l1, l2, l3, l4] = [5, 8, 13, 21];
+    threshold = 0.25;
+    minConviction = 50;
+  } else if (cfg.preset === 'Smooth Trend') {
+    [e1, e2, e3, e4, e5] = [true, true, true, true, false];
+    [l1, l2, l3, l4] = [21, 34, 55, 89];
+    threshold = 0.45;
+    minConviction = 75;
+  }
+  const presets: Record<string, [string, string]> = {
+    Classic: ['#00ff00', '#ff0000'],
+    Aqua: ['#00d4ff', '#ff8c00'],
+    Cosmic: ['#49ffce', '#9932cc'],
+    Cyber: ['#00cccc', '#ff6600'],
+    Neon: ['#ffff00', '#ff00ff'],
+    Custom: [cfg.bullishColor, cfg.bearishColor],
+  };
+  const [bullishColor, bearishColor] = presets[cfg.colorPreset] ?? presets.Custom;
+  const neutral = cfg.neutralColor;
+
+  const src = getSourceSeries(bars, cfg.src).toArray().map((v) => v ?? NaN);
+
+  // f_spearman(src, len) runs only on the bars where `e and bar_index >= len` is true (from bar `len` on): its
+  // argument history s[i] holds the values of the calls, so s[i] is na before the first call
+  const spearman = (t: number, len: number): number => {
+    const first = len; // first bar of the calls
+    const s = (i: number) => (t - i >= first ? src[t - i] : NaN);
+    let sumd2 = 0.0;
+    for (let i = 0; i <= len - 1; i++) {
+      const pi = s(i);
+      let less = 0.0;
+      let eqc = 0.0;
+      for (let j = 0; j <= len - 1; j++) {
+        const pj = s(j);
+        if (lt(pj, pi)) less += 1.0;
+        else if (eq(pj, pi)) eqc += 1.0;
+      }
+      const priceRank = less + (eqc + 1.0) / 2.0;
+      const timeRank = len - i;
+      const d = priceRank - timeRank;
+      sumd2 += d * d;
+    }
+    const denom = len * len * len - len;
+    const rho = gt(denom, 0) ? 1.0 - (6.0 * sumd2) / denom : 0.0;
+    return Math.max(-1.0, Math.min(1.0, rho));
+  };
+  const windows: Array<[boolean, number]> = [[e1, l1], [e2, l2], [e3, l3], [e4, l4], [e5, l5]];
+  const r: number[][] = windows.map(() => new Array(n).fill(NaN));
+
+  const consensus: number[] = new Array(n);
+  const trendDir: number[] = new Array(n);
+  let dir = 0; // var int trend_dir = 0
+  for (let t = 0; t < n; t++) {
+    const rhos: number[] = [];
+    windows.forEach(([on, len], k) => {
+      if (on && t >= len) r[k][t] = spearman(t, len);
+      if (!isNaN(r[k][t])) rhos.push(r[k][t]);
+    });
+    const active = rhos.length;
+    let cons = 0.0;
+    if (active > 0) cons = rhos.reduce((a, b) => a + b, 0) / active; // array.avg
+    let agree = 0;
+    if (active > 0) {
+      const sgn = ge(cons, 0) ? 1 : -1;
+      for (const v of rhos) if ((ge(v, 0) ? 1 : -1) === sgn) agree += 1;
+    }
+    const conviction = active > 0 ? (100.0 * agree) / active : 0.0;
+    const rawBull = gt(cons, threshold) && ge(conviction, minConviction);
+    const rawBear = lt(cons, -threshold) && ge(conviction, minConviction);
+    const rawState = rawBull ? 1 : rawBear ? -1 : 0;
+    dir = rawState !== 0 ? rawState : cfg.showNeutral ? 0 : dir;
+    consensus[t] = cons;
+    trendDir[t] = dir;
+  }
+
+  const lineColor = trendDir.map((d) => (d === 1 ? bullishColor : d === -1 ? bearishColor : neutral));
+  const time = (i: number) => bars[i].time;
+  const P = (f: (i: number) => Point): Point[] => bars.map((_b, i) => f(i));
+  const winColors = [color.blue, color.orange, color.lime, color.fuchsia, color.yellow];
+  const bullTh = String(color.new(bullishColor, 60));
+  const bearTh = String(color.new(bearishColor, 60));
+
+  const plots: Record<string, Point[]> = {
+    plot0: P((i) => ({ time: time(i), value: consensus[i], color: lineColor[i] })),
+    plot1: P((i) => ({ time: time(i), value: 0 })),
+    plot2: P((i) => ({ time: time(i), value: consensus[i] * 0.75 })),
+    plot3: P((i) => ({ time: time(i), value: consensus[i] * 0.5 })),
+    plot4: P((i) => ({ time: time(i), value: consensus[i] * 0.25 })),
+  };
+  // plot(show_comp and not na(rN) ? rN : na, 'Window N', color = ...)
+  r.forEach((rk, k) => {
+    plots[`plot${5 + k}`] = P((i) => ({ time: time(i), value: cfg.showComp ? rk[i] : NaN, color: winColors[k] }));
+  });
+  plots.plot10 = P((i) => ({ time: time(i), value: threshold, color: bullTh }));
+  plots.plot11 = P((i) => ({ time: time(i), value: -threshold, color: bearTh }));
+
+  // fill(p_line, p_g1, color.new(line_color, 55)), (p_g1, p_g2, 70), (p_g2, p_g3, 82), (p_g3, p_zero, 92)
+  const layer = (tr: number) => lineColor.map((c) => String(color.new(c, tr)));
+  const fills = [
+    { plot1: 'plot0', plot2: 'plot2', colors: layer(55) },
+    { plot1: 'plot2', plot2: 'plot3', colors: layer(70) },
+    { plot1: 'plot3', plot2: 'plot4', colors: layer(82) },
+    { plot1: 'plot4', plot2: 'plot1', colors: layer(92) },
+  ];
+
+  const barColors: BarColorData[] = [];
+  const bgColors: BgColorData[] = [];
+  for (let i = 0; i < n; i++) {
+    if (cfg.showCandles) barColors.push({ time: time(i), color: String(color.new(lineColor[i], cfg.barTrans)) });
+    if (cfg.showBgcolor) bgColors.push({ time: time(i), color: String(color.new(lineColor[i], cfg.bgTrans)) });
+  }
+
+  return {
+    metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
+    plots,
+    hlines: [
+      { value: 0, options: { title: 'Zero', color: String(color.new(neutral, 70)), linestyle: 'dashed' } },
+      { value: 1, options: { title: '+1', color: String(color.new(neutral, 85)), linestyle: 'dotted' } },
+      { value: -1, options: { title: '-1', color: String(color.new(neutral, 85)), linestyle: 'dotted' } },
+    ],
+    fills,
+    barColors,
+    bgColors,
+  };
+}
+
+export const MonotonicTrendConsensus = {
+  calculate,
+  metadata,
+  defaultInputs,
+  inputConfig,
+  plotConfig,
+};
