@@ -9,10 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "lightweight-charts": "^5.0.0"
+    "lightweight-charts": "^5.2.1"
   },
   "devDependencies": {
-    "oakscriptjs": "^0.9.3",
+    "oakscriptjs": "github:deepentropy/oakScriptJS#89d79f987a61ba1d418c9ccd8108d2795340cb36",
     "typescript": "^5.3.3",
     "vite": "^5.0.0"
   }
