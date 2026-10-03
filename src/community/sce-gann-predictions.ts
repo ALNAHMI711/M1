@@ -11,7 +11,7 @@
  * Original notice: © ScorsoneEnterprises
  */
 
-import { ta, Series, color, array, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, Series, color, array, callsite, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 
 export interface SceGannPredictionsInputs {
   /** Pine input "Select the TimeFrame to analyze": the script never reads it, so it changes nothing */
@@ -73,47 +73,27 @@ export function calculate(bars: Bar[], inputs: Partial<SceGannPredictionsInputs>
   const deltaDays = n + n * 2 - n;
   const gann = (t: number, gr: number, v: number) => close(t - n) + gr * deltaDays * v;
 
-  // ta.sma(GANN, n) inside evaluateGr: one call site called once per ratio in the while loop. Its history keeps
-  // one value per bar (the value of its last call in that bar); ta.sma skips na values.
-  const loopHist: number[] = []; // non-na GANN values of the last call of the previous bars
-  let loopPrev = NaN; // result of the last call of the previous bar
-  const loopSma = (x: number): number => {
-    if (isNaN(x)) return loopPrev;
-    const h = loopHist.length;
-    if (h < n - 1) return NaN;
-    let s = 0;
-    for (let k = h - (n - 1); k < h; k++) s += loopHist[k];
-    return (s + x) / n;
-  };
+  // ta.sma(GANN, n) inside evaluateGr: one call site called once per ratio in the while loop
+  const loopSma = callsite.sma();
 
   let optimalGr = NaN; // var float optimalGr = na
   let minSSE = NaN; // var float minSSE = na
   const GANN: number[] = new Array(len);
   for (let t = 0; t < len; t++) {
     const v = velocity(t);
-    let lastX = NaN;
-    let lastSma = NaN;
-    let called = false;
     let i = GrMin;
     while (lt(i, GrMax)) {
       // evaluateGr(Gn, i)
       const x = gann(t, i, v);
-      const epSma = loopSma(x);
+      const epSma = loopSma(t, x, n);
       let sse = 0.0;
       for (let j = 0; j <= n - 1; j++) sse = sse + Math.pow(close(t - j) - epSma, 2);
       if (isNaN(minSSE) || lt(sse, minSSE)) {
         minSSE = sse;
         optimalGr = i;
       }
-      lastX = x;
-      lastSma = epSma;
-      called = true;
       i = i + GrStep;
       if (!(GrStep > 0) && lt(i, GrMax)) throw new Error('Loop takes too long to execute: Gr_step must be greater than 0');
-    }
-    if (called) {
-      if (!isNaN(lastX)) loopHist.push(lastX);
-      loopPrev = lastSma;
     }
     GANN[t] = gann(t, optimalGr, v);
   }

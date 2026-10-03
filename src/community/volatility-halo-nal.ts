@@ -15,7 +15,7 @@
  * Original notice: © NordicAlphaLab
  */
 
-import { ta, Series, getSourceSeries, color, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { ta, Series, getSourceSeries, color, callsite, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 import type { PlotCandleData } from '../types';
 
 export interface VolatilityHaloNalInputs {
@@ -126,10 +126,9 @@ export function calculate(
   const lrEma = A(ta.ema(S(shock), cfg.longRunLen));
   const longRun = lrEma.map((v, i) => nz(v, shock[i]));
   const condVar: number[] = new Array(n).fill(NaN);
-  // math.sum(x, 5) inside the loops: one call site each. Its history has one value per bar (the value of the last
-  // loop iteration of that bar), so each iteration gives x + the last values of the 4 previous bars.
-  const betaSum = new LoopSum(5);
-  const gammaSum = new LoopSum(5);
+  // math.sum(x, 5) inside the loops: one call site each (one history value per bar, the value of its last call)
+  const betaSum = callsite.sum();
+  const gammaSum = callsite.sum();
   for (let i = 0; i < n; i++) {
     const fitTarget = nz(i >= 1 ? shock[i - 1] : NaN, shock[i]);
     const fitShock = nz(i >= 2 ? shock[i - 2] : NaN, fitTarget);
@@ -143,7 +142,7 @@ export function calculate(
       for (let b = 1; b <= 99; b++) {
         const bw = b / 100.0;
         const est = bw * fitCond + (1.0 - bw) * fitShock;
-        const sse = betaSum.call(Math.pow(est - fitTarget, 2.0));
+        const sse = betaSum(i, Math.pow(est - fitTarget, 2.0), 5);
         if (!isNaN(sse) && (isNaN(best) || lt(sse, best))) {
           best = sse;
           betaIndex = b;
@@ -155,14 +154,12 @@ export function calculate(
         const gw = g / 100.0;
         const aw = 1.0 - bw - gw;
         const est = gw * fitLongRun + aw * fitShock + bw * fitCond;
-        const sse = gammaSum.call(Math.pow(est - fitTarget, 2.0));
+        const sse = gammaSum(i, Math.pow(est - fitTarget, 2.0), 5);
         if (!isNaN(sse) && (isNaN(bestG) || lt(sse, bestG))) {
           bestG = sse;
           gammaIndex = g;
         }
       }
-      betaSum.commit();
-      gammaSum.commit();
     }
     const coefSum = Math.max(0.1 + 0.85 + 0.05, 0.000001);
     const beta = cfg.useAdaptiveCoefficients ? betaIndex / 100.0 : 0.85 / coefSum;
@@ -219,28 +216,6 @@ export function calculate(
     //            force_overlay = true, display = display.pane)
     plotCandles: { coloredCandles: candles },
   };
-}
-
-/**
- * Pine math.sum(x, len) of one call site called several times per bar (in a loop): each call gives x + the values
- * of the len - 1 previous bars where it ran (na before); the value kept for a bar is the one of its last call.
- */
-class LoopSum {
-  private hist: number[] = [];
-  private last = NaN;
-  constructor(private readonly len: number) {}
-  call(x: number): number {
-    this.last = x;
-    const h = this.hist.length;
-    if (h < this.len - 1) return NaN;
-    let s = x;
-    for (let k = 1; k < this.len; k++) s += this.hist[h - k];
-    return s;
-  }
-  commit(): void {
-    this.hist.push(this.last);
-    if (this.hist.length > this.len) this.hist.shift();
-  }
 }
 
 export const VolatilityHaloNal = {

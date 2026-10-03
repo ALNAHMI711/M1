@@ -114,7 +114,6 @@ export function calculate(
     const autoWindowFloat = cfg.lookbackDays * (390.0 / currentRes);
     return gt(autoWindowFloat, 20) ? Math.round(autoWindowFloat) : 20;
   });
-  const constantWindow = windowSize.every((w) => w === windowSize[0]);
 
   // f_minmax(src, len): one ta.lowest / ta.highest pair per call site, with the series length windowSize
   const minmaxSite = () => {
@@ -153,14 +152,9 @@ export function calculate(
       const site = rankSite();
       return src.map((v, i) => site(v, windowSize[i]));
     }
-    // f_zscoreNorm: ta.sma / ta.stdev with the length windowSize. oakscriptjs has no ta.sma / ta.stdev with a
-    // length that changes from bar to bar.
-    if (!constantWindow) {
-      throw new Error('Zscore with a window size that changes from bar to bar: ta.sma / ta.stdev with a series length are not supported');
-    }
-    const len = windowSize[0];
-    const meanVal = A(ta.sma(S(src), len));
-    const stdDev = A(ta.stdev(S(src), len));
+    // f_zscoreNorm: ta.sma / ta.stdev with the series length windowSize
+    const meanVal = A(ta.sma(S(src), S(windowSize)));
+    const stdDev = A(ta.stdev(S(src), S(windowSize)));
     // z = (stdDev != 0) ? (src - meanVal) / stdDev : 0 (na stdDev gives 0)
     const z = src.map((v, i) => (ne(stdDev[i], 0) ? (v - meanVal[i]) / stdDev[i] : 0));
     const site = minmaxSite();

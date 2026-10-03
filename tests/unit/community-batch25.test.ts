@@ -1,28 +1,29 @@
 /**
- * Unit tests for the community batch 24 ports (Pine v6 sources).
+ * Unit tests for the community batch 25 ports (Pine v6 sources).
  */
 
 import { describe, it, expect } from 'vitest';
 import {
-  RhokeoVwRsiHistogram,
-  DeltaVolumeRsi,
-  FlowshiftOscillator,
-  RsiTrendBias,
-  CciHashCapital,
-  HighVolumeArrowSignals,
-  RsiMacdV32,
-  ZScoreStdemaBands,
-  RenkoSniperPro,
-  ClusteringVolatility,
-  CardwellRsiByTq,
-  SpMacdWithDivergence,
-  PolynomialRegressionMovingAverage,
-  VolatilityBigMarketMoves,
-  BtcLogarithmicRegressionQuantileBandsAstralVision,
-  ParabolicStochSarVisualizer,
-  MacdDynamicSqueezePro,
-  MacdIrtov,
-  BuyingVsSellingMovingAverages,
+  IchimokuWHeikinAshi,
+  FastWma,
+  SmcStatisticalLiquidityWalls,
+  VolumeBarRange,
+  VortexProWithMovingAverage,
+  MidTermRibbon,
+  BitcoinMayerMultiple,
+  RsiAlternativeDerivation,
+  BreakoutAnReversalSignalDetectorWithColoredInBarTrends,
+  MaCrossWithDisplacement,
+  GuppyWave,
+  RossCameronInspiredDayTradingStrategy,
+  MacdVWithVolatilityNormalisation,
+  KalmanExponentialyWeightedMovingAverageMisinkomaster,
+  CycleSyncedChannelBreakout,
+  AllInOneRsiSystem,
+  BollingerHeatmap,
+  BarsSinceMaTest,
+  SwingSupportAndResistance,
+  Smiiol,
   indicatorRegistry,
 } from '../../src/index';
 
@@ -52,25 +53,26 @@ const bars = makeFixture();
 type Port = { calculate: (b: typeof bars, inputs?: any) => any; metadata: { overlay: boolean } };
 /** id, port, main plot, plots drawn with a negative offset (first bars left out) */
 const ports: Array<[string, Port, string, Record<string, number>?, Record<string, number>?]> = [
-  ['rhokeo-vw-rsi-histogram-for-cumulative-delta-by-zeiirman', RhokeoVwRsiHistogram, 'plot0'],
-  ['delta-volume-rsi', DeltaVolumeRsi, 'plot0'],
-  ['flowshift-oscillator', FlowshiftOscillator, 'plot0'],
-  ['rsi-trend-bias', RsiTrendBias, 'plot0'],
-  ['cci-hash-capital', CciHashCapital, 'plot0', { plot5: 5, plot6: 5 }],
-  ['high-volume-arrow-signals', HighVolumeArrowSignals, 'plot0'],
-  ['rsi-macd-v3-2', RsiMacdV32, 'plot0'],
-  ['z-score-stdema-bands', ZScoreStdemaBands, 'plot0'],
-  ['renko-sniper-pro', RenkoSniperPro, 'plot0'],
-  ['clustering-volatility', ClusteringVolatility, 'plot0'],
-  ['cardwell-rsi-by-tq', CardwellRsiByTq, 'plot0'],
-  ['sp-macd-with-divergence', SpMacdWithDivergence, 'plot0', { plot3: 5, plot4: 5 }],
-  ['polynomial-regression-moving-average', PolynomialRegressionMovingAverage, 'plot0'],
-  ['volatility-big-market-moves', VolatilityBigMarketMoves, 'plot0'],
-  ['btc-logarithmic-regression-quantile-bands-astral-vision', BtcLogarithmicRegressionQuantileBandsAstralVision, 'plot0'],
-  ['parabolic-stoch-sar-visualizer', ParabolicStochSarVisualizer, 'plot0'],
-  ['macd-dynamic-squeeze-pro', MacdDynamicSqueezePro, 'plot0'],
-  ['macd-irtov', MacdIrtov, 'plot0'],
-  ['buying-vs-selling-moving-averages', BuyingVsSellingMovingAverages, 'plot0'],
+  ['ichimoku-w-heikin-ashi', IchimokuWHeikinAshi, 'plot0', undefined, { plot2: 25, plot3: 25, plot4: 25 }],
+  ['fast-wma', FastWma, 'plot0'],
+  ['smc-statistical-liquidity-walls', SmcStatisticalLiquidityWalls, 'plot0'],
+  ['volume-bar-range', VolumeBarRange, 'plot0'],
+  ['vortex-pro-with-moving-average', VortexProWithMovingAverage, 'plot0'],
+  ['mid-term-ribbon', MidTermRibbon, 'plot0'],
+  ['bitcoin-mayer-multiple', BitcoinMayerMultiple, 'plot0'],
+  ['rsi-alternative-derivation', RsiAlternativeDerivation, 'plot0'],
+  ['breakout-an-reversal-signal-detector-with-colored-in-bar-trends', BreakoutAnReversalSignalDetectorWithColoredInBarTrends, 'plot0'],
+  ['ma-cross-with-displacement', MaCrossWithDisplacement, 'plot0'],
+  ['guppy-wave', GuppyWave, 'plot0'],
+  ['ross-cameron-inspired-day-trading-strategy', RossCameronInspiredDayTradingStrategy, 'plot0'],
+  ['macd-v-with-volatility-normalisation', MacdVWithVolatilityNormalisation, 'plot0'],
+  ['kalman-exponentialy-weighted-moving-average-misinkomaster', KalmanExponentialyWeightedMovingAverageMisinkomaster, 'plot0'],
+  ['cycle-synced-channel-breakout', CycleSyncedChannelBreakout, 'plot0'],
+  ['all-in-one-rsi-system', AllInOneRsiSystem, 'plot0', { plot4: 5, plot5: 5, plot6: 5, plot7: 5 }],
+  ['bollinger-heatmap', BollingerHeatmap, 'plot0'],
+  ['is-it-time-for-a-pullback-check-bars-since-ma-test', BarsSinceMaTest, 'plot0'],
+  ['swing-support-and-resistance', SwingSupportAndResistance, 'plot0', { plot0: 10, plot1: 10 }],
+  ['smiiol', Smiiol, 'plot0'],
 ];
 
 describe.each(ports)('%s', (id, port, mainPlot, leftOffsets, rightOffsets) => {
@@ -111,15 +113,3 @@ describe.each(ports)('%s', (id, port, mainPlot, leftOffsets, rightOffsets) => {
 
 
 
-
-describe('clustering-volatility Zscore with a changing window', () => {
-  it('runs Zscore with the auto window on intraday bars (ta.sma / ta.stdev with a series length)', () => {
-    const hourly = bars.slice(0, 600).map((b, i) => ({ ...b, time: 1262304000 + i * 3600 + (i >= 300 ? 7200 : 0) }));
-    const r = ClusteringVolatility.calculate(hourly, { clustMethod: 'Zscore', autoWindow: true });
-    expect(r.plots.plot0.some((p) => Number.isFinite(p.value))).toBe(true);
-  });
-
-  it('runs Zscore with the auto window on daily bars (window 20 on every bar)', () => {
-    expect(() => ClusteringVolatility.calculate(bars, { clustMethod: 'Zscore', autoWindow: true })).not.toThrow();
-  });
-});

@@ -3784,6 +3784,168 @@ export type { MacdIrtovInputs } from './community/macd-irtov';
 import * as buyingVsSellingMovingAveragesIndicator from './community/buying-vs-selling-moving-averages';
 export { BuyingVsSellingMovingAverages, calculate as calculateBuyingVsSellingMovingAverages } from './community/buying-vs-selling-moving-averages';
 export type { BuyingVsSellingMovingAveragesInputs } from './community/buying-vs-selling-moving-averages';
+// ── Community batch 25 (Pine v6 ports) ──
+// Ichimoku w/Heikin-Ashi
+import * as ichimokuWHeikinAshiIndicator from './community/ichimoku-w-heikin-ashi';
+export { IchimokuWHeikinAshi, calculate as calculateIchimokuWHeikinAshi } from './community/ichimoku-w-heikin-ashi';
+export type { IchimokuWHeikinAshiInputs } from './community/ichimoku-w-heikin-ashi';
+// Fast WMA
+import * as fastWmaIndicator from './community/fast-wma';
+export { FastWma, calculate as calculateFastWma } from './community/fast-wma';
+export type { FastWmaInputs } from './community/fast-wma';
+// SMC Statistical Liquidity Walls
+import * as smcStatisticalLiquidityWallsIndicator from './community/smc-statistical-liquidity-walls';
+export { SmcStatisticalLiquidityWalls, calculate as calculateSmcStatisticalLiquidityWalls } from './community/smc-statistical-liquidity-walls';
+export type { SmcStatisticalLiquidityWallsInputs } from './community/smc-statistical-liquidity-walls';
+// Volume bar range
+import * as volumeBarRangeIndicator from './community/volume-bar-range';
+export { VolumeBarRange, calculate as calculateVolumeBarRange } from './community/volume-bar-range';
+export type { VolumeBarRangeInputs } from './community/volume-bar-range';
+// Vortex Pro with Moving average
+import * as vortexProWithMovingAverageIndicator from './community/vortex-pro-with-moving-average';
+export { VortexProWithMovingAverage, calculate as calculateVortexProWithMovingAverage } from './community/vortex-pro-with-moving-average';
+export type { VortexProWithMovingAverageInputs } from './community/vortex-pro-with-moving-average';
+// Mid-term Ribbon
+import * as midTermRibbonIndicator from './community/mid-term-ribbon';
+export { MidTermRibbon, calculate as calculateMidTermRibbon } from './community/mid-term-ribbon';
+export type { MidTermRibbonInputs } from './community/mid-term-ribbon';
+// Bitcoin: Mayer Multiple
+import * as bitcoinMayerMultipleIndicator from './community/bitcoin-mayer-multiple';
+export { BitcoinMayerMultiple, calculate as calculateBitcoinMayerMultiple } from './community/bitcoin-mayer-multiple';
+export type { BitcoinMayerMultipleInputs } from './community/bitcoin-mayer-multiple';
+// RSI: alternative derivation
+import * as rsiAlternativeDerivationIndicator from './community/rsi-alternative-derivation';
+export { RsiAlternativeDerivation, calculate as calculateRsiAlternativeDerivation } from './community/rsi-alternative-derivation';
+export type { RsiAlternativeDerivationInputs } from './community/rsi-alternative-derivation';
+// Breakout an Reversal Signal Detector with Colored in Bar Trends
+import * as breakoutAnReversalSignalDetectorWithColoredInBarTrendsIndicator from './community/breakout-an-reversal-signal-detector-with-colored-in-bar-trends';
+export { BreakoutAnReversalSignalDetectorWithColoredInBarTrends, calculate as calculateBreakoutAnReversalSignalDetectorWithColoredInBarTrends } from './community/breakout-an-reversal-signal-detector-with-colored-in-bar-trends';
+export type { BreakoutAnReversalSignalDetectorWithColoredInBarTrendsInputs } from './community/breakout-an-reversal-signal-detector-with-colored-in-bar-trends';
+// MA Cross with Displacement
+import * as maCrossWithDisplacementIndicator from './community/ma-cross-with-displacement';
+export { MaCrossWithDisplacement, calculate as calculateMaCrossWithDisplacement } from './community/ma-cross-with-displacement';
+export type { MaCrossWithDisplacementInputs } from './community/ma-cross-with-displacement';
+// Guppy Wave
+import * as guppyWaveIndicator from './community/guppy-wave';
+export { GuppyWave, calculate as calculateGuppyWave } from './community/guppy-wave';
+export type { GuppyWaveInputs } from './community/guppy-wave';
+// Ross Cameron-Inspired Day Trading Strategy
+import * as rossCameronInspiredDayTradingStrategyIndicator from './community/ross-cameron-inspired-day-trading-strategy';
+export { RossCameronInspiredDayTradingStrategy, calculate as calculateRossCameronInspiredDayTradingStrategy } from './community/ross-cameron-inspired-day-trading-strategy';
+export type { RossCameronInspiredDayTradingStrategyInputs } from './community/ross-cameron-inspired-day-trading-strategy';
+// MACD-V with Volatility Normalisation
+import * as macdVWithVolatilityNormalisationIndicator from './community/macd-v-with-volatility-normalisation';
+export { MacdVWithVolatilityNormalisation, calculate as calculateMacdVWithVolatilityNormalisation } from './community/macd-v-with-volatility-normalisation';
+export type { MacdVWithVolatilityNormalisationInputs } from './community/macd-v-with-volatility-normalisation';
+// Kalman Exponentialy Weighted Moving Average | MisinkoMaster
+import * as kalmanExponentialyWeightedMovingAverageMisinkomasterIndicator from './community/kalman-exponentialy-weighted-moving-average-misinkomaster';
+export { KalmanExponentialyWeightedMovingAverageMisinkomaster, calculate as calculateKalmanExponentialyWeightedMovingAverageMisinkomaster } from './community/kalman-exponentialy-weighted-moving-average-misinkomaster';
+export type { KalmanExponentialyWeightedMovingAverageMisinkomasterInputs } from './community/kalman-exponentialy-weighted-moving-average-misinkomaster';
+// Cycle-Synced Channel Breakout
+import * as cycleSyncedChannelBreakoutIndicator from './community/cycle-synced-channel-breakout';
+export { CycleSyncedChannelBreakout, calculate as calculateCycleSyncedChannelBreakout } from './community/cycle-synced-channel-breakout';
+export type { CycleSyncedChannelBreakoutInputs } from './community/cycle-synced-channel-breakout';
+// ALL-IN-ONE RSI System (Cloud Divergence Stoch RSI CM WVF)
+import * as allInOneRsiSystemIndicator from './community/all-in-one-rsi-system';
+export { AllInOneRsiSystem, calculate as calculateAllInOneRsiSystem } from './community/all-in-one-rsi-system';
+export type { AllInOneRsiSystemInputs } from './community/all-in-one-rsi-system';
+// Bollinger Heatmap
+import * as bollingerHeatmapIndicator from './community/bollinger-heatmap';
+export { BollingerHeatmap, calculate as calculateBollingerHeatmap } from './community/bollinger-heatmap';
+export type { BollingerHeatmapInputs } from './community/bollinger-heatmap';
+// Is it Time for a Pullback? Check Bars Since MA Test
+import * as isItTimeForAPullbackCheckBarsSinceMaTestIndicator from './community/is-it-time-for-a-pullback-check-bars-since-ma-test';
+export { BarsSinceMaTest, calculate as calculateBarsSinceMaTest } from './community/is-it-time-for-a-pullback-check-bars-since-ma-test';
+export type { BarsSinceMaTestInputs } from './community/is-it-time-for-a-pullback-check-bars-since-ma-test';
+// Swing Support and Resistance
+import * as swingSupportAndResistanceIndicator from './community/swing-support-and-resistance';
+export { SwingSupportAndResistance, calculate as calculateSwingSupportAndResistance } from './community/swing-support-and-resistance';
+export type { SwingSupportAndResistanceInputs } from './community/swing-support-and-resistance';
+// SMIIOL
+import * as smiiolIndicator from './community/smiiol';
+export { Smiiol, calculate as calculateSmiiol } from './community/smiiol';
+export type { SmiiolInputs } from './community/smiiol';
+// ── Community batch 26 (Pine v6 ports) ──
+// Trading Gaul
+import * as tradingGaulIndicator from './community/trading-gaul';
+export { TradingGaul, calculate as calculateTradingGaul } from './community/trading-gaul';
+export type { TradingGaulInputs } from './community/trading-gaul';
+// RSI+Stoch Band Oscillator
+import * as rsiStochBandOscillatorIndicator from './community/rsi-stoch-band-oscillator';
+export { RsiStochBandOscillator, calculate as calculateRsiStochBandOscillator } from './community/rsi-stoch-band-oscillator';
+export type { RsiStochBandOscillatorInputs } from './community/rsi-stoch-band-oscillator';
+// 🌊 ALMA Bands
+import * as almaBandsIndicator from './community/alma-bands';
+export { AlmaBands, calculate as calculateAlmaBands } from './community/alma-bands';
+export type { AlmaBandsInputs } from './community/alma-bands';
+// Elliptic Curve SAR
+import * as ellipticCurveSarIndicator from './community/elliptic-curve-sar';
+export { EllipticCurveSar, calculate as calculateEllipticCurveSar } from './community/elliptic-curve-sar';
+export type { EllipticCurveSarInputs } from './community/elliptic-curve-sar';
+// Perfect RSI
+import * as perfectRsiIndicator from './community/perfect-rsi';
+export { PerfectRsi, calculate as calculatePerfectRsi } from './community/perfect-rsi';
+export type { PerfectRsiInputs } from './community/perfect-rsi';
+// Percentile Rank Oscillator (Price + VWMA)
+import * as percentileRankOscillatorIndicator from './community/percentile-rank-oscillator';
+export { PercentileRankOscillator, calculate as calculatePercentileRankOscillator } from './community/percentile-rank-oscillator';
+export type { PercentileRankOscillatorInputs } from './community/percentile-rank-oscillator';
+// Aggressive Volume
+import * as aggressiveVolumeIndicator from './community/aggressive-volume';
+export { AggressiveVolume, calculate as calculateAggressiveVolume } from './community/aggressive-volume';
+export type { AggressiveVolumeInputs } from './community/aggressive-volume';
+// Golden & Death Cross with Re-Activation
+import * as goldenDeathCrossWithReActivationIndicator from './community/golden-death-cross-with-re-activation';
+export { GoldenDeathCrossWithReActivation, calculate as calculateGoldenDeathCrossWithReActivation } from './community/golden-death-cross-with-re-activation';
+export type { GoldenDeathCrossWithReActivationInputs } from './community/golden-death-cross-with-re-activation';
+// TFO + ADX with Histogram & Signal
+import * as tfoAdxWithHistogramSignalIndicator from './community/tfo-adx-with-histogram-signal';
+export { TfoAdxWithHistogramSignal, calculate as calculateTfoAdxWithHistogramSignal } from './community/tfo-adx-with-histogram-signal';
+export type { TfoAdxWithHistogramSignalInputs } from './community/tfo-adx-with-histogram-signal';
+// VolVol
+import * as volvolIndicator from './community/volvol';
+export { VolVol, calculate as calculateVolVol } from './community/volvol';
+export type { VolVolInputs } from './community/volvol';
+// AI Trading Assistant v2
+import * as aiTradingAssistantV2Indicator from './community/ai-trading-assistant-v2';
+export { AiTradingAssistantV2, calculate as calculateAiTradingAssistantV2 } from './community/ai-trading-assistant-v2';
+export type { AiTradingAssistantV2Inputs } from './community/ai-trading-assistant-v2';
+// Volume Buy/Sell Split
+import * as volumeBuySellSplitIndicator from './community/volume-buy-sell-split';
+export { VolumeBuySellSplit, calculate as calculateVolumeBuySellSplit } from './community/volume-buy-sell-split';
+export type { VolumeBuySellSplitInputs } from './community/volume-buy-sell-split';
+// Spira Alligator
+import * as spiraAlligatorIndicator from './community/spira-alligator';
+export { SpiraAlligator, calculate as calculateSpiraAlligator } from './community/spira-alligator';
+export type { SpiraAlligatorInputs } from './community/spira-alligator';
+// TASC 2026.01 The Reversion Index
+import * as tasc202601TheReversionIndexIndicator from './community/tasc-2026-01-the-reversion-index';
+export { Tasc202601TheReversionIndex, calculate as calculateTasc202601TheReversionIndex } from './community/tasc-2026-01-the-reversion-index';
+export type { Tasc202601TheReversionIndexInputs } from './community/tasc-2026-01-the-reversion-index';
+// Ichimoku ACE Club
+import * as ichimokuAceClubIndicator from './community/ichimoku-ace-club';
+export { IchimokuAceClub, calculate as calculateIchimokuAceClub } from './community/ichimoku-ace-club';
+export type { IchimokuAceClubInputs } from './community/ichimoku-ace-club';
+// Trend Double Pullbackv1.0
+import * as trendDoublePullbackV10Indicator from './community/trend-double-pullback-v1-0';
+export { TrendDoublePullbackV10, calculate as calculateTrendDoublePullbackV10 } from './community/trend-double-pullback-v1-0';
+export type { TrendDoublePullbackV10Inputs } from './community/trend-double-pullback-v1-0';
+// RSI + ADX + ATR Combo
+import * as rsiAdxAtrComboIndicator from './community/rsi-adx-atr-combo';
+export { RsiAdxAtrCombo, calculate as calculateRsiAdxAtrCombo } from './community/rsi-adx-atr-combo';
+export type { RsiAdxAtrComboInputs } from './community/rsi-adx-atr-combo';
+// Macd + Adx Pro by @Eternyworld
+import * as macdAdxProByEternyworldIndicator from './community/macd-adx-pro-by-eternyworld';
+export { MacdAdxProByEternyworld, calculate as calculateMacdAdxProByEternyworld } from './community/macd-adx-pro-by-eternyworld';
+export type { MacdAdxProByEternyworldInputs } from './community/macd-adx-pro-by-eternyworld';
+// Cabal Dev Indicator
+import * as cabalDevIndicatorIndicator from './community/cabal-dev-indicator';
+export { CabalDevIndicator, calculate as calculateCabalDevIndicator } from './community/cabal-dev-indicator';
+export type { CabalDevIndicatorInputs } from './community/cabal-dev-indicator';
+// Volume Comparison with Buyer/Seller Pressure
+import * as volumeComparisonWithBuyerSellerPressureIndicator from './community/volume-comparison-with-buyer-seller-pressure';
+export { VolumeComparisonWithBuyerSellerPressure, calculate as calculateVolumeComparisonWithBuyerSellerPressure } from './community/volume-comparison-with-buyer-seller-pressure';
+export type { VolumeComparisonWithBuyerSellerPressureInputs } from './community/volume-comparison-with-buyer-seller-pressure';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -15464,6 +15626,532 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: buyingVsSellingMovingAveragesIndicator.plotConfig as PlotConfig[],
     defaultInputs: { ...buyingVsSellingMovingAveragesIndicator.defaultInputs },
     calculate: buyingVsSellingMovingAveragesIndicator.calculate,
+  },
+  {
+    id: 'ichimoku-w-heikin-ashi',
+    group: 'community',
+    name: 'Ichimoku w/Heikin-Ashi',
+    shortName: ichimokuWHeikinAshiIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: ichimokuWHeikinAshiIndicator.metadata,
+    inputConfig: ichimokuWHeikinAshiIndicator.inputConfig as InputConfig[],
+    plotConfig: ichimokuWHeikinAshiIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...ichimokuWHeikinAshiIndicator.defaultInputs },
+    calculate: ichimokuWHeikinAshiIndicator.calculate,
+  },
+  {
+    id: 'fast-wma',
+    group: 'community',
+    name: 'Fast WMA',
+    shortName: fastWmaIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: false,
+    metadata: fastWmaIndicator.metadata,
+    inputConfig: fastWmaIndicator.inputConfig as InputConfig[],
+    plotConfig: fastWmaIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...fastWmaIndicator.defaultInputs },
+    calculate: fastWmaIndicator.calculate,
+  },
+  {
+    id: 'smc-statistical-liquidity-walls',
+    group: 'community',
+    name: 'SMC Statistical Liquidity Walls',
+    shortName: smcStatisticalLiquidityWallsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: smcStatisticalLiquidityWallsIndicator.metadata,
+    inputConfig: smcStatisticalLiquidityWallsIndicator.inputConfig as InputConfig[],
+    plotConfig: smcStatisticalLiquidityWallsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...smcStatisticalLiquidityWallsIndicator.defaultInputs },
+    calculate: smcStatisticalLiquidityWallsIndicator.calculate,
+  },
+  {
+    id: 'volume-bar-range',
+    group: 'community',
+    name: 'Volume bar range',
+    shortName: volumeBarRangeIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: volumeBarRangeIndicator.metadata,
+    inputConfig: volumeBarRangeIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeBarRangeIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeBarRangeIndicator.defaultInputs },
+    calculate: volumeBarRangeIndicator.calculate,
+  },
+  {
+    id: 'vortex-pro-with-moving-average',
+    group: 'community',
+    name: 'Vortex Pro with Moving average',
+    shortName: vortexProWithMovingAverageIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: vortexProWithMovingAverageIndicator.metadata,
+    inputConfig: vortexProWithMovingAverageIndicator.inputConfig as InputConfig[],
+    plotConfig: vortexProWithMovingAverageIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...vortexProWithMovingAverageIndicator.defaultInputs },
+    calculate: vortexProWithMovingAverageIndicator.calculate,
+  },
+  {
+    id: 'mid-term-ribbon',
+    group: 'community',
+    name: 'Mid-term Ribbon',
+    shortName: midTermRibbonIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: midTermRibbonIndicator.metadata,
+    inputConfig: midTermRibbonIndicator.inputConfig as InputConfig[],
+    plotConfig: midTermRibbonIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...midTermRibbonIndicator.defaultInputs },
+    calculate: midTermRibbonIndicator.calculate,
+  },
+  {
+    id: 'bitcoin-mayer-multiple',
+    group: 'community',
+    name: 'Bitcoin: Mayer Multiple',
+    shortName: bitcoinMayerMultipleIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: bitcoinMayerMultipleIndicator.metadata,
+    inputConfig: bitcoinMayerMultipleIndicator.inputConfig as InputConfig[],
+    plotConfig: bitcoinMayerMultipleIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...bitcoinMayerMultipleIndicator.defaultInputs },
+    calculate: bitcoinMayerMultipleIndicator.calculate,
+  },
+  {
+    id: 'rsi-alternative-derivation',
+    group: 'community',
+    name: 'RSI: alternative derivation',
+    shortName: rsiAlternativeDerivationIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: rsiAlternativeDerivationIndicator.metadata,
+    inputConfig: rsiAlternativeDerivationIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiAlternativeDerivationIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsiAlternativeDerivationIndicator.defaultInputs },
+    calculate: rsiAlternativeDerivationIndicator.calculate,
+  },
+  {
+    id: 'breakout-an-reversal-signal-detector-with-colored-in-bar-trends',
+    group: 'community',
+    name: 'Breakout an Reversal Signal Detector with Colored in Bar Trends',
+    shortName: breakoutAnReversalSignalDetectorWithColoredInBarTrendsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: breakoutAnReversalSignalDetectorWithColoredInBarTrendsIndicator.metadata,
+    inputConfig: breakoutAnReversalSignalDetectorWithColoredInBarTrendsIndicator.inputConfig as InputConfig[],
+    plotConfig: breakoutAnReversalSignalDetectorWithColoredInBarTrendsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...breakoutAnReversalSignalDetectorWithColoredInBarTrendsIndicator.defaultInputs },
+    calculate: breakoutAnReversalSignalDetectorWithColoredInBarTrendsIndicator.calculate,
+  },
+  {
+    id: 'ma-cross-with-displacement',
+    group: 'community',
+    name: 'MA Cross with Displacement',
+    shortName: maCrossWithDisplacementIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: maCrossWithDisplacementIndicator.metadata,
+    inputConfig: maCrossWithDisplacementIndicator.inputConfig as InputConfig[],
+    plotConfig: maCrossWithDisplacementIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...maCrossWithDisplacementIndicator.defaultInputs },
+    calculate: maCrossWithDisplacementIndicator.calculate,
+  },
+  {
+    id: 'guppy-wave',
+    group: 'community',
+    name: 'Guppy Wave',
+    shortName: guppyWaveIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: guppyWaveIndicator.metadata,
+    inputConfig: guppyWaveIndicator.inputConfig as InputConfig[],
+    plotConfig: guppyWaveIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...guppyWaveIndicator.defaultInputs },
+    calculate: guppyWaveIndicator.calculate,
+  },
+  {
+    id: 'ross-cameron-inspired-day-trading-strategy',
+    group: 'community',
+    name: 'Ross Cameron-Inspired Day Trading Strategy',
+    shortName: rossCameronInspiredDayTradingStrategyIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: rossCameronInspiredDayTradingStrategyIndicator.metadata,
+    inputConfig: rossCameronInspiredDayTradingStrategyIndicator.inputConfig as InputConfig[],
+    plotConfig: rossCameronInspiredDayTradingStrategyIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rossCameronInspiredDayTradingStrategyIndicator.defaultInputs },
+    calculate: rossCameronInspiredDayTradingStrategyIndicator.calculate,
+  },
+  {
+    id: 'macd-v-with-volatility-normalisation',
+    group: 'community',
+    name: 'MACD-V with Volatility Normalisation',
+    shortName: macdVWithVolatilityNormalisationIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: macdVWithVolatilityNormalisationIndicator.metadata,
+    inputConfig: macdVWithVolatilityNormalisationIndicator.inputConfig as InputConfig[],
+    plotConfig: macdVWithVolatilityNormalisationIndicator.plotConfig as PlotConfig[],
+    hlineConfig: macdVWithVolatilityNormalisationIndicator.hlineConfig,
+    defaultInputs: { ...macdVWithVolatilityNormalisationIndicator.defaultInputs },
+    calculate: macdVWithVolatilityNormalisationIndicator.calculate,
+  },
+  {
+    id: 'kalman-exponentialy-weighted-moving-average-misinkomaster',
+    group: 'community',
+    name: 'Kalman Exponentialy Weighted Moving Average | MisinkoMaster',
+    shortName: kalmanExponentialyWeightedMovingAverageMisinkomasterIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: kalmanExponentialyWeightedMovingAverageMisinkomasterIndicator.metadata,
+    inputConfig: kalmanExponentialyWeightedMovingAverageMisinkomasterIndicator.inputConfig as InputConfig[],
+    plotConfig: kalmanExponentialyWeightedMovingAverageMisinkomasterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...kalmanExponentialyWeightedMovingAverageMisinkomasterIndicator.defaultInputs },
+    calculate: kalmanExponentialyWeightedMovingAverageMisinkomasterIndicator.calculate,
+  },
+  {
+    id: 'cycle-synced-channel-breakout',
+    group: 'community',
+    name: 'Cycle-Synced Channel Breakout',
+    shortName: cycleSyncedChannelBreakoutIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: cycleSyncedChannelBreakoutIndicator.metadata,
+    inputConfig: cycleSyncedChannelBreakoutIndicator.inputConfig as InputConfig[],
+    plotConfig: cycleSyncedChannelBreakoutIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...cycleSyncedChannelBreakoutIndicator.defaultInputs },
+    calculate: cycleSyncedChannelBreakoutIndicator.calculate,
+  },
+  {
+    id: 'all-in-one-rsi-system',
+    group: 'community',
+    name: 'ALL-IN-ONE RSI System (Cloud Divergence Stoch RSI CM WVF)',
+    shortName: allInOneRsiSystemIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: allInOneRsiSystemIndicator.metadata,
+    inputConfig: allInOneRsiSystemIndicator.inputConfig as InputConfig[],
+    plotConfig: allInOneRsiSystemIndicator.plotConfig as PlotConfig[],
+    hlineConfig: allInOneRsiSystemIndicator.hlineConfig,
+    fillConfig: allInOneRsiSystemIndicator.fillConfig,
+    defaultInputs: { ...allInOneRsiSystemIndicator.defaultInputs },
+    calculate: allInOneRsiSystemIndicator.calculate,
+  },
+  {
+    id: 'bollinger-heatmap',
+    group: 'community',
+    name: 'Bollinger Heatmap',
+    shortName: bollingerHeatmapIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: false,
+    metadata: bollingerHeatmapIndicator.metadata,
+    inputConfig: bollingerHeatmapIndicator.inputConfig as InputConfig[],
+    plotConfig: bollingerHeatmapIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...bollingerHeatmapIndicator.defaultInputs },
+    calculate: bollingerHeatmapIndicator.calculate,
+  },
+  {
+    id: 'is-it-time-for-a-pullback-check-bars-since-ma-test',
+    group: 'community',
+    name: 'Is it Time for a Pullback? Check Bars Since MA Test',
+    shortName: isItTimeForAPullbackCheckBarsSinceMaTestIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: false,
+    metadata: isItTimeForAPullbackCheckBarsSinceMaTestIndicator.metadata,
+    inputConfig: isItTimeForAPullbackCheckBarsSinceMaTestIndicator.inputConfig as InputConfig[],
+    plotConfig: isItTimeForAPullbackCheckBarsSinceMaTestIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...isItTimeForAPullbackCheckBarsSinceMaTestIndicator.defaultInputs },
+    calculate: isItTimeForAPullbackCheckBarsSinceMaTestIndicator.calculate,
+  },
+  {
+    id: 'swing-support-and-resistance',
+    group: 'community',
+    name: 'Swing Support and Resistance',
+    shortName: swingSupportAndResistanceIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: swingSupportAndResistanceIndicator.metadata,
+    inputConfig: swingSupportAndResistanceIndicator.inputConfig as InputConfig[],
+    plotConfig: swingSupportAndResistanceIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...swingSupportAndResistanceIndicator.defaultInputs },
+    calculate: swingSupportAndResistanceIndicator.calculate,
+  },
+  {
+    id: 'smiiol',
+    group: 'community',
+    name: 'SMIIOL',
+    shortName: smiiolIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: smiiolIndicator.metadata,
+    inputConfig: smiiolIndicator.inputConfig as InputConfig[],
+    plotConfig: smiiolIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...smiiolIndicator.defaultInputs },
+    calculate: smiiolIndicator.calculate,
+  },
+  {
+    id: 'trading-gaul',
+    group: 'community',
+    name: 'Trading Gaul',
+    shortName: tradingGaulIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: tradingGaulIndicator.metadata,
+    inputConfig: tradingGaulIndicator.inputConfig as InputConfig[],
+    plotConfig: tradingGaulIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...tradingGaulIndicator.defaultInputs },
+    calculate: tradingGaulIndicator.calculate,
+  },
+  {
+    id: 'rsi-stoch-band-oscillator',
+    group: 'community',
+    name: 'RSI+Stoch Band Oscillator',
+    shortName: rsiStochBandOscillatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: rsiStochBandOscillatorIndicator.metadata,
+    inputConfig: rsiStochBandOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiStochBandOscillatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsiStochBandOscillatorIndicator.defaultInputs },
+    calculate: rsiStochBandOscillatorIndicator.calculate,
+  },
+  {
+    id: 'alma-bands',
+    group: 'community',
+    name: '🌊 ALMA Bands',
+    shortName: almaBandsIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: almaBandsIndicator.metadata,
+    inputConfig: almaBandsIndicator.inputConfig as InputConfig[],
+    plotConfig: almaBandsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...almaBandsIndicator.defaultInputs },
+    calculate: almaBandsIndicator.calculate,
+  },
+  {
+    id: 'elliptic-curve-sar',
+    group: 'community',
+    name: 'Elliptic Curve SAR',
+    shortName: ellipticCurveSarIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: ellipticCurveSarIndicator.metadata,
+    inputConfig: ellipticCurveSarIndicator.inputConfig as InputConfig[],
+    plotConfig: ellipticCurveSarIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...ellipticCurveSarIndicator.defaultInputs },
+    calculate: ellipticCurveSarIndicator.calculate,
+  },
+  {
+    id: 'perfect-rsi',
+    group: 'community',
+    name: 'Perfect RSI',
+    shortName: perfectRsiIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: perfectRsiIndicator.metadata,
+    inputConfig: perfectRsiIndicator.inputConfig as InputConfig[],
+    plotConfig: perfectRsiIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...perfectRsiIndicator.defaultInputs },
+    calculate: perfectRsiIndicator.calculate,
+  },
+  {
+    id: 'percentile-rank-oscillator',
+    group: 'community',
+    name: 'Percentile Rank Oscillator (Price + VWMA)',
+    shortName: percentileRankOscillatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: percentileRankOscillatorIndicator.metadata,
+    inputConfig: percentileRankOscillatorIndicator.inputConfig as InputConfig[],
+    plotConfig: percentileRankOscillatorIndicator.plotConfig as PlotConfig[],
+    hlineConfig: percentileRankOscillatorIndicator.hlineConfig,
+    fillConfig: percentileRankOscillatorIndicator.fillConfig,
+    defaultInputs: { ...percentileRankOscillatorIndicator.defaultInputs },
+    calculate: percentileRankOscillatorIndicator.calculate,
+  },
+  {
+    id: 'aggressive-volume',
+    group: 'community',
+    name: 'Aggressive Volume',
+    shortName: aggressiveVolumeIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: aggressiveVolumeIndicator.metadata,
+    inputConfig: aggressiveVolumeIndicator.inputConfig as InputConfig[],
+    plotConfig: aggressiveVolumeIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...aggressiveVolumeIndicator.defaultInputs },
+    calculate: aggressiveVolumeIndicator.calculate,
+  },
+  {
+    id: 'golden-death-cross-with-re-activation',
+    group: 'community',
+    name: 'Golden & Death Cross with Re-Activation',
+    shortName: goldenDeathCrossWithReActivationIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: goldenDeathCrossWithReActivationIndicator.metadata,
+    inputConfig: goldenDeathCrossWithReActivationIndicator.inputConfig as InputConfig[],
+    plotConfig: goldenDeathCrossWithReActivationIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...goldenDeathCrossWithReActivationIndicator.defaultInputs },
+    calculate: goldenDeathCrossWithReActivationIndicator.calculate,
+  },
+  {
+    id: 'tfo-adx-with-histogram-signal',
+    group: 'community',
+    name: 'TFO + ADX with Histogram & Signal',
+    shortName: tfoAdxWithHistogramSignalIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: tfoAdxWithHistogramSignalIndicator.metadata,
+    inputConfig: tfoAdxWithHistogramSignalIndicator.inputConfig as InputConfig[],
+    plotConfig: tfoAdxWithHistogramSignalIndicator.plotConfig as PlotConfig[],
+    hlineConfig: tfoAdxWithHistogramSignalIndicator.hlineConfig,
+    defaultInputs: { ...tfoAdxWithHistogramSignalIndicator.defaultInputs },
+    calculate: tfoAdxWithHistogramSignalIndicator.calculate,
+  },
+  {
+    id: 'volvol',
+    group: 'community',
+    name: 'VolVol',
+    shortName: volvolIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: volvolIndicator.metadata,
+    inputConfig: volvolIndicator.inputConfig as InputConfig[],
+    plotConfig: volvolIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volvolIndicator.defaultInputs },
+    calculate: volvolIndicator.calculate,
+  },
+  {
+    id: 'ai-trading-assistant-v2',
+    group: 'community',
+    name: 'AI Trading Assistant v2',
+    shortName: aiTradingAssistantV2Indicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: aiTradingAssistantV2Indicator.metadata,
+    inputConfig: aiTradingAssistantV2Indicator.inputConfig as InputConfig[],
+    plotConfig: aiTradingAssistantV2Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...aiTradingAssistantV2Indicator.defaultInputs },
+    calculate: aiTradingAssistantV2Indicator.calculate,
+  },
+  {
+    id: 'volume-buy-sell-split',
+    group: 'community',
+    name: 'Volume Buy/Sell Split',
+    shortName: volumeBuySellSplitIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: volumeBuySellSplitIndicator.metadata,
+    inputConfig: volumeBuySellSplitIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeBuySellSplitIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeBuySellSplitIndicator.defaultInputs },
+    calculate: volumeBuySellSplitIndicator.calculate,
+  },
+  {
+    id: 'spira-alligator',
+    group: 'community',
+    name: 'Spira Alligator',
+    shortName: spiraAlligatorIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: spiraAlligatorIndicator.metadata,
+    inputConfig: spiraAlligatorIndicator.inputConfig as InputConfig[],
+    plotConfig: spiraAlligatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...spiraAlligatorIndicator.defaultInputs },
+    calculate: spiraAlligatorIndicator.calculate,
+  },
+  {
+    id: 'tasc-2026-01-the-reversion-index',
+    group: 'community',
+    name: 'TASC 2026.01 The Reversion Index',
+    shortName: tasc202601TheReversionIndexIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: tasc202601TheReversionIndexIndicator.metadata,
+    inputConfig: tasc202601TheReversionIndexIndicator.inputConfig as InputConfig[],
+    plotConfig: tasc202601TheReversionIndexIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...tasc202601TheReversionIndexIndicator.defaultInputs },
+    calculate: tasc202601TheReversionIndexIndicator.calculate,
+  },
+  {
+    id: 'ichimoku-ace-club',
+    group: 'community',
+    name: 'Ichimoku ACE Club',
+    shortName: ichimokuAceClubIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: ichimokuAceClubIndicator.metadata,
+    inputConfig: ichimokuAceClubIndicator.inputConfig as InputConfig[],
+    plotConfig: ichimokuAceClubIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...ichimokuAceClubIndicator.defaultInputs },
+    calculate: ichimokuAceClubIndicator.calculate,
+  },
+  {
+    id: 'trend-double-pullback-v1-0',
+    group: 'community',
+    name: 'Trend Double Pullbackv1.0',
+    shortName: trendDoublePullbackV10Indicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: trendDoublePullbackV10Indicator.metadata,
+    inputConfig: trendDoublePullbackV10Indicator.inputConfig as InputConfig[],
+    plotConfig: trendDoublePullbackV10Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...trendDoublePullbackV10Indicator.defaultInputs },
+    calculate: trendDoublePullbackV10Indicator.calculate,
+  },
+  {
+    id: 'rsi-adx-atr-combo',
+    group: 'community',
+    name: 'RSI + ADX + ATR Combo',
+    shortName: rsiAdxAtrComboIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: rsiAdxAtrComboIndicator.metadata,
+    inputConfig: rsiAdxAtrComboIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiAdxAtrComboIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsiAdxAtrComboIndicator.defaultInputs },
+    calculate: rsiAdxAtrComboIndicator.calculate,
+  },
+  {
+    id: 'macd-adx-pro-by-eternyworld',
+    group: 'community',
+    name: 'Macd + Adx Pro by @Eternyworld',
+    shortName: macdAdxProByEternyworldIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: macdAdxProByEternyworldIndicator.metadata,
+    inputConfig: macdAdxProByEternyworldIndicator.inputConfig as InputConfig[],
+    plotConfig: macdAdxProByEternyworldIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...macdAdxProByEternyworldIndicator.defaultInputs },
+    calculate: macdAdxProByEternyworldIndicator.calculate,
+  },
+  {
+    id: 'cabal-dev-indicator',
+    group: 'community',
+    name: 'Cabal Dev Indicator',
+    shortName: cabalDevIndicatorIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: cabalDevIndicatorIndicator.metadata,
+    inputConfig: cabalDevIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: cabalDevIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...cabalDevIndicatorIndicator.defaultInputs },
+    calculate: cabalDevIndicatorIndicator.calculate,
+  },
+  {
+    id: 'volume-comparison-with-buyer-seller-pressure',
+    group: 'community',
+    name: 'Volume Comparison with Buyer/Seller Pressure',
+    shortName: volumeComparisonWithBuyerSellerPressureIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: volumeComparisonWithBuyerSellerPressureIndicator.metadata,
+    inputConfig: volumeComparisonWithBuyerSellerPressureIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeComparisonWithBuyerSellerPressureIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeComparisonWithBuyerSellerPressureIndicator.defaultInputs },
+    calculate: volumeComparisonWithBuyerSellerPressureIndicator.calculate,
   },
   ...candlestickEntries(
     [...candlestickPortEntries, candlestickPortAllPatterns].map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
