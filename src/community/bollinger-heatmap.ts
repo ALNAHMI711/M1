@@ -11,7 +11,7 @@
  * Original notice: © Quantitative
  */
 
-import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { callsite, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 
 const TOTAL_BARS = 30;
 const LINE_WIDTH = 4;
@@ -93,7 +93,6 @@ const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > 1e-10);
 export function calculate(bars: Bar[], inputs: Partial<BollingerHeatmapInputs> = {}): IndicatorResult {
   const cfg = { ...defaultInputs, ...inputs };
   const n = bars.length;
-  const close = getSourceSeries(bars, 'close');
 
   // fColorFromRatio(distanceRatio)
   const steps: [number, string][] = [
@@ -112,24 +111,26 @@ export function calculate(bars: Bar[], inputs: Partial<BollingerHeatmapInputs> =
     plot1: bars.map((b) => ({ time: b.time, value: 45, color: '#00000000' })),
   };
   const closeArr = bars.map((b) => b.close);
-  for (let k = 0; k < TOTAL_BARS; k++) {
-    const length = cfg[lengthKey(k)] as number;
-    // [_, upperBand, lowerBand] = ta.bb(close, length, bbStd)
-    const [, upperS, lowerS] = ta.bb(close, length, cfg.bbStd);
-    const upper = upperS.toArray();
-    const lower = lowerS.toArray();
-    const pts = new Array(n);
-    for (let i = 0; i < n; i++) {
-      const u = upper[i] ?? NaN;
-      const l = lower[i] ?? NaN;
+  // ta.bb(close, length, bbStd) inside `for i = 0 to TOTAL_BARS - 1`: one call site with a different length on each
+  // call (basis = ta.sma, dev = bbStd * ta.stdev); the loop call sites keep the last call of each bar
+  const avgSite = callsite.sma();
+  const devSite = callsite.stdev();
+  const pts: { time: number; value: number; color: string }[][] = Array.from({ length: TOTAL_BARS }, () => new Array(n));
+  for (let i = 0; i < n; i++) {
+    for (let k = 0; k < TOTAL_BARS; k++) {
+      const length = cfg[lengthKey(k)] as number;
+      const basis = avgSite(i, closeArr[i], length);
+      const dev = devSite(i, closeArr[i], length);
+      const u = basis + cfg.bbStd * dev;
+      const l = basis - cfg.bbStd * dev;
       const bandRange = u - l;
       const distanceToLower = closeArr[i] - l;
       // plain division: x / 0 is +-infinity, 0 / 0 is na
       const distanceRatio = clamp(distanceToLower / bandRange);
-      pts[i] = { time: bars[i].time, value: k, color: colourOf(distanceRatio) };
+      pts[k][i] = { time: bars[i].time, value: k, color: colourOf(distanceRatio) };
     }
-    plots[`plot${k + 2}`] = pts;
   }
+  for (let k = 0; k < TOTAL_BARS; k++) plots[`plot${k + 2}`] = pts[k];
 
   return {
     metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },

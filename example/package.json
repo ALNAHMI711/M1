@@ -12,7 +12,7 @@
     "lightweight-charts": "^5.2.1"
   },
   "devDependencies": {
-    "oakscriptjs": "github:deepentropy/oakScriptJS#382f33c525d655539813de497f735e2d3e38f5cb",
+    "oakscriptjs": "github:deepentropy/oakScriptJS#3528f3d8c49a3ab6da74972607ac03b822ad38d2",
     "typescript": "^5.3.3",
     "vite": "^5.0.0"
   }
