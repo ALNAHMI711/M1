@@ -3553,6 +3553,87 @@ export type { ThreeConfirmationBullInputs } from './community/3-confirmation-bul
 import * as buyOnVolumeIndicator from './community/buy-on-volume';
 export { BuyOnVolume, calculate as calculateBuyOnVolume } from './community/buy-on-volume';
 export type { BuyOnVolumeInputs } from './community/buy-on-volume';
+// ── Community batch 22 (Pine v6 ports) ──
+// My auto dual avwap with Auto swing low/pivot low finder
+import * as myAutoDualAvwapWithAutoSwingLowPivotLowFinderIndicator from './community/my-auto-dual-avwap-with-auto-swing-low-pivot-low-finder';
+export { MyAutoDualAvwapWithAutoSwingLowPivotLowFinder, calculate as calculateMyAutoDualAvwapWithAutoSwingLowPivotLowFinder } from './community/my-auto-dual-avwap-with-auto-swing-low-pivot-low-finder';
+export type { MyAutoDualAvwapInputs } from './community/my-auto-dual-avwap-with-auto-swing-low-pivot-low-finder';
+// FxShare - CC Reversal
+import * as fxshareCcReversalIndicator from './community/fxshare-cc-reversal';
+export { FxShareCcReversal, calculate as calculateFxShareCcReversal } from './community/fxshare-cc-reversal';
+export type { FxShareCcReversalInputs } from './community/fxshare-cc-reversal';
+// Shock Percentile Moving Average | NAL
+import * as shockPercentileMovingAverageNalIndicator from './community/shock-percentile-moving-average-nal';
+export { ShockPercentileMovingAverageNal, calculate as calculateShockPercentileMovingAverageNal } from './community/shock-percentile-moving-average-nal';
+export type { ShockPercentileMovingAverageNalInputs } from './community/shock-percentile-moving-average-nal';
+// Liquidity Indicator
+import * as liquidityIndicatorIndicator from './community/liquidity-indicator';
+export { LiquidityIndicator, calculate as calculateLiquidityIndicator } from './community/liquidity-indicator';
+export type { LiquidityIndicatorInputs } from './community/liquidity-indicator';
+// Instantaneous Trendline with Cloud
+import * as instantaneousTrendlineWithCloudIndicator from './community/instantaneous-trendline-with-cloud';
+export { InstantaneousTrendlineWithCloud, calculate as calculateInstantaneousTrendlineWithCloud } from './community/instantaneous-trendline-with-cloud';
+export type { InstantaneousTrendlineWithCloudInputs } from './community/instantaneous-trendline-with-cloud';
+// True Range eXpansion
+import * as trueRangeExpansionIndicator from './community/true-range-expansion';
+export { TrueRangeExpansion, calculate as calculateTrueRangeExpansion } from './community/true-range-expansion';
+export type { TrueRangeExpansionInputs } from './community/true-range-expansion';
+// Relative Strength Heatmap
+import * as relativeStrengthHeatmapIndicator from './community/relative-strength-heatmap';
+export { RelativeStrengthHeatmap, calculate as calculateRelativeStrengthHeatmap } from './community/relative-strength-heatmap';
+export type { RelativeStrengthHeatmapInputs } from './community/relative-strength-heatmap';
+// SCE GANN Predictions
+import * as sceGannPredictionsIndicator from './community/sce-gann-predictions';
+export { SceGannPredictions, calculate as calculateSceGannPredictions } from './community/sce-gann-predictions';
+export type { SceGannPredictionsInputs } from './community/sce-gann-predictions';
+// RSI+EMA+MZONES with Divergences
+import * as rsiEmaMzonesWithDivergencesIndicator from './community/rsi-ema-mzones-with-divergences';
+export { RsiEmaMzonesWithDivergences, calculate as calculateRsiEmaMzonesWithDivergences } from './community/rsi-ema-mzones-with-divergences';
+export type { RsiEmaMzonesWithDivergencesInputs } from './community/rsi-ema-mzones-with-divergences';
+// Biggest Volume
+import * as biggestVolumeIndicator from './community/biggest-volume';
+export { BiggestVolume, calculate as calculateBiggestVolume } from './community/biggest-volume';
+export type { BiggestVolumeInputs } from './community/biggest-volume';
+// 3-in-1 Custom Moving Average Indicator
+import * as p3In1CustomMovingAverageIndicatorIndicator from './community/3-in-1-custom-moving-average-indicator';
+export { ThreeInOneCustomMovingAverageIndicator, calculate as calculateThreeInOneCustomMovingAverageIndicator } from './community/3-in-1-custom-moving-average-indicator';
+export type { ThreeInOneCustomMovingAverageIndicatorInputs } from './community/3-in-1-custom-moving-average-indicator';
+// Crossover EMMM
+import * as crossoverEmmmIndicator from './community/crossover-emmm';
+export { CrossoverEmmm, calculate as calculateCrossoverEmmm } from './community/crossover-emmm';
+export type { CrossoverEmmmInputs } from './community/crossover-emmm';
+// MESA Phase-Adaptive Band Trend
+import * as mesaPhaseAdaptiveBandTrendIndicator from './community/mesa-phase-adaptive-band-trend';
+export { MesaPhaseAdaptiveBandTrend, calculate as calculateMesaPhaseAdaptiveBandTrend } from './community/mesa-phase-adaptive-band-trend';
+export type { MesaPhaseAdaptiveBandTrendInputs } from './community/mesa-phase-adaptive-band-trend';
+// Equalhigh JAPANESE TRIPLE RCI
+import * as equalhighJapaneseTripleRciIndicator from './community/equalhigh-japanese-triple-rci';
+export { EqualhighJapaneseTripleRci, calculate as calculateEqualhighJapaneseTripleRci } from './community/equalhigh-japanese-triple-rci';
+export type { EqualhighJapaneseTripleRciInputs } from './community/equalhigh-japanese-triple-rci';
+// Cycle & Flow Indicator - D_Quant
+import * as cycleFlowIndicatorDQuantIndicator from './community/cycle-flow-indicator-d-quant';
+export { CycleFlowIndicatorDQuant, calculate as calculateCycleFlowIndicatorDQuant } from './community/cycle-flow-indicator-d-quant';
+export type { CycleFlowIndicatorDQuantInputs } from './community/cycle-flow-indicator-d-quant';
+// BuySell%_ImtiazH_v2
+import * as buysellImtiazhV2Indicator from './community/buysell-imtiazh-v2';
+export { BuySellImtiazhV2, calculate as calculateBuySellImtiazhV2 } from './community/buysell-imtiazh-v2';
+export type { BuySellImtiazhV2Inputs } from './community/buysell-imtiazh-v2';
+// RSI Games 1.2
+import * as rsiGames12Indicator from './community/rsi-games-1-2';
+export { RsiGames12, calculate as calculateRsiGames12 } from './community/rsi-games-1-2';
+export type { RsiGames12Inputs } from './community/rsi-games-1-2';
+// Whale Volume Absorption & Aggression @MaxMaserati 3.0
+import * as whaleVolumeAbsorptionAggressionMaxmaserati30Indicator from './community/whale-volume-absorption-aggression-maxmaserati-3-0';
+export { WhaleVolumeAbsorptionAggression, calculate as calculateWhaleVolumeAbsorptionAggression } from './community/whale-volume-absorption-aggression-maxmaserati-3-0';
+export type { WhaleVolumeAbsorptionAggressionInputs } from './community/whale-volume-absorption-aggression-maxmaserati-3-0';
+// KD-NewAutoTrade for Future Trading - Heikin Ashi candles
+import * as kdNewautotradeForFutureTradingHeikinAshiCandlesIndicator from './community/kd-newautotrade-for-future-trading-heikin-ashi-candles';
+export { KdNewAutoTrade, calculate as calculateKdNewAutoTrade } from './community/kd-newautotrade-for-future-trading-heikin-ashi-candles';
+export type { KdNewAutoTradeInputs } from './community/kd-newautotrade-for-future-trading-heikin-ashi-candles';
+// Cycle Low (RSI + StochRSI) – v5 John.K
+import * as cycleLowV5JohnKIndicator from './community/cycle-low-v5-john-k';
+export { CycleLowRsiStochRsi, calculate as calculateCycleLowRsiStochRsi } from './community/cycle-low-v5-john-k';
+export type { CycleLowRsiStochRsiInputs } from './community/cycle-low-v5-john-k';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -14485,6 +14566,270 @@ export const indicatorRegistry: IndicatorRegistryEntry[] = [
     plotConfig: buyOnVolumeIndicator.plotConfig as PlotConfig[],
     defaultInputs: { ...buyOnVolumeIndicator.defaultInputs },
     calculate: buyOnVolumeIndicator.calculate,
+  },
+  {
+    id: 'my-auto-dual-avwap-with-auto-swing-low-pivot-low-finder',
+    group: 'community',
+    name: 'My auto dual avwap with Auto swing low/pivot low finder',
+    shortName: myAutoDualAvwapWithAutoSwingLowPivotLowFinderIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: myAutoDualAvwapWithAutoSwingLowPivotLowFinderIndicator.metadata,
+    inputConfig: myAutoDualAvwapWithAutoSwingLowPivotLowFinderIndicator.inputConfig as InputConfig[],
+    plotConfig: myAutoDualAvwapWithAutoSwingLowPivotLowFinderIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...myAutoDualAvwapWithAutoSwingLowPivotLowFinderIndicator.defaultInputs },
+    calculate: myAutoDualAvwapWithAutoSwingLowPivotLowFinderIndicator.calculate,
+  },
+  {
+    id: 'fxshare-cc-reversal',
+    group: 'community',
+    name: 'FxShare - CC Reversal',
+    shortName: fxshareCcReversalIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: fxshareCcReversalIndicator.metadata,
+    inputConfig: fxshareCcReversalIndicator.inputConfig as InputConfig[],
+    plotConfig: fxshareCcReversalIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...fxshareCcReversalIndicator.defaultInputs },
+    calculate: fxshareCcReversalIndicator.calculate,
+  },
+  {
+    id: 'shock-percentile-moving-average-nal',
+    group: 'community',
+    name: 'Shock Percentile Moving Average | NAL',
+    shortName: shockPercentileMovingAverageNalIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: shockPercentileMovingAverageNalIndicator.metadata,
+    inputConfig: shockPercentileMovingAverageNalIndicator.inputConfig as InputConfig[],
+    plotConfig: shockPercentileMovingAverageNalIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...shockPercentileMovingAverageNalIndicator.defaultInputs },
+    calculate: shockPercentileMovingAverageNalIndicator.calculate,
+  },
+  {
+    id: 'liquidity-indicator',
+    group: 'community',
+    name: 'Liquidity Indicator',
+    shortName: liquidityIndicatorIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: liquidityIndicatorIndicator.metadata,
+    inputConfig: liquidityIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: liquidityIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...liquidityIndicatorIndicator.defaultInputs },
+    calculate: liquidityIndicatorIndicator.calculate,
+  },
+  {
+    id: 'instantaneous-trendline-with-cloud',
+    group: 'community',
+    name: 'Instantaneous Trendline with Cloud',
+    shortName: instantaneousTrendlineWithCloudIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: instantaneousTrendlineWithCloudIndicator.metadata,
+    inputConfig: instantaneousTrendlineWithCloudIndicator.inputConfig as InputConfig[],
+    plotConfig: instantaneousTrendlineWithCloudIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...instantaneousTrendlineWithCloudIndicator.defaultInputs },
+    calculate: instantaneousTrendlineWithCloudIndicator.calculate,
+  },
+  {
+    id: 'true-range-expansion',
+    group: 'community',
+    name: 'True Range eXpansion',
+    shortName: trueRangeExpansionIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: true,
+    metadata: trueRangeExpansionIndicator.metadata,
+    inputConfig: trueRangeExpansionIndicator.inputConfig as InputConfig[],
+    plotConfig: trueRangeExpansionIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...trueRangeExpansionIndicator.defaultInputs },
+    calculate: trueRangeExpansionIndicator.calculate,
+  },
+  {
+    id: 'relative-strength-heatmap',
+    group: 'community',
+    name: 'Relative Strength Heatmap',
+    shortName: relativeStrengthHeatmapIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: false,
+    metadata: relativeStrengthHeatmapIndicator.metadata,
+    inputConfig: relativeStrengthHeatmapIndicator.inputConfig as InputConfig[],
+    plotConfig: relativeStrengthHeatmapIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...relativeStrengthHeatmapIndicator.defaultInputs },
+    calculate: relativeStrengthHeatmapIndicator.calculate,
+  },
+  {
+    id: 'sce-gann-predictions',
+    group: 'community',
+    name: 'SCE GANN Predictions',
+    shortName: sceGannPredictionsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: sceGannPredictionsIndicator.metadata,
+    inputConfig: sceGannPredictionsIndicator.inputConfig as InputConfig[],
+    plotConfig: sceGannPredictionsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...sceGannPredictionsIndicator.defaultInputs },
+    calculate: sceGannPredictionsIndicator.calculate,
+  },
+  {
+    id: 'rsi-ema-mzones-with-divergences',
+    group: 'community',
+    name: 'RSI+EMA+MZONES with Divergences',
+    shortName: rsiEmaMzonesWithDivergencesIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: rsiEmaMzonesWithDivergencesIndicator.metadata,
+    inputConfig: rsiEmaMzonesWithDivergencesIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiEmaMzonesWithDivergencesIndicator.plotConfig as PlotConfig[],
+    hlineConfig: rsiEmaMzonesWithDivergencesIndicator.hlineConfig,
+    fillConfig: rsiEmaMzonesWithDivergencesIndicator.fillConfig,
+    defaultInputs: { ...rsiEmaMzonesWithDivergencesIndicator.defaultInputs },
+    calculate: rsiEmaMzonesWithDivergencesIndicator.calculate,
+  },
+  {
+    id: 'biggest-volume',
+    group: 'community',
+    name: 'Biggest Volume',
+    shortName: biggestVolumeIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: biggestVolumeIndicator.metadata,
+    inputConfig: biggestVolumeIndicator.inputConfig as InputConfig[],
+    plotConfig: biggestVolumeIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...biggestVolumeIndicator.defaultInputs },
+    calculate: biggestVolumeIndicator.calculate,
+  },
+  {
+    id: '3-in-1-custom-moving-average-indicator',
+    group: 'community',
+    name: '3-in-1 Custom Moving Average Indicator',
+    shortName: p3In1CustomMovingAverageIndicatorIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: p3In1CustomMovingAverageIndicatorIndicator.metadata,
+    inputConfig: p3In1CustomMovingAverageIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: p3In1CustomMovingAverageIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...p3In1CustomMovingAverageIndicatorIndicator.defaultInputs },
+    calculate: p3In1CustomMovingAverageIndicatorIndicator.calculate,
+  },
+  {
+    id: 'crossover-emmm',
+    group: 'community',
+    name: 'Crossover EMMM',
+    shortName: crossoverEmmmIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: crossoverEmmmIndicator.metadata,
+    inputConfig: crossoverEmmmIndicator.inputConfig as InputConfig[],
+    plotConfig: crossoverEmmmIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...crossoverEmmmIndicator.defaultInputs },
+    calculate: crossoverEmmmIndicator.calculate,
+  },
+  {
+    id: 'mesa-phase-adaptive-band-trend',
+    group: 'community',
+    name: 'MESA Phase-Adaptive Band Trend',
+    shortName: mesaPhaseAdaptiveBandTrendIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: mesaPhaseAdaptiveBandTrendIndicator.metadata,
+    inputConfig: mesaPhaseAdaptiveBandTrendIndicator.inputConfig as InputConfig[],
+    plotConfig: mesaPhaseAdaptiveBandTrendIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...mesaPhaseAdaptiveBandTrendIndicator.defaultInputs },
+    calculate: mesaPhaseAdaptiveBandTrendIndicator.calculate,
+  },
+  {
+    id: 'equalhigh-japanese-triple-rci',
+    group: 'community',
+    name: 'Equalhigh JAPANESE TRIPLE RCI',
+    shortName: equalhighJapaneseTripleRciIndicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: equalhighJapaneseTripleRciIndicator.metadata,
+    inputConfig: equalhighJapaneseTripleRciIndicator.inputConfig as InputConfig[],
+    plotConfig: equalhighJapaneseTripleRciIndicator.plotConfig as PlotConfig[],
+    hlineConfig: equalhighJapaneseTripleRciIndicator.hlineConfig,
+    fillConfig: equalhighJapaneseTripleRciIndicator.fillConfig,
+    defaultInputs: { ...equalhighJapaneseTripleRciIndicator.defaultInputs },
+    calculate: equalhighJapaneseTripleRciIndicator.calculate,
+  },
+  {
+    id: 'cycle-flow-indicator-d-quant',
+    group: 'community',
+    name: 'Cycle & Flow Indicator - D_Quant',
+    shortName: cycleFlowIndicatorDQuantIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: cycleFlowIndicatorDQuantIndicator.metadata,
+    inputConfig: cycleFlowIndicatorDQuantIndicator.inputConfig as InputConfig[],
+    plotConfig: cycleFlowIndicatorDQuantIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...cycleFlowIndicatorDQuantIndicator.defaultInputs },
+    calculate: cycleFlowIndicatorDQuantIndicator.calculate,
+  },
+  {
+    id: 'buysell-imtiazh-v2',
+    group: 'community',
+    name: 'BuySell%_ImtiazH_v2',
+    shortName: buysellImtiazhV2Indicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: buysellImtiazhV2Indicator.metadata,
+    inputConfig: buysellImtiazhV2Indicator.inputConfig as InputConfig[],
+    plotConfig: buysellImtiazhV2Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...buysellImtiazhV2Indicator.defaultInputs },
+    calculate: buysellImtiazhV2Indicator.calculate,
+  },
+  {
+    id: 'rsi-games-1-2',
+    group: 'community',
+    name: 'RSI Games 1.2',
+    shortName: rsiGames12Indicator.metadata.shortTitle,
+    category: 'Oscillators',
+    overlay: false,
+    metadata: rsiGames12Indicator.metadata,
+    inputConfig: rsiGames12Indicator.inputConfig as InputConfig[],
+    plotConfig: rsiGames12Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsiGames12Indicator.defaultInputs },
+    calculate: rsiGames12Indicator.calculate,
+  },
+  {
+    id: 'whale-volume-absorption-aggression-maxmaserati-3-0',
+    group: 'community',
+    name: 'Whale Volume Absorption & Aggression @MaxMaserati 3.0',
+    shortName: whaleVolumeAbsorptionAggressionMaxmaserati30Indicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: whaleVolumeAbsorptionAggressionMaxmaserati30Indicator.metadata,
+    inputConfig: whaleVolumeAbsorptionAggressionMaxmaserati30Indicator.inputConfig as InputConfig[],
+    plotConfig: whaleVolumeAbsorptionAggressionMaxmaserati30Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...whaleVolumeAbsorptionAggressionMaxmaserati30Indicator.defaultInputs },
+    calculate: whaleVolumeAbsorptionAggressionMaxmaserati30Indicator.calculate,
+  },
+  {
+    id: 'kd-newautotrade-for-future-trading-heikin-ashi-candles',
+    group: 'community',
+    name: 'KD-NewAutoTrade for Future Trading - Heikin Ashi candles',
+    shortName: kdNewautotradeForFutureTradingHeikinAshiCandlesIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: kdNewautotradeForFutureTradingHeikinAshiCandlesIndicator.metadata,
+    inputConfig: kdNewautotradeForFutureTradingHeikinAshiCandlesIndicator.inputConfig as InputConfig[],
+    plotConfig: kdNewautotradeForFutureTradingHeikinAshiCandlesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...kdNewautotradeForFutureTradingHeikinAshiCandlesIndicator.defaultInputs },
+    calculate: kdNewautotradeForFutureTradingHeikinAshiCandlesIndicator.calculate,
+  },
+  {
+    id: 'cycle-low-v5-john-k',
+    group: 'community',
+    name: 'Cycle Low (RSI + StochRSI) – v5 John.K',
+    shortName: cycleLowV5JohnKIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: cycleLowV5JohnKIndicator.metadata,
+    inputConfig: cycleLowV5JohnKIndicator.inputConfig as InputConfig[],
+    plotConfig: cycleLowV5JohnKIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...cycleLowV5JohnKIndicator.defaultInputs },
+    calculate: cycleLowV5JohnKIndicator.calculate,
   },
   ...candlestickEntries(
     [...candlestickPortEntries, candlestickPortAllPatterns].map((e) => [e.id, e.indicator] as [string, typeof e.indicator])

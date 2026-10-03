@@ -11,7 +11,6 @@ import {
   HistogramSeries,
   type LineWidth,
   BaselineSeries,
-  AreaSeries,
   type IChartApi,
   type ISeriesApi,
   type ISeriesMarkersPluginApi,
@@ -24,7 +23,6 @@ import {
   type LineData,
   type HistogramData,
   type BaselineData,
-  type AreaData,
   type WhitespaceData,
   type Time,
   type SeriesType,
@@ -1247,7 +1245,8 @@ export class ChartManager {
   private container: HTMLElement;
   private candlestickSeries: ISeriesApi<'Candlestick'>;
   private indicatorSeries: Map<string, ISeriesApi<'Line'>> = new Map();
-  private areaSeries: Map<string, ISeriesApi<'Area'>> = new Map();
+  /** fill primitives of plot.style_area plots, attached to their line series in indicatorSeries */
+  private areaFills: Map<string, PlotFillPrimitive> = new Map();
   private histogramSeriesMap: Map<string, ISeriesApi<'Histogram'>> = new Map();
   private indicatorPanes: Map<string, number> = new Map();
   private hlineSeries: Map<string, ISeriesApi<'Line'>> = new Map();
@@ -1438,41 +1437,35 @@ export class ChartManager {
   }
 
   /**
-   * Add or update an area series (for 'area' plot style)
+   * Pine plot.style_area: the line of the plot and, per bar, the area between the plot value and `histBase` (Pine
+   * histbase, default 0) filled with the colour of that bar (its own alpha). The line is a normal line plot
+   * (setIndicatorData: per-point colours, na points skipped, as Pine area connects over na); the fill is a primitive
+   * attached to it. histBase is not part of the price scale (only the plot values are).
    */
   setAreaPlotData(
     id: string,
     data: Array<{ time: number; value: number; color?: string }>,
     config: SeriesConfig = {}
   ): void {
-    let series = this.areaSeries.get(id);
-
-    if (!series) {
-      const color = config.color || '#2962FF';
-      series = this.chart.addSeries(AreaSeries, {
-        topColor: withOpacity(color, 0x40 / 255) ?? 'transparent',
-        bottomColor: withOpacity(color, 0x10 / 255) ?? 'transparent',
-        lineColor: color,
-        lineWidth: (config.lineWidth && config.lineWidth >= 1 ? config.lineWidth : 2) as LineWidth,
-        crosshairMarkerVisible: true,
-      });
-
-      if (config.overlay === false) {
-        const paneIndex = config.paneIndex ?? this.getNextPaneIndex();
-        series.moveToPane(paneIndex);
-        this.indicatorPanes.set(id, paneIndex);
-      } else {
-        series.moveToPane(0);
-        this.indicatorPanes.set(id, 0);
-      }
-
-      this.areaSeries.set(id, series);
+    this.setIndicatorData(id, data, config);
+    const series = this.indicatorSeries.get(id);
+    if (!series) return;
+    let primitive = this.areaFills.get(id);
+    if (!primitive) {
+      primitive = new PlotFillPrimitive();
+      series.attachPrimitive(primitive);
+      this.areaFills.set(id, primitive);
     }
-
-    const areaData = data.filter(d =>
-      d.value != null && !Number.isNaN(d.value)
-    ) as AreaData<Time>[];
-    series.setData(areaData);
+    const base = config.histBase ?? 0;
+    const fallback = config.color || '#2962FF';
+    primitive.setData(
+      data
+        .filter(d => d.value != null && !Number.isNaN(d.value))
+        .map(d => {
+          const raw = d.color ?? fallback;
+          return { time: d.time, v1: d.value, v2: base, color: isTransparent(raw) ? null : withOpacity(raw, 1) };
+        })
+    );
   }
 
   /**
@@ -1567,11 +1560,8 @@ export class ChartManager {
    * Clear all area series
    */
   private clearAreaSeries(): void {
-    for (const [id, series] of this.areaSeries) {
-      this.chart.removeSeries(series);
-      this.indicatorPanes.delete(id);
-    }
-    this.areaSeries.clear();
+    // the line series (and the attached fills) are removed with indicatorSeries
+    this.areaFills.clear();
   }
 
   /**
