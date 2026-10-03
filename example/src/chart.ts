@@ -1649,11 +1649,13 @@ export class ChartManager {
       });
       anchor.moveToPane(pane);
 
-      // Set minimal data
-      anchor.setData([
-        { time: list[0].time as unknown as Time, value: 0 },
-        { time: list[list.length - 1].time as unknown as Time, value: 0 },
-      ] as LineData<Time>[]);
+      // Set minimal data (one point when the layer has one bar: times must be ascending)
+      const first = list[0].time;
+      const last = list[list.length - 1].time;
+      anchor.setData((first === last ? [first] : [first, last]).map((time) => ({
+        time: time as unknown as Time,
+        value: 0,
+      })) as LineData<Time>[]);
 
       const primitive = new BgColorPrimitive();
       anchor.attachPrimitive(primitive as ISeriesPrimitive<Time>);

@@ -1,0 +1,146 @@
+/**
+ * ZVOL - Z-Score Volume Heatmap
+ *
+ * Z-score of the volume: z = (volume - sma(volume, maLen)) / stdev(volume, stdLen). The z-score is put in a zone by
+ * four thresholds (below low, low..medium, medium..high, high..extreme, above extreme; an na z-score is in the top
+ * zone, as Pine's comparisons with na are false). The volume columns take the zone colour and the background is
+ * shaded by zone. EMA 21 and EMA 34 of the volume are drawn with a fill coloured by their order.
+ *
+ * Reference: "ZVOL — Z-Score Volume Heatmap" by TheLeadingIndicator
+ * Licence: Mozilla Public License 2.0, as the original Pine script (https://mozilla.org/MPL/2.0/).
+ * Original notice: Open Source | Designed by Adrian Dyer for "The Leading Indicator", Engineered by PineForge Laboratory  (2025)
+ */
+
+import { ta, Series, color, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import type { BgColorData } from '../types';
+
+export interface ZvolZScoreVolumeHeatmapInputs {
+  maLen: number;
+  stdLen: number;
+  thresholdLow: number;
+  thresholdMed: number;
+  thresholdHigh: number;
+  thresholdExtreme: number;
+  colLow: string;
+  colMed: string;
+  colHigh: string;
+  colExtreme: string;
+  /** Transparency of the EMA fill (0-100) */
+  ribbonOpacity: number;
+  showBG: boolean;
+}
+
+export const defaultInputs: ZvolZScoreVolumeHeatmapInputs = {
+  maLen: 100,
+  stdLen: 100,
+  thresholdLow: 0.0,
+  thresholdMed: 1.0,
+  thresholdHigh: 2.5,
+  thresholdExtreme: 4.0,
+  colLow: color.gray,
+  colMed: color.teal,
+  colHigh: color.orange,
+  colExtreme: color.red,
+  ribbonOpacity: 20,
+  showBG: true,
+};
+
+export const inputConfig: InputConfig[] = [
+  { id: 'maLen', type: 'int', title: 'Moving Average Length', defval: 100, min: 2, group: 'Heatmap Settings' },
+  { id: 'stdLen', type: 'int', title: 'Standard Deviation Length', defval: 100, min: 2, group: 'Heatmap Settings' },
+  { id: 'thresholdLow', type: 'float', title: 'Low Threshold (σ)', defval: 0.0, group: 'Heatmap Settings' },
+  { id: 'thresholdMed', type: 'float', title: 'Medium Threshold (σ)', defval: 1.0, group: 'Heatmap Settings' },
+  { id: 'thresholdHigh', type: 'float', title: 'High Threshold (σ)', defval: 2.5, group: 'Heatmap Settings' },
+  { id: 'thresholdExtreme', type: 'float', title: 'Extreme Threshold (σ)', defval: 4.0, group: 'Heatmap Settings' },
+  { id: 'colLow', type: 'color', title: 'Low', defval: color.gray, group: 'Zone Colors' },
+  { id: 'colMed', type: 'color', title: 'Medium', defval: color.teal, group: 'Zone Colors' },
+  { id: 'colHigh', type: 'color', title: 'High', defval: color.orange, group: 'Zone Colors' },
+  { id: 'colExtreme', type: 'color', title: 'Extreme', defval: color.red, group: 'Zone Colors' },
+  { id: 'ribbonOpacity', type: 'int', title: 'Ribbon Shading Opacity (0–100)', defval: 20, min: 0, max: 100, group: 'Heatmap Settings' },
+  { id: 'showBG', type: 'bool', title: 'Show Background Heatmap', defval: true, group: 'Heatmap Settings' },
+];
+
+const EMA21_COL = String(color.new('#b5feed', 0));
+const EMA34_COL = String(color.new('#089590', 0));
+
+export const plotConfig: PlotConfig[] = [
+  { id: 'plot0', title: 'Volume', color: '#2962FF', lineWidth: 1, style: 'columns' },
+  { id: 'plot1', title: 'EMA 21', color: EMA21_COL, lineWidth: 1 },
+  { id: 'plot2', title: 'EMA 34', color: EMA34_COL, lineWidth: 1 },
+];
+
+export const metadata = {
+  title: 'ZVOL — Z-Score Volume Heatmap',
+  shortTitle: 'ZVOL',
+  overlay: false,
+  precision: 1,
+  format: 'volume',
+};
+
+/** Pine float comparisons: a < b only when b - a > 1e-10 (na compares false) */
+const lt = (a: number, b: number) => b - a > 1e-10;
+const gt = (a: number, b: number) => a - b > 1e-10;
+
+export function calculate(
+  bars: Bar[],
+  inputs: Partial<ZvolZScoreVolumeHeatmapInputs> = {},
+): IndicatorResult & { bgColors: BgColorData[] } {
+  const cfg = { ...defaultInputs, ...inputs };
+  const n = bars.length;
+  const A = (s: Series) => s.toArray().map((v) => v ?? NaN);
+  const vol = bars.map((b) => b.volume ?? NaN);
+  const volS = Series.fromArray(bars, vol);
+
+  const volMA = A(ta.sma(volS, cfg.maLen));
+  const volStdev = A(ta.stdev(volS, cfg.stdLen));
+  const ema21 = A(ta.ema(volS, 21));
+  const ema34 = A(ta.ema(volS, 34));
+
+  const bgByZone = [
+    'transparent',
+    String(color.new(cfg.colLow, 65)),
+    String(color.new(cfg.colMed, 65)),
+    String(color.new(cfg.colHigh, 65)),
+    String(color.new(cfg.colExtreme, 65)),
+  ];
+  const zoneCol = [cfg.colLow, cfg.colMed, cfg.colHigh, cfg.colExtreme, cfg.colExtreme];
+  const fillUp = String(color.new('#b5feed', cfg.ribbonOpacity));
+  const fillDown = String(color.new('#06706d', cfg.ribbonOpacity));
+
+  const volumePlot: { time: number; value: number; color: string }[] = [];
+  const bgColors: BgColorData[] = [];
+  const fillColors: string[] = new Array(n);
+  for (let i = 0; i < n; i++) {
+    const t = bars[i].time;
+    // A plain division: x / 0 is +-infinity (0 / 0 NaN); the comparisons use the infinite value, na compares false
+    const z = (vol[i] - volMA[i]) / volStdev[i];
+    const zone = lt(z, cfg.thresholdLow) ? 0 : lt(z, cfg.thresholdMed) ? 1 : lt(z, cfg.thresholdHigh) ? 2
+      : lt(z, cfg.thresholdExtreme) ? 3 : 4;
+    // bgcolor(showBG ? bgCol : na)
+    if (cfg.showBG && zone > 0) bgColors.push({ time: t, color: bgByZone[zone] });
+    volumePlot.push({ time: t, value: vol[i], color: zoneCol[zone] });
+    fillColors[i] = gt(ema21[i], ema34[i]) ? fillUp : fillDown;
+  }
+
+  return {
+    metadata: {
+      title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay,
+      precision: metadata.precision, format: metadata.format,
+    },
+    plots: {
+      plot0: volumePlot,
+      plot1: bars.map((b, i) => ({ time: b.time, value: ema21[i], color: EMA21_COL })),
+      plot2: bars.map((b, i) => ({ time: b.time, value: ema34[i], color: EMA34_COL })),
+    },
+    fills: [{ plot1: 'plot1', plot2: 'plot2', options: { title: 'EMA Fill' }, colors: fillColors }],
+    bgColors,
+  };
+}
+
+export const ZvolZScoreVolumeHeatmap = {
+  calculate,
+  metadata,
+  defaultInputs,
+  inputConfig,
+  plotConfig,
+};
