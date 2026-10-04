@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     include: ['tests/**/*.test.ts'],
-    exclude: ['tests/regression/**'],
+    exclude: ['tests/regression/**', 'tests/tv-regression/**'],
     testTimeout: 30000,
   },
 });

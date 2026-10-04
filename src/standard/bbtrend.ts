@@ -72,6 +72,7 @@ export function calculate(bars: Bar[], inputs: Partial<BBTrendInputs> = {}): Ind
   const NEG_WEAK   = '#F2364580';
   const NEG_STRONG = '#F23645BF';
 
+  const EPS = 1e-10;
   let prevBBTrend = NaN;
   const bbTrendData = bars.map((bar, i) => {
     const sL = shortLowerArr[i];
@@ -85,11 +86,16 @@ export function calculate(bars: Bar[], inputs: Partial<BBTrendInputs> = {}): Ind
     }
 
     const bbTrend = (Math.abs(sL - lL) - Math.abs(sU - lU)) / sM * 100;
+    // switch as in Pine: operators with the 1e-10 tolerance, a comparison with na is false
+    const gt = (a: number, b: number) => a - b > EPS;
+    const lt = (a: number, b: number) => b - a > EPS;
+    const ge = (a: number, b: number) => !Number.isNaN(a - b) && !lt(a, b);
+    const le = (a: number, b: number) => !Number.isNaN(a - b) && !gt(a, b);
     let color: string;
-    if (bbTrend > 0 && bbTrend >= prevBBTrend) color = POS_STRONG;
-    else if (bbTrend > 0) color = POS_WEAK;
-    else if (bbTrend < 0 && bbTrend <= prevBBTrend) color = NEG_STRONG;
-    else if (bbTrend < 0) color = NEG_WEAK;
+    if (gt(bbTrend, 0) && ge(bbTrend, prevBBTrend)) color = POS_STRONG;
+    else if (gt(bbTrend, 0) && lt(bbTrend, prevBBTrend)) color = POS_WEAK;
+    else if (lt(bbTrend, 0) && gt(bbTrend, prevBBTrend)) color = NEG_WEAK;
+    else if (lt(bbTrend, 0) && le(bbTrend, prevBBTrend)) color = NEG_STRONG;
     else color = POS_WEAK;
     prevBBTrend = bbTrend;
     return { time: bar.time, value: bbTrend, color };

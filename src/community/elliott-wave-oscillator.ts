@@ -10,6 +10,11 @@
 
 import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 
+// Pine comparison operators: equal within 1e-10; a comparison with na is false
+const EPS = 1e-10;
+const le = (a: number, b: number) => !Number.isNaN(a - b) && !(a - b > EPS);
+
+
 export interface ElliottWaveOscInputs {
   src: SourceType;
   sma1Length: number;
@@ -64,7 +69,7 @@ export function calculate(bars: Bar[], inputs: Partial<ElliottWaveOscInputs> = {
     }
     const dif = s1 - s2;
     const value = usePercent ? (dif / sv) * 100 : dif;
-    const color = value <= 0 ? '#FF5252' : '#26A69A';
+    const color = le(value, 0) ? '#FF5252' : '#26A69A';
     ewoData[i] = { time: bars[i].time, value, color };
   }
 

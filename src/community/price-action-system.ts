@@ -11,6 +11,12 @@
 import { ta, getSourceSeries, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 import type { MarkerData, BarColorData, BgColorData } from '../types';
 
+// Pine comparison operators: equal within 1e-10; a comparison with na is false
+const EPS = 1e-10;
+const gt = (a: number, b: number) => a - b > EPS;
+const lt = (a: number, b: number) => b - a > EPS;
+
+
 export interface PriceActionSystemInputs {
   maLen: number;
   atrLen: number;
@@ -93,25 +99,25 @@ export function calculate(bars: Bar[], inputs: Partial<PriceActionSystemInputs> 
     const upperShadow = high - Math.max(close, open);
     const lowerShadow = Math.min(close, open) - low;
 
-    const prevBullish = prev.close > prev.open;
-    const prevBearish = prev.close < prev.open;
-    const bullish = close > open;
-    const bearish = close < open;
+    const prevBullish = gt(prev.close, prev.open);
+    const prevBearish = lt(prev.close, prev.open);
+    const bullish = gt(close, open);
+    const bearish = lt(close, open);
 
-    const uptrend = close > maVal;
-    const downtrend = close < maVal;
+    const uptrend = gt(close, maVal);
+    const downtrend = lt(close, maVal);
 
     // Hammer: lower shadow > body*2, upper shadow < body*0.3
-    const isHammer = lowerShadow > body * 2 && upperShadow < body * 0.3 && range > 0;
+    const isHammer = gt(lowerShadow, body * 2) && lt(upperShadow, body * 0.3) && gt(range, 0);
     // Shooting star: upper shadow > body*2, lower shadow < body*0.3
-    const isShootingStar = upperShadow > body * 2 && lowerShadow < body * 0.3 && range > 0;
+    const isShootingStar = gt(upperShadow, body * 2) && lt(lowerShadow, body * 0.3) && gt(range, 0);
 
     // Bullish engulfing: prev bearish, curr bullish, curr body engulfs prev body
     const isBullishEngulfing = prevBearish && bullish &&
-      close > prev.open && open < prev.close;
+      gt(close, prev.open) && lt(open, prev.close);
     // Bearish engulfing: prev bullish, curr bearish, curr body engulfs prev body
     const isBearishEngulfing = prevBullish && bearish &&
-      close < prev.open && open > prev.close;
+      lt(close, prev.open) && gt(open, prev.close);
 
     if (uptrend && (isBullishEngulfing || isHammer)) {
       markers.push({ time: curr.time, position: 'belowBar', shape: 'labelUp', color: '#26A69A', text: 'Buy' });
@@ -122,9 +128,9 @@ export function calculate(bars: Bar[], inputs: Partial<PriceActionSystemInputs> 
     // Bar colors: CCI > 75 = aqua (#00BCD4), CCI < -75 = black (#000000)
     const cciVal = cci[i];
     if (cciVal != null && !isNaN(cciVal)) {
-      if (cciVal > 75) {
+      if (gt(cciVal, 75)) {
         barColors.push({ time: curr.time, color: '#00BCD4' });
-      } else if (cciVal < -75) {
+      } else if (lt(cciVal, -75)) {
         barColors.push({ time: curr.time, color: '#000000' });
       }
     }

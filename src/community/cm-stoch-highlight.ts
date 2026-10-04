@@ -17,6 +17,12 @@
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { MarkerData, BarColorData, BgColorData } from '../types';
 
+// Pine comparison operators: equal within 1e-10; a comparison with na is false
+const EPS = 1e-10;
+const gt = (a: number, b: number) => a - b > EPS;
+const lt = (a: number, b: number) => b - a > EPS;
+
+
 export interface CMStochHighlightInputs {
   kLen: number;
   kSmooth: number;
@@ -92,8 +98,8 @@ export function calculate(bars: Bar[], inputs: Partial<CMStochHighlightInputs> =
     const dVal = dArr[i];
     if (kVal == null || dVal == null) continue;
 
-    const aboveLine = kVal > upLine;
-    const belowLine = kVal < lowLine;
+    const aboveLine = gt(kVal, upLine);
+    const belowLine = lt(kVal, lowLine);
 
     // barcolor: orange when overbought, fuchsia when oversold
     if (sbc) {
@@ -121,13 +127,13 @@ export function calculate(bars: Bar[], inputs: Partial<CMStochHighlightInputs> =
     if (isNaN(k1) || isNaN(d1)) continue;
 
     // Strict cross definitions: K[1] was below lowLine and below D[1], now K > D
-    const crossUp = (k1 < d1 && k1 < lowLine) && (kVal > dVal);
+    const crossUp = (lt(k1, d1) && lt(k1, lowLine)) && gt(kVal, dVal);
     // K[1] was above upLine and above D[1], now K < D
-    const crossDn = (k1 > d1 && k1 > upLine) && (kVal < dVal);
+    const crossDn = (gt(k1, d1) && gt(k1, upLine)) && lt(kVal, dVal);
 
     // Any cross definitions
-    const crossUpAll = (k1 < d1) && (kVal > dVal);
-    const crossDownAll = (k1 > d1) && (kVal < dVal);
+    const crossUpAll = lt(k1, d1) && gt(kVal, dVal);
+    const crossDownAll = gt(k1, d1) && lt(kVal, dVal);
 
     // bgcolor: strict cross highlights
     if (sch) {

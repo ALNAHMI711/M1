@@ -31,7 +31,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:pinesuite": "vitest run --config vitest.regression.config.ts"
+    "test:pinesuite": "vitest run --config vitest.regression.config.ts",
+    "test:tv": "vitest run --config vitest.tv.config.ts"
   },
   "keywords": [
     "lightweight-charts",

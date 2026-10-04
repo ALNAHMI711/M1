@@ -10,6 +10,12 @@
 
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 
+// Pine comparison operators: equal within 1e-10; a comparison with na is false
+const EPS = 1e-10;
+const gt = (a: number, b: number) => a - b > EPS;
+const lt = (a: number, b: number) => b - a > EPS;
+
+
 export interface SSLChannelInputs {
   period: number;
 }
@@ -49,8 +55,8 @@ export function calculate(bars: Bar[], inputs: Partial<SSLChannelInputs> = {}): 
     const smaL = smaLowArr[i] ?? 0;
     const c = bars[i].close;
 
-    if (c > smaH) hlv = 1;
-    else if (c < smaL) hlv = -1;
+    if (gt(c, smaH)) hlv = 1;
+    else if (lt(c, smaL)) hlv = -1;
 
     sslDown[i] = hlv < 0 ? smaH : smaL;
     sslUp[i] = hlv < 0 ? smaL : smaH;

@@ -12,6 +12,12 @@
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { MarkerData } from '../types';
 
+// Pine comparison operators: equal within 1e-10; a comparison with na is false
+const EPS = 1e-10;
+const gt = (a: number, b: number) => a - b > EPS;
+const lt = (a: number, b: number) => b - a > EPS;
+
+
 export interface PriceDivergenceDetectorInputs {
   method: string;
   length: number;
@@ -67,14 +73,14 @@ function isTopFractal(arr: number[], i: number): boolean {
   if (i < 4) return false;
   const s0 = arr[i], s1 = arr[i - 1], s2 = arr[i - 2], s3 = arr[i - 3], s4 = arr[i - 4];
   if (isNaN(s0) || isNaN(s1) || isNaN(s2) || isNaN(s3) || isNaN(s4)) return false;
-  return s4 < s2 && s3 < s2 && s2 > s1 && s2 > s0;
+  return lt(s4, s2) && lt(s3, s2) && gt(s2, s1) && gt(s2, s0);
 }
 
 function isBottomFractal(arr: number[], i: number): boolean {
   if (i < 4) return false;
   const s0 = arr[i], s1 = arr[i - 1], s2 = arr[i - 2], s3 = arr[i - 3], s4 = arr[i - 4];
   if (isNaN(s0) || isNaN(s1) || isNaN(s2) || isNaN(s3) || isNaN(s4)) return false;
-  return s4 > s2 && s3 > s2 && s2 < s1 && s2 < s0;
+  return gt(s4, s2) && gt(s3, s2) && lt(s2, s1) && lt(s2, s0);
 }
 
 function computeOscillator(
@@ -207,14 +213,14 @@ export function calculate(bars: Bar[], inputs: Partial<PriceDivergenceDetectorIn
 
       if (!isNaN(prevTopOsc) && centerBar >= warmup) {
         // Regular bearish: price HH but osc LH
-        if (showRegular && curPrice > prevTopPrice && curOsc < prevTopOsc) {
+        if (showRegular && gt(curPrice, prevTopPrice) && lt(curOsc, prevTopOsc)) {
           fractalColor = '#800000'; // maroon
           if (showLabels) {
             markers.push({ time: bars[centerBar].time, position: 'aboveBar', shape: 'labelDown', color: '#800000', text: 'R' });
           }
         }
         // Hidden bearish: price LH but osc HH
-        if (showHidden && curPrice < prevTopPrice && curOsc > prevTopOsc) {
+        if (showHidden && lt(curPrice, prevTopPrice) && gt(curOsc, prevTopOsc)) {
           fractalColor = '#800000';
           if (showLabels) {
             markers.push({ time: bars[centerBar].time, position: 'aboveBar', shape: 'labelDown', color: '#800000', text: 'H' });
@@ -235,14 +241,14 @@ export function calculate(bars: Bar[], inputs: Partial<PriceDivergenceDetectorIn
 
       if (!isNaN(prevBotOsc) && centerBar >= warmup) {
         // Regular bullish: price LL but osc HL
-        if (showRegular && curPrice < prevBotPrice && curOsc > prevBotOsc) {
+        if (showRegular && lt(curPrice, prevBotPrice) && gt(curOsc, prevBotOsc)) {
           fractalColor = '#008000'; // green
           if (showLabels) {
             markers.push({ time: bars[centerBar].time, position: 'belowBar', shape: 'labelUp', color: '#008000', text: 'R' });
           }
         }
         // Hidden bullish: price HL but osc LL
-        if (showHidden && curPrice > prevBotPrice && curOsc < prevBotOsc) {
+        if (showHidden && gt(curPrice, prevBotPrice) && lt(curOsc, prevBotOsc)) {
           fractalColor = '#008000';
           if (showLabels) {
             markers.push({ time: bars[centerBar].time, position: 'belowBar', shape: 'labelUp', color: '#008000', text: 'H' });

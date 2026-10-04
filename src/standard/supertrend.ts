@@ -66,7 +66,8 @@ export function calculate(bars: Bar[], inputs: Partial<SupertrendInputs> = {}): 
   const { atrPeriod, factor } = { ...defaultInputs, ...inputs };
 
   const [supertrendSeries, directionSeries] = ta.supertrend(bars, factor, atrPeriod);
-  const supertrendValues = supertrendSeries.toArray();
+  // supertrend := barstate.isfirst ? na : supertrend
+  const supertrendValues = supertrendSeries.toArray().map((v: number | null, i: number) => (i === 0 ? null : v));
   const directions = directionSeries.toArray();
 
   const upTrendData = supertrendValues.map((value: number | null, i: number) => ({

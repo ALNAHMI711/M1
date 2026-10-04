@@ -1,0 +1,121 @@
+/**
+ * Trend Strength/Direction
+ *
+ * Six Hull moving averages of the close (lengths 20, 40, 60, 80, 100 and a custom length 5), each computed as
+ * wma(2 * wma(close, round(len / 2)) - wma(close, len), round(sqrt(len))). Each line is the angle of its HMA:
+ * atan(hma - hma[1]) in degrees. A dotted zero line and a grey fill between the +45 and -45 levels.
+ *
+ * Reference: "Trend Strength/Direction" by ddcakez
+ * Licence: Mozilla Public License 2.0, as the original Pine script (https://mozilla.org/MPL/2.0/).
+ */
+
+import { ta, Series, color, type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig, type FillConfig, type Bar } from 'oakscriptjs';
+
+export interface TrendStrengthDirectionInputs {
+  hmaLength1: number;
+  hmaLength2: number;
+  hmaLength3: number;
+  hmaLength4: number;
+  hmaLength5: number;
+  /** Custom HMA length */
+  hmaLengthCustom: number;
+  /** Label of the custom HMA (not used in the outputs) */
+  hmaCustomLabel: string;
+}
+
+export const defaultInputs: TrendStrengthDirectionInputs = {
+  hmaLength1: 20,
+  hmaLength2: 40,
+  hmaLength3: 60,
+  hmaLength4: 80,
+  hmaLength5: 100,
+  hmaLengthCustom: 5,
+  hmaCustomLabel: 'Custom HMA',
+};
+
+export const inputConfig: InputConfig[] = [
+  { id: 'hmaLength1', type: 'int', title: 'HMA Length 1', defval: 20, min: 1 },
+  { id: 'hmaLength2', type: 'int', title: 'HMA Length 2', defval: 40, min: 1 },
+  { id: 'hmaLength3', type: 'int', title: 'HMA Length 3', defval: 60, min: 1 },
+  { id: 'hmaLength4', type: 'int', title: 'HMA Length 4', defval: 80, min: 1 },
+  { id: 'hmaLength5', type: 'int', title: 'HMA Length 5', defval: 100, min: 1 },
+  { id: 'hmaLengthCustom', type: 'int', title: 'Custom HMA Length', defval: 5, min: 1 },
+  { id: 'hmaCustomLabel', type: 'string', title: 'Custom HMA Label', defval: 'Custom HMA' },
+];
+
+const PLOT_COLORS = [color.blue, color.green, color.orange, color.purple, color.red, '#80807c'];
+const PLOT_TITLES = ['HMA Angle 1', 'HMA Angle 2', 'HMA Angle 3', 'HMA Angle 4', 'HMA Angle 5', 'Custom HMA Angle'];
+
+export const plotConfig: PlotConfig[] = PLOT_TITLES.map((title, k) => ({
+  id: `plot${k}`, title, color: PLOT_COLORS[k], lineWidth: 2,
+}));
+
+/** Pine hline default colour */
+const HLINE_COLOR = '#787B86';
+
+/** hline(0, "Zero Line"), and hline(45) / hline(-45) (Pine defaults: title "Level", dashed) for the fill */
+export const hlineConfig: HLineConfig[] = [
+  { id: 'hline_zero', price: 0, title: 'Zero Line', color: color.gray, linestyle: 'dotted', linewidth: 1 },
+  { id: 'hline_upper', price: 45, title: 'Level', color: HLINE_COLOR, linestyle: 'dashed' },
+  { id: 'hline_lower', price: -45, title: 'Level', color: HLINE_COLOR, linestyle: 'dashed' },
+];
+
+/** fill(hline(45), hline(-45), color.new(color.gray, 90), "Angle Range Fill") */
+export const fillConfig: FillConfig[] = [
+  { id: 'fill_angle', plot1: 'hline_upper', plot2: 'hline_lower', color: String(color.new(color.gray, 90)), title: 'Angle Range Fill' },
+];
+
+export const metadata = {
+  title: 'Trend Strength/Direction',
+  shortTitle: 'Trend Strength/Direction',
+  overlay: false,
+};
+
+export function calculate(bars: Bar[], inputs: Partial<TrendStrengthDirectionInputs> = {}): IndicatorResult {
+  const cfg = { ...defaultInputs, ...inputs };
+  const n = bars.length;
+  const A = (s: Series) => s.toArray().map((v) => v ?? NaN);
+  const close = Series.fromArray(bars, bars.map((b) => b.close));
+
+  // calculateHMA(source, length): wma(2 * wma(source, round(length / 2)) - wma(source, length), round(sqrt(length)))
+  const hma = (length: number): number[] => {
+    const wma1 = A(ta.wma(close, Math.round(length / 2)));
+    const wma2 = A(ta.wma(close, length));
+    const diff = wma1.map((v, i) => 2 * v - wma2[i]);
+    return A(ta.wma(Series.fromArray(bars, diff), Math.round(Math.sqrt(length))));
+  };
+  // calculateAngle(hma) = math.atan(hma - hma[1]) * 180 / math.pi
+  const angle = (h: number[]): number[] => h.map((v, i) => {
+    const a = (Math.atan(v - (i > 0 ? h[i - 1] : NaN)) * 180) / Math.PI;
+    return Number.isFinite(a) ? a : NaN;
+  });
+
+  const lengths = [cfg.hmaLength1, cfg.hmaLength2, cfg.hmaLength3, cfg.hmaLength4, cfg.hmaLength5, cfg.hmaLengthCustom];
+  const plots: IndicatorResult['plots'] = {};
+  lengths.forEach((len, k) => {
+    const a = angle(hma(len));
+    plots[`plot${k}`] = bars.map((b, i) => ({ time: b.time, value: a[i], color: PLOT_COLORS[k] }));
+  });
+
+  return {
+    metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
+    plots,
+    hlines: hlineConfig.map((h) => ({
+      value: h.price, options: { title: h.title, color: h.color, linestyle: h.linestyle, linewidth: h.linewidth ?? 1 },
+    })),
+    fills: [
+      { plot1: 'hline_upper', plot2: 'hline_lower', options: { title: 'Angle Range Fill' },
+        colors: new Array<string>(n).fill(String(color.new(color.gray, 90))) },
+    ],
+  };
+}
+
+export const TrendStrengthDirection = {
+  calculate,
+  metadata,
+  defaultInputs,
+  inputConfig,
+  plotConfig,
+  hlineConfig,
+  fillConfig,
+};
