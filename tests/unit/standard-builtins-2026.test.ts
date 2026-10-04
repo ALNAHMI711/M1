@@ -76,13 +76,15 @@ describe("Pring's Special K", () => {
 
 import { VolatilityStop } from '../../src/standard/volatility-stop';
 describe('Volatility Stop', () => {
-  it('emits exactly one of long/short per bar', () => {
+  it('emits one stop per bar, teal in an uptrend and red in a downtrend', () => {
     const r = VolatilityStop.calculate(bars);
     expect(r.plots['plot0'].length).toBe(bars.length);
+    expect(r.plots['plot0'][0].value).toBe(bars[0].close);
     for (let i = 0; i < bars.length; i++) {
-      const long = r.plots['plot0'][i].value;
-      const short = r.plots['plot1'][i].value;
-      expect(isNaN(long) !== isNaN(short)).toBe(true);
+      const p = r.plots['plot0'][i] as { value: number; color?: string };
+      expect(isNaN(p.value)).toBe(false);
+      const up = bars[i].close - p.value >= -1e-10;
+      expect(p.color).toBe(up ? '#009688' : '#F44336');
     }
     expect(VolatilityStop.metadata.overlay).toBe(true);
   });
@@ -90,10 +92,11 @@ describe('Volatility Stop', () => {
 
 import { VWAP } from '../../src/standard/vwap';
 describe('VWAP', () => {
-  it('produces a VWAP line; bands off by default', () => {
+  it('produces a VWAP line; bands #1 on by default', () => {
     const r = VWAP.calculate(bars);
     expect(hasValues(r.plots['plot0'])).toBe(true);
-    expect(hasValues(r.plots['plot1'])).toBe(false);
+    expect(hasValues(r.plots['plot1'])).toBe(true);
+    expect(hasValues(VWAP.calculate(bars, { showBands: false }).plots['plot1'])).toBe(false);
   });
   it('produces bands when enabled', () => {
     const r = VWAP.calculate(bars, { showBands: true, anchor: '1M' });

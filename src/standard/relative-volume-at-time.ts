@@ -40,7 +40,7 @@ export const plotConfig: PlotConfig[] = [
 ];
 
 export const hlineConfig: HLineConfig[] = [
-  { id: 'hline_one', price: 1, color: '#78787880', linestyle: 'solid', title: 'Baseline' },
+  { id: 'hline_one', price: 1, color: '#787B8680', linestyle: 'dashed', title: 'Baseline' },
 ];
 
 export const metadata = {
@@ -263,10 +263,12 @@ export function calculate(bars: Bar[], inputs: Partial<RelativeVolumeAtTimeInput
     // Calculate historical average at this time offset
     const pastVolume = calcAverageByTime(historicalData, timeOffset);
 
-    // Calculate ratio
+    // Calculate ratio (Pine division: non-zero / 0 is +-infinity, 0 / 0 is na)
     let ratio: number;
-    if (Number.isNaN(pastVolume) || pastVolume === 0) {
+    if (Number.isNaN(pastVolume) || Number.isNaN(currentValue)) {
       ratio = NaN;
+    } else if (pastVolume === 0) {
+      ratio = currentValue === 0 ? NaN : (currentValue > 0 ? Infinity : -Infinity);
     } else {
       ratio = currentValue / pastVolume;
     }
@@ -275,11 +277,12 @@ export function calculate(bars: Bar[], inputs: Partial<RelativeVolumeAtTimeInput
     prevTime = barTime;
   }
 
-  // Create plot data with conditional green/red coloring at 70% transparency
+  // Colour: green when ratio > 1 (Pine float comparison: ratio - 1 > 1e-10; na compares false), else red;
+  // 70% transparency. Plots treat infinity as na.
   const plotData = ratioValues.map((value, i) => ({
     time: bars[i].time,
-    value: value,
-    color: value > 1 ? '#4CAF504D' : '#F443364D',
+    value: Number.isFinite(value) ? value : NaN,
+    color: value - 1 > 1e-10 ? '#4CAF504D' : '#F236454D',
   }));
 
   return {

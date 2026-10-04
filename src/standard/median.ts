@@ -1,12 +1,18 @@
 /**
  * Median Indicator
  *
- * Shows the median price with ATR-based bands and EMA.
+ * The median (50th percentile, nearest rank) of the source over `length` bars, with bands at
+ * median +- ATR multiplier * ATR and an EMA of the median. The area between the median and its EMA is green
+ * when the median is above the EMA, fuchsia otherwise.
+ *
+ * Based on the standard "Median" indicator.
  */
 
-import { Series, ta, type IndicatorResult, type InputConfig, type PlotConfig, type FillData, type Bar } from 'oakscriptjs';
+import { Series, ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 
 export interface MedianInputs {
+  /** Median source */
+  source: SourceType;
   /** Median calculation length */
   length: number;
   /** ATR length */
@@ -16,24 +22,24 @@ export interface MedianInputs {
 }
 
 export const defaultInputs: MedianInputs = {
+  source: 'hl2',
   length: 3,
   atrLength: 14,
   atrMult: 2,
 };
 
 export const inputConfig: InputConfig[] = [
+  { id: 'source', type: 'source', title: 'Median Source', defval: 'hl2' },
   { id: 'length', type: 'int', title: 'Median Length', defval: 3, min: 1 },
   { id: 'atrLength', type: 'int', title: 'ATR Length', defval: 14, min: 1 },
-  { id: 'atrMult', type: 'float', title: 'ATR Multiplier', defval: 2, min: 0 },
+  { id: 'atrMult', type: 'int', title: 'ATR Multiplier', defval: 2 },
 ];
 
 export const plotConfig: PlotConfig[] = [
-  { id: 'plot0', title: 'Median', color: '#FF0000', lineWidth: 3 },
-  { id: 'plot1', title: 'Upper Band', color: '#00FF00', lineWidth: 1 },
-  { id: 'plot2', title: 'Lower Band', color: '#FF00FF', lineWidth: 1 },
-  { id: 'plot3', title: 'Median EMA', color: '#0000FF', lineWidth: 1 },
-  { id: 'plot4', title: 'Median Above', color: '#00FF00', lineWidth: 0, display: 'none' },
-  { id: 'plot5', title: 'Median Below', color: '#FF00FF', lineWidth: 0, display: 'none' },
+  { id: 'plot0', title: 'Median', color: '#F23645', lineWidth: 3 },
+  { id: 'plot1', title: 'Upper Band', color: '#00E676', lineWidth: 1 },
+  { id: 'plot2', title: 'Lower Band', color: '#E040FB', lineWidth: 1 },
+  { id: 'plot3', title: 'Median EMA', color: '#2962FF', lineWidth: 1 },
 ];
 
 export const metadata = {
@@ -42,90 +48,24 @@ export const metadata = {
   overlay: true,
 };
 
-/**
- * Calculate percentile using nearest rank method
- */
-function percentileNearestRank(values: number[], percentile: number): number {
-  if (values.length === 0) return NaN;
-  const sorted = [...values].sort((a, b) => a - b);
-  const index = Math.ceil((percentile / 100) * sorted.length) - 1;
-  return sorted[Math.max(0, index)];
-}
+/** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
+const EPS = 1e-10;
+const gt = (a: number, b: number) => a - b > EPS;
 
 export function calculate(bars: Bar[], inputs: Partial<MedianInputs> = {}): IndicatorResult {
-  const { length, atrLength, atrMult } = { ...defaultInputs, ...inputs };
+  const { source, length, atrLength, atrMult } = { ...defaultInputs, ...inputs };
+  const A = (s: Series) => s.toArray().map((v) => v ?? NaN);
 
-  // hl2 = (high + low) / 2
-  const hl2Values = bars.map(b => (b.high + b.low) / 2);
+  // median = ta.percentile_nearest_rank(source, length, 50)
+  const median = A(ta.percentile_nearest_rank(getSourceSeries(bars, source), length, 50));
+  // atr_ = atr_mult * ta.atr(atr_length)
+  const atr = A(ta.atr(bars, atrLength)).map((v) => atrMult * v);
+  // median_ema = ta.ema(median, length)
+  const medianEma = A(ta.ema(Series.fromArray(bars, median), length));
 
-  // Calculate median using percentile_nearest_rank with 50th percentile
-  const medianValues: number[] = [];
-  for (let i = 0; i < bars.length; i++) {
-    if (i < length - 1) {
-      medianValues.push(NaN);
-      continue;
-    }
-    const window = hl2Values.slice(i - length + 1, i + 1);
-    medianValues.push(percentileNearestRank(window, 50));
-  }
-
-  // Calculate ATR
-  const atrSeries = ta.atr(bars, atrLength);
-  const atrValues = atrSeries.toArray();
-
-  // Calculate bands
-  const upperBand = medianValues.map((m, i) => {
-    const atr = atrValues[i];
-    if (isNaN(m) || atr == null) return NaN;
-    return m + atrMult * atr;
-  });
-
-  const lowerBand = medianValues.map((m, i) => {
-    const atr = atrValues[i];
-    if (isNaN(m) || atr == null) return NaN;
-    return m - atrMult * atr;
-  });
-
-  // Calculate EMA of median
-  const medianSeries = new Series(bars, (_, i) => medianValues[i]);
-  const medianEma = ta.ema(medianSeries, length);
-  const medianEmaArr = medianEma.toArray();
-
-  // Build plot data
-  const medianData = medianValues.map((value, i) => ({
-    time: bars[i].time,
-    value: value ?? NaN,
-  }));
-
-  const upperData = upperBand.map((value, i) => ({
-    time: bars[i].time,
-    value: value ?? NaN,
-  }));
-
-  const lowerData = lowerBand.map((value, i) => ({
-    time: bars[i].time,
-    value: value ?? NaN,
-  }));
-
-  const emaData = medianEmaArr.map((value: number | null, i: number) => ({
-    time: bars[i].time,
-    value: value ?? NaN,
-  }));
-
-  // Split median into above/below EMA for conditional fill color
-  const medianAbove = medianData.map((d, i) => ({
-    time: d.time,
-    value: d.value > emaData[i].value ? d.value : NaN,
-  }));
-  const medianBelow = medianData.map((d, i) => ({
-    time: d.time,
-    value: d.value <= emaData[i].value ? d.value : NaN,
-  }));
-
-  const fills: FillData[] = [
-    { plot1: 'plot4', plot2: 'plot3', options: { color: '#00FF00', transp: 10, title: 'Bullish Fill' } },
-    { plot1: 'plot5', plot2: 'plot3', options: { color: '#FF00FF', transp: 10, title: 'Bearish Fill' } },
-  ];
+  const t = (i: number) => bars[i].time;
+  // fill colour: median > median_ema ? color.new(color.lime, 10) : color.new(color.fuchsia, 10)
+  const fillColors = bars.map((_b, i) => (gt(median[i], medianEma[i]) ? '#00E676E6' : '#E040FBE6'));
 
   return {
     metadata: {
@@ -134,14 +74,12 @@ export function calculate(bars: Bar[], inputs: Partial<MedianInputs> = {}): Indi
       overlay: metadata.overlay,
     },
     plots: {
-      'plot0': medianData,
-      'plot1': upperData,
-      'plot2': lowerData,
-      'plot3': emaData,
-      'plot4': medianAbove,
-      'plot5': medianBelow,
+      plot0: bars.map((_b, i) => ({ time: t(i), value: median[i] })),
+      plot1: bars.map((_b, i) => ({ time: t(i), value: median[i] + atr[i] })),
+      plot2: bars.map((_b, i) => ({ time: t(i), value: median[i] - atr[i] })),
+      plot3: bars.map((_b, i) => ({ time: t(i), value: medianEma[i] })),
     },
-    fills,
+    fills: [{ plot1: 'plot0', plot2: 'plot3', options: { title: 'Fill color' }, colors: fillColors }],
   };
 }
 

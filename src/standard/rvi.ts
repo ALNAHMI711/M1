@@ -5,7 +5,8 @@
  * Based on the relationship between close-open and high-low.
  */
 
-import { type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { Series, ta, math, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { barInterval, barTime } from '../bar-time';
 
 export interface RVIInputs {
   /** Period length */
@@ -36,65 +37,31 @@ export const metadata = {
   overlay: false,
 };
 
-/**
- * Symmetrically Weighted Moving Average (SWMA)
- * Weights: 1, 2, 2, 1 (period 4)
- */
-function swma(values: number[]): number[] {
-  const result: number[] = [];
-  for (let i = 0; i < values.length; i++) {
-    if (i < 3) {
-      result.push(NaN);
-      continue;
-    }
-    const swmaVal = (values[i - 3] + 2 * values[i - 2] + 2 * values[i - 1] + values[i]) / 6;
-    result.push(swmaVal);
-  }
-  return result;
-}
-
 export function calculate(bars: Bar[], inputs: Partial<RVIInputs> = {}): IndicatorResult {
   const { length, offset } = { ...defaultInputs, ...inputs };
+  const S = (a: number[]) => Series.fromArray(bars, a);
 
-  // close - open
-  const closeMinusOpen = bars.map(b => b.close - b.open);
-  // high - low
-  const highMinusLow = bars.map(b => b.high - b.low);
+  // rvi = math.sum(ta.swma(close - open), len) / math.sum(ta.swma(high - low), len)
+  const num = math.sum(ta.swma(S(bars.map((b) => b.close - b.open))), length).toArray();
+  const den = math.sum(ta.swma(S(bars.map((b) => b.high - b.low))), length).toArray();
+  // A plain division: x / 0 is +-infinity, 0 / 0 is NaN (na); the plots show both as na
+  const rviRaw = bars.map((_b, i) => (num[i] ?? NaN) / (den[i] ?? NaN));
+  // sig = ta.swma(rvi)
+  const sigRaw = ta.swma(S(rviRaw)).toArray().map((v) => v ?? NaN);
+  const finite = (v: number) => (Number.isFinite(v) ? v : NaN);
+  const rviValues = rviRaw.map(finite);
+  const signalValues = sigRaw.map(finite);
 
-  // SWMA of close-open and high-low
-  const swmaCloseOpen = swma(closeMinusOpen);
-  const swmaHighLow = swma(highMinusLow);
-
-  // Sum over length period
-  const rviValues: number[] = [];
-  for (let i = 0; i < bars.length; i++) {
-    if (i < length + 2) {
-      rviValues.push(NaN);
-      continue;
+  // plot(..., offset = offset): the value of bar i is drawn on bar i + offset (future bars after the last bar)
+  const interval = barInterval(bars);
+  const applyOffset = (arr: number[]) => {
+    const out: { time: number; value: number }[] = [];
+    for (let i = 0; i < bars.length; i++) {
+      if (i + offset < 0) continue;
+      out.push({ time: barTime(bars, i + offset, interval), value: arr[i] });
     }
-
-    let sumCloseOpen = 0;
-    let sumHighLow = 0;
-
-    for (let j = i - length + 1; j <= i; j++) {
-      if (!isNaN(swmaCloseOpen[j])) sumCloseOpen += swmaCloseOpen[j];
-      if (!isNaN(swmaHighLow[j])) sumHighLow += swmaHighLow[j];
-    }
-
-    if (sumHighLow === 0) {
-      rviValues.push(0);
-    } else {
-      rviValues.push(sumCloseOpen / sumHighLow);
-    }
-  }
-
-  // Signal = SWMA(RVI)
-  const signalValues = swma(rviValues);
-
-  const applyOffset = (arr: number[]) => bars.map((bar, i) => {
-    const srcIdx = i - offset;
-    return { time: bar.time, value: (srcIdx >= 0 && srcIdx < bars.length) ? (arr[srcIdx] ?? NaN) : NaN };
-  });
+    return out;
+  };
 
   const rviData = applyOffset(rviValues);
   const signalData = applyOffset(signalValues);

@@ -6,7 +6,7 @@
  * Based on the standard DMI indicator.
  */
 
-import { Series, ta, type Bar, type IndicatorResult, type InputConfig, type PlotConfig } from 'oakscriptjs';
+import { ta, type Series, type Bar, type IndicatorResult, type InputConfig, type PlotConfig } from 'oakscriptjs';
 
 export interface DMIInputs {
   /** ADX Smoothing length */
@@ -54,107 +54,12 @@ export const metadata = {
 export function calculate(bars: Bar[], inputs: Partial<DMIInputs> = {}): IndicatorResult {
   const { adxSmoothing, diLength } = { ...defaultInputs, ...inputs };
 
-  // Extract high and low series
-  const high = Series.fromBars(bars, 'high');
-  const low = Series.fromBars(bars, 'low');
-
-  // Calculate change in high and low
-  const up = ta.change(high, 1);
-  const upArr = up.toArray();
-  const downArr = ta.change(low, 1).toArray().map(v => v !== null ? -v : null);
-
-  // Calculate +DM and -DM
-  const plusDM: (number | null)[] = [];
-  const minusDM: (number | null)[] = [];
-
-  for (let i = 0; i < bars.length; i++) {
-    const upVal = upArr[i];
-    const downVal = downArr[i];
-
-    if (upVal === null) {
-      plusDM.push(null);
-    } else if (upVal > (downVal ?? 0) && upVal > 0) {
-      plusDM.push(upVal);
-    } else {
-      plusDM.push(0);
-    }
-
-    if (downVal === null) {
-      minusDM.push(null);
-    } else if (downVal > (upVal ?? 0) && downVal > 0) {
-      minusDM.push(downVal);
-    } else {
-      minusDM.push(0);
-    }
-  }
-
-  // Calculate True Range and smooth it
-  const trueRange = ta.tr(bars, true);
-  const trur = ta.rma(trueRange, diLength);
-  const trurArr = trur.toArray();
-
-  // Smooth +DM and -DM
-  const plusDMSeries = new Series(bars, (_, i) => plusDM[i] ?? NaN);
-  const minusDMSeries = new Series(bars, (_, i) => minusDM[i] ?? NaN);
-  const smoothedPlusDMArr = ta.rma(plusDMSeries, diLength).toArray();
-  const smoothedMinusDMArr = ta.rma(minusDMSeries, diLength).toArray();
-
-  // Calculate +DI and -DI (with fixnan behavior - carry forward last valid value)
-  const plusDI: number[] = [];
-  const minusDI: number[] = [];
-  let lastValidPlus = 0;
-  let lastValidMinus = 0;
-
-  for (let i = 0; i < bars.length; i++) {
-    const tr = trurArr[i];
-    const pDM = smoothedPlusDMArr[i];
-    const mDM = smoothedMinusDMArr[i];
-
-    if (tr === null || tr === 0 || pDM === null) {
-      plusDI.push(lastValidPlus);
-    } else {
-      const val = 100 * pDM / tr;
-      plusDI.push(val);
-      lastValidPlus = val;
-    }
-
-    if (tr === null || tr === 0 || mDM === null) {
-      minusDI.push(lastValidMinus);
-    } else {
-      const val = 100 * mDM / tr;
-      minusDI.push(val);
-      lastValidMinus = val;
-    }
-  }
-
-  // Calculate DX
-  const dx: number[] = [];
-  for (let i = 0; i < bars.length; i++) {
-    const pdi = plusDI[i];
-    const mdi = minusDI[i];
-    const sum = pdi + mdi;
-    dx.push(sum === 0 ? 0 : 100 * Math.abs(pdi - mdi) / sum);
-  }
-
-  // Calculate ADX as RMA of DX
-  const dxSeries = new Series(bars, (_, i) => dx[i]);
-  const adx = ta.rma(dxSeries, adxSmoothing);
-  const adxArr = adx.toArray();
-
-  const plotData0 = adxArr.map((value, i) => ({
-    time: bars[i].time,
-    value: value ?? NaN,
-  }));
-
-  const plotData1 = plusDI.map((value, i) => ({
-    time: bars[i].time,
-    value: value,
-  }));
-
-  const plotData2 = minusDI.map((value, i) => ({
-    time: bars[i].time,
-    value: value,
-  }));
+  // ta.dmi follows the algorithm above (1e-10 comparisons, ta.tr without handle_na, x / 0 is na for fixnan)
+  const [plus, minus, adx] = ta.dmi(bars, diLength, adxSmoothing);
+  const toPlot = (s: Series) => {
+    const arr = s.toArray();
+    return bars.map((bar, i) => ({ time: bar.time, value: arr[i] ?? NaN }));
+  };
 
   return {
     metadata: {
@@ -163,9 +68,9 @@ export function calculate(bars: Bar[], inputs: Partial<DMIInputs> = {}): Indicat
       overlay: metadata.overlay,
     },
     plots: {
-      'plot0': plotData0,
-      'plot1': plotData1,
-      'plot2': plotData2,
+      'plot0': toPlot(adx),
+      'plot1': toPlot(plus),
+      'plot2': toPlot(minus),
     },
   };
 }

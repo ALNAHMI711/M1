@@ -6,11 +6,13 @@
  * Resets at each anchor period boundary.
  *
  * PineScript display:
+ *   col = lastVolume >= openVolume ? color.teal : color.red
  *   hline(0)
  *   plotcandle(openVolume, maxVolume, minVolume, lastVolume, "CVD", color=col, bordercolor=col, wickcolor=col)
  *
- * Note: the standard version uses intrabar data for more precise calculation.
- * This implementation uses close vs open as an approximation.
+ * The values are an estimate: the standard indicator splits the volume of each bar into up and down volume from
+ * lower-timeframe (intrabar) volume, which the chart bars do not have. This implementation gives all the volume of a
+ * bar to up or down volume by close vs open. The design (colours, zero line) is the one of the standard indicator.
  */
 
 import { type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig, type Bar } from 'oakscriptjs';
@@ -37,8 +39,12 @@ export const plotCandleConfig = [
 ];
 
 export const hlineConfig: HLineConfig[] = [
-  { id: 'hline_zero', price: 0, color: '#787B86', linestyle: 'solid', title: 'Zero' },
+  { id: 'hline_zero', price: 0, color: '#787B86', linestyle: 'dashed', title: 'Zero' },
 ];
+
+/** Pine float comparisons: a >= b unless b - a > 1e-10 (na compares false) */
+const EPS = 1e-10;
+const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
 
 export const metadata = {
   title: 'Cumulative Volume Delta',
@@ -112,7 +118,8 @@ export function calculate(bars: Bar[], inputs: Partial<CumulativeVolumeDeltaInpu
       periodMinDelta = Math.min(periodMinDelta, cumDelta);
     }
 
-    const col = cumDelta >= periodOpenDelta ? '#26A69A' : '#EF5350';
+    // col = lastVolume >= openVolume ? color.teal : color.red
+    const col = ge(cumDelta, periodOpenDelta) ? '#089981' : '#F23645';
     candles.push({
       time: bar.time as number,
       open: periodOpenDelta,

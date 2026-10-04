@@ -5,7 +5,7 @@
  * Range: 0 to 100
  */
 
-import { type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig, type FillConfig, type Bar } from 'oakscriptjs';
+import { Series, ta, type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig, type FillConfig, type Bar } from 'oakscriptjs';
 
 export interface MFIInputs {
   /** Period length */
@@ -25,9 +25,9 @@ export const plotConfig: PlotConfig[] = [
 ];
 
 export const hlineConfig: HLineConfig[] = [
-  { id: 'hline_upper', price: 80, color: '#787B86', linestyle: 'solid', title: 'Overbought' },
-  { id: 'hline_mid',   price: 50, color: '#787B8680', linestyle: 'solid', title: 'Middle Band' },
-  { id: 'hline_lower', price: 20, color: '#787B86', linestyle: 'solid', title: 'Oversold' },
+  { id: 'hline_upper', price: 80, color: '#787B86', linestyle: 'dashed', title: 'Overbought' },
+  { id: 'hline_mid',   price: 50, color: '#787B8680', linestyle: 'dashed', title: 'Middle Band' },
+  { id: 'hline_lower', price: 20, color: '#787B86', linestyle: 'dashed', title: 'Oversold' },
 ];
 
 export const fillConfig: FillConfig[] = [
@@ -43,42 +43,11 @@ export const metadata = {
 export function calculate(bars: Bar[], inputs: Partial<MFIInputs> = {}): IndicatorResult {
   const { length } = { ...defaultInputs, ...inputs };
 
-  // Typical price = hlc3 = (high + low + close) / 3
-  const typicalPrice = bars.map(b => (b.high + b.low + b.close) / 3);
-
-  // Raw money flow = typical price * volume
-  const rawMoneyFlow = typicalPrice.map((tp, i) => tp * (bars[i].volume ?? 0));
-
-  // Determine if price went up or down
-  const mfiValues: number[] = [];
-
-  for (let i = 0; i < bars.length; i++) {
-    if (i < length) {
-      mfiValues.push(NaN);
-      continue;
-    }
-
-    let positiveFlow = 0;
-    let negativeFlow = 0;
-
-    for (let j = i - length + 1; j <= i; j++) {
-      if (j === 0) continue;
-
-      if (typicalPrice[j] > typicalPrice[j - 1]) {
-        positiveFlow += rawMoneyFlow[j];
-      } else if (typicalPrice[j] < typicalPrice[j - 1]) {
-        negativeFlow += rawMoneyFlow[j];
-      }
-    }
-
-    if (negativeFlow === 0) {
-      mfiValues.push(100);
-    } else {
-      const moneyFlowRatio = positiveFlow / negativeFlow;
-      const mfi = 100 - (100 / (1 + moneyFlowRatio));
-      mfiValues.push(mfi);
-    }
-  }
+  // mf = ta.mfi(hlc3, length): upper = math.sum(volume * (ta.change(src) <= 0 ? 0 : src), length),
+  // lower likewise with >= 0; 100 - 100 / (1 + upper / lower)
+  const hlc3 = Series.fromArray(bars, bars.map((b) => (b.high + b.low + b.close) / 3));
+  const volume = Series.fromArray(bars, bars.map((b) => b.volume ?? NaN));
+  const mfiValues = ta.mfi(hlc3, length, volume).toArray();
 
   const mfiData = mfiValues.map((value, i) => ({
     time: bars[i].time,

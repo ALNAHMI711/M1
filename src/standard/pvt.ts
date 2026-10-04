@@ -1,11 +1,11 @@
 /**
  * Price Volume Trend (PVT) Indicator
  *
- * Cumulative volume indicator that relates volume to price change.
- * PVT = cumulative(change(close) / close[1] * volume)
+ * Cumulative volume indicator that relates volume to price change:
+ * vt = ta.cum(ta.change(close) / close[1] * volume). The first bar has no change, so it is na.
  */
 
-import { type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { Series, ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 
 export interface PVTInputs {
   // No inputs needed
@@ -26,31 +26,14 @@ export const metadata = {
 };
 
 export function calculate(bars: Bar[], _inputs: Partial<PVTInputs> = {}): IndicatorResult {
-  // PVT = cumulative(change(close) / close[1] * volume)
-  const pvtValues: number[] = [];
-  let cumulative = 0;
+  // vt = ta.cum(ta.change(src) / src[1] * volume); x / 0 is +-infinity (0 / 0 na): ta.cum skips it (na on that bar)
+  const change = ta.change(new Series(bars, (b) => b.close)).toArray();
+  const terms = bars.map((b, i) => (i > 0 ? (change[i] ?? NaN) / bars[i - 1].close * (b.volume ?? NaN) : NaN));
+  const pvt = ta.cum(Series.fromArray(bars, terms)).toArray();
 
-  for (let i = 0; i < bars.length; i++) {
-    if (i === 0) {
-      pvtValues.push(0);
-      continue;
-    }
-
-    const prevClose = bars[i - 1].close;
-    if (prevClose === 0) {
-      pvtValues.push(cumulative);
-      continue;
-    }
-
-    const change = bars[i].close - prevClose;
-    const pvtChange = (change / prevClose) * (bars[i].volume ?? 0);
-    cumulative += pvtChange;
-    pvtValues.push(cumulative);
-  }
-
-  const pvtData = pvtValues.map((value, i) => ({
+  const pvtData = pvt.map((value, i) => ({
     time: bars[i].time,
-    value,
+    value: value ?? NaN,
   }));
 
   return {

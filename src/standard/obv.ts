@@ -1,8 +1,9 @@
 /**
  * On Balance Volume (OBV) Indicator
  *
- * Hand-optimized implementation using oakscriptjs.
- * Cumulative volume indicator that adds volume on up days and subtracts on down days.
+ * Cumulative volume indicator that adds volume on up bars and subtracts it on down bars:
+ * obv = ta.cum(math.sign(ta.change(close)) * volume). The first bar has no change, so it is na.
+ * Optional smoothing MA of the OBV (None by default), with Bollinger Bands for 'SMA + Bollinger Bands'.
  */
 
 import { Series, ta, type IndicatorResult, type InputConfig, type PlotConfig, type FillData, type Bar } from 'oakscriptjs';
@@ -20,16 +21,16 @@ export const defaultInputs: OBVInputs = {
 };
 
 export const inputConfig: InputConfig[] = [
-  { id: 'maType', type: 'string', title: 'Smoothing Type', defval: 'None', options: ['None', 'SMA', 'SMA + Bollinger Bands', 'EMA', 'SMMA (RMA)', 'WMA', 'VWMA'] },
-  { id: 'maLength', type: 'int', title: 'Smoothing Length', defval: 14, min: 1 },
-  { id: 'bbMult', type: 'float', title: 'BB StdDev', defval: 2.0, min: 0.001, max: 50 },
+  { id: 'maType', type: 'string', title: 'Type', defval: 'None', options: ['None', 'SMA', 'SMA + Bollinger Bands', 'EMA', 'SMMA (RMA)', 'WMA', 'VWMA'] },
+  { id: 'maLength', type: 'int', title: 'Length', defval: 14 },
+  { id: 'bbMult', type: 'float', title: 'BB StdDev', defval: 2.0, min: 0.001, max: 50, step: 0.5 },
 ];
 
 export const plotConfig: PlotConfig[] = [
-  { id: 'plot0', title: 'OBV', color: '#2962FF', lineWidth: 1 },
-  { id: 'plot1', title: 'OBV-based MA', color: '#E2CC00', lineWidth: 1, display: 'none' },
-  { id: 'plot2', title: 'Upper Bollinger Band', color: '#089981', lineWidth: 1, display: 'none' },
-  { id: 'plot3', title: 'Lower Bollinger Band', color: '#089981', lineWidth: 1, display: 'none' },
+  { id: 'plot0', title: 'OnBalanceVolume', color: '#2962FF', lineWidth: 1 },
+  { id: 'plot1', title: 'OBV-based MA', color: '#FDD835', lineWidth: 1, display: 'none' },
+  { id: 'plot2', title: 'Upper Bollinger Band', color: '#4CAF50', lineWidth: 1, display: 'none' },
+  { id: 'plot3', title: 'Lower Bollinger Band', color: '#4CAF50', lineWidth: 1, display: 'none' },
 ];
 
 export const metadata = {
@@ -40,36 +41,16 @@ export const metadata = {
 
 export function calculate(bars: Bar[], inputs: Partial<OBVInputs> = {}): IndicatorResult {
   const { maType, maLength, bbMult } = { ...defaultInputs, ...inputs };
+  const A = (s: Series) => s.toArray().map((v) => v ?? NaN);
   const close = new Series(bars, (bar) => bar.close);
-  const volume = new Series(bars, (bar) => bar.volume ?? 0);
+  const volume = new Series(bars, (bar) => bar.volume ?? NaN);
+  const volumeArr = A(volume);
 
-  const closeArr = close.toArray();
-  const volumeArr = volume.toArray();
-
-  const obvArr: number[] = [];
-  let cumOBV = 0;
-
-  for (let i = 0; i < bars.length; i++) {
-    if (i === 0) {
-      obvArr.push(0);
-    } else {
-      const currClose = closeArr[i] ?? 0;
-      const prevClose = closeArr[i - 1] ?? 0;
-      const vol = volumeArr[i] ?? 0;
-
-      if (currClose > prevClose) {
-        cumOBV += vol;
-      } else if (currClose < prevClose) {
-        cumOBV -= vol;
-      }
-      obvArr.push(cumOBV);
-    }
-  }
-
-  const plotData = obvArr.map((value, i) => ({
-    time: bars[i].time,
-    value: value,
-  }));
+  // obv = ta.cum(math.sign(ta.change(src)) * volume)
+  const change = A(ta.change(close));
+  const obvSeries = ta.cum(Series.fromArray(bars, change.map((c, i) => Math.sign(c) * volumeArr[i])));
+  const obvArr = A(obvSeries);
+  const plotData = obvArr.map((value, i) => ({ time: bars[i].time, value }));
 
   const enableMA = maType !== 'None';
   const isBB = maType === 'SMA + Bollinger Bands';
@@ -79,7 +60,6 @@ export function calculate(bars: Bar[], inputs: Partial<OBVInputs> = {}): Indicat
   const fills: FillData[] = [];
 
   if (enableMA) {
-    const obvSeries = new Series(bars, (_, i) => obvArr[i]);
     let maSeries: Series;
     switch (maType) {
       case 'EMA': maSeries = ta.ema(obvSeries, maLength); break;
@@ -88,14 +68,16 @@ export function calculate(bars: Bar[], inputs: Partial<OBVInputs> = {}): Indicat
       case 'VWMA': maSeries = ta.vwma(obvSeries, maLength, volume); break;
       default: maSeries = ta.sma(obvSeries, maLength); break;
     }
-    const maArr = maSeries.toArray();
-    maData = maArr.map((v, i) => ({ time: bars[i].time, value: v ?? NaN }));
+    const maArr = A(maSeries);
+    maData = maArr.map((v, i) => ({ time: bars[i].time, value: v }));
 
     if (isBB) {
-      const stdevArr = ta.stdev(obvSeries, maLength).toArray();
-      bbUpperData = maArr.map((v, i) => ({ time: bars[i].time, value: (v != null && stdevArr[i] != null) ? v + stdevArr[i]! * bbMult : NaN }));
-      bbLowerData = maArr.map((v, i) => ({ time: bars[i].time, value: (v != null && stdevArr[i] != null) ? v - stdevArr[i]! * bbMult : NaN }));
-      fills.push({ plot1: 'plot2', plot2: 'plot3', options: { color: '#089981', transp: 90, title: 'BB Background' } });
+      // smoothingStDev = ta.stdev(obv, maLengthInput) * bbMultInput
+      const stdevArr = A(ta.stdev(obvSeries, maLength));
+      bbUpperData = maArr.map((v, i) => ({ time: bars[i].time, value: v + stdevArr[i] * bbMult }));
+      bbLowerData = maArr.map((v, i) => ({ time: bars[i].time, value: v - stdevArr[i] * bbMult }));
+      // color.new(color.green, 90)
+      fills.push({ plot1: 'plot2', plot2: 'plot3', options: { color: '#4CAF501A', title: 'Bollinger Bands Background Fill' } });
     }
   }
 

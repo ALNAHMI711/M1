@@ -17,6 +17,8 @@ export interface MARibbonInputs {
   ma1Source: SourceType;
   /** MA 1 length */
   ma1Length: number;
+  /** MA 1 colour */
+  ma1Color: string;
   /** Show MA 2 */
   showMa2: boolean;
   /** MA 2 type */
@@ -25,6 +27,8 @@ export interface MARibbonInputs {
   ma2Source: SourceType;
   /** MA 2 length */
   ma2Length: number;
+  /** MA 2 colour */
+  ma2Color: string;
   /** Show MA 3 */
   showMa3: boolean;
   /** MA 3 type */
@@ -33,6 +37,8 @@ export interface MARibbonInputs {
   ma3Source: SourceType;
   /** MA 3 length */
   ma3Length: number;
+  /** MA 3 colour */
+  ma3Color: string;
   /** Show MA 4 */
   showMa4: boolean;
   /** MA 4 type */
@@ -41,6 +47,8 @@ export interface MARibbonInputs {
   ma4Source: SourceType;
   /** MA 4 length */
   ma4Length: number;
+  /** MA 4 colour */
+  ma4Color: string;
 }
 
 export const defaultInputs: MARibbonInputs = {
@@ -48,18 +56,22 @@ export const defaultInputs: MARibbonInputs = {
   ma1Type: 'SMA',
   ma1Source: 'close',
   ma1Length: 20,
+  ma1Color: '#F6C309',
   showMa2: true,
   ma2Type: 'SMA',
   ma2Source: 'close',
   ma2Length: 50,
+  ma2Color: '#FB9800',
   showMa3: true,
   ma3Type: 'SMA',
   ma3Source: 'close',
   ma3Length: 100,
+  ma3Color: '#FB6500',
   showMa4: true,
   ma4Type: 'SMA',
   ma4Source: 'close',
   ma4Length: 200,
+  ma4Color: '#F60C0C',
 };
 
 export const inputConfig: InputConfig[] = [
@@ -67,25 +79,29 @@ export const inputConfig: InputConfig[] = [
   { id: 'ma1Type', type: 'string', title: 'MA 1 Type', defval: 'SMA', options: ['SMA', 'EMA', 'SMMA (RMA)', 'WMA', 'VWMA'] },
   { id: 'ma1Source', type: 'source', title: 'MA 1 Source', defval: 'close' },
   { id: 'ma1Length', type: 'int', title: 'MA 1 Length', defval: 20, min: 1 },
+  { id: 'ma1Color', type: 'color', title: 'MA 1 Color', defval: '#F6C309' },
   { id: 'showMa2', type: 'bool', title: 'Show MA 2', defval: true },
   { id: 'ma2Type', type: 'string', title: 'MA 2 Type', defval: 'SMA', options: ['SMA', 'EMA', 'SMMA (RMA)', 'WMA', 'VWMA'] },
   { id: 'ma2Source', type: 'source', title: 'MA 2 Source', defval: 'close' },
   { id: 'ma2Length', type: 'int', title: 'MA 2 Length', defval: 50, min: 1 },
+  { id: 'ma2Color', type: 'color', title: 'MA 2 Color', defval: '#FB9800' },
   { id: 'showMa3', type: 'bool', title: 'Show MA 3', defval: true },
   { id: 'ma3Type', type: 'string', title: 'MA 3 Type', defval: 'SMA', options: ['SMA', 'EMA', 'SMMA (RMA)', 'WMA', 'VWMA'] },
   { id: 'ma3Source', type: 'source', title: 'MA 3 Source', defval: 'close' },
   { id: 'ma3Length', type: 'int', title: 'MA 3 Length', defval: 100, min: 1 },
+  { id: 'ma3Color', type: 'color', title: 'MA 3 Color', defval: '#FB6500' },
   { id: 'showMa4', type: 'bool', title: 'Show MA 4', defval: true },
   { id: 'ma4Type', type: 'string', title: 'MA 4 Type', defval: 'SMA', options: ['SMA', 'EMA', 'SMMA (RMA)', 'WMA', 'VWMA'] },
   { id: 'ma4Source', type: 'source', title: 'MA 4 Source', defval: 'close' },
   { id: 'ma4Length', type: 'int', title: 'MA 4 Length', defval: 200, min: 1 },
+  { id: 'ma4Color', type: 'color', title: 'MA 4 Color', defval: '#F60C0C' },
 ];
 
 export const plotConfig: PlotConfig[] = [
-  { id: 'plot0', title: 'MA 1', color: '#f6c309', lineWidth: 1 },
-  { id: 'plot1', title: 'MA 2', color: '#fb9800', lineWidth: 1 },
-  { id: 'plot2', title: 'MA 3', color: '#fb6500', lineWidth: 1 },
-  { id: 'plot3', title: 'MA 4', color: '#f60c0c', lineWidth: 1 },
+  { id: 'plot0', title: 'MA #1', color: '#F6C309', lineWidth: 1 },
+  { id: 'plot1', title: 'MA #2', color: '#FB9800', lineWidth: 1 },
+  { id: 'plot2', title: 'MA #3', color: '#FB6500', lineWidth: 1 },
+  { id: 'plot3', title: 'MA #4', color: '#F60C0C', lineWidth: 1 },
 ];
 
 export const metadata = {
@@ -123,20 +139,20 @@ function calculateMA(
 
 export function calculate(bars: Bar[], inputs: Partial<MARibbonInputs> = {}): IndicatorResult {
   const {
-    showMa1, ma1Type, ma1Source, ma1Length,
-    showMa2, ma2Type, ma2Source, ma2Length,
-    showMa3, ma3Type, ma3Source, ma3Length,
-    showMa4, ma4Type, ma4Source, ma4Length,
+    showMa1, ma1Type, ma1Source, ma1Length, ma1Color,
+    showMa2, ma2Type, ma2Source, ma2Length, ma2Color,
+    showMa3, ma3Type, ma3Source, ma3Length, ma3Color,
+    showMa4, ma4Type, ma4Source, ma4Length, ma4Color,
   } = { ...defaultInputs, ...inputs };
 
-  const plots: Record<string, { time: number; value: number }[]> = {};
+  const plots: Record<string, { time: number; value: number; color?: string }[]> = {};
 
   // Calculate and add each MA if enabled
   const maConfigs = [
-    { show: showMa1, type: ma1Type, source: ma1Source, length: ma1Length, plotId: 'plot0' },
-    { show: showMa2, type: ma2Type, source: ma2Source, length: ma2Length, plotId: 'plot1' },
-    { show: showMa3, type: ma3Type, source: ma3Source, length: ma3Length, plotId: 'plot2' },
-    { show: showMa4, type: ma4Type, source: ma4Source, length: ma4Length, plotId: 'plot3' },
+    { show: showMa1, type: ma1Type, source: ma1Source, length: ma1Length, color: ma1Color, plotId: 'plot0' },
+    { show: showMa2, type: ma2Type, source: ma2Source, length: ma2Length, color: ma2Color, plotId: 'plot1' },
+    { show: showMa3, type: ma3Type, source: ma3Source, length: ma3Length, color: ma3Color, plotId: 'plot2' },
+    { show: showMa4, type: ma4Type, source: ma4Source, length: ma4Length, color: ma4Color, plotId: 'plot3' },
   ];
 
   for (const config of maConfigs) {
@@ -145,12 +161,14 @@ export function calculate(bars: Bar[], inputs: Partial<MARibbonInputs> = {}): In
       plots[config.plotId] = ma.toArray().map((value, i) => ({
         time: bars[i].time,
         value: value ?? NaN,
+        color: config.color,
       }));
     } else {
-      // Return NaN values for hidden MAs
+      // Hidden MA: na values (the plot keeps its colour)
       plots[config.plotId] = bars.map((bar) => ({
         time: bar.time,
         value: NaN,
+        color: config.color,
       }));
     }
   }

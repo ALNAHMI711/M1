@@ -2,8 +2,8 @@
  * Rank Correlation Index (RCI) Indicator
  *
  * Measures directional consistency using Spearman's rank correlation,
- * scaled to -100 to 100. Includes SMA smoothing (enabled by default).
- * BB bands are excluded (display=none).
+ * scaled to -100 to 100 (ta.rci). Includes SMA smoothing (enabled by default),
+ * with Bollinger Bands for 'SMA + Bollinger Bands'.
  */
 
 import { Series, ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig, type FillConfig, type FillData, type Bar, type SourceType } from 'oakscriptjs';
@@ -28,26 +28,26 @@ export const inputConfig: InputConfig[] = [
   { id: 'source', type: 'source', title: 'Source', defval: 'close' },
   { id: 'length', type: 'int', title: 'RCI Length', defval: 10, min: 1 },
   { id: 'maType', type: 'string', title: 'Type', defval: 'SMA', options: ['None', 'SMA', 'SMA + Bollinger Bands', 'EMA', 'SMMA (RMA)', 'WMA', 'VWMA'] },
-  { id: 'maLength', type: 'int', title: 'Length', defval: 14, min: 1 },
-  { id: 'bbMult', type: 'float', title: 'BB StdDev', defval: 2.0, min: 0.001, max: 50 },
+  { id: 'maLength', type: 'int', title: 'Length', defval: 14 },
+  { id: 'bbMult', type: 'float', title: 'BB StdDev', defval: 2.0, min: 0.001, max: 50, step: 0.5 },
 ];
 
 export const plotConfig: PlotConfig[] = [
   { id: 'plot0', title: 'RCI', color: '#2962FF', lineWidth: 1 },
-  { id: 'plot1', title: 'RCI-based MA', color: '#E2CC00', lineWidth: 1 },
-  { id: 'plot2', title: 'Upper Bollinger Band', color: '#089981', lineWidth: 1, display: 'none' },
-  { id: 'plot3', title: 'Lower Bollinger Band', color: '#089981', lineWidth: 1, display: 'none' },
+  { id: 'plot1', title: 'RCI-based MA', color: '#FDD835', lineWidth: 1 },
+  { id: 'plot2', title: 'Upper Bollinger Band', color: '#4CAF50', lineWidth: 1, display: 'none' },
+  { id: 'plot3', title: 'Lower Bollinger Band', color: '#4CAF50', lineWidth: 1, display: 'none' },
 ];
 
 export const hlineConfig: HLineConfig[] = [
-  { id: 'hline_upper', price: 80, color: '#787B86', linestyle: 'solid', title: 'Upper Band' },
-  { id: 'hline_mid',   price: 0, color: '#787B86', linestyle: 'solid', title: 'Middle Band' },
-  { id: 'hline_lower', price: -80, color: '#787B86', linestyle: 'solid', title: 'Lower Band' },
+  { id: 'hline_mid',   price: 0, color: '#787B86', linestyle: 'dashed', title: 'Middle band' },
+  { id: 'hline_upper', price: 80, color: '#787B86', linestyle: 'dashed', title: 'Upper band' },
+  { id: 'hline_lower', price: -80, color: '#787B86', linestyle: 'dashed', title: 'Lower band' },
 ];
 
 export const fillConfig: FillConfig[] = [
-  { id: 'fill_band', plot1: 'hline_upper', plot2: 'hline_lower', color: '#2962FF19' },
-  { id: 'fill_bb', plot1: 'plot2', plot2: 'plot3', color: '#08998119' },
+  { id: 'fill_band', plot1: 'hline_upper', plot2: 'hline_lower', color: '#2962FF1A' },
+  { id: 'fill_bb', plot1: 'plot2', plot2: 'plot3', color: '#4CAF501A', title: 'Bollinger Bands Background Fill' },
 ];
 
 export const metadata = {
@@ -98,7 +98,8 @@ export function calculate(bars: Bar[], inputs: Partial<RCIInputs> = {}): Indicat
 
   const fills: FillData[] = [];
   if (isBB) {
-    fills.push({ plot1: 'plot2', plot2: 'plot3', options: { color: '#089981', transp: 90, title: 'BB Background' } });
+    // color.new(color.green, 90)
+    fills.push({ plot1: 'plot2', plot2: 'plot3', options: { color: '#4CAF501A', title: 'Bollinger Bands Background Fill' } });
   }
 
   return {

@@ -60,18 +60,13 @@ export function calculate(bars: Bar[], inputs: Partial<KlingerInputs> = {}): Ind
   const hlc3ChangeArr = ta.change(hlc3Series, 1).toArray();
 
   // Calculate signed volume: sv = ta.change(hlc3) >= 0 ? volume : -volume
+  // Pine float comparison: change >= 0 unless 0 - change > 1e-10; na (first bar) compares false
   const signedVolume: number[] = [];
   for (let i = 0; i < bars.length; i++) {
     const change = hlc3ChangeArr[i];
-    const volume = bars[i].volume ?? 0;
-
-    if (change === null) {
-      // First bar has no change, PineScript would treat it as 0 which is >= 0
-      signedVolume.push(volume);
-    } else {
-      // Key: >= 0, not just > 0
-      signedVolume.push(change >= 0 ? volume : -volume);
-    }
+    const volume = bars[i].volume ?? NaN;
+    const up = change != null && !isNaN(change) && !(0 - change > 1e-10);
+    signedVolume.push(up ? volume : -volume);
   }
 
   // Calculate EMAs

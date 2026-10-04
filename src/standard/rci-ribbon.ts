@@ -38,17 +38,17 @@ export const inputConfig: InputConfig[] = [
 export const plotConfig: PlotConfig[] = [
   { id: 'plot0', title: 'Short RCI', color: '#2962FF', lineWidth: 1 },
   { id: 'plot1', title: 'Middle RCI', color: '#F23645', lineWidth: 1 },
-  { id: 'plot2', title: 'Long RCI', color: '#089981', lineWidth: 1 },
+  { id: 'plot2', title: 'Long RCI', color: '#4CAF50', lineWidth: 1 },
 ];
 
 export const hlineConfig: HLineConfig[] = [
-  { id: 'hline_upper', price: 80, color: '#787B86', linestyle: 'solid', title: 'Upper Band' },
-  { id: 'hline_mid',   price: 0, color: '#787B86', linestyle: 'solid', title: 'Middle Band' },
-  { id: 'hline_lower', price: -80, color: '#787B86', linestyle: 'solid', title: 'Lower Band' },
+  { id: 'hline_mid',   price: 0, color: '#787B86', linestyle: 'dashed', title: 'Middle band' },
+  { id: 'hline_upper', price: 80, color: '#787B86', linestyle: 'dashed', title: 'Upper band' },
+  { id: 'hline_lower', price: -80, color: '#787B86', linestyle: 'dashed', title: 'Lower band' },
 ];
 
 export const fillConfig: FillConfig[] = [
-  { id: 'fill_band', plot1: 'hline_upper', plot2: 'hline_lower', color: '#2962FF19' },
+  { id: 'fill_band', plot1: 'hline_upper', plot2: 'hline_lower', color: '#2962FF1A' },
 ];
 
 export const metadata = {

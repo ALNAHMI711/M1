@@ -1,14 +1,15 @@
 /**
  * Positive Volume Index (PVI)
  *
- * Cumulative index that changes only on days when volume INCREASES versus the
- * prior bar, by the bar's percentage price change. Tracks the "crowd" that is
- * presumed to trade on active days. Seeded at 1000; an EMA(255) acts as signal.
+ * Cumulative index that changes only on bars where volume INCREASES versus the
+ * prior bar: it moves by the bar's percentage close change (index * (close - close[1]) / close[1]).
+ * Tracks the "crowd" that is presumed to trade on active days. The plot is ta.pvi * 1000
+ * (starts at 1000), with an EMA (255) of it as signal line.
  *
  * Based on the standard "Positive Volume Index" indicator.
  */
 
-import { Series, ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 
 export interface PVIInputs {
   /** Signal EMA length */
@@ -20,12 +21,12 @@ export const defaultInputs: PVIInputs = {
 };
 
 export const inputConfig: InputConfig[] = [
-  { id: 'signalLength', type: 'int', title: 'Signal EMA Length', defval: 255, min: 1 },
+  { id: 'signalLength', type: 'int', title: 'EMA length', defval: 255, min: 1 },
 ];
 
 export const plotConfig: PlotConfig[] = [
   { id: 'plot0', title: 'PVI', color: '#2962FF', lineWidth: 1 },
-  { id: 'plot1', title: 'EMA', color: '#FF6D00', lineWidth: 1 },
+  { id: 'plot1', title: 'PVI-based EMA', color: '#FF9800', lineWidth: 1 },
 ];
 
 export const metadata = {
@@ -37,18 +38,10 @@ export const metadata = {
 export function calculate(bars: Bar[], inputs: Partial<PVIInputs> = {}): IndicatorResult {
   const { signalLength } = { ...defaultInputs, ...inputs };
 
-  const pvi: number[] = [];
-  for (let i = 0; i < bars.length; i++) {
-    if (i === 0) { pvi.push(1000); continue; }
-    const prevClose = bars[i - 1].close;
-    const roc = prevClose !== 0 ? ((bars[i].close - prevClose) / prevClose) * 100 : 0;
-    const vol = bars[i].volume ?? 0;
-    const prevVol = bars[i - 1].volume ?? 0;
-    pvi.push(vol > prevVol ? pvi[i - 1] + roc : pvi[i - 1]);
-  }
-
-  const pviSeries = new Series(bars, (_, i) => pvi[i]);
-  const emaArr = ta.ema(pviSeries, signalLength).toArray();
+  // pvi = ta.pvi * 1000.0; ema = ta.ema(pvi, maLengthInput)
+  const pviSeries = ta.pvi(bars).mul(1000);
+  const pvi = pviSeries.toArray();
+  const ema = ta.ema(pviSeries, signalLength).toArray();
 
   return {
     metadata: {
@@ -57,8 +50,8 @@ export function calculate(bars: Bar[], inputs: Partial<PVIInputs> = {}): Indicat
       overlay: metadata.overlay,
     },
     plots: {
-      'plot0': pvi.map((value, i) => ({ time: bars[i].time, value })),
-      'plot1': emaArr.map((value, i) => ({ time: bars[i].time, value: value ?? NaN })),
+      'plot0': pvi.map((value, i) => ({ time: bars[i].time, value: value ?? NaN })),
+      'plot1': ema.map((value, i) => ({ time: bars[i].time, value: value ?? NaN })),
     },
   };
 }

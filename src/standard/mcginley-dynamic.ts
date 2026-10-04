@@ -1,11 +1,11 @@
 /**
  * McGinley Dynamic Indicator
  *
- * Hand-optimized implementation using oakscriptjs.
- * An adaptive moving average that adjusts to market speed.
+ * An adaptive moving average that adjusts to market speed: it starts from the EMA of the source and then
+ * follows MD = MD[1] + (src - MD[1]) / (length * (src / MD[1])^4).
  */
 
-import { getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { getSourceSeries, ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 
 export interface McGinleyDynamicInputs {
   length: number;
@@ -28,35 +28,29 @@ export const plotConfig: PlotConfig[] = [
 
 export const metadata = {
   title: 'McGinley Dynamic',
-  shortTitle: 'MD',
+  shortTitle: 'McGinley Dynamic',
   overlay: true,
 };
 
 export function calculate(bars: Bar[], inputs: Partial<McGinleyDynamicInputs> = {}): IndicatorResult {
   const { length, src } = { ...defaultInputs, ...inputs };
-  const source = getSourceSeries(bars, src);
-  const sourceArr = source.toArray();
+  const sourceArr = getSourceSeries(bars, src).toArray().map((v) => v ?? NaN);
 
-  // McGinley Dynamic formula: MD = MD[1] + (src - MD[1]) / (length * (src / MD[1])^4)
-  const mdArr: number[] = [];
-
+  // mg := na(mg[1]) ? ta.ema(source, length) : mg[1] + (source - mg[1]) / (length * math.pow(source / mg[1], 4))
+  // ta.ema runs only on the bars where mg[1] is na: from bar 0 until its first value (the SMA of the first
+  // `length` values), so it is the plain EMA there.
+  const ema = ta.ema(getSourceSeries(bars, src), length).toArray().map((v) => v ?? NaN);
+  const mdArr: number[] = new Array(bars.length);
+  let prev = NaN;
   for (let i = 0; i < bars.length; i++) {
-    const srcVal = sourceArr[i] ?? 0;
-
-    if (i === 0 || mdArr[i - 1] === undefined || mdArr[i - 1] === 0) {
-      mdArr.push(srcVal);
-    } else {
-      const prevMD = mdArr[i - 1];
-      const ratio = srcVal / prevMD;
-      const k = length * Math.pow(ratio, 4);
-      const md = prevMD + (srcVal - prevMD) / k;
-      mdArr.push(md);
-    }
+    const s0 = sourceArr[i];
+    prev = Number.isNaN(prev) ? ema[i] : prev + (s0 - prev) / (length * Math.pow(s0 / prev, 4));
+    mdArr[i] = prev;
   }
 
   const plotData = mdArr.map((value, i) => ({
     time: bars[i].time,
-    value: value,
+    value: Number.isFinite(value) ? value : NaN,
   }));
 
   return {

@@ -9,10 +9,12 @@
  *   stdev  = sqrt( sum(volume*src^2)/sum(volume) - vwap^2 )
  *   bands  = vwap +/- mult * stdev
  *
+ * Bands #1 are shown by default, with a fill between them (green, 95% transparency).
+ *
  * Based on the standard "Volume Weighted Average Price" indicator.
  */
 
-import { getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { getSourceSeries, type FillData, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 
 export interface VWAPInputs {
   anchor: string;
@@ -24,21 +26,21 @@ export interface VWAPInputs {
 export const defaultInputs: VWAPInputs = {
   anchor: '1D',
   src: 'hlc3',
-  showBands: false,
+  showBands: true,
   bandMult: 1.0,
 };
 
 export const inputConfig: InputConfig[] = [
   { id: 'anchor', type: 'string', title: 'Anchor Period', defval: '1D', options: ['1D', '1W', '1M'] },
   { id: 'src', type: 'source', title: 'Source', defval: 'hlc3' },
-  { id: 'showBands', type: 'bool', title: 'Show Bands', defval: false },
+  { id: 'showBands', type: 'bool', title: 'Show Bands', defval: true },
   { id: 'bandMult', type: 'float', title: 'Band Multiplier', defval: 1.0, min: 0.1, step: 0.1 },
 ];
 
 export const plotConfig: PlotConfig[] = [
   { id: 'plot0', title: 'VWAP', color: '#2962FF', lineWidth: 1 },
-  { id: 'plot1', title: 'Upper Band', color: '#089981', lineWidth: 1 },
-  { id: 'plot2', title: 'Lower Band', color: '#F23645', lineWidth: 1 },
+  { id: 'plot1', title: 'Upper Band #1', color: '#4CAF50', lineWidth: 1 },
+  { id: 'plot2', title: 'Lower Band #1', color: '#4CAF50', lineWidth: 1 },
 ];
 
 export const metadata = {
@@ -112,6 +114,10 @@ export function calculate(bars: Bar[], inputs: Partial<VWAPInputs> = {}): Indica
     prevPeriodStart = periodStart;
   }
 
+  const fills: FillData[] = showBands
+    ? [{ plot1: 'plot1', plot2: 'plot2', options: { color: '#4CAF50', transp: 95, title: 'Bands Fill #1' } }]
+    : [];
+
   return {
     metadata: {
       title: metadata.title,
@@ -123,6 +129,7 @@ export function calculate(bars: Bar[], inputs: Partial<VWAPInputs> = {}): Indica
       'plot1': upperData,
       'plot2': lowerData,
     },
+    fills,
   };
 }
 

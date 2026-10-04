@@ -1,12 +1,13 @@
 /**
  * Net Volume Indicator
  *
- * Displays the net volume (upVolume - downVolume) for each bar.
- * Approximates up/down volume by comparing close to open price.
+ * Displays the net volume (upVolume - downVolume) for each bar, as one blue line, with a zero line.
  * Positive values indicate buying pressure, negative indicates selling pressure.
  *
- * Note: the standard version uses intrabar data for more precise calculation.
- * This implementation uses close vs open as an approximation.
+ * The values are an estimate: the standard indicator splits the volume of each bar into up and down volume from
+ * lower-timeframe (intrabar) volume, which the chart bars do not have. This implementation gives all the volume of a
+ * bar to up or down volume by close vs open (0 when close equals open). The design (plot colour, zero line) is the
+ * one of the standard indicator.
  *
  * Based on the standard Net Volume indicator.
  */
@@ -26,7 +27,7 @@ export const plotConfig: PlotConfig[] = [
 ];
 
 export const hlineConfig: HLineConfig[] = [
-  { id: 'hline_zero', price: 0, color: '#787B86', linestyle: 'solid', title: 'Zero' },
+  { id: 'hline_zero', price: 0, color: '#787B86', linestyle: 'dashed', title: 'Zero' },
 ];
 
 export const metadata = {
@@ -61,7 +62,6 @@ export function calculate(bars: Bar[], _inputs: Partial<NetVolumeInputs> = {}): 
   const plotData = deltaValues.map((value, i) => ({
     time: bars[i].time,
     value: value,
-    color: value >= 0 ? '#26A69A' : '#EF5350',
   }));
 
   return {

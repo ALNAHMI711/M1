@@ -6,7 +6,7 @@
  * Useful for identifying squeezes (low values) and expansions (high values).
  */
 
-import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { ta, Series, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 
 export interface BBBandWidthInputs {
   /** Period length */
@@ -63,42 +63,31 @@ export function calculate(bars: Bar[], inputs: Partial<BBBandWidthInputs> = {}):
   const upperArr = upper.toArray();
   const lowerArr = lower.toArray();
 
+  // Pine division: non-zero / 0 is +-infinity, 0 / 0 is na
   const bbw: number[] = [];
   for (let i = 0; i < bars.length; i++) {
     const u = upperArr[i];
     const l = lowerArr[i];
     const b = basisArr[i];
-
-    if (u == null || l == null || b == null || b === 0) {
+    if (u == null || l == null || b == null || isNaN(u) || isNaN(l) || isNaN(b)) {
       bbw.push(NaN);
     } else {
-      bbw.push(((u - l) / b) * 100);
+      const w = u - l;
+      bbw.push(b === 0 ? (w === 0 ? NaN : (w > 0 ? Infinity : -Infinity)) : (w / b) * 100);
     }
   }
 
-  // Calculate highest and lowest BBW
-  const highestExpansion: number[] = [];
-  const lowestContraction: number[] = [];
+  // ta.highest / ta.lowest: na on the first length - 1 bars
+  const bbwSeries = Series.fromArray(bars, bbw);
+  const highestExpansion = ta.highest(bbwSeries, expansionLength).toArray();
+  const lowestContraction = ta.lowest(bbwSeries, contractionLength).toArray();
 
-  for (let i = 0; i < bars.length; i++) {
-    // Highest expansion
-    let highest = -Infinity;
-    for (let j = Math.max(0, i - expansionLength + 1); j <= i; j++) {
-      if (!isNaN(bbw[j]) && bbw[j] > highest) highest = bbw[j];
-    }
-    highestExpansion.push(highest === -Infinity ? NaN : highest);
+  // Plots treat infinity as na
+  const plotValue = (v: number | null | undefined) => (v == null || !Number.isFinite(v) ? NaN : v);
 
-    // Lowest contraction
-    let lowest = Infinity;
-    for (let j = Math.max(0, i - contractionLength + 1); j <= i; j++) {
-      if (!isNaN(bbw[j]) && bbw[j] < lowest) lowest = bbw[j];
-    }
-    lowestContraction.push(lowest === Infinity ? NaN : lowest);
-  }
-
-  const bbwData = bbw.map((value, i) => ({ time: bars[i].time, value }));
-  const highData = highestExpansion.map((value, i) => ({ time: bars[i].time, value }));
-  const lowData = lowestContraction.map((value, i) => ({ time: bars[i].time, value }));
+  const bbwData = bbw.map((value, i) => ({ time: bars[i].time, value: plotValue(value) }));
+  const highData = highestExpansion.map((value, i) => ({ time: bars[i].time, value: plotValue(value) }));
+  const lowData = lowestContraction.map((value, i) => ({ time: bars[i].time, value: plotValue(value) }));
 
   return {
     metadata: {

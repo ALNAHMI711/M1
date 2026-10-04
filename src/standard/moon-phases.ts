@@ -19,13 +19,13 @@ export interface MoonPhasesInputs {
 }
 
 export const defaultInputs: MoonPhasesInputs = {
-  waxingMoonColor: '#2196F3',
+  waxingMoonColor: '#2962FF',
   waningMoonColor: '#FFFFFF',
 };
 
 export const inputConfig: InputConfig[] = [
-  { id: 'waxingMoonColor', type: 'string', title: 'Waxing Moon', defval: '#2196F3' },
-  { id: 'waningMoonColor', type: 'string', title: 'Waning Moon', defval: '#FFFFFF' },
+  { id: 'waxingMoonColor', type: 'color', title: 'Waxing Moon', defval: '#2962FF' },
+  { id: 'waningMoonColor', type: 'color', title: 'Waning Moon', defval: '#FFFFFF' },
 ];
 
 // No line plots — rendered via markers and bgcolor
@@ -185,7 +185,6 @@ export function calculate(bars: Bar[], inputs: Partial<MoonPhasesInputs> = {}): 
         position: 'aboveBar',
         shape: 'circle',
         color: hexToRgba(waxingMoonColor, 0.5),
-        text: 'New',
       });
     } else if (moonType === -1) {
       markers.push({
@@ -193,7 +192,6 @@ export function calculate(bars: Bar[], inputs: Partial<MoonPhasesInputs> = {}): 
         position: 'belowBar',
         shape: 'circle',
         color: hexToRgba(waningMoonColor, 0.5),
-        text: 'Full',
       });
     }
 

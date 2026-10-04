@@ -2,7 +2,8 @@
  * Aroon Oscillator
  *
  * The difference between Aroon Up and Aroon Down. Oscillates between -100 and
- * +100; positive values indicate an uptrend, negative a downtrend.
+ * +100; positive values indicate an uptrend, negative a downtrend. The line and its fill to zero are green
+ * at or above zero, red below.
  *
  * Based on the standard "Aroon Oscillator" indicator.
  */
@@ -23,11 +24,14 @@ export const inputConfig: InputConfig[] = [
 ];
 
 export const plotConfig: PlotConfig[] = [
-  { id: 'plot0', title: 'Aroon Oscillator', color: '#FF6D00', lineWidth: 1 },
+  { id: 'plot0', title: 'Oscillator', color: '#4CAF50', lineWidth: 1 },
+  { id: 'plot1', title: '', color: 'transparent', lineWidth: 1, display: 'none' },
 ];
 
 export const hlineConfig: HLineConfig[] = [
-  { id: 'hline_zero', price: 0, color: '#787B86', linestyle: 'dashed', title: 'Zero' },
+  { id: 'hline_zero', price: 0, color: '#787B86', linestyle: 'dashed', title: 'Center' },
+  { id: 'hline_upper', price: 90, color: '#787B86', linestyle: 'dashed', title: 'Upper level' },
+  { id: 'hline_lower', price: -90, color: '#787B86', linestyle: 'dashed', title: 'Lower level' },
 ];
 
 export const metadata = {
@@ -35,6 +39,10 @@ export const metadata = {
   shortTitle: 'Aroon Osc',
   overlay: false,
 };
+
+/** Pine float comparisons: a >= b unless b - a > 1e-10 (na compares false) */
+const EPS = 1e-10;
+const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
 
 export function calculate(bars: Bar[], inputs: Partial<AroonOscillatorInputs> = {}): IndicatorResult {
   const { length } = { ...defaultInputs, ...inputs };
@@ -62,7 +70,12 @@ export function calculate(bars: Bar[], inputs: Partial<AroonOscillatorInputs> = 
     oscArr.push(aroonUp - aroonDown);
   }
 
-  const plotData = oscArr.map((value, i) => ({ time: bars[i].time, value }));
+  // plot(osc, "Oscillator", osc >= 0 ? #4caf50 : #ff5252)
+  const plotData = oscArr.map((value, i) => ({ time: bars[i].time, value, color: ge(value, 0) ? '#4CAF50' : '#FF5252' }));
+  // zeroPlot = plot(0, "", na, display = display.none, editable = false)
+  const zeroData = bars.map((b) => ({ time: b.time, value: 0 }));
+  // fill(oscPlot, zeroPlot, osc >= 0 ? #4caf501a : #ff52521a, "Oscillator fill")
+  const fillColors = oscArr.map((value) => (ge(value, 0) ? '#4CAF501A' : '#FF52521A'));
 
   return {
     metadata: {
@@ -72,7 +85,9 @@ export function calculate(bars: Bar[], inputs: Partial<AroonOscillatorInputs> = 
     },
     plots: {
       'plot0': plotData,
+      'plot1': zeroData,
     },
+    fills: [{ plot1: 'plot0', plot2: 'plot1', options: { title: 'Oscillator fill' }, colors: fillColors }],
   };
 }
 

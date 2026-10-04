@@ -1,12 +1,16 @@
 /**
  * Ichimoku Cloud Indicator
  *
- * Hand-optimized implementation using oakscriptjs.
- * A comprehensive trend-following system that shows support/resistance,
- * momentum, and trend direction all at once.
+ * A trend-following system that shows support/resistance, momentum and trend direction at once.
+ * Conversion and Base lines are Donchian midlines; the Leading Spans are drawn `displacement - 1` bars ahead
+ * (on future bars after the last bar) and the Lagging Span `displacement - 1` bars back. The cloud between the
+ * Leading Spans is green when Leading Span A is above Leading Span B, red otherwise.
+ *
+ * Based on the standard "Ichimoku Cloud" indicator.
  */
 
-import { Series, ta, type IndicatorResult, type InputConfig, type PlotConfig, type FillData, type Bar } from 'oakscriptjs';
+import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { barInterval, barTime } from '../bar-time';
 
 /**
  * Ichimoku Cloud indicator input parameters
@@ -43,7 +47,7 @@ export const inputConfig: InputConfig[] = [
 ];
 
 /**
- * Plot configuration - order matches CSV columns
+ * Plot configuration
  */
 export const plotConfig: PlotConfig[] = [
   { id: 'plot0', title: 'Conversion Line', color: '#2962FF', lineWidth: 1 },
@@ -51,10 +55,8 @@ export const plotConfig: PlotConfig[] = [
   { id: 'plot2', title: 'Lagging Span', color: '#43A047', lineWidth: 1 },
   { id: 'plot3', title: 'Leading Span A', color: '#A5D6A7', lineWidth: 1 },
   { id: 'plot4', title: 'Leading Span B', color: '#EF9A9A', lineWidth: 1 },
-  { id: 'plot5', title: 'Lead A Bullish', color: '#A5D6A7', lineWidth: 0, display: 'none' },
-  { id: 'plot6', title: 'Lead A Bearish', color: '#EF9A9A', lineWidth: 0, display: 'none' },
-  { id: 'plot7', title: 'Kumo Cloud Upper Line', color: '#A5D6A7', lineWidth: 0, display: 'none' },
-  { id: 'plot8', title: 'Kumo Cloud Lower Line', color: '#EF9A9A', lineWidth: 0, display: 'none' },
+  { id: 'plot7', title: 'Kumo Cloud Upper Line', color: '#2962FF', lineWidth: 1, display: 'none' },
+  { id: 'plot8', title: 'Kumo Cloud Lower Line', color: '#2962FF', lineWidth: 1, display: 'none' },
 ];
 
 /**
@@ -66,14 +68,11 @@ export const metadata = {
   overlay: true,
 };
 
-/**
- * Donchian midline calculation: (highest + lowest) / 2
- */
-function donchian(high: Series, low: Series, length: number): Series {
-  const highest = ta.highest(high, length);
-  const lowest = ta.lowest(low, length);
-  return highest.add(lowest).div(2);
-}
+/** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
+const EPS = 1e-10;
+const gt = (a: number, b: number) => a - b > EPS;
+
+type Point = { time: number; value: number };
 
 /**
  * Calculate Ichimoku Cloud indicator
@@ -84,107 +83,42 @@ function donchian(high: Series, low: Series, length: number): Series {
  */
 export function calculate(bars: Bar[], inputs: Partial<IchimokuInputs> = {}): IndicatorResult {
   const { conversionPeriods, basePeriods, laggingSpan2Periods, displacement } = { ...defaultInputs, ...inputs };
-
+  const n = bars.length;
+  const A = (s: Series) => s.toArray().map((v) => v ?? NaN);
   const high = new Series(bars, (bar) => bar.high);
   const low = new Series(bars, (bar) => bar.low);
-  const close = new Series(bars, (bar) => bar.close);
 
-  // Calculate the main lines
-  const conversionLine = donchian(high, low, conversionPeriods);
-  const baseLine = donchian(high, low, basePeriods);
+  // donchian(len) => math.avg(ta.lowest(len), ta.highest(len))
+  const donchian = (len: number) => {
+    const lo = A(ta.lowest(low, len));
+    const hi = A(ta.highest(high, len));
+    return lo.map((l, i) => (l + hi[i]) / 2);
+  };
+  const conversionLine = donchian(conversionPeriods);
+  const baseLine = donchian(basePeriods);
+  const leadLine1 = conversionLine.map((c, i) => (c + baseLine[i]) / 2);
+  const leadLine2 = donchian(laggingSpan2Periods);
 
-  // Leading Span A = average of conversion and base lines
-  const leadingSpanA = conversionLine.add(baseLine).div(2);
+  const interval = barInterval(bars);
+  // plot(value, offset = off): the value of bar i is drawn on bar i + off (future bars after the last bar)
+  const shifted = (value: (i: number) => number, off: number): Point[] => {
+    const out: Point[] = [];
+    for (let i = 0; i < n; i++) {
+      if (i + off < 0) continue;
+      out.push({ time: barTime(bars, i + off, interval), value: value(i) });
+    }
+    return out;
+  };
+  const lead = displacement - 1;
 
-  // Leading Span B = donchian of laggingSpan2Periods
-  const leadingSpanB = donchian(high, low, laggingSpan2Periods);
+  // leadLine1 > leadLine2 ? leadLine1 : leadLine2 (na compares false)
+  const upper = (i: number) => (gt(leadLine1[i], leadLine2[i]) ? leadLine1[i] : leadLine2[i]);
+  // leadLine1 < leadLine2 ? leadLine1 : leadLine2
+  const lower = (i: number) => (gt(leadLine2[i], leadLine1[i]) ? leadLine1[i] : leadLine2[i]);
 
-  // Convert to arrays for manipulation
-  const conversionArr = conversionLine.toArray();
-  const baseArr = baseLine.toArray();
-  const closeArr = close.toArray();
-  const leadAArr = leadingSpanA.toArray();
-  const leadBArr = leadingSpanB.toArray();
-
-  // Build plot data with proper offsets
-  // Conversion Line - no offset
-  const conversionData = conversionArr.map((value, i) => ({
-    time: bars[i].time,
-    value: value ?? NaN,
-  }));
-
-  // Base Line - no offset
-  const baseData = baseArr.map((value, i) => ({
-    time: bars[i].time,
-    value: value ?? NaN,
-  }));
-
-  // Lagging Span - offset backward by (displacement - 1)
-  // In PineScript: plot(close, offset = -displacement + 1)
-  // This means the value at bar i is plotted at bar i - (displacement - 1)
-  const laggingData = bars.map((bar, i) => {
-    // The lagging span at position i should show the close from (displacement - 1) bars ahead
-    const sourceIndex = i + (displacement - 1);
-    const value = sourceIndex < bars.length ? closeArr[sourceIndex] : NaN;
-    return {
-      time: bar.time,
-      value: value ?? NaN,
-    };
-  });
-
-  // Leading Span A - offset forward by (displacement - 1)
-  // In PineScript: plot(leadLine1, offset = displacement - 1)
-  // This means the value at bar i is plotted at bar i + (displacement - 1)
-  const leadingAData = bars.map((bar, i) => {
-    // The leading span at position i should show the value from (displacement - 1) bars ago
-    const sourceIndex = i - (displacement - 1);
-    const value = sourceIndex >= 0 ? leadAArr[sourceIndex] : NaN;
-    return {
-      time: bar.time,
-      value: value ?? NaN,
-    };
-  });
-
-  // Leading Span B - offset forward by (displacement - 1)
-  const leadingBData = bars.map((bar, i) => {
-    const sourceIndex = i - (displacement - 1);
-    const value = sourceIndex >= 0 ? leadBArr[sourceIndex] : NaN;
-    return {
-      time: bar.time,
-      value: value ?? NaN,
-    };
-  });
-
-  // Split leadA into bullish/bearish for cloud fill (dynamic fill colors not supported)
-  const leadABullish = leadingAData.map((d, i) => ({
-    time: d.time,
-    value: d.value >= leadingBData[i].value ? d.value : NaN,
-  }));
-  const leadABearish = leadingAData.map((d, i) => ({
-    time: d.time,
-    value: d.value < leadingBData[i].value ? d.value : NaN,
-  }));
-
-  // Kumo Cloud Upper Line = max(leadLine1, leadLine2) with displacement offset
-  const kumoUpperData = leadingAData.map((d, i) => ({
-    time: d.time,
-    value: (isNaN(d.value) || isNaN(leadingBData[i].value))
-      ? NaN
-      : Math.max(d.value, leadingBData[i].value),
-  }));
-
-  // Kumo Cloud Lower Line = min(leadLine1, leadLine2) with displacement offset
-  const kumoLowerData = leadingAData.map((d, i) => ({
-    time: d.time,
-    value: (isNaN(d.value) || isNaN(leadingBData[i].value))
-      ? NaN
-      : Math.min(d.value, leadingBData[i].value),
-  }));
-
-  const fills: FillData[] = [
-    { plot1: 'plot5', plot2: 'plot4', options: { color: '#43A047', transp: 90, title: 'Bullish Cloud' } },
-    { plot1: 'plot6', plot2: 'plot4', options: { color: '#F44336', transp: 90, title: 'Bearish Cloud' } },
-  ];
+  // fill(p1, p2, color = leadLine1 > leadLine2 ? color.rgb(67, 160, 71, 90) : color.rgb(244, 67, 54, 90));
+  // the colour of bar i goes with the plot points of bar i
+  const cloudColors = bars.map((_b, i) => (gt(leadLine1[i], leadLine2[i]) ? '#43A0471A' : '#F443361A'));
 
   return {
     metadata: {
@@ -193,17 +127,15 @@ export function calculate(bars: Bar[], inputs: Partial<IchimokuInputs> = {}): In
       overlay: metadata.overlay,
     },
     plots: {
-      'plot0': conversionData,
-      'plot1': baseData,
-      'plot2': laggingData,
-      'plot3': leadingAData,
-      'plot4': leadingBData,
-      'plot5': leadABullish,
-      'plot6': leadABearish,
-      'plot7': kumoUpperData,
-      'plot8': kumoLowerData,
+      plot0: shifted((i) => conversionLine[i], 0),
+      plot1: shifted((i) => baseLine[i], 0),
+      plot2: shifted((i) => bars[i].close, -displacement + 1),
+      plot3: shifted((i) => leadLine1[i], lead),
+      plot4: shifted((i) => leadLine2[i], lead),
+      plot7: shifted(upper, lead),
+      plot8: shifted(lower, lead),
     },
-    fills,
+    fills: [{ plot1: 'plot3', plot2: 'plot4', options: { title: 'Cloud Fill' }, colors: cloudColors }],
   };
 }
 

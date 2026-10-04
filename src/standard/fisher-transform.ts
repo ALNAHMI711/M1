@@ -7,7 +7,7 @@
  * Based on the standard Fisher Transform indicator.
  */
 
-import type { Bar, InputConfig, PlotConfig, HLineConfig } from 'oakscriptjs';
+import { Series, ta, type Bar, type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig } from 'oakscriptjs';
 
 export interface FisherTransformInputs {
   /** Lookback period for highest/lowest calculation */
@@ -28,11 +28,11 @@ export const plotConfig: PlotConfig[] = [
 ];
 
 export const hlineConfig: HLineConfig[] = [
-  { id: 'hline_1',  price: 1.5, color: '#E91E63', linestyle: 'solid', title: '1.5' },
-  { id: 'hline_2',  price: 0.75, color: '#787B86', linestyle: 'solid', title: '0.75' },
-  { id: 'hline_3',  price: 0, color: '#E91E63', linestyle: 'solid', title: '0' },
-  { id: 'hline_4',  price: -0.75, color: '#787B86', linestyle: 'solid', title: '-0.75' },
-  { id: 'hline_5',  price: -1.5, color: '#E91E63', linestyle: 'solid', title: '-1.5' },
+  { id: 'hline_1',  price: 1.5, color: '#E91E63', linestyle: 'dashed', title: '1.5' },
+  { id: 'hline_2',  price: 0.75, color: '#787B86', linestyle: 'dashed', title: '0.75' },
+  { id: 'hline_3',  price: 0, color: '#E91E63', linestyle: 'dashed', title: '0' },
+  { id: 'hline_4',  price: -0.75, color: '#787B86', linestyle: 'dashed', title: '-0.75' },
+  { id: 'hline_5',  price: -1.5, color: '#E91E63', linestyle: 'dashed', title: '-1.5' },
 ];
 
 export const metadata = {
@@ -41,67 +41,50 @@ export const metadata = {
   overlay: false,
 };
 
+/** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
+const EPS = 1e-10;
+const gt = (a: number, b: number) => a - b > EPS;
+const lt = (a: number, b: number) => b - a > EPS;
+
 /**
  * Calculate Fisher Transform
  *
- * Algorithm:
- * 1. Calculate hl2 (midpoint of high and low)
- * 2. Normalize to range [-1, 1] using highest/lowest over length
- * 3. Apply smoothing with previous value
- * 4. Apply Fisher Transform: 0.5 * ln((1+x)/(1-x))
+ * high_ = ta.highest(hl2, len), low_ = ta.lowest(hl2, len)
+ * round_(val) => val > .99 ? .999 : val < -.99 ? -.999 : val
+ * value := round_(.66 * ((hl2 - low_) / (high_ - low_) - .5) + .67 * nz(value[1]))
+ * fish1 := .5 * math.log((1 + value) / (1 - value)) + .5 * nz(fish1[1])
+ * fish2 = fish1[1]
+ * A flat window (high_ == low_) gives 0 / 0 = na: value and fish1 are na on that bar and count as 0 on the next.
  */
-export function calculate(bars: Bar[], inputs: Partial<FisherTransformInputs> = {}): ReturnType<typeof import('../index.js').SMA.calculate> {
+export function calculate(bars: Bar[], inputs: Partial<FisherTransformInputs> = {}): IndicatorResult {
   const { length } = { ...defaultInputs, ...inputs };
+  const hl2 = Series.fromArray(bars, bars.map((b) => (b.high + b.low) / 2));
+  const hl2Arr = hl2.toArray().map((v) => v ?? NaN);
+  const highArr = ta.highest(hl2, length).toArray().map((v) => v ?? NaN);
+  const lowArr = ta.lowest(hl2, length).toArray().map((v) => v ?? NaN);
 
-  const fisher: number[] = [];
-  const trigger: number[] = [];
-
-  let value = 0;
-  let fish1 = 0;
-
+  const fisher: number[] = new Array(bars.length);
+  let value = NaN;
+  let fish1 = NaN;
   for (let i = 0; i < bars.length; i++) {
-    const bar = bars[i];
-    const hl2 = (bar.high + bar.low) / 2;
-
-    // Find highest and lowest hl2 over length period
-    let highestHl2 = hl2;
-    let lowestHl2 = hl2;
-    const lookback = Math.min(i + 1, length);
-
-    for (let j = 0; j < lookback; j++) {
-      const prevBar = bars[i - j];
-      const prevHl2 = (prevBar.high + prevBar.low) / 2;
-      if (prevHl2 > highestHl2) highestHl2 = prevHl2;
-      if (prevHl2 < lowestHl2) lowestHl2 = prevHl2;
-    }
-
-    // Normalize hl2 to [-0.5, 0.5] range, then apply coefficient and smooth
-    const range = highestHl2 - lowestHl2;
-    const normalized = range !== 0 ? (hl2 - lowestHl2) / range - 0.5 : 0;
-
-    // Apply 0.66 coefficient and smooth with 0.67 of previous value
-    const rawValue = 0.66 * normalized + 0.67 * value;
-
-    // Clamp to avoid infinity in log calculation
-    value = rawValue > 0.99 ? 0.999 : rawValue < -0.99 ? -0.999 : rawValue;
-
-    // Apply Fisher Transform with smoothing
-    const prevFish1 = fish1;
-    fish1 = 0.5 * Math.log((1 + value) / (1 - value)) + 0.5 * prevFish1;
-
-    fisher.push(fish1);
-    trigger.push(prevFish1); // Trigger is previous Fisher value
+    const nzValue = Number.isNaN(value) ? 0 : value;
+    const nzFish1 = Number.isNaN(fish1) ? 0 : fish1;
+    // A plain division: 0 / 0 is NaN (na), x / 0 is +-infinity
+    const raw = 0.66 * ((hl2Arr[i] - lowArr[i]) / (highArr[i] - lowArr[i]) - 0.5) + 0.67 * nzValue;
+    value = gt(raw, 0.99) ? 0.999 : lt(raw, -0.99) ? -0.999 : raw;
+    fish1 = 0.5 * Math.log((1 + value) / (1 - value)) + 0.5 * nzFish1;
+    fisher[i] = fish1;
   }
 
-  const plotData0 = fisher.map((value, i) => ({
+  const plotData0 = fisher.map((v, i) => ({
     time: bars[i].time,
-    value: i < length - 1 ? NaN : value,
+    value: Number.isFinite(v) ? v : NaN,
   }));
 
-  const plotData1 = trigger.map((value, i) => ({
-    time: bars[i].time,
-    value: i < length ? NaN : value,
-  }));
+  const plotData1 = fisher.map((_v, i) => {
+    const prev = i > 0 ? fisher[i - 1] : NaN;
+    return { time: bars[i].time, value: Number.isFinite(prev) ? prev : NaN };
+  });
 
   return {
     metadata: {
