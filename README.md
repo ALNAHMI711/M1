@@ -34,9 +34,47 @@ const macdResult = MACD.calculate(bars, { fastLength: 12, slowLength: 26, signal
 const bbResult = BollingerBands.calculate(bars, { length: 20, mult: 2 });
 ```
 
+## Drawing Results with the Renderer
+
+`lightweight-charts-indicators/render` draws a complete indicator result (plots, fills, hlines, markers, arrows, bar
+and background colours, plotcandle / plotbar, labels, lines, boxes, linefills, polylines, tables) on a chart you
+own. It needs `lightweight-charts` 5 (optional peer dependency) and is published as an ES module.
+
+```typescript
+import { createChart, CandlestickSeries } from 'lightweight-charts';
+import { indicatorRegistry } from 'lightweight-charts-indicators';
+import { IndicatorRenderer } from 'lightweight-charts-indicators/render';
+
+const chart = createChart(document.getElementById('chart')!);
+const candles = chart.addSeries(CandlestickSeries);
+candles.setData(bars);
+
+const rsi = indicatorRegistry.find((e) => e.id === 'rsi')!;
+const renderer = new IndicatorRenderer(chart, { paneIndex: 1, mainSeries: candles });
+renderer.render(rsi, rsi.calculate(bars, { length: 14 }), bars, { inputs: { length: 14 } });
+
+renderer.series(); // the series it created, plot series first
+renderer.clear();  // removes everything it drew
+```
+
+One instance draws one indicator; use one instance per indicator. Each `render()` replaces what the instance drew
+before, and the indicator pane keeps its height across a redraw.
+
+- **Panes**: an overlay indicator draws in pane 0, the others in `paneIndex`; `force_overlay` output goes to pane 0.
+- **Bar colours** (`barcolor`) repaint the bars of `mainSeries` (candlestick or bar series, Heikin Ashi included)
+  without changing its data. Without `mainSeries`, bar colours are not drawn.
+- **Bars after the last bar**: drawings on future bars are placed without adding time-scale slots; pass
+  `extendTimeScale: true` to add them.
+- **`preserveEmptyPane: true`** keeps the pane when `clear()` empties it.
+- **Render options**: `inputs` (plots whose visibility follows an input), `plots` (per-plot `visible`, `color`,
+  `lineWidth`, `style`, `palette`), `lastValueVisible`, `titleVisible`, `priceLineVisible`, `precision`, and
+  `autoscale: false` to leave the indicator out of the price-pane autoscale.
+
+The demo page (`example/`) uses the same renderer.
+
 ## Lightweight-Charts Integration Example
 
-Here's a complete example showing how to integrate indicators with lightweight-charts:
+Here's a complete example showing how to integrate indicators with lightweight-charts without the renderer:
 
 ```typescript
 import { createChart, ColorType, LineSeries, CandlestickSeries } from 'lightweight-charts';

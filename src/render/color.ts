@@ -1,5 +1,5 @@
 /**
- * Colour helper of the example renderer: reads the colour strings that the ports return and combines alphas.
+ * Colour helper of the renderer: reads the colour strings of indicator results and combines alphas.
  * Formats: 'transparent', '#rgb', '#rgba', '#rrggbb', '#rrggbbaa', 'rgb(r, g, b)', 'rgba(r, g, b, a)'
  * (also the CSS 'rgb(r g b / a)' form). Any other CSS colour (named colours, hsl()...) is read through the canvas
  * colour parser of the browser.

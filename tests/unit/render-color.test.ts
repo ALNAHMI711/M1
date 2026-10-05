@@ -1,10 +1,10 @@
 /**
- * Colour helper of the example renderer (example/src/color.ts), used for plot fills and markers
+ * Colour helper of the renderer (src/render/color.ts), used for plot fills, markers and arrows
  */
 import { describe, it, expect } from 'vitest';
-import { parseColor, withOpacity, isTransparent, gradientPart } from '../../example/src/color';
+import { parseColor, withOpacity, isTransparent, gradientPart } from '../../src/render/color';
 
-describe('example colour helper', () => {
+describe('renderer colour helper', () => {
   it('reads hex, rgb() and rgba() colours', () => {
     expect(parseColor('#2962FF')).toEqual({ r: 41, g: 98, b: 255, a: 1 });
     expect(parseColor('#ae4ce633')).toEqual({ r: 174, g: 76, b: 230, a: 0x33 / 255 });
