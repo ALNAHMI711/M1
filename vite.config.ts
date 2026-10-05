@@ -3,7 +3,7 @@ import { resolve } from 'path';
 
 export default defineConfig({
   root: 'example',
-  base: '/lightweight-charts-indicators/',
+  base: process.env.GITHUB_ACTIONS ? '/M1/' : '/',
   publicDir: 'public',
   build: {
     outDir: '../dist-example',
