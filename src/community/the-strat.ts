@@ -1,0 +1,76 @@
+/**
+ * The Strat
+ *
+ * Labels each bar with its Strat number below the bar: "1" for an inside bar (high <= previous high and
+ * low >= previous low), green "2" for a two-up bar (higher high, low >= previous low), red "2" for a two-down bar
+ * (lower low, high <= previous high) and "3" for an outside bar (higher high and lower low).
+ *
+ * Reference: "The Strat" by shayy110
+ * Licence: Mozilla Public License 2.0, as the original Pine script (https://mozilla.org/MPL/2.0/).
+ */
+
+import { color, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import type { MarkerData } from '../types';
+
+// The Pine script has no inputs
+export type TheStratInputs = Record<string, never>;
+
+export const defaultInputs: TheStratInputs = {};
+
+export const inputConfig: InputConfig[] = [];
+
+// No plot(): the only outputs are four plotchar markers
+export const plotConfig: PlotConfig[] = [];
+
+export const metadata = {
+  title: 'The Strat',
+  shortTitle: 'The Strat',
+  overlay: true,
+};
+
+/** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
+const EPS = 1e-10;
+const gt = (a: number, b: number) => a - b > EPS;
+const lt = (a: number, b: number) => b - a > EPS;
+const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
+const le = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(a - b > EPS);
+
+export function calculate(
+  bars: Bar[],
+  _inputs: Partial<TheStratInputs> = {},
+): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[] } {
+  const bullColor = color.green;
+  const bearColor = color.red;
+  const insideColor = String(color.new('#F6BE00', 0));
+  const outsideColor = color.fuchsia;
+
+  const markers: MarkerData[] = [];
+  // plotchar(cond, char, location.belowbar, color): the char as text in the colour, no shape
+  const char = (time: number, text: string, c: string) =>
+    markers.push({ time, position: 'belowBar', shape: 'circle', color: 'transparent', text, textColor: c });
+
+  for (let i = 0; i < bars.length; i++) {
+    const { time, high, low } = bars[i];
+    // high[1] / low[1]: na on bar 0
+    const high1 = i > 0 ? bars[i - 1].high : NaN;
+    const low1 = i > 0 ? bars[i - 1].low : NaN;
+
+    const isInsideBar = le(high, high1) && ge(low, low1);
+    const isTwoUpBar = gt(high, high1) && ge(low, low1);
+    const isTwoDownBar = lt(low, low1) && le(high, high1);
+    const isThreeBar = gt(high, high1) && lt(low, low1);
+
+    if (isInsideBar) char(time, '1', insideColor);
+    if (isTwoUpBar) char(time, '2', bullColor);
+    if (isTwoDownBar) char(time, '2', bearColor);
+    if (isThreeBar) char(time, '3', outsideColor);
+  }
+
+  return {
+    metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
+    plots: {},
+    markers,
+  };
+}
+
+export const TheStrat = { calculate, metadata, defaultInputs, inputConfig, plotConfig };

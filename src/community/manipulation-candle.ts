@@ -1,0 +1,62 @@
+/**
+ * Manipulation Candle
+ *
+ * Colours a bar that takes the extreme of the previous bar and closes beyond the body of the previous bar on the
+ * other side. Buy: the low is under the previous low and the close is above the previous body top (max of open and
+ * close). Sell: the high is above the previous high and the close is under the previous body bottom. Buy has
+ * priority when both are true. The script has no plot: the only output is the bar colour.
+ *
+ * Reference: "[RealEdgeFX] - Manipulation Candle" by DrauzioFx
+ * Licence: Mozilla Public License 2.0, as the original Pine script (https://mozilla.org/MPL/2.0/).
+ */
+
+import { color, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import type { BarColorData } from '../types';
+
+export interface ManipulationCandleInputs {}
+
+export const defaultInputs: ManipulationCandleInputs = {};
+
+export const inputConfig: InputConfig[] = [];
+
+// No plot: bar colours only
+export const plotConfig: PlotConfig[] = [];
+
+export const metadata = {
+  title: 'Manipulation Candle',
+  shortTitle: 'Manipulation Candle',
+  overlay: true,
+};
+
+/** Pine float comparisons: a > b only when a - b > 1e-10 (na compares false) */
+const EPS = 1e-10;
+const gt = (a: number, b: number) => a - b > EPS;
+const lt = (a: number, b: number) => b - a > EPS;
+
+const BUY_COLOR = String(color.rgb(165, 214, 167, 18));
+const SELL_COLOR = String(color.rgb(161, 79, 58, 40));
+
+export function calculate(
+  bars: Bar[],
+  _inputs: Partial<ManipulationCandleInputs> = {},
+): Omit<IndicatorResult, 'markers'> & { barColors: BarColorData[] } {
+  const barColors: BarColorData[] = [];
+  for (let i = 1; i < bars.length; i++) {
+    const prev = bars[i - 1];
+    const cur = bars[i];
+    const bodyHighPrev = Math.max(prev.open, prev.close);
+    const bodyLowPrev = Math.min(prev.open, prev.close);
+    const isSell = gt(cur.high, prev.high) && lt(cur.close, bodyLowPrev);
+    const isBuy = lt(cur.low, prev.low) && gt(cur.close, bodyHighPrev);
+    if (isBuy) barColors.push({ time: cur.time, color: BUY_COLOR });
+    else if (isSell) barColors.push({ time: cur.time, color: SELL_COLOR });
+  }
+
+  return {
+    metadata: { title: metadata.title, shorttitle: metadata.shortTitle, overlay: metadata.overlay },
+    plots: {},
+    barColors,
+  };
+}
+
+export const ManipulationCandle = { calculate, metadata, defaultInputs, inputConfig, plotConfig };

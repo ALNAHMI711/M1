@@ -1,8 +1,8 @@
 {
   "name": "lightweight-charts-indicators",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "type": "module",
-  "description": "446 technical analysis indicators for TradingView's lightweight-charts library",
+  "description": "1290 technical analysis indicators for TradingView's lightweight-charts library",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -55,13 +55,13 @@
   },
   "homepage": "https://github.com/deepentropy/lightweight-charts-indicators#readme",
   "peerDependencies": {
-    "oakscriptjs": ">=0.9.5 <0.10.0"
+    "oakscriptjs": ">=0.9.6 <0.10.0"
   },
   "devDependencies": {
     "@types/node": "^20.10.6",
     "esbuild": "^0.19.11",
     "lightweight-charts": "^5.2.1",
-    "oakscriptjs": "github:deepentropy/oakScriptJS#3528f3d8c49a3ab6da74972607ac03b822ad38d2",
+    "oakscriptjs": "^0.9.6",
     "rimraf": "^6.1.0",
     "typescript": "^5.3.3",
     "vite": "^5.4.0",

@@ -4829,6 +4829,407 @@ export type { MovingVolumeWeightedAvgPriceChannelBbsInputs } from './community/m
 import * as macdPseudoSuperSmootherIndicator from './community/macd-pseudo-super-smoother';
 export { MacdPseudoSuperSmoother, calculate as calculateMacdPseudoSuperSmoother } from './community/macd-pseudo-super-smoother';
 export type { MacdPseudoSuperSmootherInputs } from './community/macd-pseudo-super-smoother';
+// ── Community batch 38 (Pine v6 ports) ──
+// Candlestick Patterns Identified (updated 3/11/15)
+import * as candlestickPatternsIdentifiedIndicator from './community/candlestick-patterns-identified';
+export { CandlestickPatternsIdentified, calculate as calculateCandlestickPatternsIdentified } from './community/candlestick-patterns-identified';
+export type { CandlestickPatternsIdentifiedInputs } from './community/candlestick-patterns-identified';
+// Rally Base Drop Signals
+import * as rallyBaseDropSignalsIndicator from './community/rally-base-drop-signals';
+export { RallyBaseDropSignals, calculate as calculateRallyBaseDropSignals } from './community/rally-base-drop-signals';
+export type { RallyBaseDropSignalsInputs } from './community/rally-base-drop-signals';
+// Big Trades Whale Detector By HK
+import * as bigTradesWhaleDetectorByHkIndicator from './community/big-trades-whale-detector-by-hk';
+export { BigTradesWhaleDetector, calculate as calculateBigTradesWhaleDetector } from './community/big-trades-whale-detector-by-hk';
+export type { BigTradesWhaleDetectorInputs } from './community/big-trades-whale-detector-by-hk';
+// <50% Body Candle
+import * as p50BodyCandleIndicator from './community/50-body-candle';
+export { BodyCandle50, calculate as calculateBodyCandle50 } from './community/50-body-candle';
+export type { BodyCandle50Inputs } from './community/50-body-candle';
+// Pocket Pivot Breakout
+import * as pocketPivotBreakoutIndicator from './community/pocket-pivot-breakout';
+export { PocketPivotBreakout, calculate as calculatePocketPivotBreakout } from './community/pocket-pivot-breakout';
+export type { PocketPivotBreakoutInputs } from './community/pocket-pivot-breakout';
+// Custom Buy and Sell Signal with Body Ratio and RSI
+import * as customBuyAndSellSignalWithBodyRatioAndRsiIndicator from './community/custom-buy-and-sell-signal-with-body-ratio-and-rsi';
+export { CustomBuySellBodyRatioRsi, calculate as calculateCustomBuySellBodyRatioRsi } from './community/custom-buy-and-sell-signal-with-body-ratio-and-rsi';
+export type { CustomBuySellBodyRatioRsiInputs } from './community/custom-buy-and-sell-signal-with-body-ratio-and-rsi';
+// Advanced Volume-Driven Breakout Signals
+import * as advancedVolumeDrivenBreakoutSignalsIndicator from './community/advanced-volume-driven-breakout-signals';
+export { AdvancedVolumeDrivenBreakoutSignals, calculate as calculateAdvancedVolumeDrivenBreakoutSignals } from './community/advanced-volume-driven-breakout-signals';
+export type { AdvancedVolumeDrivenBreakoutSignalsInputs } from './community/advanced-volume-driven-breakout-signals';
+// RBT strategy
+import * as rbtStrategyIndicator from './community/rbt-strategy';
+export { RbtStrategy, calculate as calculateRbtStrategy } from './community/rbt-strategy';
+export type { RbtStrategyInputs } from './community/rbt-strategy';
+// Candle State (The Strat)
+import * as candleStateIndicator from './community/candle-state';
+export { CandleState, calculate as calculateCandleState } from './community/candle-state';
+export type { CandleStateInputs } from './community/candle-state';
+// Marubozu Detector
+import * as marubozuDetectorIndicator from './community/marubozu-detector';
+export { MarubozuDetector, calculate as calculateMarubozuDetector } from './community/marubozu-detector';
+export type { MarubozuDetectorInputs } from './community/marubozu-detector';
+// Strong Burst Fader | ProjectSyndicate
+import * as strongBurstFaderProjectsyndicateIndicator from './community/strong-burst-fader-projectsyndicate';
+export { StrongBurstFader, calculate as calculateStrongBurstFader } from './community/strong-burst-fader-projectsyndicate';
+export type { StrongBurstFaderInputs } from './community/strong-burst-fader-projectsyndicate';
+// Trend-Pro
+import * as trendProIndicator from './community/trend-pro';
+export { TrendPro, calculate as calculateTrendPro } from './community/trend-pro';
+export type { TrendProInputs } from './community/trend-pro';
+// Engulfing Sweeps - Milana Trades
+import * as engulfingSweepsMilanaTradesIndicator from './community/engulfing-sweeps-milana-trades';
+export { EngulfingSweepsMilanaTrades, calculate as calculateEngulfingSweepsMilanaTrades } from './community/engulfing-sweeps-milana-trades';
+export type { EngulfingSweepsMilanaTradesInputs } from './community/engulfing-sweeps-milana-trades';
+// Sweep Engulf CHoCH
+import * as sweepEngulfChochIndicator from './community/sweep-engulf-choch';
+export { SweepEngulfChoch, calculate as calculateSweepEngulfChoch } from './community/sweep-engulf-choch';
+export type { SweepEngulfChochInputs } from './community/sweep-engulf-choch';
+// Big Trades Detector By HF
+import * as bigTradesDetectorByHfIndicator from './community/big-trades-detector-by-hf';
+export { BigTradesDetectorByHf, calculate as calculateBigTradesDetectorByHf } from './community/big-trades-detector-by-hf';
+export type { BigTradesDetectorByHfInputs } from './community/big-trades-detector-by-hf';
+// RCYC Bullish Bearish Indicator
+import * as rcycBullishBearishIndicatorIndicator from './community/rcyc-bullish-bearish-indicator';
+export { RcycBullishBearishIndicator, calculate as calculateRcycBullishBearishIndicator } from './community/rcyc-bullish-bearish-indicator';
+export type { RcycBullishBearishIndicatorInputs } from './community/rcyc-bullish-bearish-indicator';
+// Engulfing + Sweep (Confirmed Only) v6 — bars only
+import * as engulfingSweepV6BarsOnlyIndicator from './community/engulfing-sweep-v6-bars-only';
+export { EngulfingSweepV6BarsOnly, calculate as calculateEngulfingSweepV6BarsOnly } from './community/engulfing-sweep-v6-bars-only';
+export type { EngulfingSweepV6BarsOnlyInputs } from './community/engulfing-sweep-v6-bars-only';
+// T1 Wyckoff Aggressive A/D Setup
+import * as t1WyckoffAggressiveADSetupIndicator from './community/t1-wyckoff-aggressive-a-d-setup';
+export { T1WyckoffAggressiveADSetup, calculate as calculateT1WyckoffAggressiveADSetup } from './community/t1-wyckoff-aggressive-a-d-setup';
+export type { T1WyckoffAggressiveADSetupInputs } from './community/t1-wyckoff-aggressive-a-d-setup';
+// Liquidity Sweep Confirmation
+import * as liquiditySweepConfirmationIndicator from './community/liquidity-sweep-confirmation';
+export { LiquiditySweepConfirmation, calculate as calculateLiquiditySweepConfirmation } from './community/liquidity-sweep-confirmation';
+export type { LiquiditySweepConfirmationInputs } from './community/liquidity-sweep-confirmation';
+// Abusuhil Bullish Candles
+import * as abusuhilBullishCandlesIndicator from './community/abusuhil-bullish-candles';
+export { AbusuhilBullishCandles, calculate as calculateAbusuhilBullishCandles } from './community/abusuhil-bullish-candles';
+export type { AbusuhilBullishCandlesInputs } from './community/abusuhil-bullish-candles';
+// ── Community batch 39 (Pine v6 ports) ──
+// RSI MA Cross + Divergence Signal (V2)
+import * as rsiMaCrossDivergenceSignalIndicator from './community/rsi-ma-cross-divergence-signal';
+export { RsiMaCrossDivergenceSignal, calculate as calculateRsiMaCrossDivergenceSignal } from './community/rsi-ma-cross-divergence-signal';
+export type { RsiMaCrossDivergenceSignalInputs } from './community/rsi-ma-cross-divergence-signal';
+// RSI Candle Color
+import * as rsiCandleColorIndicator from './community/rsi-candle-color';
+export { RSICandleColor, calculate as calculateRSICandleColor } from './community/rsi-candle-color';
+export type { RSICandleColorInputs } from './community/rsi-candle-color';
+// Trendshift
+import * as trendshiftIndicator from './community/trendshift';
+export { Trendshift, calculate as calculateTrendshift } from './community/trendshift';
+export type { TrendshiftInputs } from './community/trendshift';
+// Pump & Dump Detector (sensitive)
+import * as pumpDumpDetectorIndicator from './community/pump-dump-detector';
+export { PumpDumpDetector, calculate as calculatePumpDumpDetector } from './community/pump-dump-detector';
+export type { PumpDumpDetectorInputs } from './community/pump-dump-detector';
+// Consecutive Higher/Lower Closings
+import * as consecutiveHigherLowerClosingsIndicator from './community/consecutive-higher-lower-closings';
+export { ConsecutiveHigherLowerClosings, calculate as calculateConsecutiveHigherLowerClosings } from './community/consecutive-higher-lower-closings';
+export type { ConsecutiveHigherLowerClosingsInputs } from './community/consecutive-higher-lower-closings';
+// Dip & Rip Patterns - The Quant Science
+import * as dipRipPatternsTheQuantScienceIndicator from './community/dip-rip-patterns-the-quant-science';
+export { DipRipPatterns, calculate as calculateDipRipPatterns } from './community/dip-rip-patterns-the-quant-science';
+export type { DipRipPatternsInputs } from './community/dip-rip-patterns-the-quant-science';
+// CVD & Big Trade Detector By HK
+import * as cvdBigTradeDetectorByHkIndicator from './community/cvd-big-trade-detector-by-hk';
+export { CvdBigTradeDetector, calculate as calculateCvdBigTradeDetector } from './community/cvd-big-trade-detector-by-hk';
+export type { CvdBigTradeDetectorInputs } from './community/cvd-big-trade-detector-by-hk';
+// Manipulation Candle
+import * as manipulationCandleIndicator from './community/manipulation-candle';
+export { ManipulationCandle, calculate as calculateManipulationCandle } from './community/manipulation-candle';
+export type { ManipulationCandleInputs } from './community/manipulation-candle';
+// RSI-Colored Price Candles with Background
+import * as rsiColoredPriceCandlesWithBackgroundIndicator from './community/rsi-colored-price-candles-with-background';
+export { RSIColoredPriceCandles, calculate as calculateRSIColoredPriceCandles } from './community/rsi-colored-price-candles-with-background';
+export type { RSIColoredPriceCandlesInputs } from './community/rsi-colored-price-candles-with-background';
+// FuTech V-Spike & V-Highlighter
+import * as futechVSpikeVHighlighterIndicator from './community/futech-v-spike-v-highlighter';
+export { FuTechVSpikeVHighlighter, calculate as calculateFuTechVSpikeVHighlighter } from './community/futech-v-spike-v-highlighter';
+export type { FuTechVSpikeVHighlighterInputs } from './community/futech-v-spike-v-highlighter';
+// No wick candles
+import * as noWickCandlesIndicator from './community/no-wick-candles';
+export { NoWickCandles, calculate as calculateNoWickCandles } from './community/no-wick-candles';
+export type { NoWickCandlesInputs } from './community/no-wick-candles';
+// Linear Regression Blend Candles
+import * as linearRegressionBlendCandlesIndicator from './community/linear-regression-blend-candles';
+export { LinearRegressionBlendCandles, calculate as calculateLinearRegressionBlendCandles } from './community/linear-regression-blend-candles';
+export type { LinearRegressionBlendCandlesInputs } from './community/linear-regression-blend-candles';
+// Volume Candles
+import * as volumeCandlesIndicator from './community/volume-candles';
+export { VolumeCandles, calculate as calculateVolumeCandles } from './community/volume-candles';
+export type { VolumeCandlesInputs } from './community/volume-candles';
+// EREMA Signals
+import * as eremaSignalsIndicator from './community/erema-signals';
+export { EremaSignals, calculate as calculateEremaSignals } from './community/erema-signals';
+export type { EremaSignalsInputs } from './community/erema-signals';
+// Strong Engulfing Candlestick (With Alerts)
+import * as strongEngulfingCandlestickIndicator from './community/strong-engulfing-candlestick';
+export { StrongEngulfingCandlestick, calculate as calculateStrongEngulfingCandlestick } from './community/strong-engulfing-candlestick';
+export type { StrongEngulfingCandlestickInputs } from './community/strong-engulfing-candlestick';
+// CVD Reversal Divergence (Exhaustion)
+import * as cvdReversalDivergenceIndicator from './community/cvd-reversal-divergence';
+export { CvdReversalDivergence, calculate as calculateCvdReversalDivergence } from './community/cvd-reversal-divergence';
+export type { CvdReversalDivergenceInputs } from './community/cvd-reversal-divergence';
+// Ehlers Regime Dynamic Candles
+import * as ehlersRegimeDynamicCandlesIndicator from './community/ehlers-regime-dynamic-candles';
+export { EhlersRegimeDynamicCandles, calculate as calculateEhlersRegimeDynamicCandles } from './community/ehlers-regime-dynamic-candles';
+export type { EhlersRegimeDynamicCandlesInputs } from './community/ehlers-regime-dynamic-candles';
+// Moving Average Trend Meter
+import * as movingAverageTrendMeterIndicator from './community/moving-average-trend-meter';
+export { MovingAverageTrendMeter, calculate as calculateMovingAverageTrendMeter } from './community/moving-average-trend-meter';
+export type { MovingAverageTrendMeterInputs } from './community/moving-average-trend-meter';
+// Triple Doji Sequence
+import * as tripleDojiSequenceIndicator from './community/triple-doji-sequence';
+export { TripleDojiSequence, calculate as calculateTripleDojiSequence } from './community/triple-doji-sequence';
+export type { TripleDojiSequenceInputs } from './community/triple-doji-sequence';
+// Delta Manipulation Footprint
+import * as deltaManipulationFootprintIndicator from './community/delta-manipulation-footprint';
+export { DeltaManipulationFootprint, calculate as calculateDeltaManipulationFootprint } from './community/delta-manipulation-footprint';
+export type { DeltaManipulationFootprintInputs } from './community/delta-manipulation-footprint';
+// ── Community batch 40 (Pine v6 ports) ──
+// TrendShift Detector
+import * as trendshiftDetectorIndicator from './community/trendshift-detector';
+export { TrendShiftDetector, calculate as calculateTrendShiftDetector } from './community/trendshift-detector';
+export type { TrendShiftDetectorInputs } from './community/trendshift-detector';
+// 3 Bar Reversal
+import * as p3BarReversalIndicator from './community/3-bar-reversal';
+export { ThreeBarReversal, calculate as calculateThreeBarReversal } from './community/3-bar-reversal';
+export type { ThreeBarReversalInputs } from './community/3-bar-reversal';
+// Minimalist Doji Highlighter
+import * as minimalistDojiHighlighterIndicator from './community/minimalist-doji-highlighter';
+export { MinimalistDojiHighlighter, calculate as calculateMinimalistDojiHighlighter } from './community/minimalist-doji-highlighter';
+export type { MinimalistDojiHighlighterInputs } from './community/minimalist-doji-highlighter';
+// L1 Moving Average Fingerprint for Long Entry
+import * as l1MovingAverageFingerprintForLongEntryIndicator from './community/l1-moving-average-fingerprint-for-long-entry';
+export { L1MovingAverageFingerprint, calculate as calculateL1MovingAverageFingerprint } from './community/l1-moving-average-fingerprint-for-long-entry';
+export type { L1MovingAverageFingerprintInputs } from './community/l1-moving-average-fingerprint-for-long-entry';
+// Eagles Compass
+import * as eaglesCompassIndicator from './community/eagles-compass';
+export { EaglesCompass, calculate as calculateEaglesCompass } from './community/eagles-compass';
+export type { EaglesCompassInputs } from './community/eagles-compass';
+// Polynomial Trend Exhaustion & Divergence
+import * as polynomialTrendExhaustionDivergenceIndicator from './community/polynomial-trend-exhaustion-divergence';
+export { PolynomialTrendExhaustionDivergence, calculate as calculatePolynomialTrendExhaustionDivergence } from './community/polynomial-trend-exhaustion-divergence';
+export type { PolynomialTrendExhaustionDivergenceInputs } from './community/polynomial-trend-exhaustion-divergence';
+// Inside Bar (Body-based) Ind/Alert
+import * as insideBarIndAlertIndicator from './community/inside-bar-ind-alert';
+export { InsideBarIndAlert, calculate as calculateInsideBarIndAlert } from './community/inside-bar-ind-alert';
+export type { InsideBarIndAlertInputs } from './community/inside-bar-ind-alert';
+// Heikin Ashi Colored Regular OHLC Candles
+import * as heikinAshiColoredRegularOhlcCandlesIndicator from './community/heikin-ashi-colored-regular-ohlc-candles';
+export { HeikinAshiColoredRegularOhlcCandles, calculate as calculateHeikinAshiColoredRegularOhlcCandles } from './community/heikin-ashi-colored-regular-ohlc-candles';
+export type { HeikinAshiColoredRegularOhlcCandlesInputs } from './community/heikin-ashi-colored-regular-ohlc-candles';
+// Donchian Reversal Signals with Labels
+import * as donchianReversalSignalsWithLabelsIndicator from './community/donchian-reversal-signals-with-labels';
+export { DonchianReversalSignalsWithLabels, calculate as calculateDonchianReversalSignalsWithLabels } from './community/donchian-reversal-signals-with-labels';
+export type { DonchianReversalSignalsWithLabelsInputs } from './community/donchian-reversal-signals-with-labels';
+// FVG Candle Highlighter
+import * as fvgCandleHighlighterIndicator from './community/fvg-candle-highlighter';
+export { FvgCandleHighlighter, calculate as calculateFvgCandleHighlighter } from './community/fvg-candle-highlighter';
+export type { FvgCandleHighlighterInputs } from './community/fvg-candle-highlighter';
+// High Volume Buyers/Sellers+
+import * as highVolumeBuyersSellersIndicator from './community/high-volume-buyers-sellers';
+export { HighVolumeBuyersSellers, calculate as calculateHighVolumeBuyersSellers } from './community/high-volume-buyers-sellers';
+export type { HighVolumeBuyersSellersInputs } from './community/high-volume-buyers-sellers';
+// Actually Engulfing Candlesticks
+import * as actuallyEngulfingCandlesticksIndicator from './community/actually-engulfing-candlesticks';
+export { ActuallyEngulfingCandlesticks, calculate as calculateActuallyEngulfingCandlesticks } from './community/actually-engulfing-candlesticks';
+export type { ActuallyEngulfingCandlesticksInputs } from './community/actually-engulfing-candlesticks';
+// Perfect Hammer Pattern Indicators and Alerts
+import * as perfectHammerPatternIndicatorsAndAlertsIndicator from './community/perfect-hammer-pattern-indicators-and-alerts';
+export { PerfectHammerPattern, calculate as calculatePerfectHammerPattern } from './community/perfect-hammer-pattern-indicators-and-alerts';
+export type { PerfectHammerPatternInputs } from './community/perfect-hammer-pattern-indicators-and-alerts';
+// Fastlane
+import * as fastlaneIndicator from './community/fastlane';
+export { Fastlane, calculate as calculateFastlane } from './community/fastlane';
+export type { FastlaneInputs } from './community/fastlane';
+// Clean Buy Sell Pro
+import * as cleanBuySellProIndicator from './community/clean-buy-sell-pro';
+export { CleanBuySellPro, calculate as calculateCleanBuySellPro } from './community/clean-buy-sell-pro';
+export type { CleanBuySellProInputs } from './community/clean-buy-sell-pro';
+// Unicorn Setup Detector (aziz abid)
+import * as unicornSetupDetectorIndicator from './community/unicorn-setup-detector';
+export { UnicornSetupDetector, calculate as calculateUnicornSetupDetector } from './community/unicorn-setup-detector';
+export type { UnicornSetupDetectorInputs } from './community/unicorn-setup-detector';
+// Ut bot - Trend+volume
+import * as utBotTrendVolumeIndicator from './community/ut-bot-trend-volume';
+export { UtBotTrendVolume, calculate as calculateUtBotTrendVolume } from './community/ut-bot-trend-volume';
+export type { UtBotTrendVolumeInputs } from './community/ut-bot-trend-volume';
+// Trade Price - Spread Compensator Overlay
+import * as tradePriceSpreadCompensatorOverlayIndicator from './community/trade-price-spread-compensator-overlay';
+export { TradePriceSpreadCompensatorOverlay, calculate as calculateTradePriceSpreadCompensatorOverlay } from './community/trade-price-spread-compensator-overlay';
+export type { TradePriceSpreadCompensatorOverlayInputs } from './community/trade-price-spread-compensator-overlay';
+// Effective FVG Indicator - Imran
+import * as effectiveFvgIndicatorImranIndicator from './community/effective-fvg-indicator-imran';
+export { EffectiveFVGIndicator, calculate as calculateEffectiveFVGIndicator } from './community/effective-fvg-indicator-imran';
+export type { EffectiveFVGIndicatorInputs } from './community/effective-fvg-indicator-imran';
+// RSI & BB Oversold Scalper with MACD Confirmation
+import * as rsiBbOversoldScalperWithMacdConfirmationIndicator from './community/rsi-bb-oversold-scalper-with-macd-confirmation';
+export { RsiBbOversoldScalperWithMacdConfirmation, calculate as calculateRsiBbOversoldScalperWithMacdConfirmation } from './community/rsi-bb-oversold-scalper-with-macd-confirmation';
+export type { RsiBbOversoldScalperWithMacdConfirmationInputs } from './community/rsi-bb-oversold-scalper-with-macd-confirmation';
+// ── Community batch 41 (Pine v6 ports) ──
+// Pay Attention Candle
+import * as payAttentionCandleIndicator from './community/pay-attention-candle';
+export { PayAttentionCandle, calculate as calculatePayAttentionCandle } from './community/pay-attention-candle';
+export type { PayAttentionCandleInputs } from './community/pay-attention-candle';
+// Combined Up down with volume
+import * as combinedUpDownWithVolumeIndicator from './community/combined-up-down-with-volume';
+export { CombinedUpDownWithVolume, calculate as calculateCombinedUpDownWithVolume } from './community/combined-up-down-with-volume';
+export type { CombinedUpDownWithVolumeInputs } from './community/combined-up-down-with-volume';
+// Minervini Trend Template Screener (v5)
+import * as minerviniTrendTemplateScreenerIndicator from './community/minervini-trend-template-screener';
+export { MinerviniTrendTemplateScreener, calculate as calculateMinerviniTrendTemplateScreener } from './community/minervini-trend-template-screener';
+export type { MinerviniTrendTemplateScreenerInputs } from './community/minervini-trend-template-screener';
+// Dead Simple Reversal
+import * as deadSimpleReversalIndicator from './community/dead-simple-reversal';
+export { DeadSimpleReversal, calculate as calculateDeadSimpleReversal } from './community/dead-simple-reversal';
+export type { DeadSimpleReversalInputs } from './community/dead-simple-reversal';
+// Primitive Delta Divergence
+import * as primitiveDeltaDivergenceIndicator from './community/primitive-delta-divergence';
+export { PrimitiveDeltaDivergence, calculate as calculatePrimitiveDeltaDivergence } from './community/primitive-delta-divergence';
+export type { PrimitiveDeltaDivergenceInputs } from './community/primitive-delta-divergence';
+// Sweep Engulf 2 Candle
+import * as sweepEngulf2CandleIndicator from './community/sweep-engulf-2-candle';
+export { SweepEngulf2Candle, calculate as calculateSweepEngulf2Candle } from './community/sweep-engulf-2-candle';
+export type { SweepEngulf2CandleInputs } from './community/sweep-engulf-2-candle';
+// Renko Flip Alert (Traditional Only)
+import * as renkoFlipAlertIndicator from './community/renko-flip-alert';
+export { RenkoFlipAlert, calculate as calculateRenkoFlipAlert } from './community/renko-flip-alert';
+export type { RenkoFlipAlertInputs } from './community/renko-flip-alert';
+// Time-based Alerts for Trading Windows
+import * as timeBasedAlertsForTradingWindowsIndicator from './community/time-based-alerts-for-trading-windows';
+export { TimeBasedAlertsForTradingWindows, calculate as calculateTimeBasedAlertsForTradingWindows } from './community/time-based-alerts-for-trading-windows';
+export type { TimeBasedAlertsInputs } from './community/time-based-alerts-for-trading-windows';
+// Wick Volume Alert
+import * as wickVolumeAlertIndicator from './community/wick-volume-alert';
+export { WickVolumeAlert, calculate as calculateWickVolumeAlert } from './community/wick-volume-alert';
+export type { WickVolumeAlertInputs } from './community/wick-volume-alert';
+// Engulfing Candle Indicator
+import * as engulfingCandleIndicatorIndicator from './community/engulfing-candle-indicator';
+export { EngulfingCandleIndicator, calculate as calculateEngulfingCandleIndicator } from './community/engulfing-candle-indicator';
+export type { EngulfingCandleIndicatorInputs } from './community/engulfing-candle-indicator';
+// Moving Average Candles
+import * as movingAverageCandlesIndicator from './community/moving-average-candles';
+export { MovingAverageCandles, calculate as calculateMovingAverageCandles } from './community/moving-average-candles';
+export type { MovingAverageCandlesInputs } from './community/moving-average-candles';
+// Maket Strat Absorption Bubbles
+import * as maketStratAbsorptionBubblesIndicator from './community/maket-strat-absorption-bubbles';
+export { MaketStratAbsorptionBubbles, calculate as calculateMaketStratAbsorptionBubbles } from './community/maket-strat-absorption-bubbles';
+export type { MaketStratAbsorptionBubblesInputs } from './community/maket-strat-absorption-bubbles';
+// Volume Spike and Contraction Indicator
+import * as volumeSpikeAndContractionIndicatorIndicator from './community/volume-spike-and-contraction-indicator';
+export { VolumeSpikeAndContractionIndicator, calculate as calculateVolumeSpikeAndContractionIndicator } from './community/volume-spike-and-contraction-indicator';
+export type { VolumeSpikeAndContractionInputs } from './community/volume-spike-and-contraction-indicator';
+// Sweep Candle
+import * as sweepCandleIndicator from './community/sweep-candle';
+export { SweepCandle, calculate as calculateSweepCandle } from './community/sweep-candle';
+export type { SweepCandleInputs } from './community/sweep-candle';
+// Vacuum Candles
+import * as vacuumCandlesIndicator from './community/vacuum-candles';
+export { VacuumCandles, calculate as calculateVacuumCandles } from './community/vacuum-candles';
+export type { VacuumCandlesInputs } from './community/vacuum-candles';
+// Full Candle Higher/Lower (No Repeats)
+import * as fullCandleHigherLowerIndicator from './community/full-candle-higher-lower';
+export { FullCandleHigherLower, calculate as calculateFullCandleHigherLower } from './community/full-candle-higher-lower';
+export type { FullCandleHigherLowerInputs } from './community/full-candle-higher-lower';
+// Quasimodo Pattern
+import * as quasimodoPatternIndicator from './community/quasimodo-pattern';
+export { QuasimodoPattern, calculate as calculateQuasimodoPattern } from './community/quasimodo-pattern';
+export type { QuasimodoPatternInputs } from './community/quasimodo-pattern';
+// Absorption Arrows v2
+import * as absorptionArrowsV2Indicator from './community/absorption-arrows-v2';
+export { AbsorptionArrowsV2, calculate as calculateAbsorptionArrowsV2 } from './community/absorption-arrows-v2';
+export type { AbsorptionArrowsV2Inputs } from './community/absorption-arrows-v2';
+// Buy the Dip & Sell the Rip
+import * as buyTheDipSellTheRipIndicator from './community/buy-the-dip-sell-the-rip';
+export { BuyTheDipSellTheRip, calculate as calculateBuyTheDipSellTheRip } from './community/buy-the-dip-sell-the-rip';
+export type { BuyTheDipSellTheRipInputs } from './community/buy-the-dip-sell-the-rip';
+// SPX500 Quick Drop & Rise Alerts
+import * as spx500QuickDropRiseAlertsIndicator from './community/spx500-quick-drop-rise-alerts';
+export { Spx500QuickDropRiseAlerts, calculate as calculateSpx500QuickDropRiseAlerts } from './community/spx500-quick-drop-rise-alerts';
+export type { Spx500QuickDropRiseAlertsInputs } from './community/spx500-quick-drop-rise-alerts';
+// ── Community batch 42 (Pine v6 ports) ──
+// Price Contraction / Expansion
+import * as priceContractionExpansionIndicator from './community/price-contraction-expansion';
+export { PriceContractionExpansion, calculate as calculatePriceContractionExpansion } from './community/price-contraction-expansion';
+export type { PriceContractionExpansionInputs } from './community/price-contraction-expansion';
+// Bar Replay Fix
+import * as barReplayFixIndicator from './community/bar-replay-fix';
+export { BarReplayFix, calculate as calculateBarReplayFix } from './community/bar-replay-fix';
+export type { BarReplayFixInputs } from './community/bar-replay-fix';
+// Volume Alert
+import * as volumeAlertIndicator from './community/volume-alert';
+export { VolumeAlert, calculate as calculateVolumeAlert } from './community/volume-alert';
+export type { VolumeAlertInputs } from './community/volume-alert';
+// CVD Divergence Background By HK
+import * as cvdDivergenceBackgroundByHkIndicator from './community/cvd-divergence-background-by-hk';
+export { CvdDivergenceBackground, calculate as calculateCvdDivergenceBackground } from './community/cvd-divergence-background-by-hk';
+export type { CvdDivergenceBackgroundInputs } from './community/cvd-divergence-background-by-hk';
+// RSI PERFECT Flip Dots
+import * as rsiPerfectFlipDotsIndicator from './community/rsi-perfect-flip-dots';
+export { RsiPerfectFlipDots, calculate as calculateRsiPerfectFlipDots } from './community/rsi-perfect-flip-dots';
+export type { RsiPerfectFlipDotsInputs } from './community/rsi-perfect-flip-dots';
+// Candle Color Flip
+import * as candleColorFlipIndicator from './community/candle-color-flip';
+export { CandleColorFlip, calculate as calculateCandleColorFlip } from './community/candle-color-flip';
+export type { CandleColorFlipInputs } from './community/candle-color-flip';
+// Al Brooks II.IOI.OO
+import * as alBrooksIiIoiOoIndicator from './community/al-brooks-ii-ioi-oo';
+export { AlBrooksIiIoiOo, calculate as calculateAlBrooksIiIoiOo } from './community/al-brooks-ii-ioi-oo';
+export type { AlBrooksIiIoiOoInputs } from './community/al-brooks-ii-ioi-oo';
+// Inside Bar Coloring (Real-time + Historical) w/ Alerts
+import * as insideBarColoringWAlertsIndicator from './community/inside-bar-coloring-w-alerts';
+export { InsideBarColoringWAlerts, calculate as calculateInsideBarColoringWAlerts } from './community/inside-bar-coloring-w-alerts';
+export type { InsideBarColoringWAlertsInputs } from './community/inside-bar-coloring-w-alerts';
+// Dip Buy/Sell Signals (Vix Fix + MA Deviation + TRMAD)
+import * as dipBuySellSignalsIndicator from './community/dip-buy-sell-signals';
+export { DipBuySellSignals, calculate as calculateDipBuySellSignals } from './community/dip-buy-sell-signals';
+export type { DipBuySellSignalsInputs } from './community/dip-buy-sell-signals';
+// Tight Range Display with Background
+import * as tightRangeDisplayWithBackgroundIndicator from './community/tight-range-display-with-background';
+export { TightRangeDisplay, calculate as calculateTightRangeDisplay } from './community/tight-range-display-with-background';
+export type { TightRangeDisplayInputs } from './community/tight-range-display-with-background';
+// The Strat
+import * as theStratIndicator from './community/the-strat';
+export { TheStrat, calculate as calculateTheStrat } from './community/the-strat';
+export type { TheStratInputs } from './community/the-strat';
+// Volume Spike Indicator
+import * as volumeSpikeIndicatorIndicator from './community/volume-spike-indicator';
+export { VolumeSpikeIndicator, calculate as calculateVolumeSpikeIndicator } from './community/volume-spike-indicator';
+export type { VolumeSpikeIndicatorInputs } from './community/volume-spike-indicator';
+// Three-Bar Reversal/Continuation
+import * as threeBarReversalContinuationIndicator from './community/three-bar-reversal-continuation';
+export { ThreeBarReversalContinuation, calculate as calculateThreeBarReversalContinuation } from './community/three-bar-reversal-continuation';
+export type { ThreeBarReversalContinuationInputs } from './community/three-bar-reversal-continuation';
+// Customizable RSI/StochRSI Double Confirmation
+import * as customizableRsiStochrsiDoubleConfirmationIndicator from './community/customizable-rsi-stochrsi-double-confirmation';
+export { CustomizableRsiStochRsiDoubleConfirmation, calculate as calculateCustomizableRsiStochRsiDoubleConfirmation } from './community/customizable-rsi-stochrsi-double-confirmation';
+export type { CustomizableRsiStochRsiDoubleConfirmationInputs } from './community/customizable-rsi-stochrsi-double-confirmation';
+// John Wick Doji indicator
+import * as johnWickDojiIndicatorIndicator from './community/john-wick-doji-indicator';
+export { JohnWickDoji, calculate as calculateJohnWickDoji } from './community/john-wick-doji-indicator';
+export type { JohnWickDojiInputs } from './community/john-wick-doji-indicator';
+// Heikin Ashi Doji with High Volume
+import * as heikinAshiDojiWithHighVolumeIndicator from './community/heikin-ashi-doji-with-high-volume';
+export { HeikinAshiDojiHighVolume, calculate as calculateHeikinAshiDojiHighVolume } from './community/heikin-ashi-doji-with-high-volume';
+export type { HeikinAshiDojiHighVolumeInputs } from './community/heikin-ashi-doji-with-high-volume';
+// Inside / Outside Bars
+import * as insideOutsideBarsIndicator from './community/inside-outside-bars';
+export { InsideOutsideBars, calculate as calculateInsideOutsideBars } from './community/inside-outside-bars';
+export type { InsideOutsideBarsInputs } from './community/inside-outside-bars';
+// Mushir's Inside Candle Indicator
+import * as mushirSInsideCandleIndicatorIndicator from './community/mushir-s-inside-candle-indicator';
+export { MushirInsideCandle, calculate as calculateMushirInsideCandle } from './community/mushir-s-inside-candle-indicator';
+export type { MushirInsideCandleInputs } from './community/mushir-s-inside-candle-indicator';
+// Heikin-Ashi Reversals with Region & Dots
+import * as heikinAshiReversalsWithRegionDotsIndicator from './community/heikin-ashi-reversals-with-region-dots';
+export { HeikinAshiReversalsWithRegionDots, calculate as calculateHeikinAshiReversalsWithRegionDots } from './community/heikin-ashi-reversals-with-region-dots';
+export type { HeikinAshiReversalsWithRegionDotsInputs } from './community/heikin-ashi-reversals-with-region-dots';
 
 export type IndicatorCategory =
   | 'Moving Averages'
@@ -19934,6 +20335,1293 @@ const registryPart5: IndicatorRegistryEntry[] = [
     defaultInputs: { ...macdPseudoSuperSmootherIndicator.defaultInputs },
     calculate: macdPseudoSuperSmootherIndicator.calculate,
   },
+  {
+    id: 'candlestick-patterns-identified',
+    group: 'community',
+    name: 'Candlestick Patterns Identified',
+    shortName: candlestickPatternsIdentifiedIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: candlestickPatternsIdentifiedIndicator.metadata,
+    inputConfig: candlestickPatternsIdentifiedIndicator.inputConfig as InputConfig[],
+    plotConfig: candlestickPatternsIdentifiedIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...candlestickPatternsIdentifiedIndicator.defaultInputs },
+    calculate: candlestickPatternsIdentifiedIndicator.calculate,
+  },
+  {
+    id: 'rally-base-drop-signals',
+    group: 'community',
+    name: 'Rally Base Drop Signals',
+    shortName: rallyBaseDropSignalsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: rallyBaseDropSignalsIndicator.metadata,
+    inputConfig: rallyBaseDropSignalsIndicator.inputConfig as InputConfig[],
+    plotConfig: rallyBaseDropSignalsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rallyBaseDropSignalsIndicator.defaultInputs },
+    calculate: rallyBaseDropSignalsIndicator.calculate,
+  },
+  {
+    id: 'big-trades-whale-detector-by-hk',
+    group: 'community',
+    name: 'Big Trades Whale Detector By HK',
+    shortName: bigTradesWhaleDetectorByHkIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: bigTradesWhaleDetectorByHkIndicator.metadata,
+    inputConfig: bigTradesWhaleDetectorByHkIndicator.inputConfig as InputConfig[],
+    plotConfig: bigTradesWhaleDetectorByHkIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...bigTradesWhaleDetectorByHkIndicator.defaultInputs },
+    calculate: bigTradesWhaleDetectorByHkIndicator.calculate,
+  },
+  {
+    id: '50-body-candle',
+    group: 'community',
+    name: '<50% Body Candle',
+    shortName: p50BodyCandleIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: p50BodyCandleIndicator.metadata,
+    inputConfig: p50BodyCandleIndicator.inputConfig as InputConfig[],
+    plotConfig: p50BodyCandleIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...p50BodyCandleIndicator.defaultInputs },
+    calculate: p50BodyCandleIndicator.calculate,
+  },
+  {
+    id: 'pocket-pivot-breakout',
+    group: 'community',
+    name: 'Pocket Pivot Breakout',
+    shortName: pocketPivotBreakoutIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: pocketPivotBreakoutIndicator.metadata,
+    inputConfig: pocketPivotBreakoutIndicator.inputConfig as InputConfig[],
+    plotConfig: pocketPivotBreakoutIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...pocketPivotBreakoutIndicator.defaultInputs },
+    calculate: pocketPivotBreakoutIndicator.calculate,
+  },
+  {
+    id: 'custom-buy-and-sell-signal-with-body-ratio-and-rsi',
+    group: 'community',
+    name: 'Custom Buy and Sell Signal with Body Ratio and RSI',
+    shortName: customBuyAndSellSignalWithBodyRatioAndRsiIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: customBuyAndSellSignalWithBodyRatioAndRsiIndicator.metadata,
+    inputConfig: customBuyAndSellSignalWithBodyRatioAndRsiIndicator.inputConfig as InputConfig[],
+    plotConfig: customBuyAndSellSignalWithBodyRatioAndRsiIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...customBuyAndSellSignalWithBodyRatioAndRsiIndicator.defaultInputs },
+    calculate: customBuyAndSellSignalWithBodyRatioAndRsiIndicator.calculate,
+  },
+  {
+    id: 'advanced-volume-driven-breakout-signals',
+    group: 'community',
+    name: 'Advanced Volume-Driven Breakout Signals',
+    shortName: advancedVolumeDrivenBreakoutSignalsIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: advancedVolumeDrivenBreakoutSignalsIndicator.metadata,
+    inputConfig: advancedVolumeDrivenBreakoutSignalsIndicator.inputConfig as InputConfig[],
+    plotConfig: advancedVolumeDrivenBreakoutSignalsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...advancedVolumeDrivenBreakoutSignalsIndicator.defaultInputs },
+    calculate: advancedVolumeDrivenBreakoutSignalsIndicator.calculate,
+  },
+  {
+    id: 'rbt-strategy',
+    group: 'community',
+    name: 'RBT strategy',
+    shortName: rbtStrategyIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: rbtStrategyIndicator.metadata,
+    inputConfig: rbtStrategyIndicator.inputConfig as InputConfig[],
+    plotConfig: rbtStrategyIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rbtStrategyIndicator.defaultInputs },
+    calculate: rbtStrategyIndicator.calculate,
+  },
+  {
+    id: 'candle-state',
+    group: 'community',
+    name: 'Candle State (The Strat)',
+    shortName: candleStateIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: candleStateIndicator.metadata,
+    inputConfig: candleStateIndicator.inputConfig as InputConfig[],
+    plotConfig: candleStateIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...candleStateIndicator.defaultInputs },
+    calculate: candleStateIndicator.calculate,
+  },
+  {
+    id: 'marubozu-detector',
+    group: 'community',
+    name: 'Marubozu Detector',
+    shortName: marubozuDetectorIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: marubozuDetectorIndicator.metadata,
+    inputConfig: marubozuDetectorIndicator.inputConfig as InputConfig[],
+    plotConfig: marubozuDetectorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...marubozuDetectorIndicator.defaultInputs },
+    calculate: marubozuDetectorIndicator.calculate,
+  },
+  {
+    id: 'strong-burst-fader-projectsyndicate',
+    group: 'community',
+    name: 'Strong Burst Fader | ProjectSyndicate',
+    shortName: strongBurstFaderProjectsyndicateIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: true,
+    metadata: strongBurstFaderProjectsyndicateIndicator.metadata,
+    inputConfig: strongBurstFaderProjectsyndicateIndicator.inputConfig as InputConfig[],
+    plotConfig: strongBurstFaderProjectsyndicateIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...strongBurstFaderProjectsyndicateIndicator.defaultInputs },
+    calculate: strongBurstFaderProjectsyndicateIndicator.calculate,
+  },
+  {
+    id: 'trend-pro',
+    group: 'community',
+    name: 'Trend-Pro',
+    shortName: trendProIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: trendProIndicator.metadata,
+    inputConfig: trendProIndicator.inputConfig as InputConfig[],
+    plotConfig: trendProIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...trendProIndicator.defaultInputs },
+    calculate: trendProIndicator.calculate,
+  },
+  {
+    id: 'engulfing-sweeps-milana-trades',
+    group: 'community',
+    name: 'Engulfing Sweeps - Milana Trades',
+    shortName: engulfingSweepsMilanaTradesIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: engulfingSweepsMilanaTradesIndicator.metadata,
+    inputConfig: engulfingSweepsMilanaTradesIndicator.inputConfig as InputConfig[],
+    plotConfig: engulfingSweepsMilanaTradesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...engulfingSweepsMilanaTradesIndicator.defaultInputs },
+    calculate: engulfingSweepsMilanaTradesIndicator.calculate,
+  },
+  {
+    id: 'sweep-engulf-choch',
+    group: 'community',
+    name: 'Sweep Engulf CHoCH',
+    shortName: sweepEngulfChochIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: sweepEngulfChochIndicator.metadata,
+    inputConfig: sweepEngulfChochIndicator.inputConfig as InputConfig[],
+    plotConfig: sweepEngulfChochIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...sweepEngulfChochIndicator.defaultInputs },
+    calculate: sweepEngulfChochIndicator.calculate,
+  },
+  {
+    id: 'big-trades-detector-by-hf',
+    group: 'community',
+    name: 'Big Trades Detector By HF',
+    shortName: bigTradesDetectorByHfIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: bigTradesDetectorByHfIndicator.metadata,
+    inputConfig: bigTradesDetectorByHfIndicator.inputConfig as InputConfig[],
+    plotConfig: bigTradesDetectorByHfIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...bigTradesDetectorByHfIndicator.defaultInputs },
+    calculate: bigTradesDetectorByHfIndicator.calculate,
+  },
+  {
+    id: 'rcyc-bullish-bearish-indicator',
+    group: 'community',
+    name: 'RCYC Bullish Bearish Indicator',
+    shortName: rcycBullishBearishIndicatorIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: rcycBullishBearishIndicatorIndicator.metadata,
+    inputConfig: rcycBullishBearishIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: rcycBullishBearishIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rcycBullishBearishIndicatorIndicator.defaultInputs },
+    calculate: rcycBullishBearishIndicatorIndicator.calculate,
+  },
+  {
+    id: 'engulfing-sweep-v6-bars-only',
+    group: 'community',
+    name: 'Engulfing + Sweep (Confirmed Only) v6 - bars only',
+    shortName: engulfingSweepV6BarsOnlyIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: engulfingSweepV6BarsOnlyIndicator.metadata,
+    inputConfig: engulfingSweepV6BarsOnlyIndicator.inputConfig as InputConfig[],
+    plotConfig: engulfingSweepV6BarsOnlyIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...engulfingSweepV6BarsOnlyIndicator.defaultInputs },
+    calculate: engulfingSweepV6BarsOnlyIndicator.calculate,
+  },
+  {
+    id: 't1-wyckoff-aggressive-a-d-setup',
+    group: 'community',
+    name: 'T1 Wyckoff Aggressive A/D Setup',
+    shortName: t1WyckoffAggressiveADSetupIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: t1WyckoffAggressiveADSetupIndicator.metadata,
+    inputConfig: t1WyckoffAggressiveADSetupIndicator.inputConfig as InputConfig[],
+    plotConfig: t1WyckoffAggressiveADSetupIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...t1WyckoffAggressiveADSetupIndicator.defaultInputs },
+    calculate: t1WyckoffAggressiveADSetupIndicator.calculate,
+  },
+  {
+    id: 'liquidity-sweep-confirmation',
+    group: 'community',
+    name: 'Liquidity Sweep Confirmation',
+    shortName: liquiditySweepConfirmationIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: liquiditySweepConfirmationIndicator.metadata,
+    inputConfig: liquiditySweepConfirmationIndicator.inputConfig as InputConfig[],
+    plotConfig: liquiditySweepConfirmationIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...liquiditySweepConfirmationIndicator.defaultInputs },
+    calculate: liquiditySweepConfirmationIndicator.calculate,
+  },
+  {
+    id: 'abusuhil-bullish-candles',
+    group: 'community',
+    name: 'Abusuhil Bullish Candles',
+    shortName: abusuhilBullishCandlesIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: abusuhilBullishCandlesIndicator.metadata,
+    inputConfig: abusuhilBullishCandlesIndicator.inputConfig as InputConfig[],
+    plotConfig: abusuhilBullishCandlesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...abusuhilBullishCandlesIndicator.defaultInputs },
+    calculate: abusuhilBullishCandlesIndicator.calculate,
+  },
+  {
+    id: 'rsi-ma-cross-divergence-signal',
+    group: 'community',
+    name: 'RSI MA Cross + Divergence Signal (V2)',
+    shortName: rsiMaCrossDivergenceSignalIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: rsiMaCrossDivergenceSignalIndicator.metadata,
+    inputConfig: rsiMaCrossDivergenceSignalIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiMaCrossDivergenceSignalIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsiMaCrossDivergenceSignalIndicator.defaultInputs },
+    calculate: rsiMaCrossDivergenceSignalIndicator.calculate,
+  },
+  {
+    id: 'rsi-candle-color',
+    group: 'community',
+    name: 'RSI Candle Color',
+    shortName: rsiCandleColorIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: rsiCandleColorIndicator.metadata,
+    inputConfig: rsiCandleColorIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiCandleColorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsiCandleColorIndicator.defaultInputs },
+    calculate: rsiCandleColorIndicator.calculate,
+  },
+  {
+    id: 'trendshift',
+    group: 'community',
+    name: 'Trendshift',
+    shortName: trendshiftIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: trendshiftIndicator.metadata,
+    inputConfig: trendshiftIndicator.inputConfig as InputConfig[],
+    plotConfig: trendshiftIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...trendshiftIndicator.defaultInputs },
+    calculate: trendshiftIndicator.calculate,
+  },
+  {
+    id: 'pump-dump-detector',
+    group: 'community',
+    name: 'Pump & Dump Detector (sensitive)',
+    shortName: pumpDumpDetectorIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: pumpDumpDetectorIndicator.metadata,
+    inputConfig: pumpDumpDetectorIndicator.inputConfig as InputConfig[],
+    plotConfig: pumpDumpDetectorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...pumpDumpDetectorIndicator.defaultInputs },
+    calculate: pumpDumpDetectorIndicator.calculate,
+  },
+  {
+    id: 'consecutive-higher-lower-closings',
+    group: 'community',
+    name: 'Consecutive Higher/Lower Closings',
+    shortName: consecutiveHigherLowerClosingsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: consecutiveHigherLowerClosingsIndicator.metadata,
+    inputConfig: consecutiveHigherLowerClosingsIndicator.inputConfig as InputConfig[],
+    plotConfig: consecutiveHigherLowerClosingsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...consecutiveHigherLowerClosingsIndicator.defaultInputs },
+    calculate: consecutiveHigherLowerClosingsIndicator.calculate,
+  },
+  {
+    id: 'dip-rip-patterns-the-quant-science',
+    group: 'community',
+    name: 'Dip & Rip Patterns - The Quant Science',
+    shortName: dipRipPatternsTheQuantScienceIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: true,
+    metadata: dipRipPatternsTheQuantScienceIndicator.metadata,
+    inputConfig: dipRipPatternsTheQuantScienceIndicator.inputConfig as InputConfig[],
+    plotConfig: dipRipPatternsTheQuantScienceIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...dipRipPatternsTheQuantScienceIndicator.defaultInputs },
+    calculate: dipRipPatternsTheQuantScienceIndicator.calculate,
+  },
+  {
+    id: 'cvd-big-trade-detector-by-hk',
+    group: 'community',
+    name: 'CVD & Big Trade Detector By HK',
+    shortName: cvdBigTradeDetectorByHkIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: false,
+    metadata: cvdBigTradeDetectorByHkIndicator.metadata,
+    inputConfig: cvdBigTradeDetectorByHkIndicator.inputConfig as InputConfig[],
+    plotConfig: cvdBigTradeDetectorByHkIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...cvdBigTradeDetectorByHkIndicator.defaultInputs },
+    calculate: cvdBigTradeDetectorByHkIndicator.calculate,
+  },
+  {
+    id: 'manipulation-candle',
+    group: 'community',
+    name: 'Manipulation Candle',
+    shortName: manipulationCandleIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: manipulationCandleIndicator.metadata,
+    inputConfig: manipulationCandleIndicator.inputConfig as InputConfig[],
+    plotConfig: manipulationCandleIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...manipulationCandleIndicator.defaultInputs },
+    calculate: manipulationCandleIndicator.calculate,
+  },
+  {
+    id: 'rsi-colored-price-candles-with-background',
+    group: 'community',
+    name: 'RSI-Colored Price Candles with Background',
+    shortName: rsiColoredPriceCandlesWithBackgroundIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: rsiColoredPriceCandlesWithBackgroundIndicator.metadata,
+    inputConfig: rsiColoredPriceCandlesWithBackgroundIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiColoredPriceCandlesWithBackgroundIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsiColoredPriceCandlesWithBackgroundIndicator.defaultInputs },
+    calculate: rsiColoredPriceCandlesWithBackgroundIndicator.calculate,
+  },
+  {
+    id: 'futech-v-spike-v-highlighter',
+    group: 'community',
+    name: 'FuTech V-Spike & V-Highlighter',
+    shortName: futechVSpikeVHighlighterIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: futechVSpikeVHighlighterIndicator.metadata,
+    inputConfig: futechVSpikeVHighlighterIndicator.inputConfig as InputConfig[],
+    plotConfig: futechVSpikeVHighlighterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...futechVSpikeVHighlighterIndicator.defaultInputs },
+    calculate: futechVSpikeVHighlighterIndicator.calculate,
+  },
+  {
+    id: 'no-wick-candles',
+    group: 'community',
+    name: 'No wick candles',
+    shortName: noWickCandlesIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: noWickCandlesIndicator.metadata,
+    inputConfig: noWickCandlesIndicator.inputConfig as InputConfig[],
+    plotConfig: noWickCandlesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...noWickCandlesIndicator.defaultInputs },
+    calculate: noWickCandlesIndicator.calculate,
+  },
+  {
+    id: 'linear-regression-blend-candles',
+    group: 'community',
+    name: 'Linear Regression Blend Candles',
+    shortName: linearRegressionBlendCandlesIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: linearRegressionBlendCandlesIndicator.metadata,
+    inputConfig: linearRegressionBlendCandlesIndicator.inputConfig as InputConfig[],
+    plotConfig: linearRegressionBlendCandlesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...linearRegressionBlendCandlesIndicator.defaultInputs },
+    calculate: linearRegressionBlendCandlesIndicator.calculate,
+  },
+  {
+    id: 'volume-candles',
+    group: 'community',
+    name: 'Volume Candles',
+    shortName: volumeCandlesIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: volumeCandlesIndicator.metadata,
+    inputConfig: volumeCandlesIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeCandlesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeCandlesIndicator.defaultInputs },
+    calculate: volumeCandlesIndicator.calculate,
+  },
+  {
+    id: 'erema-signals',
+    group: 'community',
+    name: 'EREMA Signals',
+    shortName: eremaSignalsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: eremaSignalsIndicator.metadata,
+    inputConfig: eremaSignalsIndicator.inputConfig as InputConfig[],
+    plotConfig: eremaSignalsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...eremaSignalsIndicator.defaultInputs },
+    calculate: eremaSignalsIndicator.calculate,
+  },
+  {
+    id: 'strong-engulfing-candlestick',
+    group: 'community',
+    name: 'Strong Engulfing Candlestick (With Alerts)',
+    shortName: strongEngulfingCandlestickIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: strongEngulfingCandlestickIndicator.metadata,
+    inputConfig: strongEngulfingCandlestickIndicator.inputConfig as InputConfig[],
+    plotConfig: strongEngulfingCandlestickIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...strongEngulfingCandlestickIndicator.defaultInputs },
+    calculate: strongEngulfingCandlestickIndicator.calculate,
+  },
+  {
+    id: 'cvd-reversal-divergence',
+    group: 'community',
+    name: 'CVD Reversal Divergence (Exhaustion)',
+    shortName: cvdReversalDivergenceIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: cvdReversalDivergenceIndicator.metadata,
+    inputConfig: cvdReversalDivergenceIndicator.inputConfig as InputConfig[],
+    plotConfig: cvdReversalDivergenceIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...cvdReversalDivergenceIndicator.defaultInputs },
+    calculate: cvdReversalDivergenceIndicator.calculate,
+  },
+  {
+    id: 'ehlers-regime-dynamic-candles',
+    group: 'community',
+    name: 'Ehlers Regime Dynamic Candles',
+    shortName: ehlersRegimeDynamicCandlesIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: ehlersRegimeDynamicCandlesIndicator.metadata,
+    inputConfig: ehlersRegimeDynamicCandlesIndicator.inputConfig as InputConfig[],
+    plotConfig: ehlersRegimeDynamicCandlesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...ehlersRegimeDynamicCandlesIndicator.defaultInputs },
+    calculate: ehlersRegimeDynamicCandlesIndicator.calculate,
+  },
+  {
+    id: 'moving-average-trend-meter',
+    group: 'community',
+    name: 'Moving Average Trend Meter',
+    shortName: movingAverageTrendMeterIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: false,
+    metadata: movingAverageTrendMeterIndicator.metadata,
+    inputConfig: movingAverageTrendMeterIndicator.inputConfig as InputConfig[],
+    plotConfig: movingAverageTrendMeterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...movingAverageTrendMeterIndicator.defaultInputs },
+    calculate: movingAverageTrendMeterIndicator.calculate,
+  },
+  {
+    id: 'triple-doji-sequence',
+    group: 'community',
+    name: 'Triple Doji Sequence',
+    shortName: tripleDojiSequenceIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: tripleDojiSequenceIndicator.metadata,
+    inputConfig: tripleDojiSequenceIndicator.inputConfig as InputConfig[],
+    plotConfig: tripleDojiSequenceIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...tripleDojiSequenceIndicator.defaultInputs },
+    calculate: tripleDojiSequenceIndicator.calculate,
+  },
+  {
+    id: 'delta-manipulation-footprint',
+    group: 'community',
+    name: 'Delta Manipulation Footprint',
+    shortName: deltaManipulationFootprintIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: deltaManipulationFootprintIndicator.metadata,
+    inputConfig: deltaManipulationFootprintIndicator.inputConfig as InputConfig[],
+    plotConfig: deltaManipulationFootprintIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...deltaManipulationFootprintIndicator.defaultInputs },
+    calculate: deltaManipulationFootprintIndicator.calculate,
+  },
+  {
+    id: 'trendshift-detector',
+    group: 'community',
+    name: 'TrendShift Detector',
+    shortName: trendshiftDetectorIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: trendshiftDetectorIndicator.metadata,
+    inputConfig: trendshiftDetectorIndicator.inputConfig as InputConfig[],
+    plotConfig: trendshiftDetectorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...trendshiftDetectorIndicator.defaultInputs },
+    calculate: trendshiftDetectorIndicator.calculate,
+  },
+  {
+    id: '3-bar-reversal',
+    group: 'community',
+    name: '3 Bar Reversal',
+    shortName: p3BarReversalIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: p3BarReversalIndicator.metadata,
+    inputConfig: p3BarReversalIndicator.inputConfig as InputConfig[],
+    plotConfig: p3BarReversalIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...p3BarReversalIndicator.defaultInputs },
+    calculate: p3BarReversalIndicator.calculate,
+  },
+  {
+    id: 'minimalist-doji-highlighter',
+    group: 'community',
+    name: 'Minimalist Doji Highlighter',
+    shortName: minimalistDojiHighlighterIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: minimalistDojiHighlighterIndicator.metadata,
+    inputConfig: minimalistDojiHighlighterIndicator.inputConfig as InputConfig[],
+    plotConfig: minimalistDojiHighlighterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...minimalistDojiHighlighterIndicator.defaultInputs },
+    calculate: minimalistDojiHighlighterIndicator.calculate,
+  },
+  {
+    id: 'l1-moving-average-fingerprint-for-long-entry',
+    group: 'community',
+    name: 'L1 Moving Average Fingerprint for Long Entry',
+    shortName: l1MovingAverageFingerprintForLongEntryIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: l1MovingAverageFingerprintForLongEntryIndicator.metadata,
+    inputConfig: l1MovingAverageFingerprintForLongEntryIndicator.inputConfig as InputConfig[],
+    plotConfig: l1MovingAverageFingerprintForLongEntryIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...l1MovingAverageFingerprintForLongEntryIndicator.defaultInputs },
+    calculate: l1MovingAverageFingerprintForLongEntryIndicator.calculate,
+  },
+  {
+    id: 'eagles-compass',
+    group: 'community',
+    name: 'Eagles Compass',
+    shortName: eaglesCompassIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: eaglesCompassIndicator.metadata,
+    inputConfig: eaglesCompassIndicator.inputConfig as InputConfig[],
+    plotConfig: eaglesCompassIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...eaglesCompassIndicator.defaultInputs },
+    calculate: eaglesCompassIndicator.calculate,
+  },
+  {
+    id: 'polynomial-trend-exhaustion-divergence',
+    group: 'community',
+    name: 'Polynomial Trend Exhaustion & Divergence',
+    shortName: polynomialTrendExhaustionDivergenceIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: polynomialTrendExhaustionDivergenceIndicator.metadata,
+    inputConfig: polynomialTrendExhaustionDivergenceIndicator.inputConfig as InputConfig[],
+    plotConfig: polynomialTrendExhaustionDivergenceIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...polynomialTrendExhaustionDivergenceIndicator.defaultInputs },
+    calculate: polynomialTrendExhaustionDivergenceIndicator.calculate,
+  },
+  {
+    id: 'inside-bar-ind-alert',
+    group: 'community',
+    name: 'Inside Bar (Body-based) Ind/Alert',
+    shortName: insideBarIndAlertIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: insideBarIndAlertIndicator.metadata,
+    inputConfig: insideBarIndAlertIndicator.inputConfig as InputConfig[],
+    plotConfig: insideBarIndAlertIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...insideBarIndAlertIndicator.defaultInputs },
+    calculate: insideBarIndAlertIndicator.calculate,
+  },
+  {
+    id: 'heikin-ashi-colored-regular-ohlc-candles',
+    group: 'community',
+    name: 'Heikin Ashi Colored Regular OHLC Candles',
+    shortName: heikinAshiColoredRegularOhlcCandlesIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: heikinAshiColoredRegularOhlcCandlesIndicator.metadata,
+    inputConfig: heikinAshiColoredRegularOhlcCandlesIndicator.inputConfig as InputConfig[],
+    plotConfig: heikinAshiColoredRegularOhlcCandlesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...heikinAshiColoredRegularOhlcCandlesIndicator.defaultInputs },
+    calculate: heikinAshiColoredRegularOhlcCandlesIndicator.calculate,
+  },
+  {
+    id: 'donchian-reversal-signals-with-labels',
+    group: 'community',
+    name: 'Donchian Reversal Signals with Labels',
+    shortName: donchianReversalSignalsWithLabelsIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: donchianReversalSignalsWithLabelsIndicator.metadata,
+    inputConfig: donchianReversalSignalsWithLabelsIndicator.inputConfig as InputConfig[],
+    plotConfig: donchianReversalSignalsWithLabelsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...donchianReversalSignalsWithLabelsIndicator.defaultInputs },
+    calculate: donchianReversalSignalsWithLabelsIndicator.calculate,
+  },
+  {
+    id: 'fvg-candle-highlighter',
+    group: 'community',
+    name: 'FVG Candle Highlighter',
+    shortName: fvgCandleHighlighterIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: true,
+    metadata: fvgCandleHighlighterIndicator.metadata,
+    inputConfig: fvgCandleHighlighterIndicator.inputConfig as InputConfig[],
+    plotConfig: fvgCandleHighlighterIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...fvgCandleHighlighterIndicator.defaultInputs },
+    calculate: fvgCandleHighlighterIndicator.calculate,
+  },
+  {
+    id: 'high-volume-buyers-sellers',
+    group: 'community',
+    name: 'High Volume Buyers/Sellers+',
+    shortName: highVolumeBuyersSellersIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: highVolumeBuyersSellersIndicator.metadata,
+    inputConfig: highVolumeBuyersSellersIndicator.inputConfig as InputConfig[],
+    plotConfig: highVolumeBuyersSellersIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...highVolumeBuyersSellersIndicator.defaultInputs },
+    calculate: highVolumeBuyersSellersIndicator.calculate,
+  },
+  {
+    id: 'actually-engulfing-candlesticks',
+    group: 'community',
+    name: 'Actually Engulfing Candlesticks',
+    shortName: actuallyEngulfingCandlesticksIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: actuallyEngulfingCandlesticksIndicator.metadata,
+    inputConfig: actuallyEngulfingCandlesticksIndicator.inputConfig as InputConfig[],
+    plotConfig: actuallyEngulfingCandlesticksIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...actuallyEngulfingCandlesticksIndicator.defaultInputs },
+    calculate: actuallyEngulfingCandlesticksIndicator.calculate,
+  },
+  {
+    id: 'perfect-hammer-pattern-indicators-and-alerts',
+    group: 'community',
+    name: 'Perfect Hammer Pattern Indicators and Alerts',
+    shortName: perfectHammerPatternIndicatorsAndAlertsIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: perfectHammerPatternIndicatorsAndAlertsIndicator.metadata,
+    inputConfig: perfectHammerPatternIndicatorsAndAlertsIndicator.inputConfig as InputConfig[],
+    plotConfig: perfectHammerPatternIndicatorsAndAlertsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...perfectHammerPatternIndicatorsAndAlertsIndicator.defaultInputs },
+    calculate: perfectHammerPatternIndicatorsAndAlertsIndicator.calculate,
+  },
+  {
+    id: 'fastlane',
+    group: 'community',
+    name: 'Fastlane',
+    shortName: fastlaneIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: fastlaneIndicator.metadata,
+    inputConfig: fastlaneIndicator.inputConfig as InputConfig[],
+    plotConfig: fastlaneIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...fastlaneIndicator.defaultInputs },
+    calculate: fastlaneIndicator.calculate,
+  },
+  {
+    id: 'clean-buy-sell-pro',
+    group: 'community',
+    name: 'Clean Buy Sell Pro',
+    shortName: cleanBuySellProIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: cleanBuySellProIndicator.metadata,
+    inputConfig: cleanBuySellProIndicator.inputConfig as InputConfig[],
+    plotConfig: cleanBuySellProIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...cleanBuySellProIndicator.defaultInputs },
+    calculate: cleanBuySellProIndicator.calculate,
+  },
+  {
+    id: 'unicorn-setup-detector',
+    group: 'community',
+    name: 'Unicorn Setup Detector (aziz abid)',
+    shortName: unicornSetupDetectorIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: unicornSetupDetectorIndicator.metadata,
+    inputConfig: unicornSetupDetectorIndicator.inputConfig as InputConfig[],
+    plotConfig: unicornSetupDetectorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...unicornSetupDetectorIndicator.defaultInputs },
+    calculate: unicornSetupDetectorIndicator.calculate,
+  },
+  {
+    id: 'ut-bot-trend-volume',
+    group: 'community',
+    name: 'Ut bot - Trend+volume',
+    shortName: utBotTrendVolumeIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: utBotTrendVolumeIndicator.metadata,
+    inputConfig: utBotTrendVolumeIndicator.inputConfig as InputConfig[],
+    plotConfig: utBotTrendVolumeIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...utBotTrendVolumeIndicator.defaultInputs },
+    calculate: utBotTrendVolumeIndicator.calculate,
+  },
+  {
+    id: 'trade-price-spread-compensator-overlay',
+    group: 'community',
+    name: 'Trade Price - Spread Compensator Overlay',
+    shortName: tradePriceSpreadCompensatorOverlayIndicator.metadata.shortTitle,
+    category: 'Channels & Bands',
+    overlay: true,
+    metadata: tradePriceSpreadCompensatorOverlayIndicator.metadata,
+    inputConfig: tradePriceSpreadCompensatorOverlayIndicator.inputConfig as InputConfig[],
+    plotConfig: tradePriceSpreadCompensatorOverlayIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...tradePriceSpreadCompensatorOverlayIndicator.defaultInputs },
+    calculate: tradePriceSpreadCompensatorOverlayIndicator.calculate,
+  },
+  {
+    id: 'effective-fvg-indicator-imran',
+    group: 'community',
+    name: 'Effective FVG Indicator - Imran',
+    shortName: effectiveFvgIndicatorImranIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: effectiveFvgIndicatorImranIndicator.metadata,
+    inputConfig: effectiveFvgIndicatorImranIndicator.inputConfig as InputConfig[],
+    plotConfig: effectiveFvgIndicatorImranIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...effectiveFvgIndicatorImranIndicator.defaultInputs },
+    calculate: effectiveFvgIndicatorImranIndicator.calculate,
+  },
+  {
+    id: 'rsi-bb-oversold-scalper-with-macd-confirmation',
+    group: 'community',
+    name: 'RSI & BB Oversold Scalper with MACD Confirmation',
+    shortName: rsiBbOversoldScalperWithMacdConfirmationIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: rsiBbOversoldScalperWithMacdConfirmationIndicator.metadata,
+    inputConfig: rsiBbOversoldScalperWithMacdConfirmationIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiBbOversoldScalperWithMacdConfirmationIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsiBbOversoldScalperWithMacdConfirmationIndicator.defaultInputs },
+    calculate: rsiBbOversoldScalperWithMacdConfirmationIndicator.calculate,
+  },
+  {
+    id: 'pay-attention-candle',
+    group: 'community',
+    name: 'Pay Attention Candle',
+    shortName: payAttentionCandleIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: payAttentionCandleIndicator.metadata,
+    inputConfig: payAttentionCandleIndicator.inputConfig as InputConfig[],
+    plotConfig: payAttentionCandleIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...payAttentionCandleIndicator.defaultInputs },
+    calculate: payAttentionCandleIndicator.calculate,
+  },
+  {
+    id: 'combined-up-down-with-volume',
+    group: 'community',
+    name: 'Combined Up down with volume',
+    shortName: combinedUpDownWithVolumeIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: combinedUpDownWithVolumeIndicator.metadata,
+    inputConfig: combinedUpDownWithVolumeIndicator.inputConfig as InputConfig[],
+    plotConfig: combinedUpDownWithVolumeIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...combinedUpDownWithVolumeIndicator.defaultInputs },
+    calculate: combinedUpDownWithVolumeIndicator.calculate,
+  },
+  {
+    id: 'minervini-trend-template-screener',
+    group: 'community',
+    name: 'Minervini Trend Template Screener (v5)',
+    shortName: minerviniTrendTemplateScreenerIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: minerviniTrendTemplateScreenerIndicator.metadata,
+    inputConfig: minerviniTrendTemplateScreenerIndicator.inputConfig as InputConfig[],
+    plotConfig: minerviniTrendTemplateScreenerIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...minerviniTrendTemplateScreenerIndicator.defaultInputs },
+    calculate: minerviniTrendTemplateScreenerIndicator.calculate,
+  },
+  {
+    id: 'dead-simple-reversal',
+    group: 'community',
+    name: 'Dead Simple Reversal',
+    shortName: deadSimpleReversalIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: deadSimpleReversalIndicator.metadata,
+    inputConfig: deadSimpleReversalIndicator.inputConfig as InputConfig[],
+    plotConfig: deadSimpleReversalIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...deadSimpleReversalIndicator.defaultInputs },
+    calculate: deadSimpleReversalIndicator.calculate,
+  },
+  {
+    id: 'primitive-delta-divergence',
+    group: 'community',
+    name: 'Primitive Delta Divergence',
+    shortName: primitiveDeltaDivergenceIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: primitiveDeltaDivergenceIndicator.metadata,
+    inputConfig: primitiveDeltaDivergenceIndicator.inputConfig as InputConfig[],
+    plotConfig: primitiveDeltaDivergenceIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...primitiveDeltaDivergenceIndicator.defaultInputs },
+    calculate: primitiveDeltaDivergenceIndicator.calculate,
+  },
+  {
+    id: 'sweep-engulf-2-candle',
+    group: 'community',
+    name: 'Sweep Engulf 2 Candle',
+    shortName: sweepEngulf2CandleIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: sweepEngulf2CandleIndicator.metadata,
+    inputConfig: sweepEngulf2CandleIndicator.inputConfig as InputConfig[],
+    plotConfig: sweepEngulf2CandleIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...sweepEngulf2CandleIndicator.defaultInputs },
+    calculate: sweepEngulf2CandleIndicator.calculate,
+  },
+  {
+    id: 'renko-flip-alert',
+    group: 'community',
+    name: 'Renko Flip Alert (Traditional Only)',
+    shortName: renkoFlipAlertIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: renkoFlipAlertIndicator.metadata,
+    inputConfig: renkoFlipAlertIndicator.inputConfig as InputConfig[],
+    plotConfig: renkoFlipAlertIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...renkoFlipAlertIndicator.defaultInputs },
+    calculate: renkoFlipAlertIndicator.calculate,
+  },
+  {
+    id: 'time-based-alerts-for-trading-windows',
+    group: 'community',
+    name: 'Time-based Alerts for Trading Windows',
+    shortName: timeBasedAlertsForTradingWindowsIndicator.metadata.shortTitle,
+    category: 'Trend',
+    overlay: true,
+    metadata: timeBasedAlertsForTradingWindowsIndicator.metadata,
+    inputConfig: timeBasedAlertsForTradingWindowsIndicator.inputConfig as InputConfig[],
+    plotConfig: timeBasedAlertsForTradingWindowsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...timeBasedAlertsForTradingWindowsIndicator.defaultInputs },
+    calculate: timeBasedAlertsForTradingWindowsIndicator.calculate,
+  },
+  {
+    id: 'wick-volume-alert',
+    group: 'community',
+    name: 'Wick Volume Alert',
+    shortName: wickVolumeAlertIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: wickVolumeAlertIndicator.metadata,
+    inputConfig: wickVolumeAlertIndicator.inputConfig as InputConfig[],
+    plotConfig: wickVolumeAlertIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...wickVolumeAlertIndicator.defaultInputs },
+    calculate: wickVolumeAlertIndicator.calculate,
+  },
+  {
+    id: 'engulfing-candle-indicator',
+    group: 'community',
+    name: 'Engulfing Candle Indicator',
+    shortName: engulfingCandleIndicatorIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: engulfingCandleIndicatorIndicator.metadata,
+    inputConfig: engulfingCandleIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: engulfingCandleIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...engulfingCandleIndicatorIndicator.defaultInputs },
+    calculate: engulfingCandleIndicatorIndicator.calculate,
+  },
+  {
+    id: 'moving-average-candles',
+    group: 'community',
+    name: 'Moving Average Candles',
+    shortName: movingAverageCandlesIndicator.metadata.shortTitle,
+    category: 'Moving Averages',
+    overlay: true,
+    metadata: movingAverageCandlesIndicator.metadata,
+    inputConfig: movingAverageCandlesIndicator.inputConfig as InputConfig[],
+    plotConfig: movingAverageCandlesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...movingAverageCandlesIndicator.defaultInputs },
+    calculate: movingAverageCandlesIndicator.calculate,
+  },
+  {
+    id: 'maket-strat-absorption-bubbles',
+    group: 'community',
+    name: 'Maket Strat Absorption Bubbles',
+    shortName: maketStratAbsorptionBubblesIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: maketStratAbsorptionBubblesIndicator.metadata,
+    inputConfig: maketStratAbsorptionBubblesIndicator.inputConfig as InputConfig[],
+    plotConfig: maketStratAbsorptionBubblesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...maketStratAbsorptionBubblesIndicator.defaultInputs },
+    calculate: maketStratAbsorptionBubblesIndicator.calculate,
+  },
+  {
+    id: 'volume-spike-and-contraction-indicator',
+    group: 'community',
+    name: 'Volume Spike and Contraction Indicator',
+    shortName: volumeSpikeAndContractionIndicatorIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: volumeSpikeAndContractionIndicatorIndicator.metadata,
+    inputConfig: volumeSpikeAndContractionIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeSpikeAndContractionIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeSpikeAndContractionIndicatorIndicator.defaultInputs },
+    calculate: volumeSpikeAndContractionIndicatorIndicator.calculate,
+  },
+  {
+    id: 'sweep-candle',
+    group: 'community',
+    name: 'Sweep Candle',
+    shortName: sweepCandleIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: sweepCandleIndicator.metadata,
+    inputConfig: sweepCandleIndicator.inputConfig as InputConfig[],
+    plotConfig: sweepCandleIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...sweepCandleIndicator.defaultInputs },
+    calculate: sweepCandleIndicator.calculate,
+  },
+  {
+    id: 'vacuum-candles',
+    group: 'community',
+    name: 'Vacuum Candles',
+    shortName: vacuumCandlesIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: vacuumCandlesIndicator.metadata,
+    inputConfig: vacuumCandlesIndicator.inputConfig as InputConfig[],
+    plotConfig: vacuumCandlesIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...vacuumCandlesIndicator.defaultInputs },
+    calculate: vacuumCandlesIndicator.calculate,
+  },
+  {
+    id: 'full-candle-higher-lower',
+    group: 'community',
+    name: 'Full Candle Higher/Lower (No Repeats)',
+    shortName: fullCandleHigherLowerIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: fullCandleHigherLowerIndicator.metadata,
+    inputConfig: fullCandleHigherLowerIndicator.inputConfig as InputConfig[],
+    plotConfig: fullCandleHigherLowerIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...fullCandleHigherLowerIndicator.defaultInputs },
+    calculate: fullCandleHigherLowerIndicator.calculate,
+  },
+  {
+    id: 'quasimodo-pattern',
+    group: 'community',
+    name: 'Quasimodo Pattern',
+    shortName: quasimodoPatternIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: quasimodoPatternIndicator.metadata,
+    inputConfig: quasimodoPatternIndicator.inputConfig as InputConfig[],
+    plotConfig: quasimodoPatternIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...quasimodoPatternIndicator.defaultInputs },
+    calculate: quasimodoPatternIndicator.calculate,
+  },
+  {
+    id: 'absorption-arrows-v2',
+    group: 'community',
+    name: 'Absorption Arrows v2',
+    shortName: absorptionArrowsV2Indicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: absorptionArrowsV2Indicator.metadata,
+    inputConfig: absorptionArrowsV2Indicator.inputConfig as InputConfig[],
+    plotConfig: absorptionArrowsV2Indicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...absorptionArrowsV2Indicator.defaultInputs },
+    calculate: absorptionArrowsV2Indicator.calculate,
+  },
+  {
+    id: 'buy-the-dip-sell-the-rip',
+    group: 'community',
+    name: 'Buy the Dip & Sell the Rip',
+    shortName: buyTheDipSellTheRipIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: buyTheDipSellTheRipIndicator.metadata,
+    inputConfig: buyTheDipSellTheRipIndicator.inputConfig as InputConfig[],
+    plotConfig: buyTheDipSellTheRipIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...buyTheDipSellTheRipIndicator.defaultInputs },
+    calculate: buyTheDipSellTheRipIndicator.calculate,
+  },
+  {
+    id: 'spx500-quick-drop-rise-alerts',
+    group: 'community',
+    name: 'SPX500 Quick Drop & Rise Alerts',
+    shortName: spx500QuickDropRiseAlertsIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: spx500QuickDropRiseAlertsIndicator.metadata,
+    inputConfig: spx500QuickDropRiseAlertsIndicator.inputConfig as InputConfig[],
+    plotConfig: spx500QuickDropRiseAlertsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...spx500QuickDropRiseAlertsIndicator.defaultInputs },
+    calculate: spx500QuickDropRiseAlertsIndicator.calculate,
+  },
+  {
+    id: 'price-contraction-expansion',
+    group: 'community',
+    name: 'Price Contraction / Expansion',
+    shortName: priceContractionExpansionIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: true,
+    metadata: priceContractionExpansionIndicator.metadata,
+    inputConfig: priceContractionExpansionIndicator.inputConfig as InputConfig[],
+    plotConfig: priceContractionExpansionIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...priceContractionExpansionIndicator.defaultInputs },
+    calculate: priceContractionExpansionIndicator.calculate,
+  },
+  {
+    id: 'bar-replay-fix',
+    group: 'community',
+    name: 'Bar Replay Fix',
+    shortName: barReplayFixIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: barReplayFixIndicator.metadata,
+    inputConfig: barReplayFixIndicator.inputConfig as InputConfig[],
+    plotConfig: barReplayFixIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...barReplayFixIndicator.defaultInputs },
+    calculate: barReplayFixIndicator.calculate,
+  },
+  {
+    id: 'volume-alert',
+    group: 'community',
+    name: 'Volume Alert',
+    shortName: volumeAlertIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: volumeAlertIndicator.metadata,
+    inputConfig: volumeAlertIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeAlertIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeAlertIndicator.defaultInputs },
+    calculate: volumeAlertIndicator.calculate,
+  },
+  {
+    id: 'cvd-divergence-background-by-hk',
+    group: 'community',
+    name: 'CVD Divergence Background By HK',
+    shortName: cvdDivergenceBackgroundByHkIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: cvdDivergenceBackgroundByHkIndicator.metadata,
+    inputConfig: cvdDivergenceBackgroundByHkIndicator.inputConfig as InputConfig[],
+    plotConfig: cvdDivergenceBackgroundByHkIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...cvdDivergenceBackgroundByHkIndicator.defaultInputs },
+    calculate: cvdDivergenceBackgroundByHkIndicator.calculate,
+  },
+  {
+    id: 'rsi-perfect-flip-dots',
+    group: 'community',
+    name: 'RSI PERFECT Flip Dots',
+    shortName: rsiPerfectFlipDotsIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: rsiPerfectFlipDotsIndicator.metadata,
+    inputConfig: rsiPerfectFlipDotsIndicator.inputConfig as InputConfig[],
+    plotConfig: rsiPerfectFlipDotsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...rsiPerfectFlipDotsIndicator.defaultInputs },
+    calculate: rsiPerfectFlipDotsIndicator.calculate,
+  },
+  {
+    id: 'candle-color-flip',
+    group: 'community',
+    name: 'Candle Color Flip',
+    shortName: candleColorFlipIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: candleColorFlipIndicator.metadata,
+    inputConfig: candleColorFlipIndicator.inputConfig as InputConfig[],
+    plotConfig: candleColorFlipIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...candleColorFlipIndicator.defaultInputs },
+    calculate: candleColorFlipIndicator.calculate,
+  },
+  {
+    id: 'al-brooks-ii-ioi-oo',
+    group: 'community',
+    name: 'Al Brooks II.IOI.OO',
+    shortName: alBrooksIiIoiOoIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: alBrooksIiIoiOoIndicator.metadata,
+    inputConfig: alBrooksIiIoiOoIndicator.inputConfig as InputConfig[],
+    plotConfig: alBrooksIiIoiOoIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...alBrooksIiIoiOoIndicator.defaultInputs },
+    calculate: alBrooksIiIoiOoIndicator.calculate,
+  },
+  {
+    id: 'inside-bar-coloring-w-alerts',
+    group: 'community',
+    name: 'Inside Bar Coloring (Real-time + Historical) w/ Alerts',
+    shortName: insideBarColoringWAlertsIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: insideBarColoringWAlertsIndicator.metadata,
+    inputConfig: insideBarColoringWAlertsIndicator.inputConfig as InputConfig[],
+    plotConfig: insideBarColoringWAlertsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...insideBarColoringWAlertsIndicator.defaultInputs },
+    calculate: insideBarColoringWAlertsIndicator.calculate,
+  },
+  {
+    id: 'dip-buy-sell-signals',
+    group: 'community',
+    name: 'Dip Buy/Sell Signals (Vix Fix + MA Deviation + TRMAD)',
+    shortName: dipBuySellSignalsIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: true,
+    metadata: dipBuySellSignalsIndicator.metadata,
+    inputConfig: dipBuySellSignalsIndicator.inputConfig as InputConfig[],
+    plotConfig: dipBuySellSignalsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...dipBuySellSignalsIndicator.defaultInputs },
+    calculate: dipBuySellSignalsIndicator.calculate,
+  },
+  {
+    id: 'tight-range-display-with-background',
+    group: 'community',
+    name: 'Tight Range Display with Background',
+    shortName: tightRangeDisplayWithBackgroundIndicator.metadata.shortTitle,
+    category: 'Volatility',
+    overlay: true,
+    metadata: tightRangeDisplayWithBackgroundIndicator.metadata,
+    inputConfig: tightRangeDisplayWithBackgroundIndicator.inputConfig as InputConfig[],
+    plotConfig: tightRangeDisplayWithBackgroundIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...tightRangeDisplayWithBackgroundIndicator.defaultInputs },
+    calculate: tightRangeDisplayWithBackgroundIndicator.calculate,
+  },
+  {
+    id: 'the-strat',
+    group: 'community',
+    name: 'The Strat',
+    shortName: theStratIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: theStratIndicator.metadata,
+    inputConfig: theStratIndicator.inputConfig as InputConfig[],
+    plotConfig: theStratIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...theStratIndicator.defaultInputs },
+    calculate: theStratIndicator.calculate,
+  },
+  {
+    id: 'volume-spike-indicator',
+    group: 'community',
+    name: 'Volume Spike Indicator',
+    shortName: volumeSpikeIndicatorIndicator.metadata.shortTitle,
+    category: 'Volume',
+    overlay: true,
+    metadata: volumeSpikeIndicatorIndicator.metadata,
+    inputConfig: volumeSpikeIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: volumeSpikeIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...volumeSpikeIndicatorIndicator.defaultInputs },
+    calculate: volumeSpikeIndicatorIndicator.calculate,
+  },
+  {
+    id: 'three-bar-reversal-continuation',
+    group: 'community',
+    name: 'Three-Bar Reversal/Continuation',
+    shortName: threeBarReversalContinuationIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: threeBarReversalContinuationIndicator.metadata,
+    inputConfig: threeBarReversalContinuationIndicator.inputConfig as InputConfig[],
+    plotConfig: threeBarReversalContinuationIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...threeBarReversalContinuationIndicator.defaultInputs },
+    calculate: threeBarReversalContinuationIndicator.calculate,
+  },
+  {
+    id: 'customizable-rsi-stochrsi-double-confirmation',
+    group: 'community',
+    name: 'Customizable RSI/StochRSI Double Confirmation',
+    shortName: customizableRsiStochrsiDoubleConfirmationIndicator.metadata.shortTitle,
+    category: 'Momentum',
+    overlay: true,
+    metadata: customizableRsiStochrsiDoubleConfirmationIndicator.metadata,
+    inputConfig: customizableRsiStochrsiDoubleConfirmationIndicator.inputConfig as InputConfig[],
+    plotConfig: customizableRsiStochrsiDoubleConfirmationIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...customizableRsiStochrsiDoubleConfirmationIndicator.defaultInputs },
+    calculate: customizableRsiStochrsiDoubleConfirmationIndicator.calculate,
+  },
+  {
+    id: 'john-wick-doji-indicator',
+    group: 'community',
+    name: 'John Wick Doji indicator',
+    shortName: johnWickDojiIndicatorIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: johnWickDojiIndicatorIndicator.metadata,
+    inputConfig: johnWickDojiIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: johnWickDojiIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...johnWickDojiIndicatorIndicator.defaultInputs },
+    calculate: johnWickDojiIndicatorIndicator.calculate,
+  },
+  {
+    id: 'heikin-ashi-doji-with-high-volume',
+    group: 'community',
+    name: 'Heikin Ashi Doji with High Volume',
+    shortName: heikinAshiDojiWithHighVolumeIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: heikinAshiDojiWithHighVolumeIndicator.metadata,
+    inputConfig: heikinAshiDojiWithHighVolumeIndicator.inputConfig as InputConfig[],
+    plotConfig: heikinAshiDojiWithHighVolumeIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...heikinAshiDojiWithHighVolumeIndicator.defaultInputs },
+    calculate: heikinAshiDojiWithHighVolumeIndicator.calculate,
+  },
+  {
+    id: 'inside-outside-bars',
+    group: 'community',
+    name: 'Inside / Outside Bars',
+    shortName: insideOutsideBarsIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: insideOutsideBarsIndicator.metadata,
+    inputConfig: insideOutsideBarsIndicator.inputConfig as InputConfig[],
+    plotConfig: insideOutsideBarsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...insideOutsideBarsIndicator.defaultInputs },
+    calculate: insideOutsideBarsIndicator.calculate,
+  },
+  {
+    id: 'mushir-s-inside-candle-indicator',
+    group: 'community',
+    name: 'Mushir\'s Inside Candle Indicator',
+    shortName: mushirSInsideCandleIndicatorIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: mushirSInsideCandleIndicatorIndicator.metadata,
+    inputConfig: mushirSInsideCandleIndicatorIndicator.inputConfig as InputConfig[],
+    plotConfig: mushirSInsideCandleIndicatorIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...mushirSInsideCandleIndicatorIndicator.defaultInputs },
+    calculate: mushirSInsideCandleIndicatorIndicator.calculate,
+  },
+  {
+    id: 'heikin-ashi-reversals-with-region-dots',
+    group: 'community',
+    name: 'Heikin-Ashi Reversals with Region & Dots',
+    shortName: heikinAshiReversalsWithRegionDotsIndicator.metadata.shortTitle,
+    category: 'Candlestick Patterns',
+    overlay: true,
+    metadata: heikinAshiReversalsWithRegionDotsIndicator.metadata,
+    inputConfig: heikinAshiReversalsWithRegionDotsIndicator.inputConfig as InputConfig[],
+    plotConfig: heikinAshiReversalsWithRegionDotsIndicator.plotConfig as PlotConfig[],
+    defaultInputs: { ...heikinAshiReversalsWithRegionDotsIndicator.defaultInputs },
+    calculate: heikinAshiReversalsWithRegionDotsIndicator.calculate,
+  },
   ...candlestickEntries(
     [...candlestickPortEntries, candlestickPortAllPatterns].map((e) => [e.id, e.indicator] as [string, typeof e.indicator])
   ),
@@ -20085,4 +21773,4 @@ const registryPart5: IndicatorRegistryEntry[] = [
 export const indicatorRegistry: IndicatorRegistryEntry[] = [...registryPart1, ...registryPart2, ...registryPart3, ...registryPart4, ...registryPart5];
 
 // Package version
-export const version = '0.7.0';
+export const version = '0.7.1';

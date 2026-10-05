@@ -89,12 +89,12 @@ export function calculate(
     if (gt(rsi[i], cfg.rsiOverbought)) bgColors.push({ time: t, color: OB_BG });
     // bgcolor(rsiValue < rsiOversold ? #2ca4b41a : na, title = "RSI Oversold Background")
     if (lt(rsi[i], cfg.rsiOversold)) bgColors.push({ time: t, color: OS_BG });
-    // plotshape(series = cond ? rsiValue : na, location.top / location.bottom, ...): a float series draws a shape
-    // when it is not na (also for an RSI of 0)
-    if (gt(rsi[i], cfg.rsiOverbought) && gt(cci[i], cfg.cciOverbought) && !isNaN(rsi[i])) {
+    // plotshape(series = cond ? rsiValue : na, location.top / location.bottom, ...): with a location other than
+    // absolute the series is read as a bool: na and 0 draw no shape (an RSI of 0 draws nothing)
+    if (gt(rsi[i], cfg.rsiOverbought) && gt(cci[i], cfg.cciOverbought) && !isNaN(rsi[i]) && rsi[i] !== 0) {
       markers.push({ time: t, position: 'top', shape: 'labelUp', color: OB_SHAPE });
     }
-    if (lt(rsi[i], cfg.rsiOversold) && lt(cci[i], cfg.cciOversold) && !isNaN(rsi[i])) {
+    if (lt(rsi[i], cfg.rsiOversold) && lt(cci[i], cfg.cciOversold) && !isNaN(rsi[i]) && rsi[i] !== 0) {
       markers.push({ time: t, position: 'bottom', shape: 'labelDown', color: OS_SHAPE });
     }
   }
