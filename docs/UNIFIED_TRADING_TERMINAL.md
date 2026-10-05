@@ -11,7 +11,7 @@ This branch consolidates the useful browser-side charting work from `ALNAHMI711/
 
 ## Trading page
 
-Open `/trading.html` from the Vite demo build.
+The Vite demo entry point is `example/index.html`; the deployed GitHub Pages site uses the repository root path.
 
 It provides Arabic RTL dark terminal layout, symbol search, watchlist, 1m/5m/15m/1h/4h/1d intervals, Binance Spot public candles over REST, Binance kline WebSocket updates, indicator search using the M1 registry, one active indicator rendered through the M1 renderer, responsive mobile layout, and a market-analysis-first interface. Execution controls are intentionally absent until a secure server-side trading backend and risk engine exist.
 

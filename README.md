@@ -1,6 +1,6 @@
-# lightweight-charts-indicators
+# ALNAHMI M1 — Lightweight Charts Indicators
 
-**[Live Demo](https://deepentropy.github.io/lightweight-charts-indicators/)**
+**[ALNAHMI Trading Terminal](https://alnahmi711.github.io/M1/)**
 
 1290 technical analysis indicators for the lightweight-charts library — 95 standard indicators, 1150 community indicators, and 45 candlestick patterns. PineScript v6 compatible with full drawing primitive support (lines, boxes, labels, tables).
 

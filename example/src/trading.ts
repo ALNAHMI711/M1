@@ -1,3 +1,4 @@
+import '../trading.css';
 import {
   CandlestickSeries, ColorType, CrosshairMode, createChart,
   type IChartApi, type ISeriesApi, type Time,
