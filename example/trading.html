@@ -31,15 +31,6 @@
         <button id="clear-indicator" class="ghost">إزالة المؤشر</button>
       </aside>
       <section class="chart-panel panel"><div id="chart"></div><div class="chart-footer"><span>مصدر البيانات: Binance Spot public market data</span><span id="candle-info">—</span></div></section>
-      <aside class="right-panel panel">
-        <div class="panel-title">التداول</div>
-        <div class="execution-state"><span>حالة التنفيذ</span><strong>BACKEND OFF</strong></div>
-        <div class="notice">هذه الصفحة متصلة ببيانات السوق فقط. أزرار التنفيذ معطلة حتى ربطها بواجهة التداول الخلفية الآمنة.</div>
-        <label>الكمية</label><input id="order-qty" type="number" min="0" step="any" placeholder="0.001">
-        <label>السعر</label><input id="order-price" type="number" min="0" step="any" placeholder="سعر السوق">
-        <div class="order-buttons"><button disabled class="buy">شراء</button><button disabled class="sell">بيع</button></div>
-        <div class="risk-card"><div><span>الوضع</span><b>DEVELOPMENT</b></div><div><span>أوامر حقيقية</span><b>مقفلة</b></div><div><span>Risk Engine</span><b>غير موصول</b></div></div>
-      </aside>
     </section>
   </main>
   <script type="module" src="/src/trading.ts"></script>
