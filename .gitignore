@@ -11,3 +11,6 @@ __pycache__/
 
 # Regression data (local only: reference outputs and price bars, built from .tmp research runs)
 tests/reference-regression/data/
+
+# Browser automation artifacts
+.playwright-mcp/
