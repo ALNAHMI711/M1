@@ -2,11 +2,37 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0b0f14">
   <title>ALNAHMI Trading Terminal</title>
+  <link rel="stylesheet" href="/trading.css">
 </head>
 <body>
+  <header class="topbar">
+    <div class="brand"><strong>ALNAHMI</strong><span>Trading Terminal</span></div>
+    <div class="market-status"><i></i><span id="connection-status">جاري الاتصال ببيانات السوق...</span></div>
+  </header>
+  <main class="terminal">
+    <section class="toolbar panel">
+      <div class="symbol-box"><label for="symbol">السوق</label><input id="symbol" value="BTCUSDT" autocomplete="off" spellcheck="false"></div>
+      <div class="timeframes" id="timeframes">
+        <button data-interval="1m" class="active">1د</button><button data-interval="5m">5د</button><button data-interval="15m">15د</button><button data-interval="1h">1س</button><button data-interval="4h">4س</button><button data-interval="1d">1ي</button>
+      </div>
+      <button id="load-market" class="primary">تحميل</button>
+      <div class="last-price"><span>السعر</span><strong id="last-price">—</strong></div>
+      <div class="change" id="price-change">—</div>
+    </section>
+    <section class="workspace">
+      <aside class="left-panel panel">
+        <div class="panel-title">قائمة المراقبة</div><div id="watchlist"></div>
+        <div class="panel-title indicator-title">المؤشرات</div>
+        <input id="indicator-search" class="search" placeholder="ابحث عن مؤشر..." autocomplete="off">
+        <select id="indicator-select" class="indicator-select" size="8"></select>
+        <button id="clear-indicator" class="ghost">إزالة المؤشر</button>
+      </aside>
+      <section class="chart-panel panel"><div id="chart"></div><div class="chart-footer"><span>مصدر البيانات: Binance Spot public market data</span><span id="candle-info">—</span></div></section>
+    </section>
+  </main>
   <script type="module" src="/src/trading.ts"></script>
 </body>
 </html>
