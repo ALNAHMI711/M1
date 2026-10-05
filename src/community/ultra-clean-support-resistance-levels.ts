@@ -11,7 +11,7 @@
  * Original notice: © Stocktitian
  */
 
-import { ta, Series, color, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import { barInterval, barTime } from '../bar-time';
 
 export interface UltraCleanSupportResistanceLevelsInputs {

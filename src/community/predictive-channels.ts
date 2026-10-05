@@ -8,7 +8,7 @@
  * Reference: "Predictive Channels [LuxAlgo]" by LuxAlgo
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 
 export interface PredictiveChannelsInputs {
   factor: number;

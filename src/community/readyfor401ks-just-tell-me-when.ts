@@ -216,8 +216,6 @@ export function calculate(
   const lowerk = keltma.map((k, i) => k - rangema[i] * cfg.multy);
 
   // SSL channels
-  const emaHigh = ma(cfg.maType, highArr, cfg.length);
-  const emaLow = ma(cfg.maType, lowArr, cfg.length);
   const maHigh = ma(cfg.ssl2Type, highArr, cfg.length2);
   const maLow = ma(cfg.ssl2Type, lowArr, cfg.length2);
   const exitHigh = ma(cfg.ssl3Type, highArr, cfg.length3);

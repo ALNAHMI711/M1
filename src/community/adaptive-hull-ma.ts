@@ -222,9 +222,6 @@ export function calculate(bars: Bar[], inputs: Partial<AdaptiveHullMAInputs> = {
 
   const warmup = Math.max(maxLength, slopePeriod + 2);
 
-  // Precompute ATR for signal positioning
-  const atr5 = ta.atr(bars, 5).toArray();
-
   // Precompute slopes for dynamic HMA
   const dynSlopes: number[] = new Array(n);
   for (let i = 0; i < n; i++) {

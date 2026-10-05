@@ -10,7 +10,7 @@
  * Reference: "Dynamic Structure Indicator" (community)
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 
 export interface DynamicStructureIndicatorInputs {
   atrMovement: number;

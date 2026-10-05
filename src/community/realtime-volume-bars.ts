@@ -9,7 +9,7 @@
  */
 
 import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
-import type { BarColorData, MarkerData } from '../types';
+import type { MarkerData } from '../types';
 
 export interface RealtimeVolumeBarsInputs {
   mode: string;

@@ -40,7 +40,6 @@ export const metadata = {
 
 export function calculate(bars: Bar[], inputs: Partial<LinearRegressionChannelInputs> = {}): IndicatorResult {
   const { length } = { ...defaultInputs, ...inputs };
-  const n = bars.length;
 
   const highSeries = new Series(bars, (b) => b.high);
   const lowSeries = new Series(bars, (b) => b.low);

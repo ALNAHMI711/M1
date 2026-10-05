@@ -8,7 +8,7 @@
  * Reference: "Zero Lag MACD Enhanced - Version 1.2" by AC (based on Glaz)
  */
 
-import { ta, Series, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 
 export interface ZeroLagMACDInputs {
   fastLength: number;

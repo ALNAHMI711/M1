@@ -161,8 +161,6 @@ export function calculate(bars: Bar[], inputs: Partial<UltimateBuySellInputs> = 
 
   // Generate buy/sell signals
   const markers: MarkerData[] = [];
-  let bought = false;
-  let sold = false;
 
   for (let i = 1; i < n; i++) {
     if (i < warmup) continue;
@@ -182,8 +180,6 @@ export function calculate(bars: Bar[], inputs: Partial<UltimateBuySellInputs> = 
     const sellWatchMet = watchMet(sellWatchArr, i);
 
     if (buySignal && buyWatchMet) {
-      bought = true;
-      sold = false;
       markers.push({
         time: bars[i].time,
         position: 'belowBar',
@@ -192,8 +188,6 @@ export function calculate(bars: Bar[], inputs: Partial<UltimateBuySellInputs> = 
         text: 'Buy',
       });
     } else if (sellSignal && sellWatchMet) {
-      sold = true;
-      bought = false;
       markers.push({
         time: bars[i].time,
         position: 'aboveBar',

@@ -74,7 +74,6 @@ export function calculate(bars: Bar[], inputs: Partial<MomentumZigZagInputs> = {
   const n = bars.length;
 
   const closeSeries = new Series(bars, (b) => b.close);
-  const closeArr = closeSeries.toArray();
   const highArr = new Series(bars, (b) => b.high).toArray();
   const lowArr = new Series(bars, (b) => b.low).toArray();
 

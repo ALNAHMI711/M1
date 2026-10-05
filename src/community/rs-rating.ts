@@ -74,7 +74,6 @@ const ne = (a: number, b: number) => !isNaN(a) && !isNaN(b) && Math.abs(a - b) >
 
 export function calculate(bars: Bar[], inputs: Partial<RsRatingInputs> = {}): IndicatorResult {
   const cfg = { ...defaultInputs, ...inputs };
-  const n = bars.length;
 
   // ratio(back): b = math.min(back, bar_index); b > 0 and not na(close[b]) ? close / close[b] : na
   const ratio = (i: number, back: number) => {

@@ -155,9 +155,7 @@ export function calculate(bars: Bar[], inputs: Partial<BoomHunterProInputs> = {}
 
   // Scale to chart: q * esize + ey
   const q1Arr = eot1.q1.map(v => v * esize + ey);
-  const q2Arr = eot1.q2.map(v => v * esize + ey);
   const q3Arr = eot2.q1.map(v => v * esize + ey);
-  const q4Arr = eot2.q2.map(v => v * esize + ey);
   const q5Arr = eot3.q1.map(v => v * esize + ey);
   const q6Arr = eot3.q2.map(v => v * esize + ey);
 
@@ -191,10 +189,6 @@ export function calculate(bars: Bar[], inputs: Partial<BoomHunterProInputs> = {}
 
   const dragNo = 3;
   const warmup = 5;
-
-  // LSMA WaveTrend (simplified): linreg of close RSI for long-term reference
-  // Pine uses a tradition() function with tci/mf/rsi averaged; we approximate with linreg of q1
-  const lsmaArr = ta.linreg(q1Series, 200, 0).toArray();
 
   // Plot 0: q1 colored by state
   const plot0 = q1Arr.map((v, i) => {
@@ -307,7 +301,6 @@ export function calculate(bars: Bar[], inputs: Partial<BoomHunterProInputs> = {}
     // Short signals
     if (showShorts) {
       // senter3: Quotient3 >= -0.9 and crossunder(q1, trigger) and barssince(warn3)<=7 and q1>=99
-      const warn3 = eot1.q1[i - 1] >= 0.9 && eot1.q1[i] < 0.9; // crossunder(Q1, 0.9)
       if (eot2.q1[i] >= -0.9 && crossunderQ1Trig && q1v >= 99) {
         let bsWarn3 = n;
         for (let j = i; j >= Math.max(0, i - 8); j--) {

@@ -17,7 +17,7 @@
  */
 
 import {
-  getSourceSeries, Series, color, type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig, type Bar,
+  getSourceSeries, color, type IndicatorResult, type InputConfig, type PlotConfig, type HLineConfig, type Bar,
   type SourceType,
 } from 'oakscriptjs';
 

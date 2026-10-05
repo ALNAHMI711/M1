@@ -67,8 +67,6 @@ export function calculate(bars: Bar[], inputs: Partial<OBVMACDInputs> = {}): Omi
   const signalLine = ta.ema(macdLine, signalLength);
   const histogram = macdLine.sub(signalLine);
 
-  const macdArr = macdLine.toArray();
-  const sigArr = signalLine.toArray();
   const histArr = histogram.toArray();
 
   // oc: 1=uptrend (MACD > signal), -1=downtrend

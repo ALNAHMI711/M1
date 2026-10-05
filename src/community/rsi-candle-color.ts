@@ -88,11 +88,11 @@ function getLuminance(style: LuminanceStyle): [number, number, number] {
     case 'SDTV': return [0.299, 0.587, 0.114];
     case 'Adobe': return [0.212, 0.701, 0.087];
     case 'HDTV': return [0.2126, 0.7152, 0.0722];
-    default: return [1.0 / 3.0, 1.0 / 3.0, 1.0 / 3.0];
+    default: return [math.constant(1.0 / 3.0), math.constant(1.0 / 3.0), math.constant(1.0 / 3.0)];
   }
 }
 
-const gammaSdtvAdobe = (v: number) => math.pow(v, 1 / 2.2);
+const gammaSdtvAdobe = (v: number) => math.pow(v, math.constant(1 / 2.2));
 const gammaHdtv = (v: number) => (lt(v, 0.018) ? 4.5 * v : 1.099 * math.pow(v, 0.45) - 0.099);
 const gammaInverseSrgb = (v: number) => (!gt(v, 0.04045) ? v / 12.92 : math.pow((v + 0.055) / 1.055, 2.4));
 
@@ -150,15 +150,15 @@ function atan2(x: number, y: number): number {
   if (gt(x, 0)) return Math.atan(y / x);
   if (lt(x, 0) && ge(y, 0)) return Math.atan(y / x) + Math.PI;
   if (lt(x, 0) && lt(y, 0)) return Math.atan(y / x) - Math.PI;
-  if (eq(x, 0) && gt(y, 0)) return Math.PI / 2;
-  if (eq(x, 0) && lt(y, 0)) return -Math.PI / 2;
+  if (eq(x, 0) && gt(y, 0)) return math.constant(Math.PI / 2);
+  if (eq(x, 0) && lt(y, 0)) return math.constant(-Math.PI / 2);
   return 0;
 }
 
 function xyzToHsl(self: XYZ): HSL {
   let hRad = atan2(self.x, self.y);
-  hRad = lt(hRad, 0) ? hRad + (2 * Math.PI) : hRad;
-  const h = hRad * (180 / Math.PI);
+  hRad = lt(hRad, 0) ? hRad + math.constant(2 * Math.PI) : hRad;
+  const h = hRad * math.constant(180 / Math.PI);
   const s = Math.sqrt(math.pow(self.x, 2) + math.pow(self.y, 2));
   return { h, s, l: self.z, t: self.t };
 }
@@ -213,7 +213,8 @@ export function calculate(
   const xyzColors: XYZ[] = GRADIENT_HEX.map((hex) => {
     const base = color.new(hex, GRADIENT_TRANSP);
     const rgb: RGB = { r: color.r(base), g: color.g(base), b: color.b(base), t: color.t(base) };
-    const i255 = 1 / 255;
+    // var const float i_255 = 1 / 255: a constant expression, computed by PineScript before the script runs
+    const i255 = math.constant(1 / 255);
     rgb.r = rgb.r * i255;
     rgb.g = rgb.g * i255;
     rgb.b = rgb.b * i255;

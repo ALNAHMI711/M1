@@ -46,7 +46,7 @@ export const metadata = {
 };
 
 export function calculate(bars: Bar[], inputs: Partial<SuperGuppyInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[]; barColors: BarColorData[] } {
-  const { showBreak, showSwing, lookback } = { ...defaultInputs, ...inputs };
+  const { showBreak, showSwing } = { ...defaultInputs, ...inputs };
   const n = bars.length;
   const close = new Series(bars, (b) => b.close);
 
@@ -156,8 +156,6 @@ export function calculate(bars: Bar[], inputs: Partial<SuperGuppyInputs> = {}): 
   // Track consecutive bars for swing signals
   let swingBuyCount = 0;
   let swingSellCount = 0;
-  let breakBuyFired = false;
-  let breakSellFired = false;
 
   for (let i = warmup; i < n; i++) {
     const fastAboveSlow = emaFastAvg[i] > emaSlowAvg[i];
@@ -171,13 +169,9 @@ export function calculate(bars: Bar[], inputs: Partial<SuperGuppyInputs> = {}): 
     if (showBreak) {
       if (fastAboveSlow && !prevFastAboveSlow && !slowAlignedShort[i]) {
         markers.push({ time: bars[i].time, position: 'belowBar', shape: 'arrowUp', color: '#00FFFF', text: 'Break' });
-        breakBuyFired = true;
-        breakSellFired = false;
       }
       if (fastBelowSlow && !prevFastBelowSlow && !slowAlignedLong[i]) {
         markers.push({ time: bars[i].time, position: 'aboveBar', shape: 'arrowDown', color: '#0000FF', text: 'Break' });
-        breakSellFired = true;
-        breakBuyFired = false;
       }
     }
 

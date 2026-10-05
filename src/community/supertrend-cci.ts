@@ -14,7 +14,7 @@
  * Reference: "BEST Supertrend CCI" by Daveatt
  */
 
-import { ta, Series, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 
 export interface SupertrendCCIInputs {
   source: SourceType;

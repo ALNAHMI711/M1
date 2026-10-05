@@ -91,7 +91,6 @@ function calcSupertrend(bars: Bar[], atrArr: (number | null)[], factor: number):
 
 export function calculate(bars: Bar[], inputs: Partial<SupertrendLadderInputs> = {}): IndicatorResult {
   const { atrPeriod, mult1, mult2, mult3 } = { ...defaultInputs, ...inputs };
-  const n = bars.length;
 
   const atrArr = ta.atr(bars, atrPeriod).toArray();
 

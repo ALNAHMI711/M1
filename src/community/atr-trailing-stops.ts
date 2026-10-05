@@ -56,7 +56,6 @@ export function calculate(bars: Bar[], inputs: Partial<ATRTrailingStopsInputs> =
     }
 
     const prevStop = stopArr[i - 1];
-    const prevClose = bars[i - 1].close;
     const prevDir = dirArr[i - 1];
 
     if (prevDir === 1) {

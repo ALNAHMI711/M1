@@ -43,7 +43,6 @@ export const metadata = {
 export function calculate(bars: Bar[], inputs: Partial<GaussianChannelInputs> = {}): Omit<IndicatorResult, 'markers'> & { barColors: BarColorData[] } {
   const { length, mult, src } = { ...defaultInputs, ...inputs };
   const source = getSourceSeries(bars, src);
-  const n = bars.length;
 
   const center = ta.linreg(source, length, 0);
   const dev = ta.stdev(source, length);

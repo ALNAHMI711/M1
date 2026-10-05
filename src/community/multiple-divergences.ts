@@ -157,7 +157,6 @@ export function calculate(bars: Bar[], inputs: Partial<MultipleDivergencesInputs
   }
   const plusDMSmoothed = ta.rma(Series.fromArray(bars, plusDM), diLen).toArray();
   const minusDMSmoothed = ta.rma(Series.fromArray(bars, minusDM), diLen).toArray();
-  const trArr = ta.tr(bars).toArray();
   const atrArr = ta.rma(ta.tr(bars), diLen).toArray();
   const diOscArr: number[] = new Array(n);
   for (let i = 0; i < n; i++) {

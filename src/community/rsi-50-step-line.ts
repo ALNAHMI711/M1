@@ -10,7 +10,7 @@
  * Original notice: © Devjames
  */
 
-import { ta, getSourceSeries, color, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 import type { MarkerData } from '../types';
 
 export interface Rsi50StepLineInputs {

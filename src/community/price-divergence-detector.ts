@@ -84,7 +84,7 @@ function isBottomFractal(arr: number[], i: number): boolean {
 }
 
 function computeOscillator(
-  bars: Bar[], method: string, length: number, macdFast: number, macdSlow: number, macdSmooth: number
+  bars: Bar[], method: string, length: number, macdFast: number, macdSlow: number
 ): { oscHigh: number[]; oscLow: number[] } {
   const n = bars.length;
   const closeSeries = new Series(bars, (b) => b.close);
@@ -178,11 +178,11 @@ function computeOscillator(
 }
 
 export function calculate(bars: Bar[], inputs: Partial<PriceDivergenceDetectorInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[] } {
-  const { method, length, showLabels, showChannel, showHidden, showRegular, macdFast, macdSlow, macdSmooth } =
+  const { method, length, showLabels, showHidden, showRegular, macdFast, macdSlow } =
     { ...defaultInputs, ...inputs };
 
   const n = bars.length;
-  const { oscHigh, oscLow } = computeOscillator(bars, method, length, macdFast, macdSlow, macdSmooth);
+  const { oscHigh, oscLow } = computeOscillator(bars, method, length, macdFast, macdSlow);
 
   const highArr = bars.map((b) => b.high);
   const lowArr = bars.map((b) => b.low);

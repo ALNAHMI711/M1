@@ -88,7 +88,6 @@ export function calculate(bars: Bar[], inputs: Partial<IchimokuOscillatorInputs>
     const ll2d = leadLine2Arr[dIdx] ?? 0;
     const cloudMin = Math.min(ll1d, ll2d);
     const cloudMax = Math.max(ll1d, ll2d);
-    const inCloud = c >= cloudMin && c <= cloudMax;
 
     // mtrend
     if (c > cloudMax) mtrend[i] = 1;

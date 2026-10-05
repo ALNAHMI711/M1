@@ -48,7 +48,6 @@ export function calculate(bars: Bar[], inputs: Partial<DeltaRsiOscillatorInputs>
 
   const close = new Series(bars, (b) => b.close);
   const rsiSeries = ta.rsi(close, rsiLength);
-  const rsiArr = rsiSeries.toArray();
 
   // Delta-RSI via linreg slope approximation:
   // linreg(rsi, window, 0) gives the regression value at current bar

@@ -7,7 +7,7 @@
  * Reference: "CM_RSI-2 Strategy" by ChrisMoody
  */
 
-import { ta, getSourceSeries, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 import type { BarColorData } from '../types';
 
 export interface CMRSI2UpperInputs {

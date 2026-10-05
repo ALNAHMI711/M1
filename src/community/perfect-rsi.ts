@@ -13,7 +13,7 @@
  * Licence: Mozilla Public License 2.0, as the original Pine script (https://mozilla.org/MPL/2.0/).
  */
 
-import { ta, Series, fixnan, getSourceSeries, color, type InputConfig, type PlotConfig, type Bar, type IndicatorResult, type SourceType } from 'oakscriptjs';
+import { ta, Series, fixnan, getSourceSeries, type InputConfig, type PlotConfig, type Bar, type IndicatorResult, type SourceType } from 'oakscriptjs';
 import type { BgColorData } from '../types';
 
 export interface PerfectRsiInputs {

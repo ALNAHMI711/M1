@@ -102,7 +102,6 @@ export function calculate(bars: Bar[], inputs: Partial<FractionalEmaKalmanFilter
   const cfg = { ...defaultInputs, ...inputs };
   const n = bars.length;
   const A = (s: Series) => s.toArray().map((v) => v ?? NaN);
-  const S = (a: number[]) => Series.fromArray(bars, a);
   const qlen = 5;
 
   const src = A(getSourceSeries(bars, cfg.source));

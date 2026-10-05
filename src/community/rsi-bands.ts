@@ -10,7 +10,7 @@
  * Reference: "RSI Bands [LazyBear]"
  */
 
-import { ta, getSourceSeries, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 
 export interface RSIBandsInputs {
   obLevel: number;

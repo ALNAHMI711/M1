@@ -119,7 +119,6 @@ export function calculate(bars: Bar[], inputs: Partial<TurtleTradeChannelsInputs
   // Fill: Pine fills upper channel to exit line (green for long, red for short)
   // Determine fill color based on which entry signal is most recent
   const fillColors: string[] = [];
-  let lastDir = 0;
   let lastBuyI = -Infinity;
   let lastSellI = -Infinity;
   let lastBuyExitI = -Infinity;

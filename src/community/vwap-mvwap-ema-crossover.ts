@@ -65,7 +65,7 @@ export const metadata = {
 
 export function calculate(bars: Bar[], inputs: Partial<VwapMvwapEmaCrossoverInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[]; barColors: BarColorData[] } {
   const {
-    vwapLength, emaLength1, emaLength2, rsiLimit, rsiMinimum, mvwapLength,
+    vwapLength, emaLength1, emaLength2, mvwapLength,
     conversionLen, baseLineLen, senkouBLen, displacementA, displacementB,
   } = { ...defaultInputs, ...inputs };
   const n = bars.length;

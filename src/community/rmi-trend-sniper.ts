@@ -232,7 +232,6 @@ export function calculate(bars: Bar[], inputs: Partial<RMITrendSniperInputs> = {
     }
 
     if (showPlot && !isNaN(RWMA)) {
-      const colour = pos ? bull : bear;
       plot0.push({ time, value: RWMA });
       plot1.push({ time, value: RWMA });
       plot2.push({ time, value: RWMA });

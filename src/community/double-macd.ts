@@ -58,7 +58,7 @@ export const metadata = {
 };
 
 export function calculate(bars: Bar[], inputs: Partial<DoubleMACDInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[]; bgColors: BgColorData[] } {
-  const { fast1, slow1, sig1, fast2, slow2, sig2, src } = { ...defaultInputs, ...inputs };
+  const { fast1, slow1, fast2, slow2, src } = { ...defaultInputs, ...inputs };
   const source = getSourceSeries(bars, src);
   const n = bars.length;
 
@@ -114,17 +114,7 @@ export function calculate(bars: Bar[], inputs: Partial<DoubleMACDInputs> = {}): 
   // Divergence label markers + entry markers
   const markers: MarkerData[] = [];
 
-  // Pine: max = highest(macd_2, 100) * 1.5
-  // nsc = max, nsv = -max, midpoint = 0, ploff = nsc / 8 = max / 8
   for (let i = 0; i < n; i++) {
-    // Compute local scale for label offset
-    let localMax = 0;
-    for (let j = Math.max(0, i - 99); j <= i; j++) {
-      const v = Math.abs(macd2Arr[j] ?? 0);
-      if (v > localMax) localMax = v;
-    }
-    const ploff = (localMax * 1.5) / 8;
-
     if (fractalTop[i] != null) {
       const curVal = fractalTop[i]!;
       const curPrice = bars[i - 2] ? bars[i - 2].high : bars[i].high;

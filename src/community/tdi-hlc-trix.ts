@@ -46,7 +46,6 @@ export const metadata = {
 
 export function calculate(bars: Bar[], inputs: Partial<TDIHLCTrixInputs> = {}): IndicatorResult {
   const { rsiLen, bbLen, bbMult, tradeSignalLen } = { ...defaultInputs, ...inputs };
-  const n = bars.length;
 
   const closeSeries = new Series(bars, (b) => b.close);
   const rsiArr = ta.rsi(closeSeries, rsiLen).toArray();

@@ -8,7 +8,7 @@
  * Reference: "Price Action Trading System v0.3" (community)
  */
 
-import { ta, getSourceSeries, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 import type { MarkerData, BarColorData, BgColorData } from '../types';
 
 // Pine comparison operators: equal within 1e-10; a comparison with na is false

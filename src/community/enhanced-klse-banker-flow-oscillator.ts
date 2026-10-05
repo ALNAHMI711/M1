@@ -99,7 +99,6 @@ export const metadata = {
 const EPS = 1e-10;
 const gt = (a: number, b: number) => a - b > EPS;
 const lt = (a: number, b: number) => b - a > EPS;
-const ge = (a: number, b: number) => !isNaN(a) && !isNaN(b) && !(b - a > EPS);
 const eq = (a: number, b: number) => !isNaN(a) && !isNaN(b) && Math.abs(a - b) <= EPS;
 const nz = (v: number, r = 0) => (isNaN(v) ? r : v);
 

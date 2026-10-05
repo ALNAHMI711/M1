@@ -7,7 +7,7 @@
  * Reference: "Intraday TS ,BB + Buy/Sell +Squeeze Mom.+ adx-dmi" (community)
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { MarkerData, BarColorData } from '../types';
 
 export interface IntradayTSBBInputs {

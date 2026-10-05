@@ -176,8 +176,6 @@ export function calculate(bars: Bar[], inputs: Partial<QqeCrossInputs> = {}): Om
 
       // Trend detection via cross
       const prevRSI = rsIndexArr[i - 1];
-      const crossAboveShort = prevRSI <= shortband[i - 1] && rsIndexArr[i] > shortband[i - 1];
-      const crossBelowLong = longband[i - 1] >= prevRSI && longband[i - 1] < rsIndexArr[i];
       // Actually: cross(RSIndex, shortband[1]) => RSIndex crosses above or below shortband
       // Pine cross() means either direction. But in QQE context:
       // trend = cross(RSIndex, shortband[1]) ? 1 : cross(longband[1], RSIndex) ? -1 : nz(trend[1],1)
@@ -218,10 +216,6 @@ export function calculate(bars: Bar[], inputs: Partial<QqeCrossInputs> = {}): Om
     // XQ: RSI signal crossing FastAtrRsiTL
     const xqUp = rsiPrev <= tlPrev && rsi > tl;
     const xqDn = rsiPrev >= tlPrev && rsi < tl;
-
-    // XZ: RSI signal crossing 50
-    const xzUp = rsiPrev <= 50 && rsi > 50;
-    const xzDn = rsiPrev >= 50 && rsi < 50;
 
     // XC: RSI entering threshold channel
     const upperThresh = 50 + cfg.threshold;

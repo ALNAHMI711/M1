@@ -10,7 +10,7 @@
 import { executeScript, type ScriptRunResult } from 'oakscriptjs/script';
 import type { Bar, IndicatorResult, InputConfig, PlotConfig } from 'oakscriptjs';
 import type { BarColorData, BgColorData, MarkerData } from '../types';
-import { patternScript, type PatternDef } from './pattern-runner';
+import { patternScript } from './pattern-runner';
 import { ALL_PATTERNS } from './registry';
 import { allPatternsScript } from './all-patterns';
 

@@ -8,7 +8,7 @@
  * Reference: "FX Sniper T3-CCI" community indicator
  */
 
-import { ta, getSourceSeries, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 import type { BarColorData } from '../types';
 
 export interface FXSniperT3CCIInputs {
@@ -110,7 +110,6 @@ export function calculate(bars: Bar[], inputs: Partial<FXSniperT3CCIInputs> = {}
   const e6 = emaArray(e5);
 
   const t3Arr: number[] = new Array(bars.length);
-  const warmup = cciLength + t3Length * 6;
   for (let i = 0; i < bars.length; i++) {
     if (i < cciLength - 1 || isNaN(e6[i])) {
       t3Arr[i] = NaN;

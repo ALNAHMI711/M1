@@ -52,7 +52,6 @@ export function calculate(bars: Bar[], inputs: Partial<BullBearPowerTrendInputs>
   const { showRegTrend, regLength } = { ...defaultInputs, ...inputs };
   const n = bars.length;
 
-  const closeSeries = new Series(bars, (b) => b.close);
   const highSeries = new Series(bars, (b) => b.high);
   const lowSeries = new Series(bars, (b) => b.low);
 

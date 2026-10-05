@@ -9,7 +9,7 @@
  * Reference: "HyperTrend [LuxAlgo]" by LuxAlgo
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 
 export interface HyperTrendInputs {
   mult: number;
@@ -46,7 +46,6 @@ export function calculate(bars: Bar[], inputs: Partial<HyperTrendInputs> = {}): 
   const width = widthPct / 100;
   const n = bars.length;
 
-  const closeSeries = new Series(bars, (b) => b.close);
   const atrArr = ta.atr(bars, 200).toArray();
 
   const avg: number[] = new Array(n);

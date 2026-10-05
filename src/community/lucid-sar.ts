@@ -8,7 +8,7 @@
  * Reference: "Lucid SAR"
  */
 
-import { ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 
 export interface LucidSarInputs {
   start: number;

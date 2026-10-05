@@ -7,7 +7,7 @@
  * Reference: "Super SuperTrend" (community)
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { MarkerData, PlotCandleData } from '../types';
 
 export interface SuperSupertrendInputs {

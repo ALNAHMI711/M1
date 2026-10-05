@@ -9,7 +9,7 @@
  * Reference: "Hull Butterfly Oscillator [LuxAlgo]"
  */
 
-import { ta, Series, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 import type { MarkerData } from '../types';
 
 export interface HullButterflyOscInputs {

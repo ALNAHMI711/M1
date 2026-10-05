@@ -7,7 +7,7 @@
  * Reference: "HawkEye Volume Indicator" (community)
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 
 export interface HawkEyeVolumeInputs {
   length: number;
@@ -31,10 +31,7 @@ export const metadata = {
   overlay: false,
 };
 
-export function calculate(bars: Bar[], inputs: Partial<HawkEyeVolumeInputs> = {}): IndicatorResult {
-  const { length } = { ...defaultInputs, ...inputs };
-  const n = bars.length;
-
+export function calculate(bars: Bar[], _inputs: Partial<HawkEyeVolumeInputs> = {}): IndicatorResult {
   const plot0 = bars.map((bar, i) => {
     const vol = bar.volume ?? 0;
     const midPrice = (bar.high + bar.low) / 2;

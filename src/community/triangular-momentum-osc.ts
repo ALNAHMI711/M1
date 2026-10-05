@@ -8,7 +8,7 @@
  * Reference: "Triangular Momentum Oscillator & Real Time Divergences [LuxAlgo]"
  */
 
-import { ta, getSourceSeries, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 import type { MarkerData, LineDrawingData } from '../types';
 
 export interface TriangularMomentumOscInputs {

@@ -50,7 +50,6 @@ export const metadata = {
 
 export function calculate(bars: Bar[], inputs: Partial<AutoSupportResistanceInputs> = {}): IndicatorResult {
   const { left, right, quickRight } = { ...defaultInputs, ...inputs };
-  const n = bars.length;
 
   // Pine default source is "Close" for pivots
   const closeSeries = new Series(bars, (b) => b.close);

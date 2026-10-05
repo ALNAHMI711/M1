@@ -8,7 +8,7 @@
  * Reference: "Scalping Line Indicator" by KivancOzbilgic
  */
 
-import { ta, getSourceSeries, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { ta, getSourceSeries, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
 
 export interface ScalpingLineInputs {
   src: SourceType;

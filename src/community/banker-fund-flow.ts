@@ -86,7 +86,6 @@ export function calculate(bars: Bar[], inputs: Partial<BankerFundFlowInputs> = {
   const { normLength, typicalLength, emaLength, entryThreshold } = { ...defaultInputs, ...inputs };
   const n = bars.length;
 
-  const closeSeries = new Series(bars, (b) => b.close);
   const lowSeries = new Series(bars, (b) => b.low);
   const highSeries = new Series(bars, (b) => b.high);
 

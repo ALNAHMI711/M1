@@ -7,7 +7,7 @@
  * Reference: "Matrix Series" (community)
  */
 
-import { ta, getSourceSeries, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar, type SourceType } from 'oakscriptjs';
+import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { PlotCandleData, MarkerData } from '../types';
 
 export interface MatrixSeriesInputs {

@@ -234,8 +234,6 @@ export function calculate(bars: Bar[], inputs: Partial<PPOAlertsInputs> = {}): O
     // currenttrough7 = valuewhen(priceMax, high[1], 0)
     const currenttrough4 = valuewhen(oscMins, dLag1, i, 0);
     const currenttrough5 = valuewhen(oscMaxs, dLag1, i, 0);
-    const currenttrough6 = valuewhen(priceMins, lowLag1, i, 0);
-    const currenttrough7 = valuewhen(priceMaxs, highLag1, i, 0);
 
     // y9 = valuewhen(oscMins, currenttrough6, 0)
     // For this we need currenttrough6 evaluated at each oscMins bar.
@@ -263,7 +261,6 @@ export function calculate(bars: Bar[], inputs: Partial<PPOAlertsInputs> = {}): O
     let y9 = NaN, y10 = NaN;
     let y3 = NaN, y4 = NaN, y7 = NaN, y8 = NaN;
     let y6 = NaN, y2 = NaN;
-    let y11 = NaN, y12 = NaN;
 
     // Find most recent and 2nd most recent oscMins/oscMaxs bars up to i
     {
@@ -273,7 +270,6 @@ export function calculate(bars: Bar[], inputs: Partial<PPOAlertsInputs> = {}): O
           if (oscMinCount === 0) {
             y9 = ct6AtBar(j);
             y7 = ct4AtBar(j);
-            y11 = valuewhen(oscMins, delayedlow, j, 0);
           } else {
             y8 = ct4AtBar(j);
             // y6 = valuewhen(oscMins, filter, 1)
@@ -305,7 +301,6 @@ export function calculate(bars: Bar[], inputs: Partial<PPOAlertsInputs> = {}): O
           if (oscMaxCount === 0) {
             y10 = ct7AtBar(j);
             y3 = ct5AtBar(j);
-            y12 = valuewhen(oscMaxs, delayedhigh, j, 0);
           } else {
             y4 = ct5AtBar(j);
             const bsp = barssince(priceMaxs, j);

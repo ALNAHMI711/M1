@@ -200,7 +200,6 @@ export function calculate(bars: Bar[], inputs: Partial<BuySellPressureInputs> = 
 
     vpo1Plot.push({ time: t, value: vpo1, color: vpo1 > 0 ? '#4CAF50' : '#EF5350' });
     vpo2Plot.push({ time: t, value: vpo2, color: vpo2 > 0 ? '#4CAF50' : '#EF5350' });
-    const prevVph = i > warmup ? (vpo1Plot[i - 1 - 0] ? 0 : 0) : 0;
     vphPlot.push({ time: t, value: vph, color: i > 0 && vph > (vphPlot[vphPlot.length - 2]?.value ?? 0) ? '#2196F3' : '#BA00AA' });
   }
 

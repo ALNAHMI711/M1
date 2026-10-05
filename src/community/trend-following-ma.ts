@@ -39,7 +39,7 @@ export const inputConfig: InputConfig[] = [
 
 const maLengths = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100];
 
-export const plotConfig: PlotConfig[] = maLengths.map((len, idx) => ({
+export const plotConfig: PlotConfig[] = maLengths.map((len) => ({
   id: `ma${len}`,
   title: `MA ${len}`,
   color: '#888888',

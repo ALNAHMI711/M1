@@ -9,7 +9,7 @@
  * Reference: "Nick Rypock Trailing Reverse"
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { ta, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 import type { MarkerData } from '../types';
 
 export interface NRTRInputs {

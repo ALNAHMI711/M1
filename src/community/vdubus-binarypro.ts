@@ -73,7 +73,6 @@ export function calculate(bars: Bar[], inputs: Partial<VdubusBinaryProInputs> = 
   for (let i = 0; i < n; i++) {
     basisArr[i] = ((upperArr[i] ?? 0) + (lowerArr[i] ?? 0)) / 2;
   }
-  const basisSeries = Series.fromArray(bars, basisArr);
 
   // Pine: bb1_dev = bb1_mult * stdev(close, bb1_l)
   const stdevArr = ta.stdev(closeSeries, bbLength).toArray();

@@ -9,7 +9,7 @@
  * Reference: "Liquidity Grabs | Flux Charts" by fluxchart
  */
 
-import { ta, Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
+import { Series, type IndicatorResult, type InputConfig, type PlotConfig, type Bar } from 'oakscriptjs';
 
 export interface LiquidityGrabsInputs {
   pivotLength: number;

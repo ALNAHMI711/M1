@@ -87,7 +87,6 @@ export function calculate(bars: Bar[], inputs: Partial<ParallelPivotLinesInputs>
 
   // Build cumulative sums needed for slope at each bar
   const close: number[] = bars.map((b) => b.close);
-  const barIdx: number[] = bars.map((_, i) => i);
 
   // cumClose[i] = sum of close[0..i]
   const cumClose = new Float64Array(n);
