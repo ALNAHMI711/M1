@@ -9,5 +9,5 @@ __pycache__/
 # Local research files (not published)
 .tmp/
 
-# TradingView regression data (local only: TradingView outputs and price bars, built from .tmp research runs)
-tests/tv-regression/data/
+# Regression data (local only: reference outputs and price bars, built from .tmp research runs)
+tests/reference-regression/data/

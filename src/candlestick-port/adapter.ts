@@ -2,10 +2,8 @@
  * Adapter: fits the oakscriptjs candlestick port (PatternDef + patternScript)
  * to this repo's `calculate(bars, inputs): IndicatorResult` registry convention.
  *
- * Each pattern runs through `executeScript(() => patternScript(def), bars, inputs)`.
- * The script produces oakscriptjs-native outputs (markers with location/style,
- * lowercase bgcolors/barcolors); this module converts them to the local
- * MarkerData / BgColorData / BarColorData shapes the example renderer consumes.
+ * Each pattern runs through `executeScript(() => patternScript(def), bars, inputs)`, which returns the
+ * IndicatorResult shape of this package (markers, bgColors, barColors); the result is passed through.
  */
 import { executeScript, type ScriptRunResult } from 'oakscriptjs/script';
 import type { Bar, IndicatorResult, InputConfig, PlotConfig } from 'oakscriptjs';
@@ -14,64 +12,16 @@ import { patternScript } from './pattern-runner';
 import { ALL_PATTERNS } from './registry';
 import { allPatternsScript } from './all-patterns';
 
-/** oakscriptjs MarkerLocation -> local marker position. */
-const POSITION: Record<string, MarkerData['position']> = {
-  abovebar: 'aboveBar',
-  belowbar: 'belowBar',
-  top: 'aboveBar',
-  bottom: 'belowBar',
-  absolute: 'inBar',
-};
-
-/** oakscriptjs ShapeStyle -> local marker shape. */
-const SHAPE: Record<string, MarkerData['shape']> = {
-  arrowup: 'arrowUp',
-  arrowdown: 'arrowDown',
-  triangleup: 'triangleUp',
-  triangledown: 'triangleDown',
-  circle: 'circle',
-  square: 'square',
-  cross: 'cross',
-  xcross: 'xcross',
-  diamond: 'diamond',
-  flag: 'flag',
-  labelup: 'labelUp',
-  labeldown: 'labelDown',
-};
-
-export type PortResult = Omit<IndicatorResult, 'markers'> & {
+export type PortResult = IndicatorResult & {
   markers: MarkerData[];
   bgColors: BgColorData[];
   barColors: BarColorData[];
 };
 
-/** Converts an oakscriptjs script result into the repo's local render shapes. */
+/** The script result, with the marker and colour arrays always present. */
 function convert(run: ScriptRunResult): PortResult {
   const r = run.result;
-  const markers: MarkerData[] = (r.markers ?? []).map((m) => ({
-    time: m.time as number,
-    position: POSITION[m.location] ?? 'aboveBar',
-    shape: SHAPE[m.style as string] ?? 'square',
-    color: m.color ?? '#2962FF',
-    text: m.text ?? m.char,
-  }));
-  const bgColors: BgColorData[] = (r.bgcolors ?? []).map((b) => ({
-    time: b.time as number,
-    color: b.color,
-  }));
-  const barColors: BarColorData[] = (r.barcolors ?? []).map((b) => ({
-    time: b.time as number,
-    color: b.color,
-  }));
-  return {
-    metadata: r.metadata,
-    plots: r.plots,
-    hlines: r.hlines,
-    fills: r.fills,
-    markers,
-    bgColors,
-    barColors,
-  };
+  return { ...r, markers: r.markers ?? [], bgColors: r.bgColors ?? [], barColors: r.barColors ?? [] };
 }
 
 /** Indicator object shape expected by the registry (mirrors the native patterns). */

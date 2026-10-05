@@ -2,7 +2,7 @@
 
 **[Live Demo](https://deepentropy.github.io/lightweight-charts-indicators/)**
 
-1290 technical analysis indicators for TradingView's lightweight-charts library — 95 standard indicators, 1150 community indicators, and 45 candlestick patterns. PineScript v6 compatible with full drawing primitive support (lines, boxes, labels, tables).
+1290 technical analysis indicators for the lightweight-charts library — 95 standard indicators, 1150 community indicators, and 45 candlestick patterns. PineScript v6 compatible with full drawing primitive support (lines, boxes, labels, tables).
 
 ## Installation
 
@@ -36,7 +36,7 @@ const bbResult = BollingerBands.calculate(bars, { length: 20, mult: 2 });
 
 ## Lightweight-Charts Integration Example
 
-Here's a complete example showing how to integrate indicators with TradingView's lightweight-charts:
+Here's a complete example showing how to integrate indicators with lightweight-charts:
 
 ```typescript
 import { createChart, ColorType, LineSeries, CandlestickSeries } from 'lightweight-charts';
@@ -249,7 +249,7 @@ chart.timeScale().subscribeVisibleLogicalRangeChange(range => {
 
 Categories include: Hyper Trend, AlphaTrend, HalfTrend, QQE MOD, Hull Suite, SuperTrend variants, Market Structure Trailing Stop, Liquidity Levels, Order Blocks, ZigZag Fibonacci, Trendlines with Breaks, and many more.
 
-Drawing primitive support: Lines (`LineDrawingData`), Boxes (`BoxData`), Labels (`LabelData`), Tables (`TableData`), Markers, Bar Colors, Background Colors, and Plot Candles.
+Drawing primitive support: Lines (`LineDrawingData`), Boxes (`BoxData`), Labels (`LabelData`), Linefills (`LinefillData`), Polylines (`PolylineData`), Tables (`tables: TableData[]`), Markers, Bar Colors, Background Colors, Plot Candles and Plot Bars. These are the oakscriptjs `IndicatorResult` types, shared with scripts run with `executeScript`: a property that is not set is omitted (the PineScript default applies) and an na colour is `'transparent'`.
 
 ### Candlestick Patterns (45)
 

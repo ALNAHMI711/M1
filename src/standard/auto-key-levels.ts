@@ -83,6 +83,7 @@ export function calculate(
     price: pv.price,
     text: pv.price.toFixed(2),
     textColor: pv.kind === 'high' ? RESISTANCE : SUPPORT,
+    color: 'transparent',
     style: 'label_left',
     size: 'small',
   }));

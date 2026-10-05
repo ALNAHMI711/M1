@@ -67,7 +67,7 @@ describe('ML Adaptive SuperTrend', () => {
   it('should return table data', () => {
     const result = MlAdaptiveSupertrend.calculate(bars) as any;
     expect(result.tables).toBeDefined();
-    expect(result.tables.cells.length).toBeGreaterThan(0);
+    expect(result.tables[0].cells.length).toBeGreaterThan(0);
   });
 
   it('should have correct metadata', () => {
@@ -177,7 +177,7 @@ describe('ML RSI', () => {
   it('should return table data', () => {
     const result = MlRsi.calculate(bars) as any;
     expect(result.tables).toBeDefined();
-    expect(result.tables.cells.length).toBeGreaterThan(0);
+    expect(result.tables[0].cells.length).toBeGreaterThan(0);
   });
 
   it('should have correct metadata', () => {
@@ -208,7 +208,7 @@ describe('SuperTrend AI Clustering', () => {
   it('should return table data', () => {
     const result = SupertrendAiClustering.calculate(bars) as any;
     expect(result.tables).toBeDefined();
-    expect(result.tables.cells.length).toBeGreaterThan(0);
+    expect(result.tables[0].cells.length).toBeGreaterThan(0);
   });
 
   it('should have correct metadata', () => {

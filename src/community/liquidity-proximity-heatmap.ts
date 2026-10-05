@@ -147,12 +147,12 @@ export function calculate(
   /** Sorting of one side: stored prices beyond the bar, by distance (Pine exchange sort), nearest numPoints */
   const side = (prices: number[], vols: number[], beyond: (p: number) => boolean, dist: (p: number) => number) => {
     const tp: number[] = [];
-    const tv: number[] = [];
+    const tVol: number[] = [];
     const td: number[] = [];
     for (let k = 0; k < prices.length; k++) {
       if (beyond(prices[k])) {
         tp.push(prices[k]);
-        tv.push(vols[k]);
+        tVol.push(vols[k]);
         td.push(dist(prices[k]));
       }
     }
@@ -160,7 +160,7 @@ export function calculate(
       for (let b = a + 1; b < tp.length; b++) {
         if (gt(td[a], td[b])) {
           [tp[a], tp[b]] = [tp[b], tp[a]];
-          [tv[a], tv[b]] = [tv[b], tv[a]];
+          [tVol[a], tVol[b]] = [tVol[b], tVol[a]];
           [td[a], td[b]] = [td[b], td[a]];
         }
       }
@@ -174,9 +174,9 @@ export function calculate(
       let sumV = 0.0;
       for (let k = 0; k < limit; k++) {
         resP[k] = tp[k];
-        resC[k] = getColor(tv[k], minVol, maxVol, offset, cfg.transInput);
-        sumPV += tp[k] * tv[k];
-        sumV += tv[k];
+        resC[k] = getColor(tVol[k], minVol, maxVol, offset, cfg.transInput);
+        sumPV += tp[k] * tVol[k];
+        sumV += tVol[k];
       }
       // vwap := sumV > 0 ? sumPV / sumV : na
       vwap = gt(sumV, 0) ? sumPV / sumV : NaN;

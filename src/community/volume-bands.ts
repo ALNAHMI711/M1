@@ -109,10 +109,10 @@ export function calculate(
     if (Sh) tr = -1;
     trend[i] = tr;
   }
-  const upSeries = trend.map((tv, i) => (tv === 1 ? lower[i] : NaN));
-  const downSeries = trend.map((tv, i) => (tv === -1 ? upper[i] : NaN));
+  const upSeries = trend.map((dir, i) => (dir === 1 ? lower[i] : NaN));
+  const downSeries = trend.map((dir, i) => (dir === -1 ? upper[i] : NaN));
   // var col = gray; trend == 1 -> green; trend == -1 -> pink
-  const col = trend.map((tv) => (tv === 1 ? LONG_COL : tv === -1 ? SHORT_COL : NEUTRAL_COL));
+  const col = trend.map((dir) => (dir === 1 ? LONG_COL : dir === -1 ? SHORT_COL : NEUTRAL_COL));
 
   const t = (i: number) => bars[i].time;
   const plot0 = bars.map((_b, i) => ({ time: t(i), value: upSeries[i], color: LONG_COL }));

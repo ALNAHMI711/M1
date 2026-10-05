@@ -593,6 +593,11 @@ export class IndicatorUI {
         this.chartManager.clearMarkers();
       }
 
+      // plotarrow
+      if (Array.isArray(result.arrows) && result.arrows.length > 0) {
+        this.chartManager.setArrows(result.arrows, indicator.arrowConfig ?? [], indicatorPaneIndex, indicator.overlay);
+      }
+
       // Phase 2: barcolor
       if (Array.isArray(result.barColors) && result.barColors.length > 0) {
         this.chartManager.setBarColors(result.barColors);
@@ -612,6 +617,13 @@ export class IndicatorUI {
         }
       }
 
+      // plotbar
+      for (const [id, data] of Object.entries(result.plotBars ?? {})) {
+        if (Array.isArray(data) && data.length > 0) {
+          this.chartManager.setBarPlotData(id, data, indicatorPaneIndex);
+        }
+      }
+
       // Phase 6: labels
       if (Array.isArray(result.labels) && result.labels.length > 0) {
         this.chartManager.setLabels(result.labels, indicatorPaneIndex);
@@ -627,14 +639,20 @@ export class IndicatorUI {
         this.chartManager.setBoxes(result.boxes, indicatorPaneIndex);
       }
 
+      // linefills and polylines
+      if (Array.isArray(result.linefills) && result.linefills.length > 0) {
+        this.chartManager.setLinefills(result.linefills, indicatorPaneIndex);
+      }
+      if (Array.isArray(result.polylines) && result.polylines.length > 0) {
+        this.chartManager.setPolylines(result.polylines, indicatorPaneIndex);
+      }
+
       // Bar slots after the last bar for the points on future bars (Pine bar_index + k, plot offsets)
       this.chartManager.setFutureSlots(this.lastOutputTime(result));
 
       // Phase 9: tables
       if (Array.isArray(result.tables) && result.tables.length > 0) {
-        this.chartManager.setTable(result.tables[0]);
-      } else if (result.tables && !Array.isArray(result.tables)) {
-        this.chartManager.setTable(result.tables);
+        this.chartManager.setTables(result.tables, indicatorPaneIndex);
       }
     } catch (error) {
       console.error('Error calculating indicator:', error);
@@ -642,7 +660,7 @@ export class IndicatorUI {
   }
 
   /**
-   * Latest time of the indicator outputs (plots, markers, labels, lines, boxes)
+   * Latest time of the indicator outputs (plots, markers, drawings)
    */
   private lastOutputTime(result: any): number {
     let max = -Infinity;
@@ -659,9 +677,12 @@ export class IndicatorUI {
       }
     }
     for (const m of result.markers ?? []) see(m.time);
+    for (const a of result.arrows ?? []) see(a.time);
     for (const l of result.labels ?? []) see(l.time);
     for (const l of result.lines ?? []) { see(l.time1); see(l.time2); }
     for (const b of result.boxes ?? []) { see(b.time1); see(b.time2); }
+    for (const f of result.linefills ?? []) { see(f.line1.time1); see(f.line1.time2); see(f.line2.time1); see(f.line2.time2); }
+    for (const p of result.polylines ?? []) for (const pt of p.points) see(pt.time);
     return max;
   }
 

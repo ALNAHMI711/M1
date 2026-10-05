@@ -88,7 +88,7 @@ function percentileLinear(arr: number[], p: number): number {
   return sorted[lo] + (idx - lo) * (sorted[hi] - sorted[lo]);
 }
 
-export function calculate(bars: Bar[], inputs: Partial<SupertrendAiClusteringInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[]; tables: TableData; barColors: BarColorData[]; labels: LabelData[] } {
+export function calculate(bars: Bar[], inputs: Partial<SupertrendAiClusteringInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[]; tables: TableData[]; barColors: BarColorData[]; labels: LabelData[] } {
   const { atrLen, minFactor, maxFactor, factorStep, perfAlpha, fromCluster, maxIter, maxData } = { ...defaultInputs, ...inputs };
   const n = bars.length;
 
@@ -417,7 +417,7 @@ export function calculate(bars: Bar[], inputs: Partial<SupertrendAiClusteringInp
     }
   }
 
-  const tables: TableData = {
+  const table: TableData = {
     position: 'top_right',
     columns: 4,
     rows: 4,
@@ -429,7 +429,7 @@ export function calculate(bars: Bar[], inputs: Partial<SupertrendAiClusteringInp
     plots: { 'plot0': plot0, 'plot1': plot1 },
     markers,
     labels,
-    tables,
+    tables: [table],
     barColors,
   };
 }

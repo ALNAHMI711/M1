@@ -1,6 +1,6 @@
 /**
  * Unit tests for the candlestick pattern port: the 44 single-pattern scripts and the
- * "*All Candlestick Patterns*" composite. Values were compared with TradingView separately.
+ * "*All Candlestick Patterns*" composite. Values were compared with the reference outputs separately.
  */
 
 import { describe, it, expect } from 'vitest';

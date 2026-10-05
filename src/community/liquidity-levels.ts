@@ -154,10 +154,10 @@ export function calculate(
     const interval = barInterval(bars);
     const at = (k: number) => barTime(bars, n - 1 + k, interval);
     for (let index = 0; index < Math.min(show - 1, pals.length - 1); index++) {
-      boxes.push({ time1: at(0), price1: pals[index], time2: at(bull[index]), price2: pals[index + 1], bgColor: upCol });
+      boxes.push({ time1: at(0), price1: pals[index], time2: at(bull[index]), price2: pals[index + 1], bgColor: upCol, borderColor: 'transparent' });
       boxes.push({
         time1: at(bull[index]), price1: pals[index], time2: at(bull[index] + bear[index]), price2: pals[index + 1],
-        bgColor: dnCol,
+        bgColor: dnCol, borderColor: 'transparent',
       });
     }
   }

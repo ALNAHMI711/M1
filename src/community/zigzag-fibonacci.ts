@@ -246,6 +246,7 @@ export function calculate(
           price,
           text: ratio.toFixed(3) + ' (' + price.toFixed(2) + ')',
           textColor: fiboLabelCol,
+          color: 'transparent',
           style: 'label_right',
           size: 'small',
         });

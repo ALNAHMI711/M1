@@ -7,6 +7,7 @@ import {
   createChart,
   createSeriesMarkers,
   CandlestickSeries,
+  BarSeries,
   LineSeries,
   HistogramSeries,
   type LineWidth,
@@ -20,6 +21,7 @@ import {
   type SeriesAttachedParameter,
   type SeriesMarker,
   type CandlestickData,
+  type BarData,
   type LineData,
   type HistogramData,
   type BaselineData,
@@ -31,14 +33,17 @@ import {
   LineType,
 } from 'lightweight-charts';
 import type { CanvasRenderingTarget2D } from 'fancy-canvas';
-import type { Bar, HLineConfig, FillConfig, FillData } from 'oakscriptjs';
+import type { Bar, HLineConfig, FillConfig, FillData, ArrowConfig, ArrowData } from 'oakscriptjs';
 import type {
   BarColorData,
   BgColorData,
   PlotCandleData,
+  PlotBarData,
   LabelData,
   LineDrawingData,
   BoxData,
+  LinefillData,
+  PolylineData,
   TableData,
   MarkerData,
   PineSize,
@@ -776,7 +781,13 @@ class ExtendedMarkerRenderer implements IPrimitivePaneRenderer {
         // other shapes: the shape on the anchor side, the text on the far side (above when the marker extends
         // upward, below otherwise)
         const shapeCy = dir === -1 ? top + textH + half : top + half;
-        if (showShape) {
+        if (showShape && marker.char) {
+          // plotchar: the character in place of the shape
+          ctx.font = `${Math.round(half * 2.4)}px sans-serif`;
+          ctx.fillStyle = marker.color;
+          ctx.fillText(marker.char, x, shapeCy);
+          ctx.font = `${fontSize}px sans-serif`;
+        } else if (showShape) {
           ctx.fillStyle = marker.color;
           ctx.strokeStyle = marker.color;
           ctx.lineWidth = 2;
@@ -882,326 +893,562 @@ function drawExtendedShape(
   }
 }
 
+// ─── Drawings (label.new / line.new / box.new / linefill.new / polyline.new) ─
+
 /**
- * Label primitive — draws text labels with backgrounds
+ * PineScript default colour of drawings (color.blue). Drawing properties follow the oakscriptjs rules: a property
+ * the script did not set is omitted and the PineScript default applies; a colour set to na is 'transparent'.
  */
-class LabelPrimitive extends BasePrimitive {
-  private _labels: LabelData[] = [];
-  private _views: IPrimitivePaneView[] = [new LabelPaneView(this)];
+const PINE_BLUE = '#2962FF';
 
-  constructor(private _grid: BarGrid) {
+/** Context of a drawing function (media coordinates) */
+interface DrawEnv {
+  ctx: CanvasRenderingContext2D;
+  width: number;
+  height: number;
+  series: ISeriesApi<SeriesType, Time>;
+  grid: BarGrid;
+  timeScale: ReturnType<IChartApi['timeScale']>;
+}
+
+/**
+ * Primitive that draws a list of drawings of one kind with its draw function.
+ */
+class DrawingPrimitive<T> extends BasePrimitive {
+  private _views: IPrimitivePaneView[];
+
+  constructor(
+    private _grid: BarGrid,
+    private _items: T[],
+    private _draw: (env: DrawEnv, item: T) => void,
+    zOrder: 'bottom' | 'normal' | 'top'
+  ) {
     super();
+    const renderer: IPrimitivePaneRenderer = { draw: (target) => this.drawAll(target) };
+    this._views = [{ zOrder: () => zOrder, renderer: () => renderer }];
   }
-
-  setLabels(labels: LabelData[]): void {
-    this._labels = labels;
-    this._requestUpdate?.();
-  }
-
-  getLabels() { return this._labels; }
-  getGrid() { return this._grid; }
-  getChart() { return this._chart; }
-  getSeries() { return this._series; }
 
   updateAllViews(): void {}
 
   paneViews(): readonly IPrimitivePaneView[] {
     return this._views;
   }
-}
 
-class LabelPaneView implements IPrimitivePaneView {
-  constructor(private _source: LabelPrimitive) {}
-
-  zOrder(): 'top' { return 'top'; }
-
-  renderer(): IPrimitivePaneRenderer | null {
-    return new LabelRenderer(this._source);
+  private drawAll(target: CanvasRenderingTarget2D): void {
+    const chart = this._chart;
+    const series = this._series;
+    if (!chart || !series) return;
+    const timeScale = chart.timeScale();
+    target.useMediaCoordinateSpace(({ context: ctx, mediaSize }) => {
+      const env: DrawEnv = { ctx, width: mediaSize.width, height: mediaSize.height, series, grid: this._grid, timeScale };
+      for (const item of this._items) {
+        ctx.save();
+        this._draw(env, item);
+        ctx.restore();
+      }
+    });
   }
 }
 
-const LABEL_FONT_SIZES: Record<string, number> = {
-  tiny: 9, small: 11, normal: 13, large: 16, huge: 20,
-};
+/** A colour that draws something: set and not fully transparent */
+function shown(color: string | undefined): color is string {
+  return !!color && !isTransparent(color);
+}
+
+/** Canvas dash of a PineScript line style (the arrow styles are solid) */
+function lineDash(style: string | undefined): number[] {
+  if (style === 'dashed') return [6, 3];
+  if (style === 'dotted') return [2, 2];
+  return [];
+}
+
+/** Font size (px) of label and box text */
+const TEXT_SIZES: Record<PineSize, number> = { auto: 13, tiny: 9, small: 11, normal: 13, large: 16, huge: 20 };
+
+/** Font size (px) of a PineScript size: a size.* constant or a size in points */
+function textPx(size: PineSize | number | undefined): number {
+  if (typeof size === 'number') return Math.max(1, size);
+  return TEXT_SIZES[size ?? 'normal'] ?? 13;
+}
+
+/** Canvas / CSS font: PineScript font family (font.family_*) and text.format_* flags (1 bold, 2 italic) */
+function fontOf(px: number, family?: 'default' | 'monospace', formatting?: number): string {
+  const f = formatting ?? 0;
+  return `${f & 2 ? 'italic ' : ''}${f & 1 ? 'bold ' : ''}${px}px ${family === 'monospace' ? 'monospace' : 'sans-serif'}`;
+}
+
+/** Open arrow head at (tipX, tipY), pointing away from (fromX, fromY) */
+function arrowHead(ctx: CanvasRenderingContext2D, tipX: number, tipY: number, fromX: number, fromY: number, width: number): void {
+  const a = Math.atan2(tipY - fromY, tipX - fromX);
+  const len = 6 + 2 * width;
+  ctx.beginPath();
+  ctx.moveTo(tipX - len * Math.cos(a - Math.PI / 7), tipY - len * Math.sin(a - Math.PI / 7));
+  ctx.lineTo(tipX, tipY);
+  ctx.lineTo(tipX - len * Math.cos(a + Math.PI / 7), tipY - len * Math.sin(a + Math.PI / 7));
+  ctx.stroke();
+}
+
+/**
+ * End points (x1, y1, x2, y2) of a line as drawn: point 1 and point 2, moved to the left / right edge of the pane by
+ * the line extension (extend.left continues the line beyond its left point). null when a point is not on the chart.
+ */
+function linePoints(env: DrawEnv, line: LineDrawingData): [number, number, number, number] | null {
+  const x1 = env.grid.x(env.timeScale, line.time1);
+  const y1 = env.series.priceToCoordinate(line.price1);
+  const x2 = env.grid.x(env.timeScale, line.time2);
+  const y2 = env.series.priceToCoordinate(line.price2);
+  if (x1 == null || y1 == null || x2 == null || y2 == null) return null;
+  const extend = line.extend ?? 'none';
+  const left = extend === 'left' || extend === 'both';
+  const right = extend === 'right' || extend === 'both';
+  if (x1 === x2) {
+    // vertical line: an extension continues it to the pane edges
+    return extend === 'none' ? [x1, y1, x2, y2] : [x1, y1 <= y2 ? 0 : env.height, x2, y1 <= y2 ? env.height : 0];
+  }
+  const slope = (y2 - y1) / (x2 - x1);
+  let [ax, ay, bx, by]: number[] = x1 < x2 ? [x1, y1, x2, y2] : [x2, y2, x1, y1];
+  if (left) { ay -= slope * ax; ax = 0; }
+  if (right) { by += slope * (env.width - bx); bx = env.width; }
+  return x1 < x2 ? [ax, ay, bx, by] : [bx, by, ax, ay];
+}
+
+function drawLine(env: DrawEnv, line: LineDrawingData): void {
+  const color = line.color ?? PINE_BLUE;
+  const width = line.width ?? 1;
+  const p = linePoints(env, line);
+  if (!p || !shown(color) || width <= 0) return;
+  const { ctx } = env;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.setLineDash(lineDash(line.style));
+  ctx.beginPath();
+  ctx.moveTo(p[0], p[1]);
+  ctx.lineTo(p[2], p[3]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  if (line.style === 'arrow_left' || line.style === 'arrow_both') arrowHead(ctx, p[0], p[1], p[2], p[3], width);
+  if (line.style === 'arrow_right' || line.style === 'arrow_both') arrowHead(ctx, p[2], p[3], p[0], p[1], width);
+}
+
+/** linefill.new: the area between the two lines as drawn (their extensions included) */
+function drawLinefill(env: DrawEnv, fill: LinefillData): void {
+  const color = fill.color ?? PINE_BLUE;
+  if (!shown(color)) return;
+  const a = linePoints(env, fill.line1);
+  const b = linePoints(env, fill.line2);
+  if (!a || !b) return;
+  // each line from its left point to its right point, so the polygon does not cross itself
+  const [al, ar] = a[0] <= a[2] ? [[a[0], a[1]], [a[2], a[3]]] : [[a[2], a[3]], [a[0], a[1]]];
+  const [bl, br] = b[0] <= b[2] ? [[b[0], b[1]], [b[2], b[3]]] : [[b[2], b[3]], [b[0], b[1]]];
+  const { ctx } = env;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(al[0], al[1]);
+  ctx.lineTo(ar[0], ar[1]);
+  ctx.lineTo(br[0], br[1]);
+  ctx.lineTo(bl[0], bl[1]);
+  ctx.closePath();
+  ctx.fill();
+}
+
+/** Path through the points: straight segments, or a curve through the points (Catmull-Rom spline) */
+function polylinePath(pts: Array<[number, number]>, curved: boolean, closed: boolean): Path2D {
+  const path = new Path2D();
+  path.moveTo(pts[0][0], pts[0][1]);
+  const n = pts.length;
+  if (!curved) {
+    for (let i = 1; i < n; i++) path.lineTo(pts[i][0], pts[i][1]);
+  } else {
+    const at = (i: number) => (closed ? pts[(i + n) % n] : pts[Math.max(0, Math.min(n - 1, i))]);
+    for (let i = 0; i < (closed ? n : n - 1); i++) {
+      const [p0, p1, p2, p3] = [at(i - 1), at(i), at(i + 1), at(i + 2)];
+      path.bezierCurveTo(
+        p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6,
+        p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6,
+        p2[0], p2[1]
+      );
+    }
+  }
+  if (closed) path.closePath();
+  return path;
+}
+
+/** polyline.new: line through the points (curved, closed), fill of the area inside */
+function drawPolyline(env: DrawEnv, poly: PolylineData): void {
+  const pts: Array<[number, number]> = [];
+  for (const p of poly.points) {
+    const x = env.grid.x(env.timeScale, p.time);
+    const y = env.series.priceToCoordinate(p.price);
+    if (x != null && y != null) pts.push([x, y as number]);
+  }
+  if (pts.length < 2) return;
+  const { ctx } = env;
+  const path = polylinePath(pts, !!poly.curved, !!poly.closed);
+  if (shown(poly.fillColor)) {
+    ctx.fillStyle = poly.fillColor;
+    ctx.fill(path);
+  }
+  const color = poly.lineColor ?? PINE_BLUE;
+  const width = poly.lineWidth ?? 1;
+  if (!shown(color) || width <= 0) return;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = width;
+  ctx.setLineDash(lineDash(poly.lineStyle));
+  ctx.stroke(path);
+  ctx.setLineDash([]);
+  if (poly.closed) return;
+  const n = pts.length;
+  if (poly.lineStyle === 'arrow_left' || poly.lineStyle === 'arrow_both') arrowHead(ctx, pts[0][0], pts[0][1], pts[1][0], pts[1][1], width);
+  if (poly.lineStyle === 'arrow_right' || poly.lineStyle === 'arrow_both') {
+    arrowHead(ctx, pts[n - 1][0], pts[n - 1][1], pts[n - 2][0], pts[n - 2][1], width);
+  }
+}
+
+/** The arrows of one plotarrow */
+interface ArrowSeries {
+  arrows: ArrowData[];
+  minheight: number;
+  maxheight: number;
+  forceOverlay: boolean;
+  /** Drawn at the bars (price pane); otherwise from the pane edge */
+  onBars: boolean;
+}
+
+const ARROW_BAR_GAP = 4; // px between the bar and the tip of an arrow
+
+/**
+ * plotarrow: an up arrow for a positive value (below the bar, pointing up), a down arrow for a negative value (above
+ * the bar, pointing down). Height proportional to the absolute value relative to the largest absolute value of the
+ * visible arrows, between minheight and maxheight.
+ */
+function drawArrowSeries(env: DrawEnv, s: ArrowSeries): void {
+  const visible: Array<{ a: ArrowData; x: number }> = [];
+  for (const a of s.arrows) {
+    const x = env.grid.x(env.timeScale, a.time as number);
+    if (x != null && x >= 0 && x <= env.width && a.value !== 0 && Number.isFinite(a.value)) visible.push({ a, x });
+  }
+  if (!visible.length) return;
+  const maxAbs = visible.reduce((m, p) => Math.max(m, Math.abs(p.a.value)), 0);
+  const { ctx } = env;
+  for (const { a, x } of visible) {
+    if (!shown(a.color)) continue;
+    const up = a.value > 0;
+    const h = Math.min(s.maxheight, Math.max(s.minheight, (Math.abs(a.value) / maxAbs) * s.maxheight));
+    let tip: number;
+    if (s.onBars) {
+      const bar = env.grid.byTime.get(a.time as number);
+      const y = bar ? env.series.priceToCoordinate(up ? bar.low : bar.high) : null;
+      if (y == null) continue;
+      tip = (y as number) + (up ? ARROW_BAR_GAP : -ARROW_BAR_GAP);
+    } else {
+      tip = up ? env.height - ARROW_BAR_GAP - h : ARROW_BAR_GAP + h;
+    }
+    const d = up ? 1 : -1; // direction from the tip to the base
+    const head = Math.min(8, h);
+    ctx.fillStyle = a.color;
+    ctx.strokeStyle = a.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x, tip + d * head);
+    ctx.lineTo(x, tip + d * h);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, tip);
+    ctx.lineTo(x - 4, tip + d * head);
+    ctx.lineTo(x + 4, tip + d * head);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
+
+const BOX_TEXT_PAD = 4;
+
+/** Words of a text line wrapped to `width` (PineScript text.wrap_auto) */
+function wrapLine(ctx: CanvasRenderingContext2D, line: string, width: number): string[] {
+  const out: string[] = [];
+  let cur = '';
+  for (const word of line.split(' ')) {
+    const next = cur ? `${cur} ${word}` : word;
+    if (cur && ctx.measureText(next).width > width) {
+      out.push(cur);
+      cur = word;
+    } else {
+      cur = next;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+/** Text of a box (clipped to the box): size auto fits the text in the box */
+function drawBoxText(ctx: CanvasRenderingContext2D, box: BoxData, left: number, top: number, w: number, h: number): void {
+  const color = box.textColor ?? '#000000';
+  if (!box.text || !shown(color)) return;
+  const innerW = w - BOX_TEXT_PAD * 2;
+  const innerH = h - BOX_TEXT_PAD * 2;
+  if (innerW <= 0 || innerH <= 0) return;
+  let lines = box.text.split('\n');
+  let px: number;
+  if (box.textSize == null || box.textSize === 'auto') {
+    // largest size (up to 64 px) at which the lines fit in the box
+    ctx.font = fontOf(100, box.fontFamily, box.textFormatting);
+    const widest = lines.reduce((m, l) => Math.max(m, ctx.measureText(l).width), 0) / 100;
+    px = Math.min(64, innerH / (lines.length * 1.2), widest > 0 ? innerW / widest : 64);
+    if (px < 4) return;
+  } else {
+    px = textPx(box.textSize);
+  }
+  ctx.font = fontOf(px, box.fontFamily, box.textFormatting);
+  if (box.textWrap === 'auto') lines = lines.flatMap((l) => wrapLine(ctx, l, innerW));
+  const lineHeight = px * 1.2;
+  const textH = lines.length * lineHeight;
+  const valign = box.textVAlign ?? 'center';
+  const halign = box.textHAlign ?? 'center';
+  const y0 = valign === 'top' ? top + BOX_TEXT_PAD : valign === 'bottom' ? top + h - BOX_TEXT_PAD - textH : top + (h - textH) / 2;
+  const x = halign === 'left' ? left + BOX_TEXT_PAD : halign === 'right' ? left + w - BOX_TEXT_PAD : left + w / 2;
+  ctx.beginPath();
+  ctx.rect(left, top, w, h);
+  ctx.clip();
+  ctx.fillStyle = color;
+  ctx.textAlign = halign;
+  ctx.textBaseline = 'middle';
+  lines.forEach((l, k) => ctx.fillText(l, x, y0 + lineHeight * (k + 0.5)));
+}
+
+function drawBox(env: DrawEnv, box: BoxData): void {
+  const x1 = env.grid.x(env.timeScale, box.time1);
+  const y1 = env.series.priceToCoordinate(box.price1);
+  const x2 = env.grid.x(env.timeScale, box.time2);
+  const y2 = env.series.priceToCoordinate(box.price2);
+  if (x1 == null || y1 == null || x2 == null || y2 == null) return;
+  const { ctx } = env;
+
+  // PineScript box extend: the box continues to the left / right edge of the pane
+  const extend = box.extend ?? 'none';
+  const left = extend === 'left' || extend === 'both' ? 0 : Math.min(x1, x2);
+  const right = extend === 'right' || extend === 'both' ? env.width : Math.max(x1, x2);
+  const top = Math.min(y1, y2);
+  const width = right - left;
+  const height = Math.abs(y2 - y1);
+
+  const bg = box.bgColor ?? PINE_BLUE;
+  if (shown(bg)) {
+    ctx.fillStyle = bg;
+    ctx.fillRect(left, top, width, height);
+  }
+  const border = box.borderColor ?? PINE_BLUE;
+  const borderWidth = box.borderWidth ?? 1;
+  if (shown(border) && borderWidth > 0) {
+    ctx.strokeStyle = border;
+    ctx.lineWidth = borderWidth;
+    ctx.setLineDash(lineDash(box.borderStyle));
+    ctx.strokeRect(left, top, width, height);
+    ctx.setLineDash([]);
+  }
+  drawBoxText(ctx, box, left, top, width, height);
+}
 
 const LABEL_BAR_GAP = 4; // px between the bar and a yloc.abovebar / belowbar label
+const LABEL_PADDING = 4;
+const LABEL_TIP = 6;
+
+/** Label styles drawn as a shape (label.style_xcross ...): marker shape name */
+const LABEL_SHAPES: Record<string, string> = {
+  xcross: 'xcross', cross: 'cross', triangleup: 'triangleUp', triangledown: 'triangleDown', flag: 'flag',
+  circle: 'circle', arrowup: 'arrowUp', arrowdown: 'arrowDown', square: 'square', diamond: 'diamond',
+};
+
+/** Half size (px) of a label shape */
+const LABEL_SHAPE_HALF: Record<PineSize, number> = { auto: 5, tiny: 3, small: 4, normal: 6, large: 9, huge: 13 };
+
+/** Corner label styles: side of the box from the point (x: 1 right, -1 left; y: 1 below, -1 above) */
+const LABEL_CORNERS: Record<string, [number, number]> = {
+  label_lower_left: [1, -1], label_lower_right: [-1, -1], label_upper_left: [1, 1], label_upper_right: [-1, 1],
+};
 
 /**
- * Label geometry (Pine label styles): label_down = box above the point with a pointer down to it, label_up = box
- * below with a pointer up, label_left / label_right = box right / left of the point, label_center (or no style) =
- * box centred on the point, none = text only. yloc abovebar / belowbar: the point is the bar high / low, and a
- * centred box or a text without box is moved above / below it, as in Pine.
+ * Label geometry (PineScript label styles, default label_down): label_down = box above the point with a tip down to
+ * it, label_up = box below with a tip up, label_left / label_right = box right / left of the point, the corner styles
+ * (label_lower_left ...) = box with that corner at the point, label_center = box centred on the point; the shape
+ * styles (xcross, triangleup, ...) draw the shape at the point with the text above it (below for arrowup /
+ * triangleup); none = text only; text_outline = text outlined with the label colour. yloc abovebar / belowbar: the
+ * point is the bar high / low, and a centred box, a shape or a text is moved above / below it.
  */
-class LabelRenderer implements IPrimitivePaneRenderer {
-  constructor(private _source: LabelPrimitive) {}
+function drawLabel(env: DrawEnv, label: LabelData): void {
+  const x = env.grid.x(env.timeScale, label.time);
+  if (x == null) return;
+  const yloc = label.yloc ?? 'price';
+  let y: number | null;
+  if (yloc === 'price') {
+    y = env.series.priceToCoordinate(label.price);
+  } else {
+    const bar = env.grid.byTime.get(label.time);
+    if (!bar) return;
+    const by = env.series.priceToCoordinate(yloc === 'abovebar' ? bar.high : bar.low);
+    y = by == null ? null : (by as number) + (yloc === 'abovebar' ? -LABEL_BAR_GAP : LABEL_BAR_GAP);
+  }
+  if (y == null) return;
 
-  draw(target: CanvasRenderingTarget2D): void {
-    const chart = this._source.getChart();
-    const series = this._source.getSeries();
-    if (!chart || !series) return;
+  const { ctx } = env;
+  const style = label.style ?? 'label_down';
+  const color = label.color ?? PINE_BLUE;
+  const textColor = label.textColor ?? '#ffffff';
+  const px = textPx(label.size);
+  ctx.font = fontOf(px, label.fontFamily, label.textFormatting);
+  const lines = label.text.split('\n');
+  const lineHeight = Math.round(px * 1.2);
+  const textWidth = lines.reduce((w, l) => Math.max(w, ctx.measureText(l).width), 0);
+  const textH = lines.length * lineHeight;
+  const align = label.textAlign ?? 'center';
 
-    const labels = this._source.getLabels();
-    const grid = this._source.getGrid();
-    const timeScale = chart.timeScale();
-
-    target.useMediaCoordinateSpace(({ context: ctx }) => {
-      for (const label of labels) {
-        const x = grid.x(timeScale, label.time);
-        if (x == null) continue;
-        const yloc = label.yloc ?? 'price';
-        let y: number | null;
-        if (yloc === 'price') {
-          y = series.priceToCoordinate(label.price);
-        } else {
-          const bar = grid.byTime.get(label.time);
-          if (!bar) continue;
-          const by = series.priceToCoordinate(yloc === 'abovebar' ? bar.high : bar.low);
-          y = by == null ? null : (by as number) + (yloc === 'abovebar' ? -LABEL_BAR_GAP : LABEL_BAR_GAP);
-        }
-        if (y == null) continue;
-
-        const fontSize = LABEL_FONT_SIZES[label.size ?? 'normal'] ?? 13;
-        ctx.font = `${fontSize}px sans-serif`;
-        const lines = label.text.split('\n');
-        const lineHeight = Math.round(fontSize * 1.2);
-        const textWidth = lines.reduce((w, l) => Math.max(w, ctx.measureText(l).width), 0);
-        const padding = 4;
-        const pointer = 6;
-        const w = textWidth + padding * 2;
-        const h = lines.length * lineHeight + padding * 2;
-        const style = label.style ?? 'label_center';
-
-        // box position (left, top) and pointer
-        let left = x - w / 2;
-        let top = y - h / 2;
-        if (style === 'label_down') top = y - pointer - h;
-        else if (style === 'label_up') top = y + pointer;
-        else if (style === 'label_left') left = x + pointer;
-        else if (style === 'label_right') left = x - pointer - w;
-        else if (yloc === 'abovebar') top = y - h;
-        else if (yloc === 'belowbar') top = y;
-
-        if (style !== 'none' && label.color && !isTransparent(label.color)) {
-          ctx.fillStyle = label.color;
-          ctx.beginPath();
-          ctx.roundRect(left, top, w, h, 3);
-          ctx.fill();
-          ctx.beginPath();
-          if (style === 'label_down') {
-            ctx.moveTo(x, y); ctx.lineTo(x - pointer, top + h - 0.5); ctx.lineTo(x + pointer, top + h - 0.5);
-          } else if (style === 'label_up') {
-            ctx.moveTo(x, y); ctx.lineTo(x - pointer, top + 0.5); ctx.lineTo(x + pointer, top + 0.5);
-          } else if (style === 'label_left') {
-            ctx.moveTo(x, y); ctx.lineTo(left + 0.5, y - pointer); ctx.lineTo(left + 0.5, y + pointer);
-          } else if (style === 'label_right') {
-            ctx.moveTo(x, y); ctx.lineTo(left + w - 0.5, y - pointer); ctx.lineTo(left + w - 0.5, y + pointer);
-          }
-          ctx.closePath();
-          ctx.fill();
-        }
-
-        ctx.fillStyle = label.textColor ?? '#ffffff';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        lines.forEach((l, k) => ctx.fillText(l, left + w / 2, top + padding + lineHeight * (k + 0.5)));
+  // text lines in the column [left, left + w] from `top`; outline: stroke with `outline` before the fill
+  const writeLines = (left: number, w: number, top: number, outline?: string) => {
+    ctx.textAlign = align;
+    ctx.textBaseline = 'middle';
+    const tx = align === 'left' ? left : align === 'right' ? left + w : left + w / 2;
+    lines.forEach((l, k) => {
+      const ty = top + lineHeight * (k + 0.5);
+      if (outline) {
+        ctx.strokeStyle = outline;
+        ctx.lineWidth = 3;
+        ctx.lineJoin = 'round';
+        ctx.strokeText(l, tx, ty);
+      }
+      if (shown(textColor)) {
+        ctx.fillStyle = textColor;
+        ctx.fillText(l, tx, ty);
       }
     });
+  };
+
+  const shape = LABEL_SHAPES[style];
+  if (shape) {
+    const half = typeof label.size === 'number' ? Math.max(2, label.size / 2) : LABEL_SHAPE_HALF[label.size ?? 'normal'] ?? 6;
+    const cy = yloc === 'abovebar' ? y - half : yloc === 'belowbar' ? y + half : y;
+    if (shown(color)) {
+      ctx.fillStyle = color;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      drawExtendedShape(ctx, shape, x, cy, half);
+    }
+    const below = style === 'arrowup' || style === 'triangleup';
+    writeLines(x - textWidth / 2, textWidth, below ? cy + half + 2 : cy - half - 2 - textH);
+    return;
   }
+
+  if (style === 'none' || style === 'text_outline') {
+    const top = yloc === 'abovebar' ? y - textH : yloc === 'belowbar' ? y : y - textH / 2;
+    writeLines(x - textWidth / 2, textWidth, top, style === 'text_outline' && shown(color) ? color : undefined);
+    return;
+  }
+
+  // box styles: box position (left, top) and the tip triangle
+  const w = textWidth + LABEL_PADDING * 2;
+  const h = textH + LABEL_PADDING * 2;
+  let left = x - w / 2;
+  let top = y - h / 2;
+  let tip: Array<[number, number]> | null = null;
+  const corner = LABEL_CORNERS[style];
+  if (style === 'label_down') {
+    top = y - LABEL_TIP - h;
+    tip = [[x, y], [x - LABEL_TIP, top + h - 0.5], [x + LABEL_TIP, top + h - 0.5]];
+  } else if (style === 'label_up') {
+    top = y + LABEL_TIP;
+    tip = [[x, y], [x - LABEL_TIP, top + 0.5], [x + LABEL_TIP, top + 0.5]];
+  } else if (style === 'label_left') {
+    left = x + LABEL_TIP;
+    tip = [[x, y], [left + 0.5, y - LABEL_TIP], [left + 0.5, y + LABEL_TIP]];
+  } else if (style === 'label_right') {
+    left = x - LABEL_TIP - w;
+    tip = [[x, y], [left + w - 0.5, y - LABEL_TIP], [left + w - 0.5, y + LABEL_TIP]];
+  } else if (corner) {
+    const [sx, sy] = corner;
+    const cx = x + sx * LABEL_TIP;
+    const cy = y + sy * LABEL_TIP;
+    left = sx > 0 ? cx : cx - w;
+    top = sy > 0 ? cy : cy - h;
+    tip = [[x, y], [cx + sx * LABEL_TIP * 1.5, cy], [cx, cy + sy * LABEL_TIP * 1.5]];
+  } else if (yloc === 'abovebar') {
+    top = y - h;
+  } else if (yloc === 'belowbar') {
+    top = y;
+  }
+
+  if (shown(color)) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.roundRect(left, top, w, h, 3);
+    ctx.fill();
+    if (tip) {
+      ctx.beginPath();
+      ctx.moveTo(tip[0][0], tip[0][1]);
+      ctx.lineTo(tip[1][0], tip[1][1]);
+      ctx.lineTo(tip[2][0], tip[2][1]);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+  writeLines(left + LABEL_PADDING, w - LABEL_PADDING * 2, top + LABEL_PADDING);
 }
+
+/** Font size (px) of table text */
+const TABLE_TEXT_SIZES: Record<PineSize, number> = { auto: 11, tiny: 9, small: 10, normal: 11, large: 13, huge: 16 };
 
 /**
- * Line drawing primitive — draws lines between two time/price points
+ * DOM table of a table.new table: merged cells (table.merge_cells), frame and cell borders, cell width / height in %
+ * of the plotting area (0: fit the text).
  */
-class LinePrimitive extends BasePrimitive {
-  private _lines: LineDrawingData[] = [];
-  private _views: IPrimitivePaneView[] = [new LinePaneView(this)];
+function buildTable(table: TableData, area: { width: number; height: number }): HTMLTableElement {
+  const el = document.createElement('table');
+  el.style.borderCollapse = 'collapse';
+  if (shown(table.bgColor)) el.style.background = table.bgColor;
+  if ((table.frameWidth ?? 0) > 0 && shown(table.frameColor)) el.style.border = `${table.frameWidth}px solid ${table.frameColor}`;
+  const border = (table.borderWidth ?? 0) > 0 && shown(table.borderColor) ? `${table.borderWidth}px solid ${table.borderColor}` : '';
 
-  constructor(private _grid: BarGrid) {
-    super();
-  }
-
-  setLines(lines: LineDrawingData[]): void {
-    this._lines = lines;
-    this._requestUpdate?.();
-  }
-
-  getLines() { return this._lines; }
-  getGrid() { return this._grid; }
-  getChart() { return this._chart; }
-  getSeries() { return this._series; }
-
-  updateAllViews(): void {}
-
-  paneViews(): readonly IPrimitivePaneView[] {
-    return this._views;
-  }
-}
-
-class LinePaneView implements IPrimitivePaneView {
-  constructor(private _source: LinePrimitive) {}
-
-  zOrder(): 'normal' { return 'normal'; }
-
-  renderer(): IPrimitivePaneRenderer | null {
-    return new LineDrawingRenderer(this._source);
-  }
-}
-
-class LineDrawingRenderer implements IPrimitivePaneRenderer {
-  constructor(private _source: LinePrimitive) {}
-
-  draw(target: CanvasRenderingTarget2D): void {
-    const chart = this._source.getChart();
-    const series = this._source.getSeries();
-    if (!chart || !series) return;
-
-    const lines = this._source.getLines();
-    const grid = this._source.getGrid();
-    const timeScale = chart.timeScale();
-
-    target.useMediaCoordinateSpace(({ context: ctx, mediaSize }) => {
-      for (const line of lines) {
-        const x1 = grid.x(timeScale, line.time1);
-        const y1 = series.priceToCoordinate(line.price1);
-        const x2 = grid.x(timeScale, line.time2);
-        const y2 = series.priceToCoordinate(line.price2);
-        if (x1 == null || y1 == null || x2 == null || y2 == null) continue;
-
-        ctx.strokeStyle = line.color ?? '#2962FF';
-        ctx.lineWidth = line.width ?? 1;
-
-        // Set line dash style
-        if (line.style === 'dashed') {
-          ctx.setLineDash([6, 3]);
-        } else if (line.style === 'dotted') {
-          ctx.setLineDash([2, 2]);
-        } else {
-          ctx.setLineDash([]);
-        }
-
-        ctx.beginPath();
-
-        // Handle line extension
-        const extend = line.extend ?? 'none';
-        let startX: number = x1, startY: number = y1, endX: number = x2, endY: number = y2;
-
-        if (extend === 'left' || extend === 'both') {
-          const dx = (x2 as number) - (x1 as number);
-          const dy = (y2 as number) - (y1 as number);
-          if (dx !== 0) {
-            const t = -(x1 as number) / dx;
-            startX = 0;
-            startY = (y1 as number) + dy * t;
-          }
-        }
-        if (extend === 'right' || extend === 'both') {
-          const dx = (x2 as number) - (x1 as number);
-          const dy = (y2 as number) - (y1 as number);
-          if (dx !== 0) {
-            const t = (mediaSize.width - (x1 as number)) / dx;
-            endX = mediaSize.width;
-            endY = (y1 as number) + dy * t;
-          }
-        }
-
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(endX, endY);
-        ctx.stroke();
-        ctx.setLineDash([]);
+  const cells = new Map(table.cells.map((c) => [`${c.row}_${c.column}`, c]));
+  const spans = new Map<string, { rows: number; cols: number }>();
+  const covered = new Set<string>();
+  for (const m of table.merges ?? []) {
+    spans.set(`${m.startRow}_${m.startColumn}`, { rows: m.endRow - m.startRow + 1, cols: m.endColumn - m.startColumn + 1 });
+    for (let r = m.startRow; r <= m.endRow; r++) {
+      for (let c = m.startColumn; c <= m.endColumn; c++) {
+        if (r !== m.startRow || c !== m.startColumn) covered.add(`${r}_${c}`);
       }
-    });
-  }
-}
-
-/**
- * Box primitive — draws filled rectangles
- */
-class BoxPrimitive extends BasePrimitive {
-  private _boxes: BoxData[] = [];
-  private _views: IPrimitivePaneView[] = [new BoxPaneView(this)];
-
-  constructor(private _grid: BarGrid) {
-    super();
+    }
   }
 
-  setBoxes(boxes: BoxData[]): void {
-    this._boxes = boxes;
-    this._requestUpdate?.();
-  }
-
-  getBoxes() { return this._boxes; }
-  getGrid() { return this._grid; }
-  getChart() { return this._chart; }
-  getSeries() { return this._series; }
-
-  updateAllViews(): void {}
-
-  paneViews(): readonly IPrimitivePaneView[] {
-    return this._views;
-  }
-}
-
-class BoxPaneView implements IPrimitivePaneView {
-  constructor(private _source: BoxPrimitive) {}
-
-  zOrder(): 'bottom' { return 'bottom'; }
-
-  renderer(): IPrimitivePaneRenderer | null {
-    return new BoxRenderer(this._source);
-  }
-}
-
-class BoxRenderer implements IPrimitivePaneRenderer {
-  constructor(private _source: BoxPrimitive) {}
-
-  draw(target: CanvasRenderingTarget2D): void {
-    const chart = this._source.getChart();
-    const series = this._source.getSeries();
-    if (!chart || !series) return;
-
-    const boxes = this._source.getBoxes();
-    const grid = this._source.getGrid();
-    const timeScale = chart.timeScale();
-
-    target.useMediaCoordinateSpace(({ context: ctx, mediaSize }) => {
-      for (const box of boxes) {
-        const x1 = grid.x(timeScale, box.time1);
-        const y1 = series.priceToCoordinate(box.price1);
-        const x2 = grid.x(timeScale, box.time2);
-        const y2 = series.priceToCoordinate(box.price2);
-        if (x1 == null || y1 == null || x2 == null || y2 == null) continue;
-
-        // Pine box extend: the box continues to the left / right edge of the pane
-        const extend = box.extend ?? 'none';
-        const left = extend === 'left' || extend === 'both' ? 0 : Math.min(x1, x2);
-        const right = extend === 'right' || extend === 'both' ? mediaSize.width : Math.max(x1, x2);
-        const top = Math.min(y1, y2);
-        const width = right - left;
-        const height = Math.abs(y2 - y1);
-
-        // Fill
-        if (box.bgColor) {
-          ctx.fillStyle = box.bgColor;
-          ctx.fillRect(left, top, width, height);
-        }
-
-        // Border
-        if (box.borderColor) {
-          ctx.strokeStyle = box.borderColor;
-          ctx.lineWidth = box.borderWidth ?? 1;
-          if (box.borderStyle === 'dashed') {
-            ctx.setLineDash([6, 3]);
-          } else if (box.borderStyle === 'dotted') {
-            ctx.setLineDash([2, 2]);
-          } else {
-            ctx.setLineDash([]);
-          }
-          ctx.strokeRect(left, top, width, height);
-          ctx.setLineDash([]);
-        }
+  for (let r = 0; r < table.rows; r++) {
+    const tr = el.insertRow();
+    for (let c = 0; c < table.columns; c++) {
+      const key = `${r}_${c}`;
+      if (covered.has(key)) continue;
+      const td = tr.insertCell();
+      const span = spans.get(key);
+      if (span) {
+        td.rowSpan = span.rows;
+        td.colSpan = span.cols;
       }
-    });
+      td.style.padding = '2px 6px';
+      td.style.whiteSpace = 'pre';
+      if (border) td.style.border = border;
+      const cell = cells.get(key);
+      if (!cell) continue;
+      td.textContent = cell.text;
+      const px = typeof cell.textSize === 'number' ? Math.max(1, cell.textSize) : TABLE_TEXT_SIZES[cell.textSize ?? 'normal'] ?? 11;
+      td.style.font = fontOf(px, cell.fontFamily, cell.textFormatting);
+      td.style.color = cell.textColor ?? '#000000';
+      if (shown(cell.bgColor)) td.style.background = cell.bgColor;
+      td.style.textAlign = cell.textHAlign ?? 'center';
+      td.style.verticalAlign = cell.textVAlign === 'top' ? 'top' : cell.textVAlign === 'bottom' ? 'bottom' : 'middle';
+      if (cell.width) td.style.width = `${(cell.width * area.width) / 100}px`;
+      if (cell.height) td.style.height = `${(cell.height * area.height) / 100}px`;
+      if (cell.tooltip) {
+        td.title = cell.tooltip;
+        td.style.pointerEvents = 'auto';
+      }
+    }
   }
+  return el;
 }
 
 // ─── Utility ──────────────────────────────────────────────────────────────
@@ -1269,13 +1516,11 @@ export class ChartManager {
   private paneMarkerAnchor: ISeriesApi<'Line'> | null = null;
   private paneMarkerPlugin: ISeriesMarkersPluginApi<Time> | null = null;
   private paneExtendedMarkerPrimitive: ExtendedMarkerPrimitive | null = null;
-  private labelPrimitive: LabelPrimitive | null = null;
-  private labelAnchorSeries: ISeriesApi<'Line'> | null = null;
-  // one line primitive per pane (lines with forceOverlay go to the price pane)
-  private lineDrawings: Array<{ primitive: LinePrimitive; anchor: ISeriesApi<'Line'> }> = [];
-  private boxPrimitive: BoxPrimitive | null = null;
-  private boxAnchorSeries: ISeriesApi<'Line'> | null = null;
-  private tableElement: HTMLElement | null = null;
+  private barPlotSeries: Map<string, ISeriesApi<'Bar'>> = new Map();
+  // drawings by kind (labels, lines, ...): one primitive per pane (forceOverlay drawings go to the price pane)
+  private drawingLayers: Map<string, Array<{ primitive: ISeriesPrimitive<Time>; anchor: ISeriesApi<'Line'> }>> = new Map();
+  private tables: Array<{ table: TableData; pane: number; el: HTMLElement }> = [];
+  private tableLayoutFrame = 0;
   private originalBarColors: CandlestickData<Time>[] | null = null;
   private grid = new BarGrid();
   // whitespace points after the last bar (future bar slots)
@@ -1320,12 +1565,13 @@ export class ChartManager {
     const resizeObserver = new ResizeObserver(() => {
       const { width, height } = container.getBoundingClientRect();
       this.chart.resize(width, height);
+      this.scheduleTableLayout();
     });
     resizeObserver.observe(container);
   }
 
   /**
-   * Replace the candle data. lightweight-charts 5.0.9 / 5.2.1 bug (tradingview/lightweight-charts#2154): a setData
+   * Replace the candle data. lightweight-charts 5.0.9 / 5.2.1 bug (lightweight-charts issue 2154): a setData
    * with the same times on a series that is alone keeps a stale list of time points, and a later setData after other
    * series were added empties the time scale (blank chart). Clearing first (setData([])) rebuilds the time points on
    * every call (client-side avoidance given in the issue). Remove when the library fix is released.
@@ -1730,6 +1976,36 @@ export class ChartManager {
     this.candlePlotSeries.clear();
   }
 
+  /**
+   * Add an OHLC bar series (plotbar in PineScript): vertical line from low to high, open tick on the left, close tick
+   * on the right, in the bar colour (PineScript default colour when the script sets none)
+   */
+  setBarPlotData(id: string, data: PlotBarData[], paneIndex: number): void {
+    let series = this.barPlotSeries.get(id);
+    if (!series) {
+      series = this.chart.addSeries(BarSeries, { upColor: PINE_BLUE, downColor: PINE_BLUE, openVisible: true, thinBars: false });
+      // bars with forceOverlay (PineScript force_overlay) go to the price pane
+      const pane = data.some(d => d.forceOverlay) ? 0 : paneIndex;
+      series.moveToPane(pane);
+      this.indicatorPanes.set(`bar_${id}`, pane);
+      this.barPlotSeries.set(id, series);
+    }
+    // a bar with one na value of open / high / low / close draws no bar (whitespace point)
+    series.setData(data.map((d): BarData<Time> | WhitespaceData<Time> => {
+      const time = d.time as unknown as Time;
+      if (![d.open, d.high, d.low, d.close].every(v => Number.isFinite(v))) return { time };
+      return { time, open: d.open, high: d.high, low: d.low, close: d.close, ...(d.color && { color: d.color }) };
+    }));
+  }
+
+  private clearBarPlots(): void {
+    for (const [id, series] of this.barPlotSeries) {
+      this.chart.removeSeries(series);
+      this.indicatorPanes.delete(`bar_${id}`);
+    }
+    this.barPlotSeries.clear();
+  }
+
   // ─── Phase 5: Markers ──────────────────────────────────────────────────
 
   /**
@@ -1739,7 +2015,7 @@ export class ChartManager {
    * (their price is an indicator value). top / bottom markers: at the edge of the indicator pane (price pane for an
    * overlay indicator or with forceOverlay).
    * Drawing: the lightweight-charts markers plugin (native API, atPrice* positions included) for its 4 shapes
-   * when the text has the shape colour and one line; the extended primitive otherwise (other shapes, textColor,
+   * when the text has the shape colour and one line; the extended primitive otherwise (other shapes, plotchar characters, textColor,
    * transparent shape colour, labels, multi-line text, top / bottom).
    */
   setIndicatorMarkers(markers: MarkerData[], paneIndex: number, overlay: boolean): void {
@@ -1757,6 +2033,7 @@ export class ChartManager {
       for (const m of list) {
         if (isPrice(m) && (m.price == null || Number.isNaN(m.price))) continue;
         const nativeOk = !isEdge(m)
+          && !m.char
           && BUILTIN_MARKER_SHAPES.has(m.shape)
           && (m.textColor == null || m.textColor === m.color)
           && !isTransparent(m.color)
@@ -1876,180 +2153,171 @@ export class ChartManager {
     }
   }
 
-  // ─── Phase 6: Labels ──────────────────────────────────────────────────
+  // ─── Phase 6: Drawings ────────────────────────────────────────────────
 
   /**
-   * Draw text labels on the chart
+   * Draw a list of drawings of one kind: one primitive per pane, on an invisible anchor series that holds the
+   * drawing prices (time scale and autoscale include the drawings; autoscale false: the time scale only). Drawings
+   * with forceOverlay go to the price pane, the others to `paneIndex`.
    */
-  setLabels(labels: LabelData[], paneIndex: number): void {
-    this.clearLabels();
-
-    const anchor = this.addAnchorSeries(paneIndex);
-    anchor.setData(anchorData(labels.map(l => ({ time: l.time, value: l.price })), this.grid));
-
-    const primitive = new LabelPrimitive(this.grid);
-    anchor.attachPrimitive(primitive as ISeriesPrimitive<Time>);
-    primitive.setLabels(labels);
-
-    this.labelPrimitive = primitive;
-    this.labelAnchorSeries = anchor;
-  }
-
-  private clearLabels(): void {
-    if (this.labelPrimitive && this.labelAnchorSeries) {
-      this.labelAnchorSeries.detachPrimitive(this.labelPrimitive as ISeriesPrimitive<Time>);
-      this.chart.removeSeries(this.labelAnchorSeries);
-      this.labelPrimitive = null;
-      this.labelAnchorSeries = null;
-    }
-  }
-
-  // ─── Phase 7: Line Drawings ───────────────────────────────────────────
-
-  /**
-   * Draw lines on the chart: lines with forceOverlay on the price pane, the others in `paneIndex`
-   */
-  setLineDrawings(lines: LineDrawingData[], paneIndex: number): void {
-    this.clearLineDrawings();
-
-    const groups = new Map<number, LineDrawingData[]>();
-    for (const line of lines) {
-      const pane = line.forceOverlay ? 0 : paneIndex;
+  private setDrawings<T>(
+    kind: string,
+    items: T[],
+    paneIndex: number,
+    forceOverlay: (item: T) => boolean | undefined,
+    points: (item: T) => Array<{ time: number; value: number }>,
+    draw: (env: DrawEnv, item: T) => void,
+    zOrder: 'bottom' | 'normal' | 'top',
+    autoscale = true
+  ): void {
+    this.clearDrawings(kind);
+    const groups = new Map<number, T[]>();
+    for (const item of items) {
+      const pane = forceOverlay(item) ? 0 : paneIndex;
       if (!groups.has(pane)) groups.set(pane, []);
-      groups.get(pane)!.push(line);
+      groups.get(pane)!.push(item);
     }
+    const layers: Array<{ primitive: ISeriesPrimitive<Time>; anchor: ISeriesApi<'Line'> }> = [];
     for (const [pane, group] of groups) {
       const anchor = this.addAnchorSeries(pane);
-      anchor.setData(anchorData(group.flatMap(l => [
-        { time: l.time1, value: l.price1 },
-        { time: l.time2, value: l.price2 },
-      ]), this.grid));
-      const primitive = new LinePrimitive(this.grid);
-      anchor.attachPrimitive(primitive as ISeriesPrimitive<Time>);
-      primitive.setLines(group);
-      this.lineDrawings.push({ primitive, anchor });
+      if (!autoscale) anchor.applyOptions({ autoscaleInfoProvider: () => null });
+      anchor.setData(anchorData(group.flatMap(points), this.grid));
+      const primitive = new DrawingPrimitive(this.grid, group, draw, zOrder) as ISeriesPrimitive<Time>;
+      anchor.attachPrimitive(primitive);
+      layers.push({ primitive, anchor });
+    }
+    this.drawingLayers.set(kind, layers);
+  }
+
+  private clearDrawings(kind?: string): void {
+    for (const k of kind ? [kind] : [...this.drawingLayers.keys()]) {
+      for (const { primitive, anchor } of this.drawingLayers.get(k) ?? []) {
+        anchor.detachPrimitive(primitive);
+        this.chart.removeSeries(anchor);
+      }
+      this.drawingLayers.delete(k);
     }
   }
 
-  private clearLineDrawings(): void {
-    for (const { primitive, anchor } of this.lineDrawings) {
-      anchor.detachPrimitive(primitive as ISeriesPrimitive<Time>);
-      this.chart.removeSeries(anchor);
-    }
-    this.lineDrawings = [];
+  /** label.new labels */
+  setLabels(labels: LabelData[], paneIndex: number): void {
+    this.setDrawings('labels', labels, paneIndex, (l) => l.forceOverlay, (l) => [{ time: l.time, value: l.price }], drawLabel, 'top');
   }
 
-  // ─── Phase 8: Boxes ───────────────────────────────────────────────────
+  /** line.new lines */
+  setLineDrawings(lines: LineDrawingData[], paneIndex: number): void {
+    this.setDrawings('lines', lines, paneIndex, (l) => l.forceOverlay, (l) => [
+      { time: l.time1, value: l.price1 },
+      { time: l.time2, value: l.price2 },
+    ], drawLine, 'normal');
+  }
 
-  /**
-   * Draw boxes on the chart
-   */
+  /** box.new boxes */
   setBoxes(boxes: BoxData[], paneIndex: number): void {
-    this.clearBoxes();
-
-    const anchor = this.addAnchorSeries(paneIndex);
-    anchor.setData(anchorData(boxes.flatMap(b => [
+    this.setDrawings('boxes', boxes, paneIndex, (b) => b.forceOverlay, (b) => [
       { time: b.time1, value: b.price1 },
       { time: b.time2, value: b.price2 },
-    ]), this.grid));
-
-    const primitive = new BoxPrimitive(this.grid);
-    anchor.attachPrimitive(primitive as ISeriesPrimitive<Time>);
-    primitive.setBoxes(boxes);
-
-    this.boxPrimitive = primitive;
-    this.boxAnchorSeries = anchor;
+    ], drawBox, 'bottom');
   }
 
-  private clearBoxes(): void {
-    if (this.boxPrimitive && this.boxAnchorSeries) {
-      this.boxAnchorSeries.detachPrimitive(this.boxPrimitive as ISeriesPrimitive<Time>);
-      this.chart.removeSeries(this.boxAnchorSeries);
-      this.boxPrimitive = null;
-      this.boxAnchorSeries = null;
+  /** linefill.new fills (pane of the first line) */
+  setLinefills(fills: LinefillData[], paneIndex: number): void {
+    this.setDrawings('linefills', fills, paneIndex, (f) => f.line1.forceOverlay, (f) => [
+      { time: f.line1.time1, value: f.line1.price1 },
+      { time: f.line1.time2, value: f.line1.price2 },
+      { time: f.line2.time1, value: f.line2.price1 },
+      { time: f.line2.time2, value: f.line2.price2 },
+    ], drawLinefill, 'bottom');
+  }
+
+  /** polyline.new polylines */
+  setPolylines(polylines: PolylineData[], paneIndex: number): void {
+    this.setDrawings('polylines', polylines, paneIndex, (p) => p.forceOverlay,
+      (p) => p.points.map((pt) => ({ time: pt.time, value: pt.price })), drawPolyline, 'normal');
+  }
+
+  /**
+   * plotarrow arrows, one group per plotarrow (`configs`: minheight / maxheight / forceOverlay by id; PineScript
+   * defaults 5 / 100 px when the indicator gives none). On the price pane (overlay indicator or forceOverlay) the
+   * arrows point at the bar; in an indicator pane they start at the pane edge.
+   */
+  setArrows(arrows: ArrowData[], configs: ArrowConfig[], paneIndex: number, overlay: boolean): void {
+    const byId = new Map<string, ArrowData[]>();
+    for (const a of arrows) {
+      if (!byId.has(a.id)) byId.set(a.id, []);
+      byId.get(a.id)!.push(a);
     }
+    const series: ArrowSeries[] = [...byId].map(([id, list]) => {
+      const cfg = configs.find((c) => c.id === id);
+      const forceOverlay = !!cfg?.forceOverlay;
+      return {
+        arrows: list,
+        minheight: cfg?.minheight ?? 5,
+        maxheight: cfg?.maxheight ?? 100,
+        forceOverlay,
+        onBars: overlay || forceOverlay || paneIndex === 0,
+      };
+    });
+    this.setDrawings('arrows', series, paneIndex, (s) => s.forceOverlay,
+      (s) => s.arrows.map((a) => ({ time: a.time as number, value: 0 })), drawArrowSeries, 'normal', false);
   }
 
   // ─── Phase 9: Tables ──────────────────────────────────────────────────
 
   /**
-   * Display a data table as a DOM overlay
+   * Display the tables (table.new) as DOM overlays on their pane (the price pane with forceOverlay), at their
+   * position inside the plotting area. PineScript defaults: no background, frame or borders; black cell text.
    */
-  setTable(table: TableData): void {
+  setTables(tables: TableData[], paneIndex: number): void {
     this.clearTable();
-
-    const el = document.createElement('div');
-    el.className = 'chart-table-overlay';
-
-    // Position mapping
-    const positionStyles: Record<string, string> = {
-      top_left: 'top:8px;left:8px',
-      top_center: 'top:8px;left:50%;transform:translateX(-50%)',
-      top_right: 'top:8px;right:8px',
-      middle_left: 'top:50%;left:8px;transform:translateY(-50%)',
-      middle_center: 'top:50%;left:50%;transform:translate(-50%,-50%)',
-      middle_right: 'top:50%;right:8px;transform:translateY(-50%)',
-      bottom_left: 'bottom:8px;left:8px',
-      bottom_center: 'bottom:8px;left:50%;transform:translateX(-50%)',
-      bottom_right: 'bottom:8px;right:8px',
-    };
-
-    el.style.cssText = `
-      position:absolute;${positionStyles[table.position] ?? 'top:8px;right:8px'};
-      z-index:10;pointer-events:none;
-      background:rgba(30,34,45,0.9);border:1px solid #2b2b43;border-radius:4px;
-      padding:4px;font-family:monospace;font-size:11px;color:#d1d4dc;
-    `;
-
-    // Build table HTML
-    const grid: string[][] = Array.from({ length: table.rows }, () =>
-      Array.from({ length: table.columns }, () => '')
-    );
-    const cellStyles: Record<string, { bgColor?: string; textColor?: string; textSize?: string }> = {};
-
-    for (const cell of table.cells) {
-      if (cell.row < table.rows && cell.column < table.columns) {
-        grid[cell.row][cell.column] = cell.text;
-        cellStyles[`${cell.row}_${cell.column}`] = {
-          bgColor: cell.bgColor,
-          textColor: cell.textColor,
-          textSize: cell.textSize,
-        };
-      }
-    }
-
-    const fontSizes: Record<string, string> = {
-      tiny: '9px', small: '10px', normal: '11px', large: '13px', huge: '16px',
-    };
-
-    let html = '<table style="border-collapse:collapse">';
-    for (let r = 0; r < table.rows; r++) {
-      html += '<tr>';
-      for (let c = 0; c < table.columns; c++) {
-        const style = cellStyles[`${r}_${c}`] ?? {};
-        const bg = style.bgColor ? `background:${style.bgColor};` : '';
-        const tc = style.textColor ? `color:${style.textColor};` : '';
-        const fs = style.textSize ? `font-size:${fontSizes[style.textSize] ?? '11px'};` : '';
-        html += `<td style="padding:2px 6px;${bg}${tc}${fs}">${grid[r][c]}</td>`;
-      }
-      html += '</tr>';
-    }
-    html += '</table>';
-    el.innerHTML = html;
-
     this.container.style.position = 'relative';
-    this.container.appendChild(el);
-    this.tableElement = el;
+    for (const table of tables) {
+      const el = document.createElement('div');
+      el.className = 'chart-table-overlay';
+      el.style.cssText = 'position:absolute;z-index:10;pointer-events:none;visibility:hidden';
+      this.container.appendChild(el);
+      this.tables.push({ table, pane: table.forceOverlay ? 0 : paneIndex, el });
+    }
+    this.scheduleTableLayout();
+  }
+
+  /** Lay out the tables after the chart has laid out its panes */
+  private scheduleTableLayout(): void {
+    if (!this.tables.length || this.tableLayoutFrame) return;
+    this.tableLayoutFrame = requestAnimationFrame(() => {
+      this.tableLayoutFrame = 0;
+      this.layoutTables();
+    });
+  }
+
+  private layoutTables(): void {
+    const cr = this.container.getBoundingClientRect();
+    const panes = this.chart.panes();
+    const leftScale = this.chart.priceScale('left').width();
+    const rightScale = this.chart.priceScale('right').width();
+    for (const { table, pane, el } of this.tables) {
+      const pr = (panes[pane] ?? panes[0])?.getHTMLElement()?.getBoundingClientRect() ?? cr;
+      // plotting area of the pane (without the price scales)
+      const area = { left: pr.left - cr.left + leftScale, top: pr.top - cr.top, width: pr.width - leftScale - rightScale, height: pr.height };
+      el.replaceChildren(buildTable(table, area));
+      const margin = 8;
+      const [v, h] = table.position.split('_');
+      const left = h === 'left' ? margin : h === 'right' ? area.width - el.offsetWidth - margin : (area.width - el.offsetWidth) / 2;
+      const top = v === 'top' ? margin : v === 'bottom' ? area.height - el.offsetHeight - margin : (area.height - el.offsetHeight) / 2;
+      el.style.left = `${area.left + left}px`;
+      el.style.top = `${area.top + top}px`;
+      el.style.visibility = 'visible';
+    }
   }
 
   /**
-   * Remove table overlay
+   * Remove the table overlays
    */
   clearTable(): void {
-    if (this.tableElement) {
-      this.tableElement.remove();
-      this.tableElement = null;
-    }
+    for (const { el } of this.tables) el.remove();
+    this.tables = [];
+    if (this.tableLayoutFrame) cancelAnimationFrame(this.tableLayoutFrame);
+    this.tableLayoutFrame = 0;
   }
 
   // ─── Existing methods ──────────────────────────────────────────────────
@@ -2269,9 +2537,8 @@ export class ChartManager {
     this.clearBarColors();
     this.clearBgColors();
     this.clearCandlePlots();
-    this.clearLabels();
-    this.clearLineDrawings();
-    this.clearBoxes();
+    this.clearBarPlots();
+    this.clearDrawings();
     this.clearTable();
     this.clearFutureSlots();
 

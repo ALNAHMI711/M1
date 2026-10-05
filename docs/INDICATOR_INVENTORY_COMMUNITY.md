@@ -11,7 +11,7 @@ source. This list is generated from the indicator registry (`indicatorRegistry` 
 | **Community indicators** | 1150 |
 | Drawn on the price pane (overlay) | 668 |
 | Drawn in their own pane | 482 |
-| Compared with TradingView outputs (batches 1-42) | 832 |
+| Compared with reference outputs (batches 1-42) | 832 |
 
 | Category | Count |
 |---|---|
@@ -30,7 +30,7 @@ source. This list is generated from the indicator registry (`indicatorRegistry` 
 - **Pane**: `price` for an overlay indicator, `own` for an indicator in its own pane (some plots, backgrounds or
   candles of an `own` indicator can still be drawn on the price pane, as Pine `force_overlay`).
 - **Author**: the author of the Pine source, from the port header (empty when the header does not name one).
-- **Check**: the batch in which the port was compared with TradingView outputs (BITSTAMP:BTCUSD 1D and NASDAQ:AAPL 1D,
+- **Check**: the batch in which the port was compared with reference outputs (BITSTAMP:BTCUSD 1D and NASDAQ:AAPL 1D,
   full histories, default inputs and input variants: plots, colours, fills, markers, bar / background colours and
   candles). Empty for the earlier ports.
 

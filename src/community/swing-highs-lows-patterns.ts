@@ -115,6 +115,7 @@ export function calculate(bars: Bar[], inputs: Partial<SwingHighsLowsPatternsInp
         price: ph,
         text: label + '\n' + patternName,
         textColor: swinghCss,
+        color: 'transparent',
         style: 'label_down',
         size: 'normal',
       });
@@ -127,6 +128,7 @@ export function calculate(bars: Bar[], inputs: Partial<SwingHighsLowsPatternsInp
         price: pl,
         text: label + '\n' + patternName,
         textColor: swinglCss,
+        color: 'transparent',
         style: 'label_up',
         size: 'normal',
       });

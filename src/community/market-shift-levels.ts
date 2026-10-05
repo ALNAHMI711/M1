@@ -129,6 +129,7 @@ export function calculate(bars: Bar[], inputs: Partial<MarketShiftLevelsInputs> 
         price: bars[i - 1].high,
         text: labelText,
         textColor: '#FF0000',
+        color: 'transparent',
         style: 'label_down',
       });
     }
@@ -143,6 +144,7 @@ export function calculate(bars: Bar[], inputs: Partial<MarketShiftLevelsInputs> 
         price: bars[i - 1].low,
         text: labelText,
         textColor: '#00FF00',
+        color: 'transparent',
         style: 'label_up',
       });
     }

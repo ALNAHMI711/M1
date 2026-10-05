@@ -1,7 +1,7 @@
 /**
- * One slice of the TradingView regression fixtures (the fixtures are split in PARTS slices so vitest runs them in
+ * One slice of the reference regression fixtures (the fixtures are split in PARTS slices so vitest runs them in
  * parallel). Each fixture is one test: every check of every dataset must have at least the accepted number of equal
- * bars. Skipped when tests/tv-regression/data does not exist (the data is local only, see README.md).
+ * bars. Skipped when tests/reference-regression/data does not exist (the data is local only, see README.md).
  */
 import { describe, it, expect } from 'vitest';
 import { indicatorRegistry } from '../../src/index';
@@ -12,7 +12,7 @@ export const PARTS = 8;
 export function runPart(part: number): void {
   const ids = fixtureIds().filter((_, k) => k % PARTS === part);
   const byId = new Map(indicatorRegistry.map((e) => [e.id, e]));
-  describe.skipIf(ids.length === 0)(`TradingView regression part ${part + 1}/${PARTS}`, () => {
+  describe.skipIf(ids.length === 0)(`Reference regression part ${part + 1}/${PARTS}`, () => {
     it.each(ids)('%s', (id) => {
       const fx = loadFixture(id);
       const entry = byId.get(id);

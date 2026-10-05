@@ -7,7 +7,7 @@
  * library for better performance and more idiomatic TypeScript code.
  */
 
-import type { Bar, InputConfig, PlotConfig, HLineConfig, FillConfig } from 'oakscriptjs';
+import type { Bar, InputConfig, PlotConfig, HLineConfig, FillConfig, ArrowConfig } from 'oakscriptjs';
 export type { InputConfig, PlotConfig, HLineConfig, FillConfig } from 'oakscriptjs';
 
 // SMA - Simple Moving Average
@@ -1803,15 +1803,24 @@ export const AllPatterns = candlestickPortAllPatterns.indicator;
 
 export type {
   MarkerData,
+  MarkerPosition,
+  MarkerShape,
   PineSize,
   BarColorData,
   BgColorData,
   PlotCandleData,
+  PlotBarData,
   LabelData,
+  LabelStyle,
   LineDrawingData,
   BoxData,
+  LinefillData,
+  PolylineData,
   TableData,
   TableCell,
+  TableCellData,
+  TableMergeData,
+  TablePosition,
 } from './types';
 export { barInterval, barTime } from './bar-time';
 
@@ -5262,6 +5271,8 @@ export interface IndicatorRegistryEntry {
   hlineConfig?: HLineConfig[];
   fillConfig?: FillConfig[];
   plotCandleConfig?: { id: string; title: string }[];
+  /** plotarrow settings by arrow id (minheight / maxheight / forceOverlay) of the `arrows` of the result */
+  arrowConfig?: ArrowConfig[];
   defaultInputs: Record<string, unknown>;
   calculate: (bars: Bar[], inputs?: any) => any;
 }
@@ -21773,4 +21784,4 @@ const registryPart5: IndicatorRegistryEntry[] = [
 export const indicatorRegistry: IndicatorRegistryEntry[] = [...registryPart1, ...registryPart2, ...registryPart3, ...registryPart4, ...registryPart5];
 
 // Package version
-export const version = '0.7.1';
+export const version = '0.8.0';

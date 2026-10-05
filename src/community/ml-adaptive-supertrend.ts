@@ -91,7 +91,7 @@ function kMeansClusters(data: number[], k: number, iterations: number): { centro
   return { centroids, assignments };
 }
 
-export function calculate(bars: Bar[], inputs: Partial<MlAdaptiveSupertrendInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[]; labels: LabelData[]; tables: TableData } {
+export function calculate(bars: Bar[], inputs: Partial<MlAdaptiveSupertrendInputs> = {}): Omit<IndicatorResult, 'markers'> & { markers: MarkerData[]; labels: LabelData[]; tables: TableData[] } {
   const { atrLen, minFactor, midFactor, maxFactor, trainLen, showLabels } = { ...defaultInputs, ...inputs };
   const n = bars.length;
 
@@ -233,6 +233,7 @@ export function calculate(bars: Bar[], inputs: Partial<MlAdaptiveSupertrendInput
         price: labelPrice,
         text: labelText,
         textColor,
+        color: 'transparent',
         style: 'label_center',
         size: 'small',
       });
@@ -280,7 +281,7 @@ export function calculate(bars: Bar[], inputs: Partial<MlAdaptiveSupertrendInput
     { row: 5, column: 1, text: lastActiveFactor.toFixed(2), bgColor: '#1E222D', textColor: '#2962FF', textSize: 'tiny' },
   ];
 
-  const tables: TableData = {
+  const table: TableData = {
     position: 'top_right',
     columns: 2,
     rows: 6,
@@ -302,7 +303,7 @@ export function calculate(bars: Bar[], inputs: Partial<MlAdaptiveSupertrendInput
     ],
     markers,
     labels,
-    tables,
+    tables: [table],
   };
 }
 

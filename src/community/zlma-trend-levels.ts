@@ -196,6 +196,7 @@ export function calculate(bars: Bar[], inputs: Partial<ZlmaTrendLevelsInputs> = 
           labels.push({
             time: bars[i - 1].time, price: highPrev,
             text: '\u25BC', textColor: '#4043f1',
+            color: 'transparent',
             style: 'label_down', size: 'tiny',
           });
         }
@@ -204,6 +205,7 @@ export function calculate(bars: Bar[], inputs: Partial<ZlmaTrendLevelsInputs> = 
           labels.push({
             time: bars[i - 1].time, price: lowPrev,
             text: '\u25B2', textColor: '#30d453',
+            color: 'transparent',
             style: 'label_up', size: 'tiny',
           });
         }

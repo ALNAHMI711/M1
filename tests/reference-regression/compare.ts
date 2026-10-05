@@ -1,15 +1,15 @@
 /**
- * TradingView regression checks.
+ * Reference regression checks.
  *
- * Each fixture (data/fixtures/<id>.json.gz, built from TradingView runs of the Pine source) holds, per dataset, the
- * TradingView outputs already paired with the port outputs (plot values, plot / fill / bar / background / candle
+ * Each fixture (data/fixtures/<id>.json.gz, built from reference runs of the Pine source) holds, per dataset, the
+ * reference outputs already paired with the port outputs (plot values, plot / fill / bar / background / candle
  * colours, gradient fills, markers) and the number of equal bars accepted when the fixture was built. A check fails
  * when the port now gives fewer equal bars (a regression); more equal bars is an improvement.
  *
  * The equality rules are the ones used to build the fixtures:
  * - values: na equals na; numbers equal within 1e-12 or 1e-6 relative; |x| >= 1e99 counts as na
  * - colours: '#RRGGBBAA'; na, 'transparent' and alpha 0 are equal; the alpha may differ by 1
- * - markers: a TradingView shape on bar i is matched by a port marker on bar i + shift with the same shape (when the
+ * - markers: a reference shape on bar i is matched by a port marker on bar i + shift with the same shape (when the
  *   series has one) and colour (marker colour, else text colour)
  */
 import { readFileSync, existsSync, readdirSync } from 'node:fs';
@@ -229,7 +229,7 @@ export function runChecks(ds: FixtureDataset, result: unknown, bars: { time: num
     let extra = 0;
     for (const [i, ps] of pm) for (const p of ps) if (!explained.has(`${i}|${p.shape}`) && !explained.has(`${i}|null`)) extra++;
     // fewer extra markers is better: compared as "bars without an extra marker"
-    add('extra markers (port markers no TradingView shape explains)', -extra, -ds.extra_markers, 0);
+    add('extra markers (port markers no reference shape explains)', -extra, -ds.extra_markers, 0);
   }
 
   for (const c of ds.colors) {

@@ -1,8 +1,8 @@
 /**
- * TradingView regression of the candlestick patterns: every TradingView run (dataset x input variant) of the 45
- * candlestick scripts must stay equal: detection bars of each alert, the labels TradingView keeps (bar, text, style,
+ * Reference regression of the candlestick patterns: every reference run (dataset x input variant) of the 45
+ * candlestick scripts must stay equal: detection bars of each alert, the labels the reference keeps (bar, text, style,
  * colour, tooltip), the background colours and the alertcondition titles / messages. From bar 0 on daily datasets,
- * from bar 300 on intraday datasets (TradingView computed on hidden earlier bars). Local data (README.md).
+ * from bar 300 on intraday datasets (the reference was computed on hidden earlier bars). Local data (README.md).
  */
 import { describe, it, expect } from 'vitest';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
@@ -46,7 +46,7 @@ function inputsFor(slug: string, variant: string): Record<string, unknown> {
   return inputs;
 }
 
-/** candlestick-tv check.py rgba(): channels truncated, alpha round(a * 255) (half to even) */
+/** rgba() of the candlestick check script: channels truncated, alpha round(a * 255) (half to even) */
 function rgba(c: string | null | undefined): number[] | null {
   if (c === null || c === undefined) return null;
   const s = c.trim();
@@ -72,7 +72,7 @@ function checkRun(slug: string, run: Run): string[] {
   const port = ports.get(slug);
   if (!port) return [`no port for ${slug}`];
   const bars = loadBars(run.bars);
-  if (bars.length !== run.times_count) return [`bar count ${bars.length}, TradingView ${run.times_count}`];
+  if (bars.length !== run.times_count) return [`bar count ${bars.length}, reference ${run.times_count}`];
   const inputs = inputsFor(slug, run.variant);
   const res = port.indicator.calculate(bars, inputs);
   const raw = executeScript(port.body as never, bars as never, inputs as never) as any;
@@ -100,8 +100,8 @@ function checkRun(slug: string, run: Run): string[] {
       if (!byKey.has(k)) continue; // no port marker: none on both, or a pattern the inputs do not show
       pb = new Set([...byKey.get(k)!].filter((i) => i < n));
     }
-    const tvb = new Set(d.bars);
-    const late = [...new Set([...tvb, ...pb])].filter((i) => (tvb.has(i) !== pb.has(i)) && i >= start);
+    const refBars = new Set(d.bars);
+    const late = [...new Set([...refBars, ...pb])].filter((i) => (refBars.has(i) !== pb.has(i)) && i >= start);
     if (late.length) diffs.push(`detect ${d.title}: ${late.length} bars differ, first ${late.sort((a, b) => a - b).slice(0, 3)}`);
   }
 
@@ -109,7 +109,7 @@ function checkRun(slug: string, run: Run): string[] {
   let pm = markers.map((mk, k) => ({ i: t2i.get(mk.time)!, k, mk })).sort((a, b) => a.i - b.i || a.k - b.k)
     .filter((x) => x.i >= start && x.i < n).map((x) => x.mk);
   pm = tl.length ? pm.slice(-tl.length) : [];
-  if (tl.length !== pm.length) diffs.push(`labels: ${tl.length} TradingView, ${pm.length} port`);
+  if (tl.length !== pm.length) diffs.push(`labels: ${tl.length} reference, ${pm.length} port`);
   tl.forEach((a, j) => {
     const b = pm[j];
     if (!b) return;
@@ -123,20 +123,20 @@ function checkRun(slug: string, run: Run): string[] {
     if (i !== undefined) portBg.set(i, b.color);
   }
   if (!run.bg) {
-    if (portBg.size) diffs.push(`bg: port has ${portBg.size} bars, TradingView none`);
+    if (portBg.size) diffs.push(`bg: port has ${portBg.size} bars, reference none`);
   } else {
-    const tvbg = new Map(run.bg.bars);
+    const refBg = new Map(run.bg.bars);
     const pbg = new Map([...portBg].filter(([i]) => i < n + run.bg!.offset));
-    const bad = [...new Set([...tvbg.keys(), ...pbg.keys()])].filter((i) => i >= start && !sameColour(tvbg.get(i), pbg.get(i)));
+    const bad = [...new Set([...refBg.keys(), ...pbg.keys()])].filter((i) => i >= start && !sameColour(refBg.get(i), pbg.get(i)));
     if (bad.length) diffs.push(`bg: ${bad.length} bars differ`);
   }
   return diffs.map((d) => `${run.dataset} @${run.variant}: ${d}`);
 }
 
-describe.skipIf(files.length === 0)('TradingView regression: candlestick patterns', () => {
+describe.skipIf(files.length === 0)('Reference regression: candlestick patterns', () => {
   it.each(files.map((f) => f.slice(0, -'.json.gz'.length)))('%s', (slug) => {
     const fx = JSON.parse(gunzipSync(readFileSync(join(dir, `${slug}.json.gz`))).toString('utf-8')) as { runs: Run[] };
     const diffs = fx.runs.flatMap((r) => checkRun(slug, r));
-    expect(diffs, `runs that are no longer equal to TradingView (${slug})`).toEqual([]);
+    expect(diffs, `runs that are no longer equal to the reference (${slug})`).toEqual([]);
   });
 });

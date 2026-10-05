@@ -45,7 +45,7 @@ export const metadata = {
   overlay: false,
 };
 
-export function calculate(bars: Bar[], inputs: Partial<MlRsiInputs> = {}): Omit<IndicatorResult, 'markers'> & { tables: TableData; barColors: BarColorData[] } {
+export function calculate(bars: Bar[], inputs: Partial<MlRsiInputs> = {}): Omit<IndicatorResult, 'markers'> & { tables: TableData[]; barColors: BarColorData[] } {
   const { rsiLen, k, lookback, src } = { ...defaultInputs, ...inputs };
   const n = bars.length;
 
@@ -176,7 +176,7 @@ export function calculate(bars: Bar[], inputs: Partial<MlRsiInputs> = {}): Omit<
     { row: 4, column: 1, text: lastPrediction, bgColor: '#1E222D', textColor: predColor, textSize: 'tiny' },
   ];
 
-  const tables: TableData = {
+  const table: TableData = {
     position: 'top_right',
     columns: 2,
     rows: 5,
@@ -192,7 +192,7 @@ export function calculate(bars: Bar[], inputs: Partial<MlRsiInputs> = {}): Omit<
       { value: 30, options: { color: '#26A69A', linestyle: 'dashed' as const, title: 'Oversold' } },
     ],
     barColors,
-    tables,
+    tables: [table],
   };
 }
 
