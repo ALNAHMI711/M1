@@ -5,7 +5,7 @@ import json
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app, calculated_rr, risk_check, valid_signature, Signal
+from app.main import Signal, app, calculated_rr, risk_check, valid_signature
 from app.telegram import parse_telegram_signal
 
 
@@ -77,7 +77,7 @@ def test_signature():
         main.WEBHOOK_SECRET = old
 
 
-def test_webhook_accepts_and_rejects_duplicate(client, monkeypatch):
+def test_webhook_accepts_and_rejects_duplicate(client):
     import app.main as main
     old = main.WEBHOOK_SECRET
     main.WEBHOOK_SECRET = "webhook-secret"
@@ -95,21 +95,14 @@ def test_webhook_accepts_and_rejects_duplicate(client, monkeypatch):
             "signal_id": "webhook-unique-01",
         }
         raw = json.dumps(payload, separators=(",", ":")).encode()
-        signature = hmac.new(
-            b"webhook-secret", raw, hashlib.sha256
-        ).hexdigest()
+        signature = hmac.new(b"webhook-secret", raw, hashlib.sha256).hexdigest()
         first = client.post(
-            "/v1/webhooks/tradingview",
-            content=raw,
-            headers={"x-signature": signature},
+            "/v1/webhooks/tradingview", content=raw, headers={"x-signature": signature}
         )
         assert first.status_code == 200
         assert first.json()["accepted"] is True
-
         second = client.post(
-            "/v1/webhooks/tradingview",
-            content=raw,
-            headers={"x-signature": signature},
+            "/v1/webhooks/tradingview", content=raw, headers={"x-signature": signature}
         )
         assert second.status_code == 409
     finally:
@@ -118,18 +111,22 @@ def test_webhook_accepts_and_rejects_duplicate(client, monkeypatch):
 
 def test_validate_endpoint_rejects_bad_rr(client):
     payload = {
-        "symbol": "BTCUSDT",
-        "side": "LONG",
-        "entry": 100,
-        "stop_loss": 95,
-        "take_profit": 105,
-        "score": 90,
-        "rr": 1,
-        "source": "MANUAL",
-        "mode": "PAPER",
-        "signal_id": "validate-rr-01",
+        "symbol": "BTCUSDT", "side": "LONG", "entry": 100,
+        "stop_loss": 95, "take_profit": 105, "score": 90, "rr": 1,
+        "source": "MANUAL", "mode": "PAPER", "signal_id": "validate-rr-01",
     }
     response = client.post("/v1/signals/validate", json=payload)
     assert response.status_code == 200
     assert response.json()["accepted"] is False
     assert "rr_below_2" in response.json()["reasons"]
+
+
+def test_telegram_endpoint_runs_risk_gate(client):
+    response = client.post(
+        "/v1/signals/telegram/parse",
+        params={"text": "BTCUSDT LONG ENTRY: 100 SL: 90 TP1: 120 SCORE: 92 RR: 2"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["accepted"] is True
+    assert body["signal"]["source"] == "TELEGRAM"
