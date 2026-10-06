@@ -92,8 +92,12 @@ def _decode(token: str) -> TokenData:
     return data
 
 
-async def current_user(token: str = Depends(oauth2_scheme)) -> TokenData:
-    return _decode(token)
+async def current_user(security_scopes: SecurityScopes, token: str = Depends(oauth2_scheme)) -> TokenData:
+    data = _decode(token)
+    required = set(security_scopes.scopes)
+    if required and not required.issubset(set(data.scopes)):
+        raise HTTPException(status_code=403, detail="insufficient permissions")
+    return data
 
 
 def require_scope(scope: str):
