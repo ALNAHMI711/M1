@@ -17,6 +17,13 @@ The integration target is ALNAHMI711/M1. It is the existing merge-oriented repos
 | Younesbenzouai/telegram-binance-bot | Telegram signal parsing → Binance | Reviewed; parser must never bypass validation/risk |
 | GitLab Binance-topic projects | Market-data/order-book and self-hosted trading references | Architecture reference; no code copied without license verification |
 
+## Implementation added in this integration slice
+
+- `backend/app/main.py` is now the server-side validation boundary.
+- `backend/pyproject.toml` defines the FastAPI/Pydantic control-plane dependencies.
+- `.github/workflows/backend-check.yml` performs a Python compile check on pull requests and main pushes.
+- The endpoint is validation-only; it does not place exchange orders.
+
 ## Architecture chosen
 
 Browser / Arabic RTL terminal
