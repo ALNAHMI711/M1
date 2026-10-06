@@ -3,18 +3,13 @@ import secrets
 from datetime import datetime, timedelta, timezone
 
 import jwt
-from fastapi import Depends, HTTPException, Security, status
+from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from pydantic import BaseModel, ValidationError
 
-SECRET_KEY = os.getenv("M1_AUTH_SECRET", "")
 ALGORITHM = "HS256"
-TOKEN_MINUTES = int(os.getenv("M1_AUTH_TOKEN_MINUTES", "30"))
-ADMIN_USERNAME = os.getenv("M1_ADMIN_USERNAME", "admin")
-ADMIN_PASSWORD_HASH = os.getenv("M1_ADMIN_PASSWORD_HASH", "")
-
 SCOPES = {
     "control:read": "Read the trading control plane",
     "control:write": "Change non-trading control settings",
@@ -29,6 +24,7 @@ ROLE_SCOPES = {
 }
 
 password_hash = PasswordHash.recommended()
+dummy_password_hash = password_hash.hash("invalid-password-dummy")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token", scopes=SCOPES)
 _revoked_tokens: set[str] = set()
 
@@ -46,15 +42,19 @@ class TokenData(BaseModel):
 
 
 def _secret() -> str:
-    if not SECRET_KEY:
+    secret = os.getenv("M1_AUTH_SECRET", "")
+    if not secret:
         raise RuntimeError("M1_AUTH_SECRET is not configured")
-    return SECRET_KEY
+    return secret
 
 
 def authenticate(username: str, password: str) -> str | None:
-    if not secrets.compare_digest(username, ADMIN_USERNAME):
+    admin_username = os.getenv("M1_ADMIN_USERNAME", "admin")
+    password_hash_value = os.getenv("M1_ADMIN_PASSWORD_HASH", "")
+    if not secrets.compare_digest(username, admin_username):
+        password_hash.verify(password, dummy_password_hash)
         return None
-    if not ADMIN_PASSWORD_HASH or not password_hash.verify(password, ADMIN_PASSWORD_HASH):
+    if not password_hash_value or not password_hash.verify(password, password_hash_value):
         return None
     return "ADMIN"
 
@@ -68,7 +68,7 @@ def create_access_token(username: str, role: str) -> str:
         "role": role,
         "scope": " ".join(scopes),
         "iat": now,
-        "exp": now + timedelta(minutes=TOKEN_MINUTES),
+        "exp": now + timedelta(minutes=int(os.getenv("M1_AUTH_TOKEN_MINUTES", "30"))),
         "jti": jti,
     }
     return jwt.encode(payload, _secret(), algorithm=ALGORITHM)
@@ -92,22 +92,15 @@ def _decode(token: str) -> TokenData:
     return data
 
 
-async def current_user(security_scopes: SecurityScopes, token: str = Depends(oauth2_scheme)) -> TokenData:
+async def current_user(
+    security_scopes: SecurityScopes,
+    token: str = Depends(oauth2_scheme),
+) -> TokenData:
     data = _decode(token)
     required = set(security_scopes.scopes)
     if required and not required.issubset(set(data.scopes)):
         raise HTTPException(status_code=403, detail="insufficient permissions")
     return data
-
-
-def require_scope(scope: str):
-    async def dependency(security_scopes: SecurityScopes, token: str = Depends(oauth2_scheme)) -> TokenData:
-        data = _decode(token)
-        required = set(security_scopes.scopes) or {scope}
-        if not required.issubset(set(data.scopes)):
-            raise HTTPException(status_code=403, detail="insufficient permissions")
-        return data
-    return dependency
 
 
 def revoke(token: str) -> None:
