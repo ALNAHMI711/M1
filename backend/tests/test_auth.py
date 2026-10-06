@@ -7,9 +7,10 @@ from app.main import app
 
 @pytest.fixture()
 def auth_client(monkeypatch):
-    monkeypatch.setenv("M1_AUTH_SECRET", "test-secret-for-auth")
-    monkeypatch.setenv("M1_ADMIN_USERNAME", "admin")
-    monkeypatch.setenv("M1_ADMIN_PASSWORD_HASH", PasswordHash.recommended().hash("correct-password"))
+    import app.auth as auth
+    auth.SECRET_KEY = "test-secret-for-auth"
+    auth.ADMIN_USERNAME = "admin"
+    auth.ADMIN_PASSWORD_HASH = PasswordHash.recommended().hash("correct-password")
     return TestClient(app)
 
 
