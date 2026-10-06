@@ -7,8 +7,9 @@ from fastapi import FastAPI, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from .store import record_signal, signal_seen
+from .telegram import parse_telegram_signal
 
-app = FastAPI(title="ALNAHMI M1 Trading Control Plane", version="0.3.0")
+app = FastAPI(title="ALNAHMI M1 Trading Control Plane", version="0.4.0")
 
 WEBHOOK_SECRET = os.getenv("TRADINGVIEW_WEBHOOK_SECRET", "")
 MIN_SCORE = 85.0
@@ -78,6 +79,33 @@ def health():
 def validate_signal(signal: Signal):
     accepted, reasons = risk_check(signal)
     return {"accepted": accepted, "reasons": reasons}
+
+
+@app.post("/v1/signals/telegram/parse")
+def parse_telegram(text: str):
+    try:
+        parsed = parse_telegram_signal(text)
+        signal = Signal(
+            symbol=parsed.symbol,
+            side=parsed.side,
+            entry=parsed.entry,
+            stop_loss=parsed.stop_loss,
+            take_profit=parsed.take_profit,
+            score=parsed.score,
+            rr=parsed.rr,
+            source="TELEGRAM",
+            mode="PAPER",
+            signal_id=f"telegram-preview-{hashlib.sha256(text.encode()).hexdigest()[:24]}",
+        )
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=422, detail="invalid telegram signal") from exc
+
+    accepted, reasons = risk_check(signal)
+    return {
+        "accepted": accepted,
+        "reasons": reasons,
+        "signal": signal.model_dump(),
+    }
 
 
 @app.post("/v1/webhooks/tradingview")
