@@ -3,12 +3,18 @@ import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
-DB_PATH = os.getenv("M1_DB_PATH", "backend/data/m1.sqlite3")
+
+def database_path() -> str:
+    return os.getenv("M1_DB_PATH", "backend/data/m1.sqlite3")
 
 
 @contextmanager
 def connection():
-    conn = sqlite3.connect(DB_PATH)
+    path = database_path()
+    parent = os.path.dirname(path)
+    if parent:
+        os.makedirs(parent, exist_ok=True)
+    conn = sqlite3.connect(path)
     try:
         conn.execute(
             """CREATE TABLE IF NOT EXISTS signal_events (
