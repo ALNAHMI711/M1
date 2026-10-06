@@ -7,7 +7,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Request, Security
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
 
-from .auth import Token, authenticate, create_access_token, current_user, revoke\nfrom .auth import Token, authenticate, create_access_token, current_user, revoke
+from .auth import Token, authenticate, create_access_token, current_user, revoke
 from .store import record_signal, signal_seen
 from .telegram import parse_telegram_signal
 
@@ -66,17 +66,19 @@ def risk_check(signal: Signal) -> tuple[bool, list[str]]:
 def valid_signature(raw: bytes, signature: str | None) -> bool:
     if not WEBHOOK_SECRET or not signature:
         return False
-    expected = hmac.new(
-        WEBHOOK_SECRET.encode("utf-8"), raw, hashlib.sha256
-    ).hexdigest()
+    expected = hmac.new(WEBHOOK_SECRET.encode("utf-8"), raw, hashlib.sha256).hexdigest()
     return hmac.compare_digest(expected, signature.strip())
 
 
-@app.post("/v1/auth/token", response_model=Token)\ndef login(form: OAuth2PasswordRequestForm = Depends()):\n    role = authenticate(form.username, form.password)\n    if role is None:\n        raise HTTPException(status_code=401, detail="invalid credentials", headers={"WWW-Authenticate": "Bearer"})\n    return Token(access_token=create_access_token(form.username, role))\n\n\n@app.post("/v1/auth/logout")\ndef logout(request: Request, user=Depends(current_user)):\n    authorization = request.headers.get("Authorization", "")\n    token = authorization.removeprefix("Bearer ").strip()\n    if token:\n        revoke(token)\n    return {"ok": True}\n\n\n@app.get("/v1/auth/me")\ndef me(user=Depends(current_user)):\n    return {"username": user.username, "role": user.role, "scopes": user.scopes}\n\n\n@app.get("/v1/control/status")\ndef control_status(user=Security(current_user, scopes=["control:read"])):\n    return {"status": "ready", "mode": "paper-first", "live_enabled": False, "user": user.username}\n\n\n@app.post("/v1/auth/token", response_model=Token)
+@app.post("/v1/auth/token", response_model=Token)
 def login(form: OAuth2PasswordRequestForm = Depends()):
     role = authenticate(form.username, form.password)
     if role is None:
-        raise HTTPException(status_code=401, detail="invalid credentials", headers={"WWW-Authenticate": "Bearer"})
+        raise HTTPException(
+            status_code=401,
+            detail="invalid credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return Token(access_token=create_access_token(form.username, role))
 
 
@@ -130,11 +132,7 @@ def parse_telegram(text: str):
         raise HTTPException(status_code=422, detail="invalid telegram signal") from exc
 
     accepted, reasons = risk_check(signal)
-    return {
-        "accepted": accepted,
-        "reasons": reasons,
-        "signal": signal.model_dump(),
-    }
+    return {"accepted": accepted, "reasons": reasons, "signal": signal.model_dump()}
 
 
 @app.post("/v1/webhooks/tradingview")
