@@ -6,13 +6,13 @@ from typing import Literal
 from fastapi import FastAPI, Header, HTTPException, Request
 from pydantic import BaseModel, Field
 
+from .store import record_signal, signal_seen
+
 app = FastAPI(title="ALNAHMI M1 Trading Control Plane", version="0.3.0")
 
 WEBHOOK_SECRET = os.getenv("TRADINGVIEW_WEBHOOK_SECRET", "")
 MIN_SCORE = 85.0
 MIN_RR = 2.0
-MAX_SIGNAL_AGE_SECONDS = 300
-_seen: set[str] = set()
 
 
 class Signal(BaseModel):
@@ -44,7 +44,6 @@ def risk_check(signal: Signal) -> tuple[bool, list[str]]:
     reasons: list[str] = []
     if signal.score < MIN_SCORE:
         reasons.append("score_below_85")
-
     actual_rr = calculated_rr(signal)
     if actual_rr is None:
         reasons.append("invalid_risk_reward_levels")
@@ -52,7 +51,6 @@ def risk_check(signal: Signal) -> tuple[bool, list[str]]:
         reasons.append("rr_below_2")
     elif abs(actual_rr - signal.rr) > 0.05:
         reasons.append("rr_mismatch")
-
     if signal.side == "LONG" and not (signal.stop_loss < signal.entry < signal.take_profit):
         reasons.append("invalid_long_levels")
     if signal.side == "SHORT" and not (signal.take_profit < signal.entry < signal.stop_loss):
@@ -89,15 +87,20 @@ async def tradingview_webhook(
     raw = await request.body()
     if not valid_signature(raw, x_signature):
         raise HTTPException(status_code=401, detail="invalid webhook signature")
-
     try:
         signal = Signal.model_validate_json(raw)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail="invalid signal payload") from exc
-
-    if signal.signal_id in _seen:
+    if signal_seen(signal.signal_id):
         raise HTTPException(status_code=409, detail="duplicate signal")
-
     accepted, reasons = risk_check(signal)
-    _seen.add(signal.signal_id)
+    record_signal(
+        signal.signal_id,
+        signal.symbol,
+        signal.side,
+        signal.source,
+        signal.mode,
+        accepted,
+        reasons,
+    )
     return {"accepted": accepted, "reasons": reasons, "signal_id": signal.signal_id}
