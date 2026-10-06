@@ -3,7 +3,8 @@ import hmac
 import os
 from typing import Literal
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, Security\nfrom fastapi.security import OAuth2PasswordRequestForm
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Security
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
 
 from .auth import Token, authenticate, create_access_token, current_user, revoke\nfrom .auth import Token, authenticate, create_access_token, current_user, revoke
