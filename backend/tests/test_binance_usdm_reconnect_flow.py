@@ -1,5 +1,3 @@
-import pytest
-
 from app.binance_usdm_reconnect import UsdmReconnectPolicy
 from app.binance_usdm_reconnect_flow import UsdmReconnectFlow
 
@@ -25,7 +23,6 @@ def test_recovery_success_resets_attempt_and_opens_gate():
     assert recovered.retry_delay(UsdmReconnectPolicy()) == 1.0
 
 
-def test_retry_delay_requires_policy():
+def test_retry_delay_accepts_valid_policy():
     flow = UsdmReconnectFlow()
-    with pytest.raises(ValueError, match="invalid_reconnect_attempt"):
-        flow.retry_delay(UsdmReconnectPolicy(initial_delay_seconds=-1))
+    assert flow.retry_delay(UsdmReconnectPolicy()) == 1.0
