@@ -140,12 +140,19 @@ def record_execution_order(
 
 
 def execution_order_exists(client_order_id: str) -> bool:
+    return get_execution_order(client_order_id) is not None
+
+
+def get_execution_order(client_order_id: str):
     with connection() as conn:
         row = conn.execute(
-            "SELECT 1 FROM execution_orders WHERE client_order_id = ?",
+            """SELECT client_order_id, signal_id, symbol, side, mode, order_id,
+                      status, quantity, executed_quantity, price, updated_at
+               FROM execution_orders
+               WHERE client_order_id = ?""",
             (client_order_id,),
         ).fetchone()
-        return row is not None
+        return dict(row) if row is not None else None
 
 
 def pending_execution_orders():
@@ -154,7 +161,7 @@ def pending_execution_orders():
             """SELECT client_order_id, signal_id, symbol, side, mode, order_id,
                       status, quantity, executed_quantity, price, updated_at
                FROM execution_orders
-               WHERE status NOT IN ('FILLED', 'CANCELED', 'EXPIRED', 'REJECTED', 'UNKNOWN')"""
+               WHERE status NOT IN ('FILLED', 'CANCELED', 'EXPIRED', 'EXPIRED_IN_MATCH', 'REJECTED', 'UNKNOWN')"""
         ).fetchall()
         return [dict(row) for row in rows]
 
