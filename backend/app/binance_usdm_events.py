@@ -14,7 +14,10 @@ class UserEvent:
 
 
 def parse_user_event(raw: str | bytes | dict) -> UserEvent:
-    payload = json.loads(raw) if isinstance(raw, (str, bytes)) else raw
+    try:
+        payload = json.loads(raw) if isinstance(raw, (str, bytes)) else raw
+    except (TypeError, ValueError) as exc:
+        raise ValueError("invalid_user_data_event") from exc
     if not isinstance(payload, dict):
         raise ValueError("invalid_user_data_event")
     event = payload.get("data")
@@ -36,6 +39,17 @@ def order_trade_identity(event: UserEvent) -> tuple[str, int | None]:
     order_id = order.get("i")
     if not isinstance(client_order_id, str) or not client_order_id:
         raise ValueError("order_update_missing_client_order_id")
-    if order_id is not None and not isinstance(order_id, int):
+    if order_id is not None and (
+        not isinstance(order_id, int) or isinstance(order_id, bool)
+    ):
         raise ValueError("order_update_invalid_order_id")
     return client_order_id, order_id
+
+
+def account_update_payload(event: UserEvent) -> dict:
+    if event.event_type != "ACCOUNT_UPDATE":
+        raise ValueError("not_account_update")
+    payload = event.payload
+    if not isinstance(payload.get("a"), dict):
+        raise ValueError("account_update_missing_account")
+    return payload
