@@ -15,7 +15,7 @@ class FakeBinanceClient:
 
 @pytest.fixture()
 def client(monkeypatch):
-    monkeypatch.setenv("M1_AUTH_SECRET", "test-secret-for-binance")
+    monkeypatch.setenv("M1_AUTH_SECRET", "test-secret-for-binance-0123456789abcd")
     monkeypatch.setenv("M1_ADMIN_USERNAME", "admin")
     monkeypatch.setenv(
         "M1_ADMIN_PASSWORD_HASH",
