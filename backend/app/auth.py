@@ -45,6 +45,8 @@ def _secret() -> str:
     secret = os.getenv("M1_AUTH_SECRET", "")
     if not secret:
         raise RuntimeError("M1_AUTH_SECRET is not configured")
+    if len(secret.encode("utf-8")) < 32:
+        raise RuntimeError("M1_AUTH_SECRET must be at least 32 bytes")
     return secret
 
 
