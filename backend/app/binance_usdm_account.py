@@ -101,9 +101,13 @@ def parse_account_update(payload: dict) -> UsdmAccountUpdate:
 
     event_time = payload.get("E")
     transaction_time = payload.get("T")
-    if event_time is not None and not isinstance(event_time, int):
+    if event_time is not None and (
+        not isinstance(event_time, int) or isinstance(event_time, bool) or event_time < 0
+    ):
         raise ValueError("invalid_event_time")
-    if transaction_time is not None and not isinstance(transaction_time, int):
+    if transaction_time is not None and (
+        not isinstance(transaction_time, int) or isinstance(transaction_time, bool) or transaction_time < 0
+    ):
         raise ValueError("invalid_transaction_time")
 
     reason = account.get("m")
