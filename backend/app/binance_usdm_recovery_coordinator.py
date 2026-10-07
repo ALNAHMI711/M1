@@ -54,14 +54,11 @@ class UsdmRecoveryCoordinator:
         )
 
     def accept_user_event(self, event: UserEvent) -> "UsdmRecoveryCoordinator":
-        if not self.events_allowed:
-            raise ValueError("recovery_required")
-
         if is_listen_key_expired(event):
             # Binance explicitly signals listen-key expiry. Treat it like a
             # transport loss: block all subsequent events until a fresh
             # snapshot is restored and a new private stream is established.
-            return self.on_disconnect()
+            return self.on_disconnect()\n\n        if not self.events_allowed:\n            raise ValueError("recovery_required")
 
         exchange_event_time = event_time(event)
         # Check freshness before reconciliation so stale exchange events
