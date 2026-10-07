@@ -21,7 +21,7 @@ def test_parses_partial_account_and_position_update():
                         "pa": "0.010",
                         "ep": "62000.00",
                         "up": "12.50",
-                        "mt": "CROSSED",
+                        "mt": "isolated",
                     }
                 ],
             },
@@ -31,8 +31,10 @@ def test_parses_partial_account_and_position_update():
     assert result.reason == "ORDER"
     assert result.assets[0].asset == "USDT"
     assert result.assets[0].wallet_balance == "100.00"
+    assert result.assets[0].balance_change == "1.25"
     assert result.positions[0].symbol == "BTCUSDT"
     assert result.positions[0].quantity == "0.010"
+    assert result.positions[0].margin_type == "ISOLATED"
 
 
 def test_rejects_non_account_event():
@@ -64,7 +66,7 @@ def test_rejects_invalid_decimal_fields(field, value, error):
             ],
         },
     }
-    if field in {"wb"}:
+    if field == "wb":
         payload["a"]["B"][0][field] = value
     else:
         payload["a"]["P"][0][field] = value
