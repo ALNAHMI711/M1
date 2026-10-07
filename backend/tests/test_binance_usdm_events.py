@@ -72,3 +72,16 @@ def test_account_update_payload_rejects_wrong_event_type():
     event = UserEvent(event_type="ORDER_TRADE_UPDATE", payload={"o": {}})
     with pytest.raises(ValueError, match="not_account_update"):
         account_update_payload(event)
+
+
+def test_event_time_is_read_from_exchange_payload():
+    event = parse_user_event({"e": "ORDER_TRADE_UPDATE", "E": 123456, "o": {"c": "m1-client-1", "i": 1}})
+    from app.binance_usdm_events import event_time
+    assert event_time(event) == 123456
+
+
+def test_event_time_is_required_and_strict():
+    from app.binance_usdm_events import event_time
+    event = UserEvent(event_type="ACCOUNT_UPDATE", payload={"e": "ACCOUNT_UPDATE"})
+    with pytest.raises(ValueError, match="invalid_event_time"):
+        event_time(event)
