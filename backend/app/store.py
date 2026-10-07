@@ -45,8 +45,23 @@ def connection():
             )"""
         )
         conn.execute(
+            """CREATE TABLE IF NOT EXISTS execution_audit (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                client_order_id TEXT,
+                signal_id TEXT,
+                event TEXT NOT NULL,
+                status TEXT NOT NULL,
+                detail TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            )"""
+        )
+        conn.execute(
             """CREATE INDEX IF NOT EXISTS idx_execution_orders_status
                ON execution_orders(status)"""
+        )
+        conn.execute(
+            """CREATE INDEX IF NOT EXISTS idx_execution_audit_created_at
+               ON execution_audit(created_at)"""
         )
         conn.commit()
         yield conn
@@ -159,4 +174,28 @@ def update_execution_order(
         conn.execute(
             f"UPDATE execution_orders SET {', '.join(fields)} WHERE client_order_id = ?",
             values,
+        )
+
+
+def record_execution_audit(
+    *,
+    event: str,
+    status: str,
+    detail: str,
+    client_order_id: str | None = None,
+    signal_id: str | None = None,
+) -> None:
+    with connection() as conn:
+        conn.execute(
+            """INSERT INTO execution_audit
+               (client_order_id, signal_id, event, status, detail, created_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (
+                client_order_id,
+                signal_id,
+                event,
+                status,
+                detail,
+                datetime.now(timezone.utc).isoformat(),
+            ),
         )
