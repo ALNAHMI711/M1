@@ -55,7 +55,7 @@ def test_rejects_malformed_user_event(raw):
 
 
 def test_order_update_requires_client_order_id():
-    event = parse_user_event({"e": "ORDER_TRADE_UPDATE", "i": 1})
+    event = parse_user_event({"e": "ORDER_TRADE_UPDATE", "o": {"i": 1}})
     with pytest.raises(ValueError, match="missing_client_order_id"):
         order_trade_identity(event)
 
