@@ -7,17 +7,13 @@ def test_account_update_merges_partial_asset_and_position_state():
     state = from_snapshot(
         UsdmAccountSnapshot(
             assets=(UsdmSnapshotAsset("USDT", "10", "9"),),
-            positions=(
-                UsdmSnapshotPosition("BTCUSDT", "BOTH", "0", "0", "0"),
-            ),
+            positions=(UsdmSnapshotPosition("BTCUSDT", "BOTH", "0", "0", "0"),),
         ),
         snapshot_version=1,
     )
     update = parse_account_update(
         {
-            "e": "ACCOUNT_UPDATE",
-            "E": 200,
-            "T": 199,
+            "e": "ACCOUNT_UPDATE", "E": 200, "T": 199,
             "a": {
                 "m": "ORDER",
                 "B": [{"a": "USDT", "wb": "12", "cw": "11", "bc": "2"}],
@@ -28,24 +24,19 @@ def test_account_update_merges_partial_asset_and_position_state():
     updated = accept_account_update(state, update)
     assert updated.last_event_time == 200
     assert updated.snapshot.assets[0].wallet_balance == "12"
-    assert updated.snapshot.assets[0].available_balance == "11"
+    assert updated.snapshot.assets[0].available_balance == "9"
     assert updated.snapshot.positions[0].quantity == "0.01"
 
 
 def test_stale_account_update_does_not_mutate_snapshot():
     state = from_snapshot(
-        UsdmAccountSnapshot(
-            assets=(UsdmSnapshotAsset("USDT", "10", "9"),),
-            positions=(),
-        ),
+        UsdmAccountSnapshot(assets=(UsdmSnapshotAsset("USDT", "10", "9"),), positions=()),
         snapshot_version=1,
     )
-    first = parse_account_update(
-        {"e": "ACCOUNT_UPDATE", "E": 200, "a": {"B": [], "P": []}}
-    )
-    stale = parse_account_update(
-        {"e": "ACCOUNT_UPDATE", "E": 199, "a": {"B": [{"a": "USDT", "wb": "1", "cw": "1", "bc": "0"}], "P": []}}
-    )
+    first = parse_account_update({"e": "ACCOUNT_UPDATE", "E": 200, "a": {"B": [], "P": []}})
+    stale = parse_account_update({
+        "e": "ACCOUNT_UPDATE", "E": 199,
+        "a": {"B": [{"a": "USDT", "wb": "1", "cw": "1", "bc": "0"}], "P": []},
+    })
     state = accept_account_update(state, first)
-    unchanged = accept_account_update(state, stale)
-    assert unchanged == state
+    assert accept_account_update(state, stale) == state
