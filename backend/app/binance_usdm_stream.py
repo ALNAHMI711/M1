@@ -9,8 +9,8 @@ USDM_WS_API_TESTNET_URL = "wss://testnet.binancefuture.com/ws-fapi/v1"
 USDM_PRIVATE_STREAM_URL = "wss://fstream.binance.com/private/ws"
 
 
-def _request_id(request_id: int) -> int:
-    if not isinstance(request_id, int) or isinstance(request_id, bool):
+def _request_id(request_id: str) -> str:
+    if not isinstance(request_id, str) or not request_id:
         raise ValueError("invalid_request_id")
     return request_id
 
@@ -70,7 +70,7 @@ class UsdmUserDataStreamLifecycle:
         })
         return f"{USDM_PRIVATE_STREAM_URL}?{query}"
 
-    def start_request(self, request_id: int) -> dict:
+    def start_request(self, request_id: str) -> dict:
         return {
             "id": _request_id(request_id),
             "method": "userDataStream.start",
@@ -89,7 +89,7 @@ class UsdmUserDataStreamLifecycle:
             listen_key=listen_key,
         )
 
-    def keepalive_request(self, request_id: int) -> dict:
+    def keepalive_request(self, request_id: str) -> dict:
         if not self.started:
             raise ValueError("stream_not_started")
         return {
@@ -113,7 +113,7 @@ class UsdmUserDataStreamLifecycle:
             raise ValueError("invalid_elapsed_seconds")
         return elapsed_seconds >= self.keepalive_interval_seconds
 
-    def stop_request(self, request_id: int) -> dict:
+    def stop_request(self, request_id: str) -> dict:
         if not self.started:
             raise ValueError("stream_not_started")
         return {
