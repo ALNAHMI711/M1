@@ -117,3 +117,99 @@ def test_account_update_opens_state_progress_only_after_runtime_recovery():
 
     assert updated.events_allowed is True
     assert updated.gate.state.last_event_time == 100
+
+
+def test_stale_order_event_does_not_mutate_execution_record(tmp_path, monkeypatch):
+    from app.binance_usdm_account import UsdmAccountUpdate
+    from app.binance_usdm_events import parse_user_event
+    from app.store import get_execution_order, record_execution_order
+
+    monkeypatch.setenv("M1_DB_PATH", str(tmp_path / "m1.sqlite3"))
+    record_execution_order(
+        client_order_id="m1-futures-stale-1",
+        signal_id="sig-stale-1",
+        symbol="BTCUSDT",
+        side="LONG",
+        mode="TESTNET",
+        quantity="0.01",
+        status="NEW",
+        order_id="98765",
+    )
+
+    coordinator = make_coordinator().on_disconnect().restore_snapshot(
+        UsdmAccountSnapshot(assets=(), positions=())
+    ).on_recovery_success("new-key")
+    coordinator = coordinator.accept_account_update(
+        UsdmAccountUpdate(
+            event_time=200,
+            transaction_time=200,
+            reason="ORDER",
+            assets=(),
+            positions=(),
+        )
+    )
+
+    stale = parse_user_event(
+        {
+            "e": "ORDER_TRADE_UPDATE",
+            "o": {
+                "c": "m1-futures-stale-1",
+                "i": 98765,
+                "X": "FILLED",
+                "z": "0.010",
+                "ap": "62000.10",
+            },
+        }
+    )
+
+    updated = coordinator.accept_user_event(stale, event_time=100)
+
+    assert updated is coordinator
+    order = get_execution_order("m1-futures-stale-1")
+    assert order["status"] == "NEW"
+    assert order["executed_quantity"] == "0"
+    assert order["price"] is None
+    assert order["order_id"] == "98765"
+
+
+def test_fresh_order_event_reconciles_after_recovery(tmp_path, monkeypatch):
+    from app.binance_usdm_events import parse_user_event
+    from app.store import get_execution_order, record_execution_order
+
+    monkeypatch.setenv("M1_DB_PATH", str(tmp_path / "m1.sqlite3"))
+    record_execution_order(
+        client_order_id="m1-futures-fresh-1",
+        signal_id="sig-fresh-1",
+        symbol="BTCUSDT",
+        side="LONG",
+        mode="TESTNET",
+        quantity="0.01",
+        status="NEW",
+        order_id="98765",
+    )
+
+    coordinator = make_coordinator().on_disconnect().restore_snapshot(
+        UsdmAccountSnapshot(assets=(), positions=())
+    ).on_recovery_success("new-key")
+
+    event = parse_user_event(
+        {
+            "e": "ORDER_TRADE_UPDATE",
+            "o": {
+                "c": "m1-futures-fresh-1",
+                "i": 98765,
+                "X": "FILLED",
+                "z": "0.010",
+                "ap": "62000.10",
+            },
+        }
+    )
+
+    updated = coordinator.accept_user_event(event, event_time=300)
+
+    assert updated.events_allowed is True
+    assert updated.gate.state.last_event_time == 300
+    order = get_execution_order("m1-futures-fresh-1")
+    assert order["status"] == "FILLED"
+    assert order["executed_quantity"] == "0.010"
+    assert order["price"] == "62000.10"
