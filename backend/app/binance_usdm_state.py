@@ -24,11 +24,13 @@ def from_snapshot(snapshot: UsdmAccountSnapshot, *, snapshot_version: int) -> Us
 def _apply_account_update(snapshot: UsdmAccountSnapshot, update: UsdmAccountUpdate) -> UsdmAccountSnapshot:
     assets = {item.asset: item for item in snapshot.assets}
     for item in update.assets:
+        current = assets.get(item.asset)
         assets[item.asset] = UsdmSnapshotAsset(
             asset=item.asset,
             wallet_balance=item.wallet_balance,
-            available_balance=item.cross_wallet_balance,
+            available_balance=current.available_balance if current is not None else item.cross_wallet_balance,
         )
+
     positions = {(item.symbol, item.position_side): item for item in snapshot.positions}
     for item in update.positions:
         positions[(item.symbol, item.position_side)] = UsdmSnapshotPosition(
@@ -38,10 +40,7 @@ def _apply_account_update(snapshot: UsdmAccountSnapshot, update: UsdmAccountUpda
             entry_price=item.entry_price,
             unrealized_pnl=item.unrealized_pnl,
         )
-    return UsdmAccountSnapshot(
-        assets=tuple(assets.values()),
-        positions=tuple(positions.values()),
-    )
+    return UsdmAccountSnapshot(assets=tuple(assets.values()), positions=tuple(positions.values()))
 
 
 def accept_account_update(state: UsdmState, update: UsdmAccountUpdate) -> UsdmState:
