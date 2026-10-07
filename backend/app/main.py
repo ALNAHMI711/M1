@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 from .auth import Token, authenticate, create_access_token, current_user, revoke
 from .binance_spot import BinanceAPIError, BinanceSpotClient, BinanceSpotConfig
+from .recovery import recover_spot_orders
 from .store import record_signal, signal_seen
 from .telegram import parse_telegram_signal
 
@@ -148,6 +149,17 @@ def binance_spot_order_test(
     except BinanceAPIError as exc:
         raise HTTPException(status_code=502, detail="binance_testnet_request_failed") from exc
     return {"accepted": True, "mode": "TESTNET", "result": result, "user": user.username}
+
+
+@app.post("/v1/binance/spot/recover")
+def binance_spot_recover(user=Security(current_user, scopes=["control:write"])):
+    """Reconcile pending Spot state; this endpoint never places an order."""
+    try:
+        client = BinanceSpotClient(BinanceSpotConfig.from_env(testnet=True))
+        result = recover_spot_orders(client)
+    except BinanceAPIError as exc:
+        raise HTTPException(status_code=502, detail="binance_recovery_failed") from exc
+    return {"mode": "TESTNET", "order_placement": False, "result": result, "user": user.username}
 
 
 @app.post("/v1/signals/telegram/parse")
