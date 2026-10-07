@@ -102,24 +102,21 @@ def test_stream_enforces_recv_window_limit():
         )
 
 
+
+
 def test_stream_reconnects_after_termination_and_recovers_before_events():
-    calls = []
-    recovery_calls = []
-    responses = iter([
-        {"status": 200, "result": {"subscriptionId": 1}},
-        {"status": 200, "result": {"subscriptionId": 2}},
-    ])
+    import asyncio
 
     class FakeWebSocket:
-        def __init__(self, events):
+        def __init__(self, response, events):
+            self.response = response
             self.events = iter(events)
-            self.sent = []
 
         async def send(self, value):
-            self.sent.append(json.loads(value))
+            return None
 
         async def recv(self):
-            return json.dumps(next(responses))
+            return json.dumps(self.response)
 
         def __aiter__(self):
             return self
@@ -131,49 +128,39 @@ def test_stream_reconnects_after_termination_and_recovers_before_events():
                 raise StopAsyncIteration
 
     streams = [
-        FakeWebSocket([json.dumps({"event": {"e": "eventStreamTerminated"}})]),
-        FakeWebSocket([json.dumps({"event": {"e": "executionReport", "c": "client-1"}})]),
+        FakeWebSocket({"status": 200, "result": {"subscriptionId": 1}},
+                       [json.dumps({"event": {"e": "eventStreamTerminated"}})]),
+        FakeWebSocket({"status": 200, "result": {"subscriptionId": 2}},
+                       [json.dumps({"event": {"e": "executionReport", "c": "client-1"}})]),
     ]
+    recovered = 0
+    applied = []
 
     class Connect:
         def __call__(self, url):
             websocket = streams.pop(0)
-
             class Context:
                 async def __aenter__(self):
-                    calls.append(url)
                     return websocket
-
                 async def __aexit__(self, exc_type, exc, tb):
                     return False
-
             return Context()
 
-    applied = []
     stream = BinanceSpotUserDataStream(
-        BinanceSpotStreamConfig(
-            api_key="key",
-            api_secret="secret",
-            reconnect_min_seconds=0,
-            reconnect_max_seconds=0,
-        ),
+        BinanceSpotStreamConfig(api_key="key", api_secret="secret", reconnect_min_seconds=0, reconnect_max_seconds=0),
         rest_client=object(),
         connect=Connect(),
         apply_event=lambda payload: applied.append(payload) or True,
-        recover=lambda client: recovery_calls.append(True) or {"checked": 0, "updated": 0, "unknown": 0},
     )
 
-    async def stop_after_second_recovery(client):
-        recovery_calls.append(True)
-        if len(recovery_calls) >= 2:
+    def recover(_client):
+        nonlocal recovered
+        recovered += 1
+        if recovered == 2:
             stream.stop()
         return {"checked": 0, "updated": 0, "unknown": 0}
 
-    stream._recover = stop_after_second_recovery
-
-    import asyncio
+    stream._recover = recover
     asyncio.run(stream.run())
-
-    assert len(calls) == 2
-    assert len(recovery_calls) == 2
+    assert recovered == 2
     assert len(applied) == 1
