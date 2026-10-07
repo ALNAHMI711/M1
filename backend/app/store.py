@@ -154,7 +154,7 @@ def pending_execution_orders():
             """SELECT client_order_id, signal_id, symbol, side, mode, order_id,
                       status, quantity, executed_quantity, price, updated_at
                FROM execution_orders
-               WHERE status NOT IN ('FILLED', 'CANCELED', 'EXPIRED', 'REJECTED')"""
+               WHERE status NOT IN ('FILLED', 'CANCELED', 'EXPIRED', 'REJECTED', 'UNKNOWN')"""
         ).fetchall()
         return [dict(row) for row in rows]
 
