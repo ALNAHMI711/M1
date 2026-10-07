@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from urllib.parse import urlencode
 
 
 USDM_WS_API_URL = "wss://ws-fapi.binance.com/ws-fapi/v1"
@@ -59,10 +60,11 @@ class UsdmUserDataStreamLifecycle:
     def private_stream_url(self) -> str:
         if not self.listen_key:
             raise ValueError("stream_not_started")
-        return (
-            f"{USDM_PRIVATE_STREAM_URL}?listenKey={self.listen_key}"
-            "&events=ORDER_TRADE_UPDATE,ACCOUNT_UPDATE"
-        )
+        query = urlencode({
+            "listenKey": self.listen_key,
+            "events": "ORDER_TRADE_UPDATE,ACCOUNT_UPDATE",
+        })
+        return f"{USDM_PRIVATE_STREAM_URL}?{query}"
 
     def start_request(self, request_id: int) -> dict:
         return {
@@ -75,7 +77,7 @@ class UsdmUserDataStreamLifecycle:
         return self.started_with(_validate_start_response(response))
 
     def started_with(self, listen_key: str) -> "UsdmUserDataStreamLifecycle":
-        if not listen_key:
+        if not isinstance(listen_key, str) or not listen_key:
             raise ValueError("missing_listen_key")
         return UsdmUserDataStreamLifecycle(
             api_key=self.api_key,
@@ -99,7 +101,7 @@ class UsdmUserDataStreamLifecycle:
         return self.started_with(_validate_start_response(response))
 
     def keepalive_due(self, elapsed_seconds: int) -> bool:
-        if elapsed_seconds < 0:
+        if not isinstance(elapsed_seconds, int) or isinstance(elapsed_seconds, bool) or elapsed_seconds < 0:
             raise ValueError("invalid_elapsed_seconds")
         return elapsed_seconds >= self.keepalive_interval_seconds
 
