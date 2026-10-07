@@ -4,7 +4,11 @@ import json
 from dataclasses import dataclass
 
 
-SUPPORTED_EVENTS = {"ORDER_TRADE_UPDATE", "ACCOUNT_UPDATE"}
+SUPPORTED_EVENTS = {
+    "ORDER_TRADE_UPDATE",
+    "ACCOUNT_UPDATE",
+    "listenKeyExpired",
+}
 
 
 @dataclass(frozen=True)
@@ -27,6 +31,10 @@ def parse_user_event(raw: str | bytes | dict) -> UserEvent:
     if event_type not in SUPPORTED_EVENTS:
         raise ValueError("unsupported_user_data_event")
     return UserEvent(event_type=event_type, payload=event)
+
+
+def is_listen_key_expired(event: UserEvent) -> bool:
+    return event.event_type == "listenKeyExpired"
 
 
 def order_trade_identity(event: UserEvent) -> tuple[str, int | None]:
