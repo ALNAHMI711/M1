@@ -43,9 +43,13 @@ class UsdmUserDataStreamLifecycle:
     listen_key: str | None = None
 
     def __post_init__(self) -> None:
-        if not self.api_key:
+        if not isinstance(self.api_key, str) or not self.api_key:
             raise ValueError("missing_api_key")
-        if self.keepalive_interval_seconds <= 0:
+        if (
+            not isinstance(self.keepalive_interval_seconds, int)
+            or isinstance(self.keepalive_interval_seconds, bool)
+            or self.keepalive_interval_seconds <= 0
+        ):
             raise ValueError("invalid_keepalive_interval")
 
     @property
@@ -101,7 +105,11 @@ class UsdmUserDataStreamLifecycle:
         return self.started_with(_validate_start_response(response))
 
     def keepalive_due(self, elapsed_seconds: int) -> bool:
-        if not isinstance(elapsed_seconds, int) or isinstance(elapsed_seconds, bool) or elapsed_seconds < 0:
+        if (
+            not isinstance(elapsed_seconds, int)
+            or isinstance(elapsed_seconds, bool)
+            or elapsed_seconds < 0
+        ):
             raise ValueError("invalid_elapsed_seconds")
         return elapsed_seconds >= self.keepalive_interval_seconds
 
