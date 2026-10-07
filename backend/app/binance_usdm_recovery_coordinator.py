@@ -60,7 +60,8 @@ class UsdmRecoveryCoordinator:
             # snapshot is restored and a new private stream is established.
             return self.on_disconnect()
 
-        if not self.events_allowed:\n            raise ValueError("recovery_required")
+        if not self.events_allowed:
+            raise ValueError("recovery_required")
 
         exchange_event_time = event_time(event)
         # Check freshness before reconciliation so stale exchange events
