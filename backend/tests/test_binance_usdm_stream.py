@@ -35,7 +35,7 @@ def test_start_response_creates_stream_state():
 
 def test_start_response_rejects_invalid_payload():
     state = UsdmUserDataStreamLifecycle(api_key="key")
-    with pytest.raises(ValueError, match="invalid_start_response"):
+    with pytest.raises(ValueError, match="usdm_stream_start_failed"):
         state.apply_start_response({"status": 500})
     with pytest.raises(ValueError, match="missing_listen_key"):
         state.apply_start_response({"status": 200, "result": {}})
