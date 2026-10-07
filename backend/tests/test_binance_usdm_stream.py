@@ -26,9 +26,7 @@ def test_start_request_includes_api_key():
 
 def test_start_response_creates_stream_state():
     state = UsdmUserDataStreamLifecycle(api_key="key")
-    started = state.apply_start_response(
-        {"status": 200, "result": {"listenKey": "listen-key"}}
-    )
+    started = state.apply_start_response({"status": 200, "result": {"listenKey": "listen-key"}})
     assert started.started is True
     assert started.listen_key == "listen-key"
 
@@ -45,12 +43,16 @@ def test_private_stream_url_requires_started_stream():
     state = UsdmUserDataStreamLifecycle(api_key="key")
     with pytest.raises(ValueError, match="stream_not_started"):
         _ = state.private_stream_url
-
     started = state.started_with("listen-key")
     assert started.private_stream_url == (
         "wss://fstream.binance.com/private/ws"
-        "?listenKey=listen-key&events=ORDER_TRADE_UPDATE,ACCOUNT_UPDATE"
+        "?listenKey=listen-key&events=ORDER_TRADE_UPDATE%2CACCOUNT_UPDATE"
     )
+
+
+def test_listen_key_is_url_encoded():
+    state = UsdmUserDataStreamLifecycle(api_key="key").started_with("a/b+c")
+    assert "listenKey=a%2Fb%2Bc" in state.private_stream_url
 
 
 def test_keepalive_request_and_response_refresh_listen_key():
@@ -60,9 +62,7 @@ def test_keepalive_request_and_response_refresh_listen_key():
         "method": "userDataStream.ping",
         "params": {"apiKey": "key"},
     }
-    refreshed = started.apply_keepalive_response(
-        {"status": 200, "result": {"listenKey": "new-key"}}
-    )
+    refreshed = started.apply_keepalive_response({"status": 200, "result": {"listenKey": "new-key"}})
     assert refreshed.listen_key == "new-key"
 
 
@@ -94,10 +94,7 @@ def test_stop_request_and_response():
     "kwargs,error",
     [
         ({"api_key": ""}, "missing_api_key"),
-        (
-            {"api_key": "key", "keepalive_interval_seconds": 0},
-            "invalid_keepalive_interval",
-        ),
+        ({"api_key": "key", "keepalive_interval_seconds": 0}, "invalid_keepalive_interval"),
     ],
 )
 def test_invalid_stream_configuration(kwargs, error):
