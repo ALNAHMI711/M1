@@ -35,3 +35,13 @@ def next_snapshot_version(previous_version: int) -> int:
     if not isinstance(previous_version, int) or isinstance(previous_version, bool) or previous_version < 1:
         raise ValueError("invalid_snapshot_version")
     return previous_version + 1
+
+
+def recovery_event_cutoff(*, snapshot_version: int, last_event_time: int | None) -> tuple[int, int | None]:
+    if not isinstance(snapshot_version, int) or isinstance(snapshot_version, bool) or snapshot_version < 1:
+        raise ValueError("invalid_snapshot_version")
+    if last_event_time is not None and (
+        not isinstance(last_event_time, int) or isinstance(last_event_time, bool) or last_event_time < 0
+    ):
+        raise ValueError("invalid_last_event_time")
+    return snapshot_version, last_event_time
