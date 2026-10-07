@@ -2,7 +2,12 @@ import json
 
 import pytest
 
-from app.binance_usdm_events import UserEvent, order_trade_identity, parse_user_event
+from app.binance_usdm_events import (
+    UserEvent,
+    account_update_payload,
+    order_trade_identity,
+    parse_user_event,
+)
 
 
 def test_parse_order_trade_update():
@@ -22,6 +27,7 @@ def test_parse_order_trade_update():
 def test_parse_account_update():
     event = parse_user_event({"e": "ACCOUNT_UPDATE", "a": {"m": "ORDER"}})
     assert event.event_type == "ACCOUNT_UPDATE"
+    assert account_update_payload(event)["a"]["m"] == "ORDER"
 
 
 def test_parse_wrapped_event():
@@ -36,7 +42,33 @@ def test_rejects_unknown_event():
         parse_user_event({"e": "BOOK_TICKER"})
 
 
+@pytest.mark.parametrize("raw", ["{bad-json", b"{bad-json", 123, None])
+def test_rejects_malformed_user_event(raw):
+    with pytest.raises(ValueError, match="invalid_user_data_event"):
+        parse_user_event(raw)
+
+
 def test_order_update_requires_client_order_id():
     event = parse_user_event({"e": "ORDER_TRADE_UPDATE", "o": {"i": 1}})
     with pytest.raises(ValueError, match="missing_client_order_id"):
         order_trade_identity(event)
+
+
+def test_order_update_rejects_boolean_order_id():
+    event = parse_user_event(
+        {"e": "ORDER_TRADE_UPDATE", "o": {"c": "m1-client-1", "i": True}}
+    )
+    with pytest.raises(ValueError, match="invalid_order_id"):
+        order_trade_identity(event)
+
+
+def test_account_update_requires_account_payload():
+    event = UserEvent(event_type="ACCOUNT_UPDATE", payload={"e": "ACCOUNT_UPDATE"})
+    with pytest.raises(ValueError, match="missing_account"):
+        account_update_payload(event)
+
+
+def test_account_update_payload_rejects_wrong_event_type():
+    event = UserEvent(event_type="ORDER_TRADE_UPDATE", payload={"o": {}})
+    with pytest.raises(ValueError, match="not_account_update"):
+        account_update_payload(event)
