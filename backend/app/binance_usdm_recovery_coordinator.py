@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from .binance_usdm_account import UsdmAccountUpdate
 from .binance_usdm_events import UserEvent
 from .binance_usdm_private_runtime import UsdmPrivateRuntime
+from .binance_usdm_recovery import event_is_fresh
 from .binance_usdm_snapshot import UsdmAccountSnapshot
 from .binance_usdm_snapshot_recovery_gate import UsdmSnapshotRecoveryGate
 from .binance_usdm_reconciliation import apply_usdm_order_update
@@ -55,6 +56,15 @@ class UsdmRecoveryCoordinator:
     def accept_user_event(self, event: UserEvent, *, event_time: int) -> "UsdmRecoveryCoordinator":
         if not self.events_allowed:
             raise ValueError("recovery_required")
+        # Check freshness before reconciliation so stale exchange events
+        # cannot mutate the local execution record.
+        if not event_is_fresh(
+            event_time=event_time,
+            snapshot_version=self.gate.state.snapshot_version,
+            last_event_time=self.gate.state.last_event_time,
+        ):
+            return self
+
         if event.event_type == "ORDER_TRADE_UPDATE":
             apply_usdm_order_update(event)
         return UsdmRecoveryCoordinator(
