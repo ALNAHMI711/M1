@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .binance_usdm_account import UsdmAccountUpdate
-from .binance_usdm_events import UserEvent
+from .binance_usdm_events import UserEvent, event_time
 from .binance_usdm_private_runtime import UsdmPrivateRuntime
 from .binance_usdm_recovery import event_is_fresh
 from .binance_usdm_snapshot import UsdmAccountSnapshot
@@ -53,13 +53,14 @@ class UsdmRecoveryCoordinator:
             gate=UsdmSnapshotRecoveryGate(state=accept_account_update(self.gate.state, update)),
         )
 
-    def accept_user_event(self, event: UserEvent, *, event_time: int) -> "UsdmRecoveryCoordinator":
+    def accept_user_event(self, event: UserEvent) -> "UsdmRecoveryCoordinator":
         if not self.events_allowed:
             raise ValueError("recovery_required")
+        exchange_event_time = event_time(event)
         # Check freshness before reconciliation so stale exchange events
         # cannot mutate the local execution record.
         if not event_is_fresh(
-            event_time=event_time,
+            event_time=exchange_event_time,
             snapshot_version=self.gate.state.snapshot_version,
             last_event_time=self.gate.state.last_event_time,
         ):
@@ -69,7 +70,7 @@ class UsdmRecoveryCoordinator:
             apply_usdm_order_update(event)
         return UsdmRecoveryCoordinator(
             runtime=self.runtime,
-            gate=UsdmSnapshotRecoveryGate(state=accept_event(self.gate.state, event, event_time=event_time)),
+            gate=UsdmSnapshotRecoveryGate(state=accept_event(self.gate.state, event, event_time=exchange_event_time)),
         )
 
     def on_recovery_success(self, listen_key: str) -> "UsdmRecoveryCoordinator":
