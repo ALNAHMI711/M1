@@ -23,21 +23,11 @@ def from_snapshot(snapshot: UsdmAccountSnapshot, *, snapshot_version: int) -> Us
 
 
 def apply_recovery(state: UsdmState, snapshot: UsdmAccountSnapshot) -> UsdmState:
-    return UsdmState(
-        snapshot=snapshot,
-        snapshot_version=state.snapshot_version,
-        last_event_time=None,
-        events_allowed=True,
-    )
+    return UsdmState(snapshot=snapshot, snapshot_version=state.snapshot_version, last_event_time=None, events_allowed=True)
 
 
 def mark_recovery_required(state: UsdmState) -> UsdmState:
-    return UsdmState(
-        snapshot=state.snapshot,
-        snapshot_version=next_snapshot_version(state.snapshot_version),
-        last_event_time=None,
-        events_allowed=False,
-    )
+    return UsdmState(snapshot=state.snapshot, snapshot_version=next_snapshot_version(state.snapshot_version), last_event_time=None, events_allowed=False)
 
 
 def _apply_account_update(snapshot: UsdmAccountSnapshot, update: UsdmAccountUpdate) -> UsdmAccountSnapshot:
@@ -46,21 +36,10 @@ def _apply_account_update(snapshot: UsdmAccountSnapshot, update: UsdmAccountUpda
         current = assets.get(item.asset)
         if current is None:
             raise ValueError("account_update_missing_snapshot_asset")
-        assets[item.asset] = UsdmSnapshotAsset(
-            asset=item.asset,
-            wallet_balance=item.wallet_balance,
-            available_balance=current.available_balance,
-        )
-
+        assets[item.asset] = UsdmSnapshotAsset(asset=item.asset, wallet_balance=item.wallet_balance, available_balance=current.available_balance)
     positions = {(item.symbol, item.position_side): item for item in snapshot.positions}
     for item in update.positions:
-        positions[(item.symbol, item.position_side)] = UsdmSnapshotPosition(
-            symbol=item.symbol,
-            position_side=item.position_side,
-            quantity=item.quantity,
-            entry_price=item.entry_price,
-            unrealized_pnl=item.unrealized_pnl,
-        )
+        positions[(item.symbol, item.position_side)] = UsdmSnapshotPosition(symbol=item.symbol, position_side=item.position_side, quantity=item.quantity, entry_price=item.entry_price, unrealized_pnl=item.unrealized_pnl)
     return UsdmAccountSnapshot(assets=tuple(assets.values()), positions=tuple(positions.values()))
 
 
@@ -71,12 +50,7 @@ def accept_account_update(state: UsdmState, update: UsdmAccountUpdate) -> UsdmSt
         raise ValueError("account_update_missing_event_time")
     if not event_is_fresh(event_time=update.event_time, snapshot_version=state.snapshot_version, last_event_time=state.last_event_time):
         return state
-    return UsdmState(
-        snapshot=_apply_account_update(state.snapshot, update),
-        snapshot_version=state.snapshot_version,
-        last_event_time=update.event_time,
-        events_allowed=True,
-    )
+    return UsdmState(snapshot=_apply_account_update(state.snapshot, update), snapshot_version=state.snapshot_version, last_event_time=update.event_time, events_allowed=True)
 
 
 def accept_event(state: UsdmState, event: UserEvent, *, event_time: int) -> UsdmState:
