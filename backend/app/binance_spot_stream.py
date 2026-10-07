@@ -139,8 +139,7 @@ class BinanceSpotUserDataStream:
                     response = json.loads(await websocket.recv())
                     self._ensure_subscription_confirmed(response)
 
-                    if not first_connection:
-                        self._recover(self.rest_client)
+                    self._recover(self.rest_client)
                     first_connection = False
                     delay = self.config.reconnect_min_seconds
 
