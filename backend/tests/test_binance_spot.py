@@ -76,6 +76,36 @@ def test_signed_request_uses_hmac_and_api_key():
     assert query["type"] == ["LIMIT"]
 
 
+def test_recovery_queries_are_signed_and_use_read_only_endpoints():
+    seen = []
+
+    def opener(request, timeout):
+        seen.append(request)
+        return FakeResponse({"status": "FILLED"})
+
+    client = BinanceSpotClient(
+        BinanceSpotConfig(api_key="test-key", api_secret="secret"),
+        opener=opener,
+    )
+    assert client.get_order(symbol="BTCUSDT", order_id=123) == {"status": "FILLED"}
+    assert client.open_orders(symbol="BTCUSDT") == {"status": "FILLED"}
+
+    assert urlsplit(seen[0].full_url).path == "/api/v3/order"
+    assert parse_qs(urlsplit(seen[0].full_url).query)["orderId"] == ["123"]
+    assert urlsplit(seen[1].full_url).path == "/api/v3/openOrders"
+    assert parse_qs(urlsplit(seen[1].full_url).query)["symbol"] == ["BTCUSDT"]
+    for request in seen:
+        assert request.get_header("X-mbx-apikey") == "test-key"
+
+
+def test_get_order_requires_an_identifier():
+    client = BinanceSpotClient(
+        BinanceSpotConfig(api_key="k", api_secret="s"),
+    )
+    with pytest.raises(ValueError, match="order_id_or_client_order_id_required"):
+        client.get_order(symbol="BTCUSDT")
+
+
 def test_signed_request_requires_credentials():
     client = BinanceSpotClient(BinanceSpotConfig(api_key="", api_secret=""))
     with pytest.raises(BinanceAPIError, match="missing_binance_credentials"):
