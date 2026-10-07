@@ -49,15 +49,12 @@ def test_stream_rejects_failed_subscription():
         )
 
 
-def test_stream_consumes_execution_report_only_for_known_order(monkeypatch, tmp_path):
+def test_stream_consumes_execution_report_only_for_known_order():
     applied = []
-
-    class FakeRest:
-        pass
 
     stream = BinanceSpotUserDataStream(
         BinanceSpotStreamConfig(api_key="key", api_secret="secret"),
-        rest_client=FakeRest(),
+        rest_client=object(),
         apply_event=lambda payload: applied.append(payload) or True,
     )
     stream._consume(
@@ -102,8 +99,6 @@ def test_stream_enforces_recv_window_limit():
         )
 
 
-
-
 def test_stream_reconnects_after_termination_and_recovers_before_events():
     import asyncio
 
@@ -128,29 +123,116 @@ def test_stream_reconnects_after_termination_and_recovers_before_events():
                 raise StopAsyncIteration
 
     streams = [
-        FakeWebSocket({"status": 200, "result": {"subscriptionId": 1}},
-                       [json.dumps({"event": {"e": "eventStreamTerminated"}})]),
-        FakeWebSocket({"status": 200, "result": {"subscriptionId": 2}},
-                       [json.dumps({"event": {"e": "executionReport", "c": "client-1"}})]),
+        FakeWebSocket(
+            {"status": 200, "result": {"subscriptionId": 1}},
+            [json.dumps({"event": {"e": "eventStreamTerminated"}})],
+        ),
+        FakeWebSocket(
+            {"status": 200, "result": {"subscriptionId": 2}},
+            [json.dumps({"event": {"e": "executionReport", "c": "client-1"}})],
+        ),
     ]
-    recovered = 0
+    lifecycle = []
     applied = []
 
     class Connect:
         def __call__(self, url):
             websocket = streams.pop(0)
+
             class Context:
                 async def __aenter__(self):
                     return websocket
+
                 async def __aexit__(self, exc_type, exc, tb):
                     return False
+
             return Context()
 
     stream = BinanceSpotUserDataStream(
-        BinanceSpotStreamConfig(api_key="key", api_secret="secret", reconnect_min_seconds=0, reconnect_max_seconds=0),
+        BinanceSpotStreamConfig(
+            api_key="key",
+            api_secret="secret",
+            reconnect_min_seconds=0,
+            reconnect_max_seconds=0,
+        ),
         rest_client=object(),
         connect=Connect(),
-        apply_event=lambda payload: applied.append(payload) or True,
+        apply_event=lambda payload: (
+            lifecycle.append("event"),
+            applied.append(payload),
+        )[1] or True,
+    )
+
+    def recover(_client):
+        lifecycle.append("recovery")
+        if lifecycle.count("recovery") == 2:
+            stream.stop()
+        return {"checked": 0, "updated": 0, "unknown": 0}
+
+    stream._recover = recover
+    asyncio.run(stream.run())
+
+    assert lifecycle == ["recovery", "recovery", "event"]
+    assert len(applied) == 1
+
+
+def test_stream_reconnects_after_server_shutdown():
+    import asyncio
+
+    class FakeWebSocket:
+        def __init__(self, response, events):
+            self.response = response
+            self.events = iter(events)
+
+        async def send(self, value):
+            return None
+
+        async def recv(self):
+            return json.dumps(self.response)
+
+        def __aiter__(self):
+            return self
+
+        async def __anext__(self):
+            try:
+                return next(self.events)
+            except StopIteration:
+                raise StopAsyncIteration
+
+    streams = [
+        FakeWebSocket(
+            {"status": 200, "result": {"subscriptionId": 1}},
+            [json.dumps({"event": {"e": "serverShutdown"}})],
+        ),
+        FakeWebSocket(
+            {"status": 200, "result": {"subscriptionId": 2}},
+            [],
+        ),
+    ]
+    recovered = 0
+
+    class Connect:
+        def __call__(self, url):
+            websocket = streams.pop(0)
+
+            class Context:
+                async def __aenter__(self):
+                    return websocket
+
+                async def __aexit__(self, exc_type, exc, tb):
+                    return False
+
+            return Context()
+
+    stream = BinanceSpotUserDataStream(
+        BinanceSpotStreamConfig(
+            api_key="key",
+            api_secret="secret",
+            reconnect_min_seconds=0,
+            reconnect_max_seconds=0,
+        ),
+        rest_client=object(),
+        connect=Connect(),
     )
 
     def recover(_client):
@@ -162,5 +244,5 @@ def test_stream_reconnects_after_termination_and_recovers_before_events():
 
     stream._recover = recover
     asyncio.run(stream.run())
+
     assert recovered == 2
-    assert len(applied) == 1
