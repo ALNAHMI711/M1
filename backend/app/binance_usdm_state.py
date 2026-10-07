@@ -19,9 +19,13 @@ class UsdmState:
 def from_snapshot(snapshot: UsdmAccountSnapshot, *, snapshot_version: int) -> UsdmState:
     if not isinstance(snapshot_version, int) or isinstance(snapshot_version, bool) or snapshot_version < 1:
         raise ValueError("invalid_snapshot_version")
+    return UsdmState(snapshot=snapshot, snapshot_version=snapshot_version, events_allowed=True)
+
+
+def apply_recovery(state: UsdmState, snapshot: UsdmAccountSnapshot) -> UsdmState:
     return UsdmState(
         snapshot=snapshot,
-        snapshot_version=snapshot_version,
+        snapshot_version=state.snapshot_version,
         last_event_time=None,
         events_allowed=True,
     )
@@ -65,11 +69,7 @@ def accept_account_update(state: UsdmState, update: UsdmAccountUpdate) -> UsdmSt
         raise ValueError("recovery_required")
     if update.event_time is None:
         raise ValueError("account_update_missing_event_time")
-    if not event_is_fresh(
-        event_time=update.event_time,
-        snapshot_version=state.snapshot_version,
-        last_event_time=state.last_event_time,
-    ):
+    if not event_is_fresh(event_time=update.event_time, snapshot_version=state.snapshot_version, last_event_time=state.last_event_time):
         return state
     return UsdmState(
         snapshot=_apply_account_update(state.snapshot, update),
@@ -82,15 +82,6 @@ def accept_account_update(state: UsdmState, update: UsdmAccountUpdate) -> UsdmSt
 def accept_event(state: UsdmState, event: UserEvent, *, event_time: int) -> UsdmState:
     if not state.events_allowed:
         raise ValueError("recovery_required")
-    if not event_is_fresh(
-        event_time=event_time,
-        snapshot_version=state.snapshot_version,
-        last_event_time=state.last_event_time,
-    ):
+    if not event_is_fresh(event_time=event_time, snapshot_version=state.snapshot_version, last_event_time=state.last_event_time):
         return state
-    return UsdmState(
-        snapshot=state.snapshot,
-        snapshot_version=state.snapshot_version,
-        last_event_time=event_time,
-        events_allowed=True,
-    )
+    return UsdmState(snapshot=state.snapshot, snapshot_version=state.snapshot_version, last_event_time=event_time, events_allowed=True)
