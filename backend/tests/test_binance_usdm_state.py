@@ -2,8 +2,8 @@ import pytest
 
 from app.binance_usdm_events import UserEvent
 from app.binance_usdm_recovery import recovery_event_cutoff
-from app.binance_usdm_snapshot import UsdmAccountSnapshot
-from app.binance_usdm_state import accept_event, from_snapshot, mark_recovery_required
+from app.binance_usdm_snapshot import UsdmAccountSnapshot, UsdmSnapshotAsset
+from app.binance_usdm_state import accept_event, apply_recovery, from_snapshot, mark_recovery_required
 
 
 def test_accept_event_tracks_latest_event_time():
@@ -36,3 +36,24 @@ def test_recovery_gate_blocks_events_until_a_new_snapshot():
     event = UserEvent(event_type="ACCOUNT_UPDATE", payload={"e": "ACCOUNT_UPDATE", "a": {}})
     with pytest.raises(ValueError, match="recovery_required"):
         accept_event(blocked, event, event_time=200)
+
+
+def test_successful_recovery_reopens_gate_and_resets_event_cutoff():
+    state = from_snapshot(
+        UsdmAccountSnapshot(assets=(UsdmSnapshotAsset("USDT", "10", "9"),), positions=()),
+        snapshot_version=2,
+    )
+    state = accept_event(
+        state,
+        UserEvent(event_type="ACCOUNT_UPDATE", payload={"e": "ACCOUNT_UPDATE", "a": {}}),
+        event_time=500,
+    )
+    blocked = mark_recovery_required(state)
+    recovered = apply_recovery(
+        blocked,
+        UsdmAccountSnapshot(assets=(UsdmSnapshotAsset("USDT", "12", "11"),), positions=()),
+    )
+    assert recovered.snapshot.assets[0].wallet_balance == "12"
+    assert recovered.snapshot_version == 3
+    assert recovered.last_event_time is None
+    assert recovered.events_allowed is True
