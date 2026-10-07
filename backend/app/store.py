@@ -139,6 +139,15 @@ def record_execution_order(
         )
 
 
+def execution_order_exists(client_order_id: str) -> bool:
+    with connection() as conn:
+        row = conn.execute(
+            "SELECT 1 FROM execution_orders WHERE client_order_id = ?",
+            (client_order_id,),
+        ).fetchone()
+        return row is not None
+
+
 def pending_execution_orders():
     with connection() as conn:
         rows = conn.execute(
@@ -157,7 +166,7 @@ def update_execution_order(
     order_id: str | None = None,
     executed_quantity: str | None = None,
     price: str | None = None,
-) -> None:
+) -> bool:
     fields = ["status = ?", "updated_at = ?"]
     values: list[str | None] = [status, datetime.now(timezone.utc).isoformat()]
     if order_id is not None:
@@ -171,10 +180,11 @@ def update_execution_order(
         values.append(price)
     values.append(client_order_id)
     with connection() as conn:
-        conn.execute(
+        cursor = conn.execute(
             f"UPDATE execution_orders SET {', '.join(fields)} WHERE client_order_id = ?",
             values,
         )
+        return cursor.rowcount == 1
 
 
 def record_execution_audit(
