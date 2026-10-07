@@ -199,3 +199,15 @@ def record_execution_audit(
                 datetime.now(timezone.utc).isoformat(),
             ),
         )
+
+
+def recent_execution_audit(limit: int = 100):
+    safe_limit = max(1, min(limit, 500))
+    with connection() as conn:
+        rows = conn.execute(
+            """SELECT id, client_order_id, signal_id, event, status, detail, created_at
+               FROM execution_audit
+               ORDER BY id DESC LIMIT ?""",
+            (safe_limit,),
+        ).fetchall()
+        return [dict(row) for row in rows]
