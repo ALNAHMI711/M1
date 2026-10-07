@@ -16,8 +16,8 @@ def test_current_usdm_ws_api_endpoints_are_defined():
 
 def test_start_request_includes_api_key():
     state = UsdmUserDataStreamLifecycle(api_key="key")
-    assert state.start_request(7) == {
-        "id": 7,
+    assert state.start_request("req-7") == {
+        "id": "req-7",
         "method": "userDataStream.start",
         "params": {"apiKey": "key"},
     }
@@ -58,8 +58,8 @@ def test_listen_key_is_url_encoded():
 
 def test_keepalive_request_and_response_refresh_listen_key():
     started = UsdmUserDataStreamLifecycle(api_key="key").started_with("old-key")
-    assert started.keepalive_request(2) == {
-        "id": 2,
+    assert started.keepalive_request("req-2") == {
+        "id": "req-2",
         "method": "userDataStream.ping",
         "params": {"apiKey": "key"},
     }
@@ -71,7 +71,7 @@ def test_keepalive_request_and_response_refresh_listen_key():
 
 def test_keepalive_requires_started_stream():
     with pytest.raises(ValueError, match="stream_not_started"):
-        UsdmUserDataStreamLifecycle(api_key="key").keepalive_request(1)
+        UsdmUserDataStreamLifecycle(api_key="key").keepalive_request("req-1")
 
 
 def test_keepalive_is_due_before_stream_expiry():
@@ -82,8 +82,8 @@ def test_keepalive_is_due_before_stream_expiry():
 
 def test_stop_request_and_response():
     started = UsdmUserDataStreamLifecycle(api_key="key").started_with("listen-key")
-    assert started.stop_request(3) == {
-        "id": 3,
+    assert started.stop_request("req-3") == {
+        "id": "req-3",
         "method": "userDataStream.stop",
         "params": {"apiKey": "key"},
     }
@@ -108,7 +108,13 @@ def test_invalid_stream_configuration(kwargs, error):
 def test_invalid_request_id_is_rejected():
     state = UsdmUserDataStreamLifecycle(api_key="key")
     with pytest.raises(ValueError, match="invalid_request_id"):
-        state.start_request(True)
+        state.start_request(7)
+
+
+def test_empty_request_id_is_rejected():
+    state = UsdmUserDataStreamLifecycle(api_key="key")
+    with pytest.raises(ValueError, match="invalid_request_id"):
+        state.start_request("")
 
 
 def test_negative_or_bool_elapsed_is_rejected():
