@@ -16,11 +16,7 @@ def recover_before_events(response: dict, *, snapshot_version: int = 1) -> UsdmR
     if not isinstance(snapshot_version, int) or isinstance(snapshot_version, bool) or snapshot_version < 1:
         raise ValueError("invalid_snapshot_version")
     snapshot = parse_account_snapshot(response)
-    return UsdmRecoveryResult(
-        snapshot=snapshot,
-        events_allowed=True,
-        snapshot_version=snapshot_version,
-    )
+    return UsdmRecoveryResult(snapshot=snapshot, events_allowed=True, snapshot_version=snapshot_version)
 
 
 def event_is_fresh(*, event_time: int, snapshot_version: int, last_event_time: int | None) -> bool:
@@ -33,3 +29,9 @@ def event_is_fresh(*, event_time: int, snapshot_version: int, last_event_time: i
     ):
         raise ValueError("invalid_last_event_time")
     return last_event_time is None or event_time >= last_event_time
+
+
+def next_snapshot_version(previous_version: int) -> int:
+    if not isinstance(previous_version, int) or isinstance(previous_version, bool) or previous_version < 1:
+        raise ValueError("invalid_snapshot_version")
+    return previous_version + 1
