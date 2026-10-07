@@ -5,6 +5,33 @@ from dataclasses import dataclass
 
 USDM_WS_API_URL = "wss://ws-fapi.binance.com/ws-fapi/v1"
 USDM_WS_API_TESTNET_URL = "wss://testnet.binancefuture.com/ws-fapi/v1"
+USDM_PRIVATE_STREAM_URL = "wss://fstream.binance.com/private/ws"
+USDM_PRIVATE_STREAM_TESTNET_URL = "wss://stream.binancefuture.com/private/ws"
+
+
+def _request_id(request_id: int) -> int:
+    if not isinstance(request_id, int) or isinstance(request_id, bool):
+        raise ValueError("invalid_request_id")
+    return request_id
+
+
+def _validate_start_response(response: object) -> str:
+    if not isinstance(response, dict):
+        raise ValueError("invalid_start_response")
+    if response.get("status") != 200:
+        raise ValueError("usdm_stream_start_failed")
+    result = response.get("result")
+    if not isinstance(result, dict):
+        raise ValueError("invalid_start_result")
+    listen_key = result.get("listenKey")
+    if not isinstance(listen_key, str) or not listen_key:
+        raise ValueError("missing_listen_key")
+    return listen_key
+
+
+def _validate_control_response(response: object, expected_status: int = 200) -> None:
+    if not isinstance(response, dict) or response.get("status") != expected_status:
+        raise ValueError("usdm_stream_control_failed")
 
 
 @dataclass(frozen=True)
@@ -25,10 +52,17 @@ class UsdmUserDataStreamLifecycle:
     def started(self) -> bool:
         return bool(self.listen_key)
 
+    @property
+    def private_stream_url(self) -> str:
+        if not self.listen_key:
+            raise ValueError("stream_not_started")
+        return f"{USDM_PRIVATE_STREAM_URL}?listenKey={self.listen_key}&events=ORDER_TRADE_UPDATE,ACCOUNT_UPDATE"
+
     def start_request(self, request_id: int) -> dict:
-        if not isinstance(request_id, int):
-            raise ValueError("invalid_request_id")
-        return {"id": request_id, "method": "userDataStream.start"}
+        return {"id": _request_id(request_id), "method": "userDataStream.start"}
+
+    def apply_start_response(self, response: object) -> "UsdmUserDataStreamLifecycle":
+        return self.started_with(_validate_start_response(response))
 
     def started_with(self, listen_key: str) -> "UsdmUserDataStreamLifecycle":
         if not listen_key:
@@ -42,13 +76,14 @@ class UsdmUserDataStreamLifecycle:
     def keepalive_request(self, request_id: int) -> dict:
         if not self.started:
             raise ValueError("stream_not_started")
-        if not isinstance(request_id, int):
-            raise ValueError("invalid_request_id")
         return {
-            "id": request_id,
+            "id": _request_id(request_id),
             "method": "userDataStream.ping",
             "params": {"listenKey": self.listen_key},
         }
+
+    def apply_keepalive_response(self, response: object) -> None:
+        _validate_control_response(response)
 
     def keepalive_due(self, elapsed_seconds: int) -> bool:
         if elapsed_seconds < 0:
@@ -58,13 +93,15 @@ class UsdmUserDataStreamLifecycle:
     def stop_request(self, request_id: int) -> dict:
         if not self.started:
             raise ValueError("stream_not_started")
-        if not isinstance(request_id, int):
-            raise ValueError("invalid_request_id")
         return {
-            "id": request_id,
+            "id": _request_id(request_id),
             "method": "userDataStream.stop",
             "params": {"listenKey": self.listen_key},
         }
+
+    def apply_stop_response(self, response: object) -> "UsdmUserDataStreamLifecycle":
+        _validate_control_response(response)
+        return self.stopped()
 
     def stopped(self) -> "UsdmUserDataStreamLifecycle":
         return UsdmUserDataStreamLifecycle(
