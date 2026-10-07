@@ -68,3 +68,52 @@ def test_stream_recovery_cannot_open_before_snapshot_restore():
         assert str(exc) == "snapshot_recovery_required"
     else:
         raise AssertionError("stream recovery must not open before snapshot recovery")
+
+
+def test_events_are_rejected_while_recovery_is_pending():
+    from app.binance_usdm_account import UsdmAccountUpdate
+    from app.binance_usdm_events import UserEvent
+
+    coordinator = make_coordinator().on_disconnect()
+    account_update = UsdmAccountUpdate(
+        event_time=100,
+        transaction_time=100,
+        reason="ORDER",
+        assets=(),
+        positions=(),
+    )
+    event = UserEvent(event_type="ACCOUNT_UPDATE", payload={"e": "ACCOUNT_UPDATE"})
+
+    try:
+        coordinator.accept_account_update(account_update)
+    except ValueError as exc:
+        assert str(exc) == "recovery_required"
+    else:
+        raise AssertionError("account updates must remain blocked during recovery")
+
+    try:
+        coordinator.accept_user_event(event, event_time=100)
+    except ValueError as exc:
+        assert str(exc) == "recovery_required"
+    else:
+        raise AssertionError("user events must remain blocked during recovery")
+
+
+def test_account_update_opens_state_progress_only_after_runtime_recovery():
+    from app.binance_usdm_account import UsdmAccountUpdate
+
+    coordinator = make_coordinator().on_disconnect().restore_snapshot(
+        UsdmAccountSnapshot(assets=(), positions=())
+    ).on_recovery_success("new-key")
+    updated = coordinator.accept_account_update(
+        UsdmAccountUpdate(
+            event_time=100,
+            transaction_time=100,
+            reason="ORDER",
+            assets=(),
+            positions=(),
+        )
+    )
+
+    assert updated.events_allowed is True
+    assert updated.gate.state.last_event_time == 100
