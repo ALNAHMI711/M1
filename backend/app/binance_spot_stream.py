@@ -125,7 +125,6 @@ class BinanceSpotUserDataStream:
             connect = self._connect
 
         delay = self.config.reconnect_min_seconds
-        first_connection = True
 
         while not self._stopped:
             try:
@@ -140,7 +139,6 @@ class BinanceSpotUserDataStream:
                     self._ensure_subscription_confirmed(response)
 
                     self._recover(self.rest_client)
-                    first_connection = False
                     delay = self.config.reconnect_min_seconds
 
                     async for raw in websocket:
