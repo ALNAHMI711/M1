@@ -83,7 +83,10 @@ def parse_account_update(payload: dict) -> UsdmAccountUpdate:
             raise ValueError("invalid_position_symbol")
         if position_side not in {"BOTH", "LONG", "SHORT"}:
             raise ValueError("invalid_position_side")
-        if margin_type not in {"CROSSED", "ISOLATED"}:
+        if not isinstance(margin_type, str):
+            raise ValueError("invalid_margin_type")
+        normalized_margin_type = margin_type.upper()
+        if normalized_margin_type not in {"CROSSED", "ISOLATED"}:
             raise ValueError("invalid_margin_type")
         positions.append(
             UsdmPosition(
@@ -92,7 +95,7 @@ def parse_account_update(payload: dict) -> UsdmAccountUpdate:
                 quantity=_decimal_string(item.get("pa"), "position_quantity"),
                 entry_price=_decimal_string(item.get("ep"), "entry_price"),
                 unrealized_pnl=_decimal_string(item.get("up"), "unrealized_pnl"),
-                margin_type=margin_type,
+                margin_type=normalized_margin_type,
             )
         )
 
