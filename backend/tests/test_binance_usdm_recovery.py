@@ -19,7 +19,7 @@ def test_recovery_does_not_open_event_gate_on_invalid_snapshot():
 
 @pytest.mark.parametrize(
     "event_time,last_event_time,expected",
-    [(100, None, True), (100, 99, True), (100, 100, True), (100, 101, False)],
+    [(100, None, True), (100, 99, True), (100, 100, False), (100, 101, False)],
 )
 def test_event_freshness(event_time, last_event_time, expected):
     assert event_is_fresh(event_time=event_time, snapshot_version=1, last_event_time=last_event_time) is expected
