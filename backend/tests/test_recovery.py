@@ -45,7 +45,7 @@ def test_recovery_marks_binance_failure_unknown(monkeypatch, tmp_path):
             raise BinanceAPIError("temporary")
 
     assert recover_spot_orders(Client()) == {"checked": 1, "updated": 0, "unknown": 1}
-    assert store.pending_execution_orders()[0]["status"] == "UNKNOWN"
+    assert store.pending_execution_orders() == []
 
 
 def test_recovery_uses_client_order_id_when_remote_id_missing(monkeypatch, tmp_path):
