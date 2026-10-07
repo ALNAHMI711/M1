@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from .binance_usdm_private_runtime import UsdmPrivateRuntime
 from .binance_usdm_snapshot import UsdmAccountSnapshot
 from .binance_usdm_snapshot_recovery_gate import UsdmSnapshotRecoveryGate
+from .binance_usdm_state import recovery_failed
 
 
 @dataclass(frozen=True)
@@ -32,10 +33,7 @@ class UsdmRecoveryCoordinator:
         return UsdmRecoveryCoordinator(
             runtime=self.runtime.on_recovery_failure(),
             gate=UsdmSnapshotRecoveryGate(
-                state=__import__(
-                    "app.binance_usdm_state",
-                    fromlist=["recovery_failed"],
-                ).recovery_failed(self.gate.state)
+                state=recovery_failed(self.gate.state)
             ),
         )
 
