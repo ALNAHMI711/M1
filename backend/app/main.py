@@ -8,10 +8,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
 
 from .auth import Token, authenticate, create_access_token, current_user, revoke
+from .binance_spot import BinanceAPIError, BinanceSpotClient, BinanceSpotConfig
 from .store import record_signal, signal_seen
 from .telegram import parse_telegram_signal
 
-app = FastAPI(title="ALNAHMI M1 Trading Control Plane", version="0.4.0")
+app = FastAPI(title="ALNAHMI M1 Trading Control Plane", version="0.5.0")
 
 WEBHOOK_SECRET = os.getenv("TRADINGVIEW_WEBHOOK_SECRET", "")
 MIN_SCORE = 85.0
@@ -27,8 +28,17 @@ class Signal(BaseModel):
     score: float = Field(ge=0, le=100)
     rr: float = Field(gt=0)
     source: Literal["TRADINGVIEW", "TELEGRAM", "STRATEGY", "MANUAL"]
-    mode: Literal["DEVELOPMENT", "BACKTEST", "DRY_RUN", "PAPER", "LIVE"] = "PAPER"
+    mode: Literal["DEVELOPMENT", "BACKTEST", "DRY_RUN", "PAPER", "TESTNET", "LIVE"] = "PAPER"
     signal_id: str = Field(min_length=8, max_length=128)
+
+
+class BinanceSpotOrderTest(BaseModel):
+    signal: Signal
+    order_type: Literal["MARKET", "LIMIT"] = "MARKET"
+    quantity: str = Field(min_length=1, max_length=32)
+    price: str | None = Field(default=None, min_length=1, max_length=32)
+    time_in_force: Literal["GTC", "IOC", "FOK"] | None = None
+    client_order_id: str | None = Field(default=None, min_length=1, max_length=36)
 
 
 def calculated_rr(signal: Signal) -> float | None:
@@ -110,6 +120,34 @@ def health():
 def validate_signal(signal: Signal):
     accepted, reasons = risk_check(signal)
     return {"accepted": accepted, "reasons": reasons}
+
+
+@app.post("/v1/binance/spot/order-test")
+def binance_spot_order_test(
+    request: BinanceSpotOrderTest,
+    user=Security(current_user, scopes=["control:write"]),
+):
+    if request.signal.mode != "TESTNET":
+        raise HTTPException(status_code=400, detail="binance_order_test_requires_testnet_mode")
+    accepted, reasons = risk_check(request.signal)
+    if not accepted:
+        raise HTTPException(status_code=422, detail={"accepted": False, "reasons": reasons})
+    if request.order_type == "LIMIT" and (request.price is None or request.time_in_force is None):
+        raise HTTPException(status_code=422, detail="limit_order_requires_price_and_time_in_force")
+    try:
+        client = BinanceSpotClient(BinanceSpotConfig.from_env(testnet=True))
+        result = client.order_test(
+            symbol=request.signal.symbol,
+            side="BUY" if request.signal.side == "LONG" else "SELL",
+            order_type=request.order_type,
+            quantity=request.quantity,
+            price=request.price,
+            time_in_force=request.time_in_force,
+            client_order_id=request.client_order_id,
+        )
+    except BinanceAPIError as exc:
+        raise HTTPException(status_code=502, detail="binance_testnet_request_failed") from exc
+    return {"accepted": True, "mode": "TESTNET", "result": result, "user": user.username}
 
 
 @app.post("/v1/signals/telegram/parse")
