@@ -102,7 +102,13 @@ class UsdmUserDataStreamLifecycle:
         self, response: object
     ) -> "UsdmUserDataStreamLifecycle":
         _validate_control_response(response)
-        return self.started_with(_validate_start_response(response))
+        if not isinstance(response, dict):
+            raise ValueError("invalid_keepalive_response")
+        result = response.get("result")
+        if not isinstance(result, dict):
+            raise ValueError("invalid_keepalive_result")
+        listen_key = result.get("listenKey", self.listen_key)
+        return self.started_with(listen_key)
 
     def keepalive_due(self, elapsed_seconds: int) -> bool:
         if (
