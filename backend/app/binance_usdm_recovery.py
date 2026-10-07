@@ -28,7 +28,7 @@ def event_is_fresh(*, event_time: int, snapshot_version: int, last_event_time: i
         not isinstance(last_event_time, int) or isinstance(last_event_time, bool) or last_event_time < 0
     ):
         raise ValueError("invalid_last_event_time")
-    return last_event_time is None or event_time >= last_event_time
+    return last_event_time is None or event_time > last_event_time
 
 
 def next_snapshot_version(previous_version: int) -> int:
