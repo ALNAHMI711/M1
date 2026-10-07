@@ -92,7 +92,7 @@ def test_events_are_rejected_while_recovery_is_pending():
         raise AssertionError("account updates must remain blocked during recovery")
 
     try:
-        coordinator.accept_user_event(event, event_time=100)
+        coordinator.accept_user_event(event)
     except ValueError as exc:
         assert str(exc) == "recovery_required"
     else:
