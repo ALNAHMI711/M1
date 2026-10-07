@@ -1,14 +1,20 @@
 import sqlite3
 
 import app.order_events as events
+from app.store import record_execution_order
 
 
 def test_apply_spot_order_update_persists_state(monkeypatch, tmp_path):
     db = tmp_path / "events.sqlite3"
     monkeypatch.setenv("M1_DB_PATH", str(db))
 
-    events.update_execution_order(
-        "client-1",
+    record_execution_order(
+        client_order_id="client-1",
+        signal_id="signal-1",
+        symbol="BTCUSDT",
+        side="BUY",
+        mode="TESTNET",
+        quantity="0.5",
         status="NEW",
         order_id="123",
         executed_quantity="0",
