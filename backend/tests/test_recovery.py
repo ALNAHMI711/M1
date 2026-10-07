@@ -70,3 +70,27 @@ def test_recovery_uses_client_order_id_when_remote_id_missing(monkeypatch, tmp_p
 
     assert recover_spot_orders(Client()) == {"checked": 1, "updated": 1, "unknown": 0}
     assert store.pending_execution_orders() == []
+
+
+def test_recovery_does_not_retry_quarantined_unknown(monkeypatch, tmp_path):
+    monkeypatch.setenv("M1_DB_PATH", str(tmp_path / "m1.sqlite3"))
+    store.record_execution_order(
+        client_order_id="m1-test-004",
+        signal_id="signal-004",
+        symbol="BTCUSDT",
+        side="BUY",
+        mode="TESTNET",
+        quantity="0.001",
+        status="UNKNOWN",
+    )
+
+    calls = []
+
+    class Client:
+        def get_order(self, **kwargs):
+            calls.append(kwargs)
+            return {"status": "FILLED", "executedQty": "0.001", "price": "50000"}
+
+    assert recover_spot_orders(Client()) == {"checked": 0, "updated": 0, "unknown": 0}
+    assert calls == []
+    assert store.pending_execution_orders() == []
