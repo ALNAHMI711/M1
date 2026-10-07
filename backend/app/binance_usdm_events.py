@@ -53,3 +53,10 @@ def account_update_payload(event: UserEvent) -> dict:
     if not isinstance(payload.get("a"), dict):
         raise ValueError("account_update_missing_account")
     return payload
+
+
+def event_time(event: UserEvent) -> int:
+    value = event.payload.get("E")
+    if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+        raise ValueError("invalid_event_time")
+    return value
