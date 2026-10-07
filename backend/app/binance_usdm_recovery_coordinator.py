@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .binance_usdm_account import UsdmAccountUpdate
-from .binance_usdm_events import UserEvent, event_time
+from .binance_usdm_events import UserEvent, event_time, is_listen_key_expired
 from .binance_usdm_private_runtime import UsdmPrivateRuntime
 from .binance_usdm_recovery import event_is_fresh
 from .binance_usdm_snapshot import UsdmAccountSnapshot
@@ -56,6 +56,13 @@ class UsdmRecoveryCoordinator:
     def accept_user_event(self, event: UserEvent) -> "UsdmRecoveryCoordinator":
         if not self.events_allowed:
             raise ValueError("recovery_required")
+
+        if is_listen_key_expired(event):
+            # Binance explicitly signals listen-key expiry. Treat it like a
+            # transport loss: block all subsequent events until a fresh
+            # snapshot is restored and a new private stream is established.
+            return self.on_disconnect()
+
         exchange_event_time = event_time(event)
         # Check freshness before reconciliation so stale exchange events
         # cannot mutate the local execution record.
