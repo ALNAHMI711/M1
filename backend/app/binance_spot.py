@@ -11,7 +11,6 @@ import urllib.request
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-
 TESTNET_BASE_URL = "https://testnet.binance.vision"
 LIVE_BASE_URL = "https://api.binance.com"
 
@@ -111,6 +110,26 @@ class BinanceSpotClient:
 
     def account(self) -> Any:
         return self._request("GET", "/api/v3/account", signed=True)
+
+    def get_order(
+        self,
+        *,
+        symbol: str,
+        order_id: int | None = None,
+        client_order_id: str | None = None,
+    ) -> Any:
+        if order_id is None and client_order_id is None:
+            raise ValueError("order_id_or_client_order_id_required")
+        params: dict[str, Any] = {"symbol": symbol.upper()}
+        if order_id is not None:
+            params["orderId"] = order_id
+        else:
+            params["origClientOrderId"] = client_order_id
+        return self._request("GET", "/api/v3/order", params, signed=True)
+
+    def open_orders(self, *, symbol: str | None = None) -> Any:
+        params = {"symbol": symbol.upper()} if symbol else None
+        return self._request("GET", "/api/v3/openOrders", params, signed=True)
 
     def order_test(
         self,
