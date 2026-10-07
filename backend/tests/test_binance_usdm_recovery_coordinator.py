@@ -30,6 +30,20 @@ def test_disconnect_blocks_both_runtime_and_state_events():
     assert coordinator.gate.state.snapshot_version == 2
 
 
+def test_listen_key_expiry_blocks_events_and_requires_snapshot_recovery():
+    from app.binance_usdm_events import parse_user_event
+
+    coordinator = make_coordinator()
+    expired = parse_user_event({"e": "listenKeyExpired", "E": 1000})
+
+    recovered = coordinator.accept_user_event(expired)
+
+    assert recovered.events_allowed is False
+    assert recovered.recovery_required is True
+    assert recovered.runtime.events_allowed is False
+    assert recovered.gate.state.snapshot_version == 2
+
+
 def test_failed_recovery_keeps_both_gates_closed_and_increments_attempt():
     coordinator = make_coordinator().on_disconnect().on_recovery_failure()
 
