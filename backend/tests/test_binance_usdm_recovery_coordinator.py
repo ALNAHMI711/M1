@@ -152,6 +152,7 @@ def test_stale_order_event_does_not_mutate_execution_record(tmp_path, monkeypatc
     stale = parse_user_event(
         {
             "e": "ORDER_TRADE_UPDATE",
+            "E": 100,
             "o": {
                 "c": "m1-futures-stale-1",
                 "i": 98765,
@@ -162,7 +163,7 @@ def test_stale_order_event_does_not_mutate_execution_record(tmp_path, monkeypatc
         }
     )
 
-    updated = coordinator.accept_user_event(stale, event_time=100)
+    updated = coordinator.accept_user_event(stale)
 
     assert updated is coordinator
     order = get_execution_order("m1-futures-stale-1")
@@ -195,6 +196,7 @@ def test_fresh_order_event_reconciles_after_recovery(tmp_path, monkeypatch):
     event = parse_user_event(
         {
             "e": "ORDER_TRADE_UPDATE",
+            "E": 300,
             "o": {
                 "c": "m1-futures-fresh-1",
                 "i": 98765,
@@ -205,7 +207,7 @@ def test_fresh_order_event_reconciles_after_recovery(tmp_path, monkeypatch):
         }
     )
 
-    updated = coordinator.accept_user_event(event, event_time=300)
+    updated = coordinator.accept_user_event(event)
 
     assert updated.events_allowed is True
     assert updated.gate.state.last_event_time == 300
