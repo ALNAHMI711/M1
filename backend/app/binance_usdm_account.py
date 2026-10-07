@@ -9,7 +9,7 @@ class UsdmAsset:
     asset: str
     wallet_balance: str
     cross_wallet_balance: str
-    available_balance: str
+    balance_change: str
 
 
 @dataclass(frozen=True)
@@ -68,7 +68,7 @@ def parse_account_update(payload: dict) -> UsdmAccountUpdate:
                 asset=asset,
                 wallet_balance=_decimal_string(item.get("wb"), "wallet_balance"),
                 cross_wallet_balance=_decimal_string(item.get("cw"), "cross_wallet_balance"),
-                available_balance=_decimal_string(item.get("bc"), "available_balance"),
+                balance_change=_decimal_string(item.get("bc"), "balance_change"),
             )
         )
 
