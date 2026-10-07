@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from .auth import Token, authenticate, create_access_token, current_user, revoke
 from .binance_spot import BinanceAPIError, BinanceSpotClient, BinanceSpotConfig
 from .recovery import recover_spot_orders
-from .store import record_signal, signal_seen
+from .store import record_signal, recent_execution_audit, signal_seen
 from .telegram import parse_telegram_signal
 
 app = FastAPI(title="ALNAHMI M1 Trading Control Plane", version="0.5.0")
@@ -110,6 +110,11 @@ def me(user=Depends(current_user)):
 @app.get("/v1/control/status")
 def control_status(user=Security(current_user, scopes=["control:read"])):
     return {"status": "ready", "mode": "paper-first", "live_enabled": False, "user": user.username}
+
+
+@app.get("/v1/control/audit")
+def control_audit(limit: int = 100, user=Security(current_user, scopes=["control:read"])):
+    return {"items": recent_execution_audit(limit), "user": user.username}
 
 
 @app.get("/health")
