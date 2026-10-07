@@ -64,6 +64,14 @@ def test_keepalive_request_and_response_refresh_listen_key():
         "params": {"apiKey": "key"},
     }
     refreshed = started.apply_keepalive_response(
+        {"status": 200, "result": {}}
+    )
+    assert refreshed.listen_key == "old-key"
+
+
+def test_keepalive_response_can_refresh_listen_key():
+    started = UsdmUserDataStreamLifecycle(api_key="key").started_with("old-key")
+    refreshed = started.apply_keepalive_response(
         {"status": 200, "result": {"listenKey": "new-key"}}
     )
     assert refreshed.listen_key == "new-key"
