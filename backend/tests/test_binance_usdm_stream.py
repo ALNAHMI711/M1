@@ -25,8 +25,9 @@ def test_start_request_includes_api_key():
 
 
 def test_start_response_creates_stream_state():
-    state = UsdmUserDataStreamLifecycle(api_key="key")
-    started = state.apply_start_response({"status": 200, "result": {"listenKey": "listen-key"}})
+    started = UsdmUserDataStreamLifecycle(api_key="key").apply_start_response(
+        {"status": 200, "result": {"listenKey": "listen-key"}}
+    )
     assert started.started is True
     assert started.listen_key == "listen-key"
 
@@ -62,14 +63,15 @@ def test_keepalive_request_and_response_refresh_listen_key():
         "method": "userDataStream.ping",
         "params": {"apiKey": "key"},
     }
-    refreshed = started.apply_keepalive_response({"status": 200, "result": {"listenKey": "new-key"}})
+    refreshed = started.apply_keepalive_response(
+        {"status": 200, "result": {"listenKey": "new-key"}}
+    )
     assert refreshed.listen_key == "new-key"
 
 
 def test_keepalive_requires_started_stream():
-    state = UsdmUserDataStreamLifecycle(api_key="key")
     with pytest.raises(ValueError, match="stream_not_started"):
-        state.keepalive_request(1)
+        UsdmUserDataStreamLifecycle(api_key="key").keepalive_request(1)
 
 
 def test_keepalive_is_due_before_stream_expiry():
@@ -95,6 +97,7 @@ def test_stop_request_and_response():
     [
         ({"api_key": ""}, "missing_api_key"),
         ({"api_key": "key", "keepalive_interval_seconds": 0}, "invalid_keepalive_interval"),
+        ({"api_key": "key", "keepalive_interval_seconds": True}, "invalid_keepalive_interval"),
     ],
 )
 def test_invalid_stream_configuration(kwargs, error):
@@ -102,7 +105,15 @@ def test_invalid_stream_configuration(kwargs, error):
         UsdmUserDataStreamLifecycle(**kwargs)
 
 
-def test_negative_elapsed_is_rejected():
+def test_invalid_request_id_is_rejected():
+    state = UsdmUserDataStreamLifecycle(api_key="key")
+    with pytest.raises(ValueError, match="invalid_request_id"):
+        state.start_request(True)
+
+
+def test_negative_or_bool_elapsed_is_rejected():
     state = UsdmUserDataStreamLifecycle(api_key="key")
     with pytest.raises(ValueError, match="invalid_elapsed_seconds"):
         state.keepalive_due(-1)
+    with pytest.raises(ValueError, match="invalid_elapsed_seconds"):
+        state.keepalive_due(True)
