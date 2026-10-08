@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from enum import StrEnum
 from typing import Protocol
 
@@ -37,6 +38,16 @@ class OrderExecutor(Protocol):
         ...
 
 
+def _positive_decimal(value: str) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        number = Decimal(value)
+    except (InvalidOperation, ValueError):
+        return False
+    return number.is_finite() and number > 0
+
+
 def authorize_execution(
     request: ExecutionRequest,
     *,
@@ -53,16 +64,15 @@ def authorize_execution(
     if request.side.upper() not in {"BUY", "SELL"}:
         risk = RiskDecision(False, ("invalid_side",))
         return ExecutionDecision(False, risk, "invalid_side")
+    if not _positive_decimal(request.quantity):
+        risk = RiskDecision(False, ("invalid_quantity",))
+        return ExecutionDecision(False, risk, "invalid_quantity")
 
     risk = evaluate_trade_risk(request.risk)
     if not risk.allowed:
         return ExecutionDecision(False, risk, "risk_rejected")
 
     if request.mode is ExecutionMode.LIVE and not live_enabled:
-        return ExecutionDecision(
-            False,
-            risk,
-            "live_execution_disabled",
-        )
+        return ExecutionDecision(False, risk, "live_execution_disabled")
 
     return ExecutionDecision(True, risk)
