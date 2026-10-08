@@ -53,3 +53,10 @@ def test_live_can_never_bypass_a_rejected_risk_gate():
 def test_invalid_symbol_and_side_are_rejected_before_execution():
     assert authorize_execution(_request(symbol="btcusdt")).reason == "invalid_symbol"
     assert authorize_execution(_request(side="HOLD")).reason == "invalid_side"
+
+
+def test_invalid_quantities_are_rejected_before_risk():
+    for quantity in ("0", "-1", "NaN", "Infinity", "not-a-number"):
+        decision = authorize_execution(_request(quantity=quantity))
+        assert decision.allowed is False
+        assert decision.reason == "invalid_quantity"
