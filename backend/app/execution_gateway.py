@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
 
-from .risk_gate import RiskDecision
+from .risk_gate import RiskDecision, RiskInput, evaluate_trade_risk
 
 
 class ExecutionMode(str, Enum):
@@ -23,6 +23,7 @@ class ExecutionRequest:
     side: str
     quantity: Decimal
     mode: ExecutionMode
+    risk: RiskInput
 
 
 class ExecutionBlocked(ValueError):
@@ -32,11 +33,17 @@ class ExecutionBlocked(ValueError):
 class ExecutionGateway:
     """Execution boundary: risk approval is mandatory before transport.
 
-    This interface intentionally contains no exchange implementation.
-    LIVE is denied until a separately reviewed adapter is installed.
+    The gateway computes the risk decision itself so callers cannot forge an
+    approved RiskDecision and bypass the hard gate. It contains no exchange
+    implementation. LIVE remains denied until a separately reviewed adapter
+    is installed and explicitly enabled.
     """
 
-    def submit(self, request: ExecutionRequest, decision: RiskDecision) -> None:
+    def evaluate(self, request: ExecutionRequest) -> RiskDecision:
+        return evaluate_trade_risk(request.risk)
+
+    def submit(self, request: ExecutionRequest) -> None:
+        decision = self.evaluate(request)
         if not decision.allowed:
             raise ExecutionBlocked("risk_gate_rejected")
         if request.mode is ExecutionMode.LIVE:
