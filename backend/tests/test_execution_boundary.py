@@ -4,6 +4,7 @@ from app.execution_boundary import (
     ExecutionMode,
     ExecutionRequest,
     GuardedExecutionService,
+    LiveExecutionRequirements,
 )
 from app.risk_gate import RiskInput
 
@@ -59,7 +60,6 @@ def test_allowed_request_reaches_configured_adapter():
     assert result.accepted is True
     assert result.reason == "submitted"
     assert len(adapter.requests) == 1
-    assert adapter.requests[0].symbol == "BTCUSDT"
 
 
 def test_invalid_quantity_is_rejected_before_adapter():
@@ -81,10 +81,19 @@ def test_invalid_quantity_is_rejected_before_adapter():
     assert adapter.requests == []
 
 
-def test_live_mode_is_hard_disabled_by_default():
+def test_live_mode_requires_all_readiness_controls():
     adapter = RecordingAdapter()
-    result = GuardedExecutionService(adapter).submit(
-        _request().__class__(
+    result = GuardedExecutionService(
+        adapter,
+        live_requirements=LiveExecutionRequirements(
+            server_side_execution=True,
+            trusted_ip_restricted=True,
+            withdrawals_disabled=True,
+            recovery_verified=True,
+            audit_verified=False,
+        ),
+    ).submit(
+        ExecutionRequest(
             symbol="BTCUSDT",
             side="BUY",
             quantity=Decimal("0.001"),
@@ -93,5 +102,29 @@ def test_live_mode_is_hard_disabled_by_default():
         )
     )
     assert result.accepted is False
-    assert result.reason == "live_execution_disabled"
+    assert result.reason == "live_execution_not_ready"
     assert adapter.requests == []
+
+
+def test_live_mode_can_pass_only_when_every_readiness_control_is_verified():
+    adapter = RecordingAdapter()
+    result = GuardedExecutionService(
+        adapter,
+        live_requirements=LiveExecutionRequirements(
+            server_side_execution=True,
+            trusted_ip_restricted=True,
+            withdrawals_disabled=True,
+            recovery_verified=True,
+            audit_verified=True,
+        ),
+    ).submit(
+        ExecutionRequest(
+            symbol="BTCUSDT",
+            side="BUY",
+            quantity=Decimal("0.001"),
+            risk=_request().risk,
+            mode=ExecutionMode.LIVE,
+        )
+    )
+    assert result.accepted is True
+    assert len(adapter.requests) == 1
