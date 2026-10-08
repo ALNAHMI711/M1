@@ -39,15 +39,20 @@ class ExecutionAdapter(Protocol):
 
 
 class GuardedExecutionService:
-    """Single application boundary between validated risk and order submission.
+    """Hard boundary between risk validation and exchange submission.
 
-    The risk decision is mandatory and evaluated immediately before adapter
-    submission. Rejected requests never reach the adapter. This service does
-    not create simulated or exchange orders itself.
+    Risk is evaluated immediately before adapter submission. LIVE is
+    disabled by default and cannot be enabled by this service alone.
     """
 
-    def __init__(self, adapter: ExecutionAdapter | None = None) -> None:
+    def __init__(
+        self,
+        adapter: ExecutionAdapter | None = None,
+        *,
+        live_enabled: bool = False,
+    ) -> None:
         self._adapter = adapter
+        self._live_enabled = live_enabled
 
     def evaluate(self, request: ExecutionRequest) -> RiskDecision:
         return evaluate_trade_risk(request.risk)
@@ -55,27 +60,18 @@ class GuardedExecutionService:
     def submit(self, request: ExecutionRequest) -> ExecutionResult:
         decision = self.evaluate(request)
         if not decision.allowed:
-            return ExecutionResult(
-                accepted=False,
-                reason="risk_rejected",
-                risk=decision,
-            )
-
-        if self._adapter is None:
-            return ExecutionResult(
-                accepted=False,
-                reason="execution_adapter_not_configured",
-                risk=decision,
-            )
+            return ExecutionResult(False, "risk_rejected", decision)
 
         if request.quantity <= 0:
             raise ValueError("invalid_quantity")
         if not request.symbol or not request.side:
             raise ValueError("invalid_execution_request")
 
+        if request.mode is ExecutionMode.LIVE and not self._live_enabled:
+            return ExecutionResult(False, "live_execution_disabled", decision)
+
+        if self._adapter is None:
+            return ExecutionResult(False, "execution_adapter_not_configured", decision)
+
         self._adapter.submit(request)
-        return ExecutionResult(
-            accepted=True,
-            reason="submitted",
-            risk=decision,
-        )
+        return ExecutionResult(True, "submitted", decision)
