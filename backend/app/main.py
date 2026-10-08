@@ -19,9 +19,18 @@ from .execution_pipeline import (
     PaperAdapter,
     RiskLimits,
     binance_quote_provider,
+    ledger_account_state,
 )
 from .recovery import recover_spot_orders
-from .store import record_signal, recent_execution_audit, signal_seen
+from .store import (
+    close_position,
+    get_risk_position,
+    open_risk_positions,
+    record_execution_audit,
+    record_signal,
+    recent_execution_audit,
+    signal_seen,
+)
 from .telegram import parse_telegram_signal
 
 app = FastAPI(title="ALNAHMI M1 Trading Control Plane", version="0.5.0")
@@ -102,17 +111,28 @@ def build_execution_pipeline(mode: ExecutionMode) -> ExecutionPipeline:
     """LIVE stays blocked here: readiness and account-risk tracking are not
     wired yet, so no live client or adapter is ever constructed."""
     limits = RiskLimits.from_env()
+    account_state = ledger_account_state(limits.account_equity)
     if mode is ExecutionMode.TESTNET:
         client = BinanceSpotClient(BinanceSpotConfig.from_env(testnet=True))
         return ExecutionPipeline(
             adapter=BinanceSpotAdapter(client),
             quote_provider=binance_quote_provider(client),
             limits=limits,
+            account_state=account_state,
         )
     market_data = BinanceSpotClient(BinanceSpotConfig.from_env(testnet=False))
     quotes = binance_quote_provider(market_data)
     adapter = PaperAdapter(quotes) if mode is ExecutionMode.PAPER else None
-    return ExecutionPipeline(adapter=adapter, quote_provider=quotes, limits=limits)
+    return ExecutionPipeline(
+        adapter=adapter, quote_provider=quotes, limits=limits, account_state=account_state
+    )
+
+
+LEDGER_MODES = Literal["DRY_RUN", "PAPER", "TESTNET", "LIVE"]
+
+
+class PositionClose(BaseModel):
+    realized_pnl: str = Field(min_length=1, max_length=32, pattern=r"^-?\d+(\.\d+)?$")
 
 
 def valid_signature(raw: bytes, signature: str | None) -> bool:
@@ -245,6 +265,50 @@ def execution_submit(
     if outcome.outcome is Outcome.UNCERTAIN:
         response.status_code = 202
     return body
+
+
+@app.get("/v1/risk/state")
+def risk_state(
+    mode: LEDGER_MODES = "PAPER",
+    user=Security(current_user, scopes=["control:read"]),
+):
+    try:
+        limits = RiskLimits.from_env()
+    except (InvalidOperation, ValueError) as exc:
+        raise HTTPException(status_code=500, detail="execution_config_invalid") from exc
+    state = ledger_account_state(limits.account_equity)(ExecutionMode(mode))
+    return {
+        "mode": mode,
+        "tracked": state.tracked,
+        "daily_loss_pct": str(state.daily_loss_pct),
+        "max_daily_loss_pct": str(limits.max_daily_loss_pct),
+        "open_risk_pct": str(state.open_risk_pct),
+        "max_open_risk_pct": str(limits.max_open_risk_pct),
+        "kill_switch": limits.kill_switch,
+        "open_positions": open_risk_positions(mode),
+        "user": user.username,
+    }
+
+
+@app.post("/v1/risk/positions/{client_order_id}/close")
+def risk_close_position(
+    client_order_id: str,
+    request: PositionClose,
+    user=Security(current_user, scopes=["control:write"]),
+):
+    """Record realized PnL for a position. Never sends an exchange order."""
+    position = get_risk_position(client_order_id)
+    if position is None:
+        raise HTTPException(status_code=404, detail="position_not_found")
+    if not close_position(client_order_id, Decimal(request.realized_pnl)):
+        raise HTTPException(status_code=409, detail="position_not_open")
+    record_execution_audit(
+        event="POSITION_CLOSED",
+        status="CLOSED",
+        detail=f"realized_pnl={request.realized_pnl};by={user.username}",
+        client_order_id=client_order_id,
+    )
+    return {"client_order_id": client_order_id, "status": "CLOSED", "user": user.username}
 
 
 @app.post("/v1/binance/spot/recover")

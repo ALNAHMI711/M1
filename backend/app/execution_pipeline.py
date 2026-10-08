@@ -13,6 +13,7 @@ from __future__ import annotations
 import hashlib
 import os
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from enum import StrEnum
 from typing import Callable, Protocol
@@ -96,13 +97,41 @@ class AccountRiskState:
     tracked: bool
 
 
-def untracked_account_state() -> AccountRiskState:
-    """Placeholder until realized PnL and open-risk tracking exist.
+def untracked_account_state(mode: ExecutionMode | None = None) -> AccountRiskState:
+    """Fallback with no data source.
 
     ``tracked=False`` keeps LIVE blocked: zeros here must never authorize
     real money.
     """
     return AccountRiskState(Decimal("0"), Decimal("0"), tracked=False)
+
+
+def utc_day_start(now: datetime | None = None) -> str:
+    current = now or datetime.now(timezone.utc)
+    return current.replace(hour=0, minute=0, second=0, microsecond=0).isoformat()
+
+
+def ledger_account_state(
+    equity: Decimal | None,
+) -> Callable[[ExecutionMode], AccountRiskState]:
+    """Account risk from the persisted ledger, scoped per execution mode.
+
+    Paper and testnet history never count against LIVE limits, and vice
+    versa. Daily loss is the net realized loss since 00:00 UTC.
+    """
+
+    def state(mode: ExecutionMode) -> AccountRiskState:
+        if equity is None or equity <= 0:
+            return untracked_account_state(mode)
+        open_risk, realized = store.risk_totals(mode.value, utc_day_start())
+        daily_loss = max(Decimal("0"), -realized)
+        return AccountRiskState(
+            daily_loss_pct=daily_loss / equity * HUNDRED,
+            open_risk_pct=open_risk / equity * HUNDRED,
+            tracked=True,
+        )
+
+    return state
 
 
 @dataclass(frozen=True)
@@ -236,7 +265,7 @@ class ExecutionPipeline:
         adapter: ExecutionAdapter | None,
         quote_provider: Callable[[str], MarketQuote],
         limits: RiskLimits,
-        account_state: Callable[[], AccountRiskState] = untracked_account_state,
+        account_state: Callable[[ExecutionMode], AccountRiskState] = untracked_account_state,
         live_requirements: LiveExecutionRequirements | None = None,
         live_enabled: bool = False,
     ) -> None:
@@ -320,8 +349,9 @@ class ExecutionPipeline:
 
         notional = quantity * reference
         equity = self._limits.account_equity
-        trade_risk_pct = quantity * abs(reference - intent.stop_loss) / equity * HUNDRED
-        account = self._account_state()
+        trade_risk_amount = quantity * abs(reference - intent.stop_loss)
+        trade_risk_pct = trade_risk_amount / equity * HUNDRED
+        account = self._account_state(intent.mode)
         reward_risk = _reward_risk(intent, reference)
         drift_bps = abs(reference - intent.entry) / intent.entry * BPS
 
@@ -390,6 +420,9 @@ class ExecutionPipeline:
             mode=intent.mode.value,
             quantity=intent.quantity,
             price=intent.price,
+            risk_amount=str(trade_risk_amount),
+            reference_price=str(reference),
+            stop_loss=str(intent.stop_loss),
         )
         if not claimed:
             existing = store.get_execution_order(client_order_id) or {}

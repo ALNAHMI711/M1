@@ -2,6 +2,7 @@ import os
 import sqlite3
 from contextlib import contextmanager
 from datetime import datetime, timezone
+from decimal import Decimal, InvalidOperation
 
 
 def database_path() -> str:
@@ -63,6 +64,26 @@ def connection():
                 detail TEXT NOT NULL,
                 created_at TEXT NOT NULL
             )"""
+        )
+        conn.execute(
+            """CREATE TABLE IF NOT EXISTS risk_positions (
+                client_order_id TEXT PRIMARY KEY,
+                mode TEXT NOT NULL,
+                symbol TEXT NOT NULL,
+                side TEXT NOT NULL,
+                quantity TEXT NOT NULL,
+                reference_price TEXT NOT NULL,
+                stop_loss TEXT NOT NULL,
+                risk_amount TEXT NOT NULL,
+                status TEXT NOT NULL,
+                realized_pnl TEXT,
+                opened_at TEXT NOT NULL,
+                closed_at TEXT
+            )"""
+        )
+        conn.execute(
+            """CREATE INDEX IF NOT EXISTS idx_risk_positions_mode_status
+               ON risk_positions(mode, status)"""
         )
         conn.execute(
             """CREATE INDEX IF NOT EXISTS idx_execution_orders_status
@@ -187,12 +208,19 @@ def claim_execution_order(
     mode: str,
     quantity: str,
     price: str | None = None,
+    risk_amount: str | None = None,
+    reference_price: str | None = None,
+    stop_loss: str | None = None,
 ) -> bool:
     """Atomically reserve a client order id before any exchange call.
 
     Returns False when the id already exists, so a replayed signal can never
     reach the exchange twice. The PENDING_SUBMIT row stays pending for
     recovery if the process dies or the exchange outcome is unknown.
+
+    When ``risk_amount`` is given, the trade's stop-loss risk is reserved in
+    the same transaction, so concurrent claims cannot both pass the open-risk
+    limit against a stale total.
     """
     now = datetime.now(timezone.utc).isoformat()
     with connection() as conn:
@@ -203,7 +231,101 @@ def claim_execution_order(
                VALUES (?, ?, ?, ?, ?, NULL, 'PENDING_SUBMIT', ?, '0', ?, NULL, ?)""",
             (client_order_id, signal_id, symbol, side, mode, quantity, price, now),
         )
+        claimed = cursor.rowcount == 1
+        if claimed and risk_amount is not None:
+            conn.execute(
+                """INSERT INTO risk_positions
+                   (client_order_id, mode, symbol, side, quantity, reference_price,
+                    stop_loss, risk_amount, status, realized_pnl, opened_at, closed_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'OPEN', NULL, ?, NULL)""",
+                (
+                    client_order_id,
+                    mode,
+                    symbol,
+                    side,
+                    quantity,
+                    reference_price or "0",
+                    stop_loss or "0",
+                    risk_amount,
+                    now,
+                ),
+            )
+        return claimed
+
+
+NO_FILL_TERMINAL_STATUSES = frozenset(
+    {"REJECTED", "CANCELED", "EXPIRED", "EXPIRED_IN_MATCH"}
+)
+
+
+def _is_zero(quantity: str | None) -> bool:
+    try:
+        return Decimal(quantity or "0") == 0
+    except (InvalidOperation, ValueError):
+        return False
+
+
+def release_position_risk(client_order_id: str, conn=None) -> bool:
+    """Free reserved risk for an order that never opened a position."""
+    now = datetime.now(timezone.utc).isoformat()
+    sql = """UPDATE risk_positions SET status = 'RELEASED', closed_at = ?
+             WHERE client_order_id = ? AND status = 'OPEN'"""
+    if conn is not None:
+        return conn.execute(sql, (now, client_order_id)).rowcount == 1
+    with connection() as own:
+        return own.execute(sql, (now, client_order_id)).rowcount == 1
+
+
+def close_position(client_order_id: str, realized_pnl: Decimal) -> bool:
+    """Record a closed position's realized PnL; only OPEN positions close."""
+    now = datetime.now(timezone.utc).isoformat()
+    with connection() as conn:
+        cursor = conn.execute(
+            """UPDATE risk_positions
+               SET status = 'CLOSED', realized_pnl = ?, closed_at = ?
+               WHERE client_order_id = ? AND status = 'OPEN'""",
+            (str(realized_pnl), now, client_order_id),
+        )
         return cursor.rowcount == 1
+
+
+def get_risk_position(client_order_id: str):
+    with connection() as conn:
+        row = conn.execute(
+            "SELECT * FROM risk_positions WHERE client_order_id = ?",
+            (client_order_id,),
+        ).fetchone()
+        return dict(row) if row is not None else None
+
+
+def open_risk_positions(mode: str):
+    with connection() as conn:
+        rows = conn.execute(
+            """SELECT * FROM risk_positions WHERE mode = ? AND status = 'OPEN'
+               ORDER BY opened_at""",
+            (mode,),
+        ).fetchall()
+        return [dict(row) for row in rows]
+
+
+def risk_totals(mode: str, since_iso: str) -> tuple[Decimal, Decimal]:
+    """Return (open risk amount, realized PnL closed since ``since_iso``)."""
+    with connection() as conn:
+        open_rows = conn.execute(
+            "SELECT risk_amount FROM risk_positions WHERE mode = ? AND status = 'OPEN'",
+            (mode,),
+        ).fetchall()
+        closed_rows = conn.execute(
+            """SELECT realized_pnl FROM risk_positions
+               WHERE mode = ? AND status = 'CLOSED' AND closed_at >= ?""",
+            (mode, since_iso),
+        ).fetchall()
+    open_risk = sum((Decimal(row["risk_amount"]) for row in open_rows), Decimal("0"))
+    realized = sum(
+        (Decimal(row["realized_pnl"]) for row in closed_rows if row["realized_pnl"]),
+        Decimal("0"),
+    )
+    return open_risk, realized
 
 
 def update_execution_order(
@@ -235,7 +357,15 @@ def update_execution_order(
             f"UPDATE execution_orders SET {', '.join(fields)} WHERE client_order_id = ?",
             values,
         )
-        return cursor.rowcount == 1
+        updated = cursor.rowcount == 1
+        if updated and status in NO_FILL_TERMINAL_STATUSES:
+            row = conn.execute(
+                "SELECT executed_quantity FROM execution_orders WHERE client_order_id = ?",
+                (client_order_id,),
+            ).fetchone()
+            if row is not None and _is_zero(row["executed_quantity"]):
+                release_position_risk(client_order_id, conn=conn)
+        return updated
 
 
 def record_execution_audit(

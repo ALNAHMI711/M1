@@ -183,7 +183,7 @@ def test_live_passes_only_when_every_gate_is_satisfied():
         adapter,
         live_requirements=ready,
         live_enabled=True,
-        account_state=lambda: AccountRiskState(Decimal("0"), Decimal("0"), tracked=True),
+        account_state=lambda _mode: AccountRiskState(Decimal("0"), Decimal("0"), tracked=True),
     ).execute(intent(mode=ExecutionMode.LIVE))
 
     assert outcome.outcome is Outcome.SUBMITTED
@@ -194,7 +194,7 @@ def test_existing_open_risk_counts_against_limit():
     adapter = RecordingAdapter()
     outcome = pipeline(
         adapter,
-        account_state=lambda: AccountRiskState(Decimal("0"), Decimal("2.99"), tracked=True),
+        account_state=lambda _mode: AccountRiskState(Decimal("0"), Decimal("2.99"), tracked=True),
     ).execute(intent())
 
     assert "open_risk_limit" in outcome.reasons
@@ -204,7 +204,7 @@ def test_daily_loss_limit_rejects():
     adapter = RecordingAdapter()
     outcome = pipeline(
         adapter,
-        account_state=lambda: AccountRiskState(Decimal("2"), Decimal("0"), tracked=True),
+        account_state=lambda _mode: AccountRiskState(Decimal("2"), Decimal("0"), tracked=True),
     ).execute(intent())
 
     assert "daily_loss_limit" in outcome.reasons
