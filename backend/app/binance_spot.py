@@ -16,7 +16,37 @@ LIVE_BASE_URL = "https://api.binance.com"
 
 
 class BinanceAPIError(RuntimeError):
-    """Raised when Binance returns an API or transport error."""
+    """Raised when Binance returns an API or transport error.
+
+    ``status_code`` is the HTTP status when one was received, and ``None`` for
+    transport failures. Binance documents 5XX responses as "execution status
+    unknown", so callers must not treat them as a definite rejection.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        status_code: int | None = None,
+        request_sent: bool = True,
+    ) -> None:
+        super().__init__(message)
+        self.status_code = status_code
+        self.request_sent = request_sent
+
+    @property
+    def outcome_unknown(self) -> bool:
+        if not self.request_sent:
+            return False
+        if self.status_code is None:
+            return True
+        if self.status_code >= 500:
+            return True
+        try:
+            payload = json.loads(str(self))
+        except ValueError:
+            return False
+        return isinstance(payload, dict) and payload.get("code") == -1007
 
 
 @dataclass(frozen=True)
@@ -60,7 +90,7 @@ class BinanceSpotClient:
         values = dict(params or {})
         if signed:
             if not self.config.api_key or not self.config.api_secret:
-                raise BinanceAPIError("missing_binance_credentials")
+                raise BinanceAPIError("missing_binance_credentials", request_sent=False)
             values.setdefault("timestamp", int(time.time() * 1000))
             values.setdefault("recvWindow", self.config.recv_window)
 
@@ -93,13 +123,43 @@ class BinanceSpotClient:
                 payload = json.loads(exc.read().decode("utf-8"))
             except (ValueError, UnicodeDecodeError):
                 payload = {"code": exc.code, "msg": "binance_http_error"}
-            raise BinanceAPIError(json.dumps(payload, ensure_ascii=False)) from exc
+            raise BinanceAPIError(
+                json.dumps(payload, ensure_ascii=False), status_code=exc.code
+            ) from exc
         except (urllib.error.URLError, TimeoutError) as exc:
             raise BinanceAPIError("binance_transport_error") from exc
 
         if isinstance(payload, dict) and "code" in payload and payload.get("code", 0) < 0:
-            raise BinanceAPIError(json.dumps(payload, ensure_ascii=False))
+            raise BinanceAPIError(json.dumps(payload, ensure_ascii=False), status_code=200)
         return payload
+
+    def book_ticker(self, symbol: str) -> Any:
+        return self._request("GET", "/api/v3/ticker/bookTicker", {"symbol": symbol.upper()})
+
+    def new_order(
+        self,
+        *,
+        symbol: str,
+        side: str,
+        order_type: str,
+        quantity: str,
+        client_order_id: str,
+        price: str | None = None,
+        time_in_force: str | None = None,
+    ) -> Any:
+        params: dict[str, Any] = {
+            "symbol": symbol.upper(),
+            "side": side.upper(),
+            "type": order_type.upper(),
+            "quantity": quantity,
+            "newClientOrderId": client_order_id,
+            "newOrderRespType": "RESULT",
+        }
+        if price is not None:
+            params["price"] = price
+        if time_in_force is not None:
+            params["timeInForce"] = time_in_force
+        return self._request("POST", "/api/v3/order", params, signed=True)
 
     def ping(self) -> Any:
         return self._request("GET", "/api/v3/ping")

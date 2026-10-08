@@ -173,9 +173,37 @@ def pending_execution_orders():
             """SELECT client_order_id, signal_id, symbol, side, mode, order_id,
                       status, quantity, executed_quantity, price, last_event_time, updated_at
                FROM execution_orders
-               WHERE status NOT IN ('FILLED', 'CANCELED', 'EXPIRED', 'EXPIRED_IN_MATCH', 'REJECTED', 'UNKNOWN')"""
+               WHERE status NOT IN ('FILLED', 'CANCELED', 'EXPIRED', 'EXPIRED_IN_MATCH', 'REJECTED', 'UNKNOWN', 'SIMULATED')"""
         ).fetchall()
         return [dict(row) for row in rows]
+
+
+def claim_execution_order(
+    *,
+    client_order_id: str,
+    signal_id: str,
+    symbol: str,
+    side: str,
+    mode: str,
+    quantity: str,
+    price: str | None = None,
+) -> bool:
+    """Atomically reserve a client order id before any exchange call.
+
+    Returns False when the id already exists, so a replayed signal can never
+    reach the exchange twice. The PENDING_SUBMIT row stays pending for
+    recovery if the process dies or the exchange outcome is unknown.
+    """
+    now = datetime.now(timezone.utc).isoformat()
+    with connection() as conn:
+        cursor = conn.execute(
+            """INSERT OR IGNORE INTO execution_orders
+               (client_order_id, signal_id, symbol, side, mode, order_id,
+                status, quantity, executed_quantity, price, last_event_time, updated_at)
+               VALUES (?, ?, ?, ?, ?, NULL, 'PENDING_SUBMIT', ?, '0', ?, NULL, ?)""",
+            (client_order_id, signal_id, symbol, side, mode, quantity, price, now),
+        )
+        return cursor.rowcount == 1
 
 
 def update_execution_order(

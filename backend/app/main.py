@@ -1,14 +1,25 @@
 import hashlib
 import hmac
 import os
+from decimal import Decimal, InvalidOperation
 from typing import Literal
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, Security
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, Security
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
 
 from .auth import Token, authenticate, create_access_token, current_user, revoke
 from .binance_spot import BinanceAPIError, BinanceSpotClient, BinanceSpotConfig
+from .execution_boundary import ExecutionMode
+from .execution_pipeline import (
+    BinanceSpotAdapter,
+    ExecutionPipeline,
+    OrderIntent,
+    Outcome,
+    PaperAdapter,
+    RiskLimits,
+    binance_quote_provider,
+)
 from .recovery import recover_spot_orders
 from .store import record_signal, recent_execution_audit, signal_seen
 from .telegram import parse_telegram_signal
@@ -54,7 +65,22 @@ def calculated_rr(signal: Signal) -> float | None:
     return reward / risk
 
 
+class ExecutionSubmit(BaseModel):
+    signal: Signal
+    order_type: Literal["MARKET", "LIMIT"] = "MARKET"
+    quantity: str = Field(min_length=1, max_length=32)
+    price: str | None = Field(default=None, min_length=1, max_length=32)
+    time_in_force: Literal["GTC", "IOC", "FOK"] | None = None
+
+
 def risk_check(signal: Signal) -> tuple[bool, list[str]]:
+    reasons = signal_reasons(signal)
+    if signal.mode == "LIVE":
+        reasons.append("live_execution_not_implemented")
+    return not reasons, reasons
+
+
+def signal_reasons(signal: Signal) -> list[str]:
     reasons: list[str] = []
     if signal.score < MIN_SCORE:
         reasons.append("score_below_85")
@@ -69,9 +95,24 @@ def risk_check(signal: Signal) -> tuple[bool, list[str]]:
         reasons.append("invalid_long_levels")
     if signal.side == "SHORT" and not (signal.take_profit < signal.entry < signal.stop_loss):
         reasons.append("invalid_short_levels")
-    if signal.mode == "LIVE":
-        reasons.append("live_execution_not_implemented")
-    return not reasons, reasons
+    return reasons
+
+
+def build_execution_pipeline(mode: ExecutionMode) -> ExecutionPipeline:
+    """LIVE stays blocked here: readiness and account-risk tracking are not
+    wired yet, so no live client or adapter is ever constructed."""
+    limits = RiskLimits.from_env()
+    if mode is ExecutionMode.TESTNET:
+        client = BinanceSpotClient(BinanceSpotConfig.from_env(testnet=True))
+        return ExecutionPipeline(
+            adapter=BinanceSpotAdapter(client),
+            quote_provider=binance_quote_provider(client),
+            limits=limits,
+        )
+    market_data = BinanceSpotClient(BinanceSpotConfig.from_env(testnet=False))
+    quotes = binance_quote_provider(market_data)
+    adapter = PaperAdapter(quotes) if mode is ExecutionMode.PAPER else None
+    return ExecutionPipeline(adapter=adapter, quote_provider=quotes, limits=limits)
 
 
 def valid_signature(raw: bytes, signature: str | None) -> bool:
@@ -154,6 +195,56 @@ def binance_spot_order_test(
     except BinanceAPIError as exc:
         raise HTTPException(status_code=502, detail="binance_testnet_request_failed") from exc
     return {"accepted": True, "mode": "TESTNET", "result": result, "user": user.username}
+
+
+@app.post("/v1/execution/submit")
+def execution_submit(
+    request: ExecutionSubmit,
+    response: Response,
+    user=Security(current_user, scopes=["control:write"]),
+):
+    signal = request.signal
+    reasons = signal_reasons(signal)
+    if reasons:
+        raise HTTPException(status_code=422, detail={"outcome": "REJECTED", "reasons": reasons})
+
+    mode = ExecutionMode(signal.mode)
+    intent = OrderIntent(
+        signal_id=signal.signal_id,
+        symbol=signal.symbol,
+        side="BUY" if signal.side == "LONG" else "SELL",
+        order_type=request.order_type,
+        quantity=request.quantity,
+        mode=mode,
+        score=int(signal.score),
+        entry=Decimal(str(signal.entry)),
+        stop_loss=Decimal(str(signal.stop_loss)),
+        take_profit=Decimal(str(signal.take_profit)),
+        price=request.price,
+        time_in_force=request.time_in_force,
+    )
+    try:
+        pipeline = build_execution_pipeline(mode)
+    except (InvalidOperation, ValueError) as exc:
+        raise HTTPException(status_code=500, detail="execution_config_invalid") from exc
+    outcome = pipeline.execute(intent)
+
+    body = {
+        "outcome": outcome.outcome.value,
+        "accepted": outcome.accepted,
+        "mode": mode.value,
+        "client_order_id": outcome.client_order_id,
+        "status": outcome.status,
+        "order_id": outcome.order_id,
+        "reasons": list(outcome.reasons),
+        "metrics": outcome.metrics,
+        "user": user.username,
+    }
+    if outcome.outcome is Outcome.REJECTED:
+        raise HTTPException(status_code=422, detail=body)
+    if outcome.outcome is Outcome.UNCERTAIN:
+        response.status_code = 202
+    return body
 
 
 @app.post("/v1/binance/spot/recover")
