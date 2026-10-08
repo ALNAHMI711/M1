@@ -79,3 +79,19 @@ def test_invalid_quantity_is_rejected_before_adapter():
     else:
         raise AssertionError("expected invalid_quantity")
     assert adapter.requests == []
+
+
+def test_live_mode_is_hard_disabled_by_default():
+    adapter = RecordingAdapter()
+    result = GuardedExecutionService(adapter).submit(
+        _request().__class__(
+            symbol="BTCUSDT",
+            side="BUY",
+            quantity=Decimal("0.001"),
+            risk=_request().risk,
+            mode=ExecutionMode.LIVE,
+        )
+    )
+    assert result.accepted is False
+    assert result.reason == "live_execution_disabled"
+    assert adapter.requests == []
