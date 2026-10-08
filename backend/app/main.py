@@ -32,6 +32,13 @@ from .store import (
     signal_seen,
 )
 from .telegram import parse_telegram_signal
+from .trade_plan import (
+    DEFAULT_ALLOCATIONS,
+    DEFAULT_R_MULTIPLES,
+    atr_stop_reasons,
+    build_take_profit_ladder,
+    size_position,
+)
 
 app = FastAPI(title="ALNAHMI M1 Trading Control Plane", version="0.5.0")
 
@@ -133,6 +140,25 @@ LEDGER_MODES = Literal["DRY_RUN", "PAPER", "TESTNET", "LIVE"]
 
 class PositionClose(BaseModel):
     realized_pnl: str = Field(min_length=1, max_length=32, pattern=r"^-?\d+(\.\d+)?$")
+
+
+DECIMAL_PATTERN = r"^\d+(\.\d+)?$"
+
+
+class TradePlanRequest(BaseModel):
+    side: Literal["LONG", "SHORT"]
+    entry: str = Field(max_length=32, pattern=DECIMAL_PATTERN)
+    stop_loss: str = Field(max_length=32, pattern=DECIMAL_PATTERN)
+    risk_pct: str = Field(default="0.5", max_length=8, pattern=DECIMAL_PATTERN)
+    step_size: str = Field(max_length=32, pattern=DECIMAL_PATTERN)
+    min_qty: str = Field(default="0", max_length=32, pattern=DECIMAL_PATTERN)
+    min_notional: str = Field(default="0", max_length=32, pattern=DECIMAL_PATTERN)
+    atr: str | None = Field(default=None, max_length=32, pattern=DECIMAL_PATTERN)
+    r_multiples: list[str] | None = Field(default=None, min_length=1, max_length=7)
+    allocations: list[str] | None = Field(default=None, min_length=1, max_length=7)
+
+
+MAX_PLAN_RISK_PCT = Decimal("2")
 
 
 def valid_signature(raw: bytes, signature: str | None) -> bool:
@@ -286,6 +312,94 @@ def risk_state(
         "max_open_risk_pct": str(limits.max_open_risk_pct),
         "kill_switch": limits.kill_switch,
         "open_positions": open_risk_positions(mode),
+        "user": user.username,
+    }
+
+
+@app.post("/v1/risk/plan")
+def risk_plan(
+    request: TradePlanRequest,
+    user=Security(current_user, scopes=["control:read"]),
+):
+    """Preview sizing, TP1-TP7 and stop rules. Never places an order."""
+    try:
+        limits = RiskLimits.from_env()
+        side = "BUY" if request.side == "LONG" else "SELL"
+        entry = Decimal(request.entry)
+        stop = Decimal(request.stop_loss)
+        risk_pct = Decimal(request.risk_pct)
+        step = Decimal(request.step_size)
+        min_qty = Decimal(request.min_qty)
+        atr = Decimal(request.atr) if request.atr is not None else None
+        r_multiples = (
+            tuple(Decimal(v) for v in request.r_multiples)
+            if request.r_multiples is not None
+            else DEFAULT_R_MULTIPLES
+        )
+        allocations = (
+            tuple(Decimal(v) for v in request.allocations)
+            if request.allocations is not None
+            else DEFAULT_ALLOCATIONS
+        )
+    except (InvalidOperation, ValueError) as exc:
+        raise HTTPException(status_code=422, detail="invalid_plan_inputs") from exc
+
+    if limits.account_equity is None or limits.account_equity <= 0:
+        raise HTTPException(status_code=422, detail="account_equity_not_configured")
+    if risk_pct > MAX_PLAN_RISK_PCT:
+        raise HTTPException(status_code=422, detail="risk_pct_above_maximum")
+
+    sizing = size_position(
+        side=side,
+        equity=limits.account_equity,
+        risk_pct=risk_pct,
+        entry=entry,
+        stop=stop,
+        max_notional=limits.max_notional,
+        step_size=step,
+        min_qty=min_qty,
+        min_notional=Decimal(request.min_notional),
+    )
+    reasons = list(sizing.reasons) + atr_stop_reasons(entry=entry, stop=stop, atr=atr)
+    ladder = (
+        build_take_profit_ladder(
+            side=side,
+            entry=entry,
+            stop=stop,
+            quantity=sizing.quantity,
+            step_size=step,
+            min_qty=min_qty,
+            r_multiples=r_multiples,
+            allocations=allocations,
+        )
+        if sizing.ok
+        else None
+    )
+    if ladder is not None:
+        reasons += list(ladder.reasons)
+        if ladder.ok and ladder.weighted_reward_risk < Decimal("2"):
+            reasons.append("weighted_reward_risk_below_threshold")
+
+    return {
+        "accepted": not reasons,
+        "reasons": reasons,
+        "side": request.side,
+        "quantity": str(sizing.quantity),
+        "notional": str(sizing.notional),
+        "risk_amount": str(sizing.risk_amount),
+        "risk_pct": f"{sizing.risk_pct:.4f}",
+        "capped_by": sizing.capped_by,
+        "weighted_reward_risk": f"{ladder.weighted_reward_risk:.4f}" if ladder else None,
+        "targets": [
+            {
+                "tp": t.index,
+                "price": str(t.price),
+                "r_multiple": str(t.r_multiple),
+                "quantity": str(t.quantity),
+            }
+            for t in (ladder.targets if ladder else ())
+        ],
+        "stop_rules": {"breakeven_after_tp": 1, "trail_after_tp": 2, "trail_atr_multiple": "2"},
         "user": user.username,
     }
 
