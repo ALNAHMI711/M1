@@ -41,9 +41,18 @@ def connection():
                 quantity TEXT NOT NULL,
                 executed_quantity TEXT NOT NULL DEFAULT '0',
                 price TEXT,
+                last_event_time INTEGER,
                 updated_at TEXT NOT NULL
             )"""
         )
+        columns = {
+            row["name"]
+            for row in conn.execute("PRAGMA table_info(execution_orders)").fetchall()
+        }
+        if "last_event_time" not in columns:
+            conn.execute(
+                "ALTER TABLE execution_orders ADD COLUMN last_event_time INTEGER"
+            )
         conn.execute(
             """CREATE TABLE IF NOT EXISTS execution_audit (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -109,19 +118,21 @@ def record_execution_order(
     order_id: str | None = None,
     executed_quantity: str = "0",
     price: str | None = None,
+    last_event_time: int | None = None,
 ) -> None:
     now = datetime.now(timezone.utc).isoformat()
     with connection() as conn:
         conn.execute(
             """INSERT INTO execution_orders
                (client_order_id, signal_id, symbol, side, mode, order_id,
-                status, quantity, executed_quantity, price, updated_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                status, quantity, executed_quantity, price, last_event_time, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                ON CONFLICT(client_order_id) DO UPDATE SET
                  order_id=excluded.order_id,
                  status=excluded.status,
                  executed_quantity=excluded.executed_quantity,
                  price=excluded.price,
+                 last_event_time=COALESCE(excluded.last_event_time, execution_orders.last_event_time),
                  updated_at=excluded.updated_at""",
             (
                 client_order_id,
@@ -134,6 +145,7 @@ def record_execution_order(
                 quantity,
                 executed_quantity,
                 price,
+                last_event_time,
                 now,
             ),
         )
@@ -147,7 +159,7 @@ def get_execution_order(client_order_id: str):
     with connection() as conn:
         row = conn.execute(
             """SELECT client_order_id, signal_id, symbol, side, mode, order_id,
-                      status, quantity, executed_quantity, price, updated_at
+                      status, quantity, executed_quantity, price, last_event_time, updated_at
                FROM execution_orders
                WHERE client_order_id = ?""",
             (client_order_id,),
@@ -159,7 +171,7 @@ def pending_execution_orders():
     with connection() as conn:
         rows = conn.execute(
             """SELECT client_order_id, signal_id, symbol, side, mode, order_id,
-                      status, quantity, executed_quantity, price, updated_at
+                      status, quantity, executed_quantity, price, last_event_time, updated_at
                FROM execution_orders
                WHERE status NOT IN ('FILLED', 'CANCELED', 'EXPIRED', 'EXPIRED_IN_MATCH', 'REJECTED', 'UNKNOWN')"""
         ).fetchall()
@@ -173,9 +185,10 @@ def update_execution_order(
     order_id: str | None = None,
     executed_quantity: str | None = None,
     price: str | None = None,
+    event_time: int | None = None,
 ) -> bool:
     fields = ["status = ?", "updated_at = ?"]
-    values: list[str | None] = [status, datetime.now(timezone.utc).isoformat()]
+    values: list[str | int | None] = [status, datetime.now(timezone.utc).isoformat()]
     if order_id is not None:
         fields.append("order_id = ?")
         values.append(order_id)
@@ -185,6 +198,9 @@ def update_execution_order(
     if price is not None:
         fields.append("price = ?")
         values.append(price)
+    if event_time is not None:
+        fields.append("last_event_time = ?")
+        values.append(event_time)
     values.append(client_order_id)
     with connection() as conn:
         cursor = conn.execute(
