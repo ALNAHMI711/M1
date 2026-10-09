@@ -13,6 +13,11 @@ class RecordingAdapter:
         return ExecutionResult(accepted=True, status="SUBMITTED")
 
 
+class RaisingAdapter:
+    def submit(self, request):
+        raise RuntimeError("private exchange response must not leak")
+
+
 def request(**overrides):
     values = dict(
         client_order_id="m1-test-1",
@@ -88,3 +93,20 @@ def test_blank_identity_never_reaches_adapter():
         "missing_client_order_id,missing_signal_id,missing_symbol"
     )
     assert adapter.calls == []
+
+
+def test_non_finite_quantity_never_reaches_adapter():
+    adapter = RecordingAdapter()
+    result = submit_authorized(adapter, request(quantity=Decimal("NaN")))
+    assert result.status == "REJECTED_BY_POLICY"
+    assert result.reason == "invalid_quantity"
+    assert adapter.calls == []
+
+
+def test_adapter_exception_is_sanitized():
+    result = submit_authorized(RaisingAdapter(), request())
+    assert result == ExecutionResult(
+        accepted=False,
+        status="ADAPTER_FAILURE",
+        reason="adapter_submission_failed",
+    )
