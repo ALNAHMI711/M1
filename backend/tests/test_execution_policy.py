@@ -110,3 +110,19 @@ def test_adapter_exception_is_sanitized():
         status="ADAPTER_FAILURE",
         reason="adapter_submission_failed",
     )
+
+def test_malformed_request_fails_closed_without_adapter_call():
+    adapter = RecordingAdapter()
+    result = submit_authorized(adapter, None)
+    assert result.status == "REJECTED_BY_POLICY"
+    assert result.reason == "invalid_execution_request"
+    assert adapter.calls == []
+
+
+def test_invalid_adapter_interface_fails_closed():
+    result = submit_authorized(object(), request())
+    assert result == ExecutionResult(
+        accepted=False,
+        status="ADAPTER_FAILURE",
+        reason="invalid_execution_adapter",
+    )
