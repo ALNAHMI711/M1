@@ -26,9 +26,15 @@ class RiskDecision:
 
 
 _NUMERIC_FIELDS = (
-    "reward_risk", "spread_bps", "estimated_slippage_bps",
-    "daily_loss_pct", "max_daily_loss_pct", "open_risk_pct",
-    "max_open_risk_pct", "notional", "max_notional",
+    "reward_risk",
+    "spread_bps",
+    "estimated_slippage_bps",
+    "daily_loss_pct",
+    "max_daily_loss_pct",
+    "open_risk_pct",
+    "max_open_risk_pct",
+    "notional",
+    "max_notional",
 )
 
 
@@ -51,7 +57,12 @@ def evaluate_trade_risk(
         invalid = True
     elif risk.kill_switch:
         reasons.append("kill_switch")
-    if isinstance(risk.score, bool) or not isinstance(risk.score, int):
+
+    if (
+        isinstance(risk.score, bool)
+        or not isinstance(risk.score, int)
+        or not 0 <= risk.score <= 100
+    ):
         reasons.append("invalid_score")
         invalid = True
 
@@ -60,12 +71,29 @@ def evaluate_trade_risk(
         if not isinstance(value, Decimal) or not value.is_finite():
             reasons.append(f"invalid_{field}")
             invalid = True
+
+    thresholds = {
+        "min_reward_risk": min_reward_risk,
+        "max_spread_bps": max_spread_bps,
+        "max_slippage_bps": max_slippage_bps,
+    }
+    for field, value in thresholds.items():
+        if not isinstance(value, Decimal) or not value.is_finite() or value < 0:
+            reasons.append(f"invalid_{field}")
+            invalid = True
+
+    if isinstance(min_score, bool) or not isinstance(min_score, int) or not 0 <= min_score <= 100:
+        reasons.append("invalid_min_score")
+        invalid = True
+
     if invalid:
         return RiskDecision(False, tuple(reasons))
 
     if risk.score < min_score:
         reasons.append("score_below_threshold")
-    if risk.reward_risk < min_reward_risk:
+    if risk.reward_risk < 0:
+        reasons.append("invalid_reward_risk")
+    elif risk.reward_risk < min_reward_risk:
         reasons.append("reward_risk_below_threshold")
     if risk.spread_bps < 0:
         reasons.append("invalid_spread")
