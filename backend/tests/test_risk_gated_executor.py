@@ -89,3 +89,22 @@ def test_invalid_intent_never_reaches_transport(overrides, expected):
 
     assert transport.calls == []
     assert expected in executor.authorize(_intent(**overrides)).reasons
+
+
+@pytest.mark.parametrize("live_enabled", [False, True])
+def test_live_mode_is_blocked_even_when_boolean_flag_is_true(live_enabled):
+    transport = RecordingTransport()
+    executor = RiskGatedExecutor(
+        transport,
+        mode="LIVE",
+        live_enabled=live_enabled,
+    )
+
+    with pytest.raises(PermissionError, match="risk_gate_rejected"):
+        executor.submit(_intent())
+
+    assert transport.calls == []
+    reasons = executor.authorize(_intent()).reasons
+    assert "live_execution_not_implemented" in reasons
+    if live_enabled:
+        assert "live_readiness_verifier_required" in reasons
