@@ -25,6 +25,13 @@ class RiskDecision:
     reasons: tuple[str, ...]
 
 
+_NUMERIC_FIELDS = (
+    "reward_risk", "spread_bps", "estimated_slippage_bps",
+    "daily_loss_pct", "max_daily_loss_pct", "open_risk_pct",
+    "max_open_risk_pct", "notional", "max_notional",
+)
+
+
 def evaluate_trade_risk(
     risk: RiskInput,
     *,
@@ -33,29 +40,48 @@ def evaluate_trade_risk(
     max_spread_bps: Decimal = Decimal("20"),
     max_slippage_bps: Decimal = Decimal("20"),
 ) -> RiskDecision:
-    """Pure pre-execution risk gate.
+    """Fail-closed, pure pre-execution risk gate."""
+    if not isinstance(risk, RiskInput):
+        return RiskDecision(False, ("invalid_risk_input",))
 
-    This gate can only reject a trade. It never submits, sizes around,
-    or overrides an execution policy. Callers must treat a rejected
-    decision as a hard stop before any exchange request.
-    """
     reasons: list[str] = []
-
-    if risk.kill_switch:
+    if not isinstance(risk.kill_switch, bool):
+        reasons.append("invalid_kill_switch")
+    elif risk.kill_switch:
         reasons.append("kill_switch")
-    if risk.score < min_score:
+    if isinstance(risk.score, bool) or not isinstance(risk.score, int):
+        reasons.append("invalid_score")
+    elif risk.score < min_score:
         reasons.append("score_below_threshold")
+
+    for field in _NUMERIC_FIELDS:
+        value = getattr(risk, field)
+        if not isinstance(value, Decimal) or not value.is_finite():
+            reasons.append(f"invalid_{field}")
+    if reasons:
+        return RiskDecision(False, tuple(reasons))
+
     if risk.reward_risk < min_reward_risk:
         reasons.append("reward_risk_below_threshold")
-    if risk.spread_bps > max_spread_bps:
+    if risk.spread_bps < 0:
+        reasons.append("invalid_spread")
+    elif risk.spread_bps > max_spread_bps:
         reasons.append("spread_above_limit")
-    if risk.estimated_slippage_bps > max_slippage_bps:
+    if risk.estimated_slippage_bps < 0:
+        reasons.append("invalid_slippage")
+    elif risk.estimated_slippage_bps > max_slippage_bps:
         reasons.append("slippage_above_limit")
-    if risk.daily_loss_pct >= risk.max_daily_loss_pct:
+    if risk.daily_loss_pct < 0 or risk.max_daily_loss_pct <= 0:
+        reasons.append("invalid_daily_loss_limit")
+    elif risk.daily_loss_pct >= risk.max_daily_loss_pct:
         reasons.append("daily_loss_limit")
-    if risk.open_risk_pct > risk.max_open_risk_pct:
+    if risk.open_risk_pct < 0 or risk.max_open_risk_pct < 0:
+        reasons.append("invalid_open_risk_limit")
+    elif risk.open_risk_pct > risk.max_open_risk_pct:
         reasons.append("open_risk_limit")
-    if risk.notional > risk.max_notional:
+    if risk.notional <= 0 or risk.max_notional <= 0:
+        reasons.append("invalid_notional_limit")
+    elif risk.notional > risk.max_notional:
         reasons.append("notional_limit")
 
     return RiskDecision(allowed=not reasons, reasons=tuple(reasons))
