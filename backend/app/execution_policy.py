@@ -76,7 +76,7 @@ def submit_authorized(
     adapter: ExecutionAdapter,
     request: ExecutionRequest,
 ) -> ExecutionResult:
-    if not isinstance(adapter, ExecutionAdapter):
+    if not callable(getattr(adapter, "submit", None)):
         return ExecutionResult(False, "ADAPTER_FAILURE", "invalid_execution_adapter")
     decision = authorize_execution(request)
     if not decision.allowed:
