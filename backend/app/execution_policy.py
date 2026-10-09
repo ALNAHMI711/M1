@@ -36,6 +36,8 @@ class ExecutionAdapter(Protocol):
 
 
 def _validate_request(request: ExecutionRequest) -> tuple[str, ...]:
+    if not isinstance(request, ExecutionRequest):
+        return ("invalid_execution_request",)
     reasons: list[str] = []
     if not isinstance(request.client_order_id, str) or not request.client_order_id.strip():
         reasons.append("missing_client_order_id")
@@ -43,7 +45,7 @@ def _validate_request(request: ExecutionRequest) -> tuple[str, ...]:
         reasons.append("missing_signal_id")
     if not isinstance(request.symbol, str) or not request.symbol.strip():
         reasons.append("missing_symbol")
-    if request.side not in SUPPORTED_SIDES:
+    if not isinstance(request.side, str) or request.side not in SUPPORTED_SIDES:
         reasons.append("unsupported_side")
     if (
         not isinstance(request.quantity, Decimal)
@@ -51,7 +53,7 @@ def _validate_request(request: ExecutionRequest) -> tuple[str, ...]:
         or request.quantity <= Decimal("0")
     ):
         reasons.append("invalid_quantity")
-    if request.mode not in ALLOWED_EXECUTION_MODES:
+    if not isinstance(request.mode, str) or request.mode not in ALLOWED_EXECUTION_MODES:
         reasons.append("unsupported_execution_mode")
     return tuple(reasons)
 
@@ -74,6 +76,8 @@ def submit_authorized(
     adapter: ExecutionAdapter,
     request: ExecutionRequest,
 ) -> ExecutionResult:
+    if not isinstance(adapter, ExecutionAdapter):
+        return ExecutionResult(False, "ADAPTER_FAILURE", "invalid_execution_adapter")
     decision = authorize_execution(request)
     if not decision.allowed:
         return ExecutionResult(
