@@ -7,7 +7,8 @@ from app.risk_gated_executor import ExecutionIntent, RiskGatedExecutor
 
 
 class RecordingTransport:
-    def __init__(self):
+    def __init__(self, mode="TESTNET"):
+        self.mode = mode
         self.calls = []
 
     def submit(self, **kwargs):
@@ -46,7 +47,7 @@ def _intent(**overrides):
 
 def test_rejected_intent_never_reaches_transport():
     transport = RecordingTransport()
-    executor = RiskGatedExecutor(transport)
+    executor = RiskGatedExecutor(transport, mode="TESTNET")
 
     with pytest.raises(PermissionError, match="risk_gate_rejected"):
         executor.submit(_intent(risk=_risk(kill_switch=True)))
@@ -54,9 +55,9 @@ def test_rejected_intent_never_reaches_transport():
     assert transport.calls == []
 
 
-def test_approved_intent_reaches_transport():
-    transport = RecordingTransport()
-    executor = RiskGatedExecutor(transport)
+def test_approved_testnet_intent_reaches_testnet_transport():
+    transport = RecordingTransport(mode="TESTNET")
+    executor = RiskGatedExecutor(transport, mode="TESTNET")
 
     result = executor.submit(_intent())
 
@@ -67,6 +68,28 @@ def test_approved_intent_reaches_transport():
         "side": "BUY",
         "quantity": Decimal("0.001"),
     }]
+
+
+@pytest.mark.parametrize("mode", ["DEVELOPMENT", "BACKTEST", "DRY_RUN", "PAPER"])
+def test_non_execution_modes_never_call_transport(mode):
+    transport = RecordingTransport(mode="TESTNET")
+    executor = RiskGatedExecutor(transport, mode=mode)
+
+    result = executor.submit(_intent())
+
+    assert result == {"accepted": False, "mode": mode, "status": "validated_only"}
+    assert transport.calls == []
+
+
+def test_testnet_mode_rejects_unlabelled_transport():
+    transport = RecordingTransport(mode="LIVE")
+    executor = RiskGatedExecutor(transport, mode="TESTNET")
+
+    with pytest.raises(PermissionError, match="risk_gate_rejected"):
+        executor.submit(_intent())
+
+    assert transport.calls == []
+    assert "testnet_transport_required" in executor.authorize(_intent()).reasons
 
 
 @pytest.mark.parametrize(
@@ -82,7 +105,7 @@ def test_approved_intent_reaches_transport():
 )
 def test_invalid_intent_never_reaches_transport(overrides, expected):
     transport = RecordingTransport()
-    executor = RiskGatedExecutor(transport)
+    executor = RiskGatedExecutor(transport, mode="TESTNET")
 
     with pytest.raises(PermissionError, match="risk_gate_rejected"):
         executor.submit(_intent(**overrides))
