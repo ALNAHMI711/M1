@@ -57,7 +57,23 @@ def test_risk_gate_rejects_multiple_limits():
 
 
 def test_risk_gate_uses_strict_thresholds():
-    decision = evaluate_trade_risk(
-        _risk(score=85, reward_risk=Decimal("2"))
-    )
+    decision = evaluate_trade_risk(_risk(score=85, reward_risk=Decimal("2")))
     assert decision.allowed is True
+
+
+def test_risk_gate_fails_closed_on_non_finite_values():
+    decision = evaluate_trade_risk(_risk(notional=Decimal("NaN")))
+    assert decision.allowed is False
+    assert decision.reasons == ("invalid_notional",)
+
+
+def test_risk_gate_rejects_negative_market_costs():
+    decision = evaluate_trade_risk(_risk(spread_bps=Decimal("-1")))
+    assert decision.allowed is False
+    assert decision.reasons == ("invalid_spread",)
+
+
+def test_risk_gate_rejects_malformed_risk_payload():
+    decision = evaluate_trade_risk({"score": 100})
+    assert decision.allowed is False
+    assert decision.reasons == ("invalid_risk_input",)
