@@ -31,6 +31,8 @@ class ExecutionResult:
 
 
 class ExecutionAdapter(Protocol):
+    execution_mode: str
+
     def submit(self, request: ExecutionRequest) -> ExecutionResult:
         ...
 
@@ -64,10 +66,10 @@ def authorize_execution(request: ExecutionRequest) -> RiskDecision:
     if validation_reasons:
         return RiskDecision(False, validation_reasons)
 
-    if request.mode == "LIVE":
-        # LIVE remains blocked until a reviewed production adapter is wired
-        # with authenticated exchange calls, recovery, audit, and deployment gates.
-        return RiskDecision(False, ("live_execution_not_enabled",))
+    if request.mode in {"LIVE", "TESTNET"}:
+        # These modes remain blocked until their authenticated adapters,
+        # reconciliation/recovery, audit and deployment gates are validated.
+        return RiskDecision(False, (f"{request.mode.lower()}_execution_not_enabled",))
 
     return evaluate_trade_risk(request.risk)
 
@@ -78,6 +80,7 @@ def submit_authorized(
 ) -> ExecutionResult:
     if not callable(getattr(adapter, "submit", None)):
         return ExecutionResult(False, "ADAPTER_FAILURE", "invalid_execution_adapter")
+
     decision = authorize_execution(request)
     if not decision.allowed:
         return ExecutionResult(
@@ -85,6 +88,15 @@ def submit_authorized(
             status="REJECTED_BY_POLICY",
             reason=",".join(decision.reasons),
         )
+
+    adapter_mode = getattr(adapter, "execution_mode", None)
+    if adapter_mode != request.mode:
+        return ExecutionResult(
+            accepted=False,
+            status="REJECTED_BY_POLICY",
+            reason="execution_mode_adapter_mismatch",
+        )
+
     try:
         result = adapter.submit(request)
     except Exception:
