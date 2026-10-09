@@ -37,15 +37,19 @@ class ExecutionAdapter(Protocol):
 
 def _validate_request(request: ExecutionRequest) -> tuple[str, ...]:
     reasons: list[str] = []
-    if not request.client_order_id.strip():
+    if not isinstance(request.client_order_id, str) or not request.client_order_id.strip():
         reasons.append("missing_client_order_id")
-    if not request.signal_id.strip():
+    if not isinstance(request.signal_id, str) or not request.signal_id.strip():
         reasons.append("missing_signal_id")
-    if not request.symbol.strip():
+    if not isinstance(request.symbol, str) or not request.symbol.strip():
         reasons.append("missing_symbol")
     if request.side not in SUPPORTED_SIDES:
         reasons.append("unsupported_side")
-    if request.quantity <= Decimal("0"):
+    if (
+        not isinstance(request.quantity, Decimal)
+        or not request.quantity.is_finite()
+        or request.quantity <= Decimal("0")
+    ):
         reasons.append("invalid_quantity")
     if request.mode not in ALLOWED_EXECUTION_MODES:
         reasons.append("unsupported_execution_mode")
@@ -59,7 +63,7 @@ def authorize_execution(request: ExecutionRequest) -> RiskDecision:
         return RiskDecision(False, validation_reasons)
 
     if request.mode == "LIVE":
-        # LIVE stays explicitly blocked until a production adapter is wired
+        # LIVE remains blocked until a reviewed production adapter is wired
         # with authenticated exchange calls, recovery, audit, and deployment gates.
         return RiskDecision(False, ("live_execution_not_enabled",))
 
@@ -77,4 +81,19 @@ def submit_authorized(
             status="REJECTED_BY_POLICY",
             reason=",".join(decision.reasons),
         )
-    return adapter.submit(request)
+    try:
+        result = adapter.submit(request)
+    except Exception:
+        # Do not expose exchange response bodies, credentials, or internal errors.
+        return ExecutionResult(
+            accepted=False,
+            status="ADAPTER_FAILURE",
+            reason="adapter_submission_failed",
+        )
+    if not isinstance(result, ExecutionResult):
+        return ExecutionResult(
+            accepted=False,
+            status="ADAPTER_FAILURE",
+            reason="invalid_adapter_result",
+        )
+    return result
