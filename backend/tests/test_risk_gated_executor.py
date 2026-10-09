@@ -32,14 +32,16 @@ def _risk(**overrides):
     return RiskInput(**values)
 
 
-def _intent(**risk_overrides):
-    return ExecutionIntent(
-        client_order_id="TEST-1",
-        symbol="BTCUSDT",
-        side="BUY",
-        quantity=Decimal("0.001"),
-        risk=_risk(**risk_overrides),
-    )
+def _intent(**overrides):
+    values = {
+        "client_order_id": "TEST-1",
+        "symbol": "BTCUSDT",
+        "side": "BUY",
+        "quantity": Decimal("0.001"),
+        "risk": _risk(),
+    }
+    values.update(overrides)
+    return ExecutionIntent(**values)
 
 
 def test_rejected_intent_never_reaches_transport():
@@ -47,7 +49,7 @@ def test_rejected_intent_never_reaches_transport():
     executor = RiskGatedExecutor(transport)
 
     with pytest.raises(PermissionError, match="risk_gate_rejected"):
-        executor.submit(_intent(kill_switch=True))
+        executor.submit(_intent(risk=_risk(kill_switch=True)))
 
     assert transport.calls == []
 
@@ -65,3 +67,25 @@ def test_approved_intent_reaches_transport():
         "side": "BUY",
         "quantity": Decimal("0.001"),
     }]
+
+
+@pytest.mark.parametrize(
+    ("overrides", "expected"),
+    [
+        ({"client_order_id": ""}, "missing_client_order_id"),
+        ({"symbol": ""}, "missing_symbol"),
+        ({"side": "HACK"}, "unsupported_side"),
+        ({"quantity": Decimal("0")}, "invalid_quantity"),
+        ({"quantity": Decimal("NaN")}, "invalid_quantity"),
+        ({"quantity": Decimal("Infinity")}, "invalid_quantity"),
+    ],
+)
+def test_invalid_intent_never_reaches_transport(overrides, expected):
+    transport = RecordingTransport()
+    executor = RiskGatedExecutor(transport)
+
+    with pytest.raises(PermissionError, match="risk_gate_rejected"):
+        executor.submit(_intent(**overrides))
+
+    assert transport.calls == []
+    assert expected in executor.authorize(_intent(**overrides)).reasons
