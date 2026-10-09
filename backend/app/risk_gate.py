@@ -45,22 +45,26 @@ def evaluate_trade_risk(
         return RiskDecision(False, ("invalid_risk_input",))
 
     reasons: list[str] = []
+    invalid = False
     if not isinstance(risk.kill_switch, bool):
         reasons.append("invalid_kill_switch")
+        invalid = True
     elif risk.kill_switch:
         reasons.append("kill_switch")
     if isinstance(risk.score, bool) or not isinstance(risk.score, int):
         reasons.append("invalid_score")
-    elif risk.score < min_score:
-        reasons.append("score_below_threshold")
+        invalid = True
 
     for field in _NUMERIC_FIELDS:
         value = getattr(risk, field)
         if not isinstance(value, Decimal) or not value.is_finite():
             reasons.append(f"invalid_{field}")
-    if reasons:
+            invalid = True
+    if invalid:
         return RiskDecision(False, tuple(reasons))
 
+    if risk.score < min_score:
+        reasons.append("score_below_threshold")
     if risk.reward_risk < min_reward_risk:
         reasons.append("reward_risk_below_threshold")
     if risk.spread_bps < 0:
