@@ -36,7 +36,6 @@ def dispatch_execution(
     risk: RiskInput,
     *,
     adapter: ExecutionAdapter | None = None,
-    live_enabled: bool = False,
 ) -> ExecutionResult:
     """Single policy boundary before any exchange submission.
 
@@ -60,8 +59,7 @@ def dispatch_execution(
         return ExecutionResult("rejected", decision.reasons)
 
     if mode == "LIVE":
-        # Kept blocked even if a caller passes live_enabled=True. Enabling LIVE
-        # requires a separate reviewed server-side security/configuration gate.
+        # Enabling LIVE requires a separate reviewed server-side security gate.
         return ExecutionResult("blocked", ("live_execution_not_implemented",))
     if mode != "TESTNET":
         return ExecutionResult("not_submitted", ("non_execution_mode",))
