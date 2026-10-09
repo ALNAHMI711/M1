@@ -5,6 +5,8 @@ from decimal import Decimal
 
 from .risk_gate import RiskDecision, RiskInput, evaluate_trade_risk
 
+VALID_SIDES = frozenset({"BUY", "SELL"})
+
 
 @dataclass(frozen=True)
 class ExecutionIntent:
@@ -16,20 +18,33 @@ class ExecutionIntent:
 
 
 class RiskGatedExecutor:
-    """Execution boundary that requires an explicit risk approval.
+    """Execution boundary that requires explicit risk approval.
 
-    The executor is deliberately transport-agnostic. A real Binance adapter
-    must be injected later; rejected intents never reach that adapter.
+    Transport-agnostic; rejected intents never reach the injected adapter.
+    This is not a live-readiness gate and must not enable LIVE trading.
     """
 
     def __init__(self, transport) -> None:
         self._transport = transport
 
     def authorize(self, intent: ExecutionIntent) -> RiskDecision:
-        decision = evaluate_trade_risk(intent.risk)
-        if not decision.allowed:
-            return decision
-        return decision
+        reasons: list[str] = []
+        if not isinstance(intent.client_order_id, str) or not intent.client_order_id.strip():
+            reasons.append("missing_client_order_id")
+        if not isinstance(intent.symbol, str) or not intent.symbol.strip():
+            reasons.append("missing_symbol")
+        if intent.side not in VALID_SIDES:
+            reasons.append("unsupported_side")
+        quantity = intent.quantity
+        if (
+            not isinstance(quantity, Decimal)
+            or not quantity.is_finite()
+            or quantity <= Decimal("0")
+        ):
+            reasons.append("invalid_quantity")
+        if reasons:
+            return RiskDecision(False, tuple(reasons))
+        return evaluate_trade_risk(intent.risk)
 
     def submit(self, intent: ExecutionIntent):
         decision = self.authorize(intent)
