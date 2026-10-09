@@ -147,3 +147,42 @@ def test_invalid_adapter_interface_fails_closed():
         status="ADAPTER_FAILURE",
         reason="invalid_execution_adapter",
     )
+
+
+def test_kill_switch_blocks_adapter_even_when_other_metrics_pass():
+    adapter = RecordingAdapter()
+    safe_risk = request().risk
+    result = submit_authorized(
+        adapter,
+        request(risk=RiskInput(
+            score=safe_risk.score,
+            reward_risk=safe_risk.reward_risk,
+            spread_bps=safe_risk.spread_bps,
+            estimated_slippage_bps=safe_risk.estimated_slippage_bps,
+            daily_loss_pct=safe_risk.daily_loss_pct,
+            max_daily_loss_pct=safe_risk.max_daily_loss_pct,
+            open_risk_pct=safe_risk.open_risk_pct,
+            max_open_risk_pct=safe_risk.max_open_risk_pct,
+            notional=safe_risk.notional,
+            max_notional=safe_risk.max_notional,
+            kill_switch=True,
+        )),
+    )
+    assert result.status == "REJECTED_BY_POLICY"
+    assert result.reason == "kill_switch"
+    assert adapter.calls == []
+
+
+def test_invalid_adapter_result_fails_closed():
+    class MalformedResultAdapter:
+        execution_mode = "PAPER"
+
+        def submit(self, request):
+            return {"accepted": True, "status": "SUBMITTED"}
+
+    result = submit_authorized(MalformedResultAdapter(), request())
+    assert result == ExecutionResult(
+        accepted=False,
+        status="ADAPTER_FAILURE",
+        reason="invalid_adapter_result",
+    )
