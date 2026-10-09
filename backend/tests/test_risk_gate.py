@@ -77,3 +77,26 @@ def test_risk_gate_rejects_malformed_risk_payload():
     decision = evaluate_trade_risk({"score": 100})
     assert decision.allowed is False
     assert decision.reasons == ("invalid_risk_input",)
+
+
+def test_risk_gate_rejects_score_outside_zero_to_hundred():
+    for score in (-1, 101, True):
+        decision = evaluate_trade_risk(_risk(score=score))
+        assert decision.allowed is False
+        assert decision.reasons == ("invalid_score",)
+
+
+def test_risk_gate_rejects_negative_reward_risk():
+    decision = evaluate_trade_risk(_risk(reward_risk=Decimal("-0.1")))
+    assert decision.allowed is False
+    assert decision.reasons == ("invalid_reward_risk",)
+
+
+def test_risk_gate_rejects_invalid_threshold_configuration():
+    decision = evaluate_trade_risk(_risk(), min_score=101)
+    assert decision.allowed is False
+    assert decision.reasons == ("invalid_min_score",)
+
+    decision = evaluate_trade_risk(_risk(), max_spread_bps=Decimal("-1"))
+    assert decision.allowed is False
+    assert decision.reasons == ("invalid_max_spread_bps",)
