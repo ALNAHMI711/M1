@@ -11,8 +11,8 @@ from app.execution_contract import (
 from app.risk_gate import RiskDecision, RiskInput
 
 
-def _request():
-    return ExecutionRequest(
+def _request(**overrides):
+    values = dict(
         client_order_id="M1-TEST-1",
         symbol="BTCUSDT",
         side="BUY",
@@ -31,6 +31,8 @@ def _request():
             max_notional=Decimal("1000"),
         ),
     )
+    values.update(overrides)
+    return ExecutionRequest(**values)
 
 
 def test_authorization_blocks_rejected_risk():
@@ -42,10 +44,11 @@ def test_authorization_blocks_rejected_risk():
 
 
 def test_authorization_blocks_non_positive_quantity():
-    request = _request()
-    request = ExecutionRequest(**{**request.__dict__, "quantity": Decimal("0")})
     with pytest.raises(ValueError, match="invalid_execution_quantity"):
-        authorize_execution(request, risk_decision=RiskDecision(True, ()))
+        authorize_execution(
+            _request(quantity=Decimal("0")),
+            risk_decision=RiskDecision(True, ()),
+        )
 
 
 def test_submit_after_risk_cannot_call_adapter_when_blocked():
@@ -64,3 +67,49 @@ def test_submit_after_risk_cannot_call_adapter_when_blocked():
             risk_decision=RiskDecision(False, ("score_below_threshold",)),
         )
     assert adapter.called is False
+
+
+def test_forged_allowed_decision_cannot_override_request_risk():
+    class Adapter:
+        called = False
+
+        def submit(self, request):
+            self.called = True
+            return ExecutionResult(True, request.client_order_id, "1", "NEW")
+
+    blocked_risk = RiskInput(
+        score=20,
+        reward_risk=Decimal("0.5"),
+        spread_bps=Decimal("100"),
+        estimated_slippage_bps=Decimal("100"),
+        daily_loss_pct=Decimal("5"),
+        max_daily_loss_pct=Decimal("5"),
+        open_risk_pct=Decimal("4"),
+        max_open_risk_pct=Decimal("3"),
+        notional=Decimal("2000"),
+        max_notional=Decimal("1000"),
+    )
+    adapter = Adapter()
+    with pytest.raises(PermissionError, match="execution_blocked"):
+        submit_after_risk(
+            adapter,
+            _request(risk=blocked_risk),
+            risk_decision=RiskDecision(True, ()),
+        )
+    assert adapter.called is False
+
+
+def test_live_mode_is_disabled_by_default():
+    with pytest.raises(PermissionError, match="live_disabled"):
+        authorize_execution(
+            _request(mode="LIVE"),
+            risk_decision=RiskDecision(True, ()),
+        )
+
+
+def test_invalid_side_is_rejected_before_adapter():
+    with pytest.raises(ValueError, match="invalid_execution_side"):
+        authorize_execution(
+            _request(side="SHORT"),
+            risk_decision=RiskDecision(True, ()),
+        )
