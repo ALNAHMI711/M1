@@ -5,6 +5,8 @@ from app.risk_gate import RiskInput
 
 
 class RecordingAdapter:
+    execution_mode = "PAPER"
+
     def __init__(self):
         self.calls = []
 
@@ -14,6 +16,8 @@ class RecordingAdapter:
 
 
 class RaisingAdapter:
+    execution_mode = "PAPER"
+
     def submit(self, request):
         raise RuntimeError("private exchange response must not leak")
 
@@ -54,7 +58,7 @@ def test_rejected_risk_never_reaches_adapter():
     assert adapter.calls == []
 
 
-def test_allowed_paper_request_reaches_adapter():
+def test_allowed_paper_request_reaches_matching_adapter():
     adapter = RecordingAdapter()
     result = submit_authorized(adapter, request())
     assert result.accepted is True
@@ -66,6 +70,22 @@ def test_live_is_blocked_before_adapter():
     result = submit_authorized(adapter, request(mode="LIVE"))
     assert result.status == "REJECTED_BY_POLICY"
     assert result.reason == "live_execution_not_enabled"
+    assert adapter.calls == []
+
+
+def test_testnet_is_blocked_before_adapter():
+    adapter = RecordingAdapter()
+    result = submit_authorized(adapter, request(mode="TESTNET"))
+    assert result.status == "REJECTED_BY_POLICY"
+    assert result.reason == "testnet_execution_not_enabled"
+    assert adapter.calls == []
+
+
+def test_adapter_mode_must_match_request():
+    adapter = RecordingAdapter()
+    result = submit_authorized(adapter, request(mode="DRY_RUN"))
+    assert result.status == "REJECTED_BY_POLICY"
+    assert result.reason == "execution_mode_adapter_mismatch"
     assert adapter.calls == []
 
 
@@ -110,6 +130,7 @@ def test_adapter_exception_is_sanitized():
         status="ADAPTER_FAILURE",
         reason="adapter_submission_failed",
     )
+
 
 def test_malformed_request_fails_closed_without_adapter_call():
     adapter = RecordingAdapter()
