@@ -19,6 +19,9 @@ class FakeBinanceClient:
         from app.spot_filters import validate_spot_order
         return validate_spot_order(metadata(), **kwargs)
 
+    def order_submission_preflight(self, **kwargs):
+        return self.order_preflight(**kwargs)
+
     def submit_testnet_order(self, **kwargs):
         return {
             "symbol": kwargs["symbol"], "orderId": 91, "status": "NEW",
@@ -206,6 +209,23 @@ def test_order_submit_is_disabled_by_default_before_preflight(client, monkeypatc
     assert response.json()["detail"] == "testnet_order_submission_disabled"
 
 
+def test_order_submit_refuses_missing_credentials_before_exchange_preflight(client, monkeypatch):
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    monkeypatch.setenv("M1_TESTNET_ALLOWED_SYMBOLS", "BTCUSDT")
+    monkeypatch.setenv("M1_TESTNET_MAX_NOTIONAL", "100")
+    monkeypatch.delenv("BINANCE_API_KEY", raising=False)
+    monkeypatch.delenv("BINANCE_API_SECRET", raising=False)
+    token = login(client)
+    response = client.post(
+        "/v1/binance/spot/order-submit",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"signal": signal(), "order_type": "LIMIT", "quantity": "0.1",
+              "price": "100", "time_in_force": "GTC", "client_order_id": "submit-no-key"},
+    )
+    assert response.status_code == 503
+    assert response.json()["detail"] == "testnet_credentials_not_configured"
+
+
 def test_order_submit_refuses_unresolved_account_and_reference_checks(client, monkeypatch):
     monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
     monkeypatch.setenv("M1_TESTNET_ALLOWED_SYMBOLS", "BTCUSDT")
@@ -230,7 +250,7 @@ def test_order_submit_happy_path_uses_reserved_single_submission_offline(client,
     monkeypatch.setenv("M1_TESTNET_MAX_NOTIONAL", "100")
     monkeypatch.setenv("BINANCE_API_KEY", "fake-testnet-key")
     monkeypatch.setenv("BINANCE_API_SECRET", "fake-testnet-secret")
-    monkeypatch.setattr(FakeBinanceClient, "order_preflight", lambda self, **kwargs: {
+    monkeypatch.setattr(FakeBinanceClient, "order_submission_preflight", lambda self, **kwargs: {
         "deferred_checks": [], "account_and_asset_filters_verified": True,
     })
     token = login(client)

@@ -147,7 +147,7 @@ def test_gated_testnet_submit_runs_preflight_then_signed_order(monkeypatch):
     client = BinanceSpotClient(
         BinanceSpotConfig(api_key="test-key", api_secret="secret"), opener=opener,
     )
-    monkeypatch.setattr(client, "order_preflight", lambda **kwargs: {
+    monkeypatch.setattr(client, "order_submission_preflight", lambda **kwargs: {
         "deferred_checks": [], "account_and_asset_filters_verified": True,
     })
     result = client.submit_testnet_order(
@@ -165,7 +165,7 @@ def test_gated_testnet_submit_runs_preflight_then_signed_order(monkeypatch):
     assert request.get_header("X-mbx-apikey") == "test-key"
 
 
-def test_unresolved_exchange_checks_block_testnet_submission_before_order_post(monkeypatch):
+def test_invalid_reference_price_blocks_testnet_submission_before_order_post(monkeypatch):
     monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
     monkeypatch.setattr("app.operations.kill_switch_active", lambda: False)
     seen = []
@@ -176,9 +176,50 @@ def test_unresolved_exchange_checks_block_testnet_submission_before_order_post(m
     client = BinanceSpotClient(
         BinanceSpotConfig(api_key="test-key", api_secret="secret"), opener=opener,
     )
-    with pytest.raises(BinanceAPIError, match="testnet_exchange_validation_incomplete"):
+    from app.spot_filters import SpotFilterError
+    with pytest.raises(SpotFilterError, match="invalid_filter_number"):
         client.submit_testnet_order(
             symbol="BTCUSDT", side="BUY", order_type="LIMIT", quantity="0.1",
             price="100", time_in_force="GTC", client_order_id="blocked-order-001",
         )
-    assert [urlsplit(request.full_url).path for request in seen] == ["/api/v3/exchangeInfo"]
+    assert [urlsplit(request.full_url).path for request in seen] == [
+        "/api/v3/exchangeInfo", "/api/v3/avgPrice",
+        "/api/v3/openOrders", "/api/v3/account",
+    ]
+
+
+def test_submission_preflight_reads_fresh_reference_account_and_open_orders(monkeypatch):
+    import time
+    from test_spot_filters import metadata
+    calls = []
+    def transport(method, path, params=None, *, signed=False):
+        calls.append((method, path, signed))
+        if path == "/api/v3/exchangeInfo":
+            return metadata()
+        if path == "/api/v3/avgPrice":
+            return {"price": "100", "mins": 5, "closeTime": int(time.time() * 1000)}
+        if path == "/api/v3/account":
+            return {
+                "canTrade": True, "permissions": ["SPOT"],
+                "balances": [
+                    {"asset": "BTC", "free": "0", "locked": "0"},
+                    {"asset": "USDT", "free": "1000", "locked": "0"},
+                ],
+            }
+        if path == "/api/v3/openOrders":
+            return []
+        raise AssertionError(path)
+    client = BinanceSpotClient(BinanceSpotConfig("test-key", "test-secret"))
+    monkeypatch.setattr(client, "_request", transport)
+    report = client.order_submission_preflight(
+        symbol="BTCUSDT", side="BUY", order_type="LIMIT", quantity="0.1",
+        price="100", time_in_force="GTC",
+    )
+    assert report["deferred_checks"] == []
+    assert report["account_and_asset_filters_verified"] is True
+    assert calls == [
+        ("GET", "/api/v3/exchangeInfo", False),
+        ("GET", "/api/v3/avgPrice", False),
+        ("GET", "/api/v3/openOrders", True),
+        ("GET", "/api/v3/account", True),
+    ]

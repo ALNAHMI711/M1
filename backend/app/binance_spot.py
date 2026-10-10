@@ -8,7 +8,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from .spot_filters import validate_spot_order, SpotFilterError
+from .spot_filters import validate_spot_order, validate_spot_order_with_account, SpotFilterError
 from dataclasses import dataclass
 from typing import Any, Mapping
 
@@ -72,7 +72,8 @@ class BinanceSpotClient:
         allowed = {
             ("GET", "/api/v3/ping"), ("GET", "/api/v3/exchangeInfo"),
             ("GET", "/api/v3/account"), ("GET", "/api/v3/order"),
-            ("GET", "/api/v3/openOrders"), ("POST", "/api/v3/order/test"),
+            ("GET", "/api/v3/openOrders"), ("GET", "/api/v3/avgPrice"),
+            ("POST", "/api/v3/order/test"),
         }
         if os.getenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "false").lower() == "true":
             allowed.add(("POST", "/api/v3/order"))
@@ -156,6 +157,9 @@ class BinanceSpotClient:
         params = {"symbol": symbol.upper()} if symbol else None
         return self._request("GET", "/api/v3/openOrders", params, signed=True)
 
+    def average_price(self, *, symbol: str) -> Any:
+        return self._request("GET", "/api/v3/avgPrice", {"symbol": symbol.upper()})
+
     def order_preflight(self, *, symbol: str, side: str, order_type: str,
                         quantity: str, price: str | None = None,
                         time_in_force: str | None = None) -> dict:
@@ -170,6 +174,26 @@ class BinanceSpotClient:
             self.exchange_info(symbol), symbol=symbol, side=side,
             order_type=order_type, quantity=quantity, price=price,
             time_in_force=time_in_force,
+        )
+
+    def order_submission_preflight(
+        self, *, symbol: str, side: str, order_type: str, quantity: str,
+        price: str | None = None, time_in_force: str | None = None,
+    ) -> dict:
+        if self.execution_mode != "TESTNET":
+            raise BinanceAPIError("live_execution_not_enabled")
+        metadata = self.exchange_info(symbol)
+        average = self.average_price(symbol=symbol)
+        open_orders = self.open_orders()
+        account = self.account()
+        try:
+            fee_buffer_bps = int(os.getenv("M1_TESTNET_FEE_BUFFER_BPS", "100"))
+        except ValueError as exc:
+            raise SpotFilterError("invalid_fee_buffer") from exc
+        return validate_spot_order_with_account(
+            metadata, account, open_orders, average, symbol=symbol, side=side,
+            order_type=order_type, quantity=quantity, price=price,
+            time_in_force=time_in_force, fee_buffer_bps=fee_buffer_bps,
         )
 
     def order_test(
@@ -237,7 +261,7 @@ class BinanceSpotClient:
             raise BinanceAPIError("client_order_id_required")
         if kill_switch_active():
             raise BinanceAPIError("kill_switch")
-        report = self.order_preflight(
+        report = self.order_submission_preflight(
             symbol=symbol, side=side, order_type=order_type, quantity=quantity,
             price=price, time_in_force=time_in_force,
         )

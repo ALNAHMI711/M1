@@ -3,7 +3,7 @@ from decimal import getcontext
 
 import pytest
 
-from app.spot_filters import SpotFilterError, validate_spot_order
+from app.spot_filters import SpotFilterError, validate_spot_order, validate_spot_order_with_account
 from app.binance_spot import BinanceAPIError, BinanceSpotClient, BinanceSpotConfig
 from app.operations import set_kill_switch
 
@@ -12,7 +12,8 @@ def metadata():
     return {
         "exchangeFilters": [],
         "symbols": [{
-            "symbol": "BTCUSDT", "status": "TRADING", "isSpotTradingAllowed": True,
+            "symbol": "BTCUSDT", "baseAsset": "BTC", "quoteAsset": "USDT",
+            "status": "TRADING", "isSpotTradingAllowed": True,
             "orderTypes": ["LIMIT", "MARKET"],
             "filters": [
                 {"filterType": "PRICE_FILTER", "minPrice": "0.01", "maxPrice": "1000000", "tickSize": "0.01"},
@@ -147,6 +148,51 @@ def test_static_violation_never_reaches_signed_validation(monkeypatch):
         client.order_test(symbol="BTCUSDT", side="BUY", order_type="LIMIT",
                           quantity="0.1001", price="100", time_in_force="GTC")
     assert calls == [("GET", "/api/v3/exchangeInfo", False)]
+
+
+def _account_snapshot(*, quote_free="1000", base_free="0", base_locked="0", can_trade=True):
+    return {
+        "canTrade": can_trade,
+        "permissions": ["SPOT"],
+        "balances": [
+            {"asset": "USDT", "free": quote_free, "locked": "0"},
+            {"asset": "BTC", "free": base_free, "locked": base_locked},
+        ],
+    }
+
+
+def test_account_and_reference_preflight_resolves_dynamic_buy_filters():
+    result = validate_spot_order_with_account(
+        metadata(), _account_snapshot(), [], {"price": "100", "mins": 5, "closeTime": 1_000_000},
+        symbol="BTCUSDT", side="BUY", order_type="LIMIT", quantity="0.1",
+        price="100", time_in_force="GTC", now_ms=1_000_001,
+    )
+    assert result["deferred_checks"] == []
+    assert result["account_and_asset_filters_verified"] is True
+    assert result["reference_price"] == "100"
+    assert result["required_quote_with_fee_buffer"] == "10.100"
+    assert result["base_position_including_open_buys"] == "0"
+
+
+@pytest.mark.parametrize("kwargs,reason", [
+    ({"average_price": {"price": "100", "mins": 5, "closeTime": 900_000}, "now_ms": 1_000_001}, "stale_exchange_reference_price"),
+    ({"average_price": {"price": "1000", "mins": 5, "closeTime": 1_000_000}, "now_ms": 1_000_001}, "price_outside_reference_band"),
+    ({"average_price": {"price": "100", "mins": 1, "closeTime": 1_000_000}, "now_ms": 1_000_001}, "reference_price_window_mismatch"),
+    ({"account": _account_snapshot(quote_free="10")}, "insufficient_free_quote_balance"),
+    ({"account": _account_snapshot(base_free="99.95")}, "max_position_exceeded"),
+    ({"account": _account_snapshot(can_trade=False)}, "spot_account_cannot_trade"),
+])
+def test_account_and_reference_preflight_fails_closed(kwargs, reason):
+    values = {
+        "metadata": metadata(), "account": _account_snapshot(), "open_orders": [],
+        "average_price": {"price": "100", "mins": 5, "closeTime": 1_000_000},
+        "symbol": "BTCUSDT", "side": "BUY", "order_type": "LIMIT",
+        "quantity": "0.1", "price": "100", "time_in_force": "GTC",
+        "now_ms": 1_000_001,
+    }
+    values.update(kwargs)
+    with pytest.raises(SpotFilterError, match=reason):
+        validate_spot_order_with_account(**values)
 
 
 def test_kill_during_metadata_fetch_blocks_signed_validation(monkeypatch):

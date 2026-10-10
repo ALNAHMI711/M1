@@ -322,7 +322,7 @@ def binance_spot_order_submit(
         raise HTTPException(status_code=503, detail="testnet_credentials_not_configured")
     client = BinanceSpotClient(config)
     try:
-        report = client.order_preflight(
+        report = client.order_submission_preflight(
             symbol=request.signal.symbol, side=side, order_type=request.order_type,
             quantity=request.quantity, price=request.price,
             time_in_force=request.time_in_force,
