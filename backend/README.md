@@ -16,6 +16,13 @@ This service is the server-side boundary for future trading automation. It accep
 
 - FastAPI control plane, authentication primitives, persistence, audit events, execution contracts/policies, risk gate and gated-executor modules exist.
 - Spot REST/User Data Stream and USDⓈ-M state/recovery/reconciliation components have tests.
+- Spot Testnet static preflight checks fresh exchangeInfo for symbol status,
+  order type, quantity step/bounds, LIMIT tick/bounds and notional. Dynamic
+  reference-price/account/asset filters are not locally certified; signed
+  `/order/test` is validation-only and requires Testnet keys on your own backend.
+- See [Testnet preflight guide](../docs/TESTNET_PREFLIGHT_AR.md). Public Testnet
+  access from the delivery sandbox returned HTTP 451; no circumvention or
+  authenticated integration was attempted.
 - This is not yet approved for production or live trading. Review the current branch and GitHub Actions results before each release.
 
 ## Modes

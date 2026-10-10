@@ -8,6 +8,7 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from .spot_filters import validate_spot_order, SpotFilterError
 from dataclasses import dataclass
 from typing import Any, Mapping
 
@@ -153,6 +154,22 @@ class BinanceSpotClient:
         params = {"symbol": symbol.upper()} if symbol else None
         return self._request("GET", "/api/v3/openOrders", params, signed=True)
 
+    def order_preflight(self, *, symbol: str, side: str, order_type: str,
+                        quantity: str, price: str | None = None,
+                        time_in_force: str | None = None) -> dict:
+        if self.execution_mode != "TESTNET":
+            raise BinanceAPIError("live_execution_not_enabled")
+        # Validate shape before querying, never accepting URLs or external metadata
+        # from the API caller. Fresh metadata is fetched from this Testnet origin.
+        import re
+        if not isinstance(symbol, str) or not re.fullmatch(r"[A-Z0-9]{3,20}", symbol):
+            raise SpotFilterError("invalid_spot_symbol")
+        return validate_spot_order(
+            self.exchange_info(symbol), symbol=symbol, side=side,
+            order_type=order_type, quantity=quantity, price=price,
+            time_in_force=time_in_force,
+        )
+
     def order_test(
         self,
         *,
@@ -165,6 +182,14 @@ class BinanceSpotClient:
         client_order_id: str | None = None,
     ) -> Any:
         from .operations import kill_switch_active
+        if kill_switch_active():
+            raise BinanceAPIError("kill_switch")
+        if self.execution_mode != "TESTNET":
+            raise BinanceAPIError("live_execution_not_enabled")
+        if not self.config.api_key or not self.config.api_secret:
+            raise BinanceAPIError("missing_binance_credentials")
+        self.order_preflight(symbol=symbol, side=side, order_type=order_type,
+                             quantity=quantity, price=price, time_in_force=time_in_force)
         if kill_switch_active():
             raise BinanceAPIError("kill_switch")
         params: dict[str, Any] = {

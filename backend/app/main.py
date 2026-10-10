@@ -1,12 +1,13 @@
 import hashlib
 import hmac
 import os
+from decimal import Decimal
 from typing import Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request, Security, Query
 from fastapi.responses import Response
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from starlette.middleware.cors import CORSMiddleware
 
@@ -18,8 +19,9 @@ from .telegram import parse_telegram_signal
 from .operations import check_database, kill_switch_active, set_kill_switch
 from .http_safety import HTTPSafetyMiddleware
 from .paper import PaperOrder, PaperError, paper_account, submit_paper_order, paper_ledger_csv
+from .spot_filters import SpotFilterError
 
-app = FastAPI(title="ALNAHMI M1 Trading Control Plane", version="0.7.0")
+app = FastAPI(title="ALNAHMI M1 Trading Control Plane", version="0.8.0")
 app.add_middleware(HTTPSafetyMiddleware)
 app.add_middleware(
     TrustedHostMiddleware,
@@ -51,12 +53,23 @@ class Signal(BaseModel):
 
 
 class BinanceSpotOrderTest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     signal: Signal
     order_type: Literal["MARKET", "LIMIT"] = "MARKET"
     quantity: str = Field(min_length=1, max_length=32, pattern=r"^(?:[1-9]\d*(?:\.\d+)?|0\.\d*[1-9]\d*)$")
     price: str | None = Field(default=None, min_length=1, max_length=32, pattern=r"^(?:[1-9]\d*(?:\.\d+)?|0\.\d*[1-9]\d*)$")
     time_in_force: Literal["GTC", "IOC", "FOK"] | None = None
     client_order_id: str | None = Field(default=None, min_length=1, max_length=36, pattern=r"^[A-Za-z0-9._:-]+$")
+
+    @model_validator(mode="after")
+    def validate_order_shape(self):
+        if self.order_type == "LIMIT" and (self.price is None or self.time_in_force is None):
+            raise ValueError("limit_requires_price_and_time_in_force")
+        if self.order_type == "MARKET" and (self.price is not None or self.time_in_force is not None):
+            raise ValueError("market_disallows_price_and_time_in_force")
+        if self.order_type == "LIMIT" and Decimal(self.price) != Decimal(str(self.signal.entry)):
+            raise ValueError("limit_price_must_match_signal_entry")
+        return self
 
 
 def calculated_rr(signal: Signal) -> float | None:
@@ -201,6 +214,27 @@ def export_paper_ledger(limit: int = Query(1000, ge=1, le=5000), user=Security(c
     )
 
 
+@app.post("/v1/binance/spot/preflight")
+def binance_spot_preflight(request: BinanceSpotOrderTest,
+                          user=Security(current_user, scopes=["control:read"])):
+    if request.signal.mode != "TESTNET":
+        raise HTTPException(status_code=400, detail="preflight_requires_testnet_mode")
+    accepted, reasons = risk_check(request.signal)
+    if not accepted:
+        raise HTTPException(status_code=422, detail={"accepted": False, "reasons": reasons})
+    try:
+        client = BinanceSpotClient(BinanceSpotConfig("", ""))
+        return client.order_preflight(
+            symbol=request.signal.symbol, side="BUY" if request.signal.side == "LONG" else "SELL",
+            order_type=request.order_type, quantity=request.quantity,
+            price=request.price, time_in_force=request.time_in_force,
+        )
+    except SpotFilterError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except BinanceAPIError as exc:
+        raise HTTPException(status_code=502, detail="testnet_metadata_unavailable") from exc
+
+
 @app.post("/v1/binance/spot/order-test")
 def binance_spot_order_test(
     request: BinanceSpotOrderTest,
@@ -228,11 +262,17 @@ def binance_spot_order_test(
             time_in_force=request.time_in_force,
             client_order_id=request.client_order_id,
         )
+    except SpotFilterError as exc:
+        record_execution_audit(event="SPOT_ORDER_TEST", status="REJECTED",
+                               detail=str(exc), signal_id=request.signal.signal_id)
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except BinanceAPIError as exc:
         record_execution_audit(event="SPOT_ORDER_TEST", status="FAILED", detail="testnet_request_failed", signal_id=request.signal.signal_id)
         raise HTTPException(status_code=502, detail="binance_testnet_request_failed") from exc
     record_execution_audit(event="SPOT_ORDER_TEST", status="VALIDATED", detail="no_order_placed", signal_id=request.signal.signal_id)
-    return {"accepted": True, "mode": "TESTNET", "result": result, "user": user.username}
+    return {"accepted": True, "mode": "TESTNET", "result": result, "user": user.username,
+            "order_placement": False, "live_enabled": False,
+            "production_readiness": False}
 
 
 @app.post("/v1/binance/spot/recover")
@@ -305,6 +345,8 @@ def control_readiness(user=Security(current_user, scopes=["control:read"])):
         "persistent_store_healthy": check_database(),
         "durable_sessions": True,
         "paper_simulation_available": True,
+        "spot_static_preflight_available": True,
+        "spot_account_and_asset_filters_verified": False,
         "tradingview_webhook_secret_configured": bool(WEBHOOK_SECRET),
         "spot_api_key_configured": bool(os.getenv("BINANCE_API_KEY")),
         "spot_api_secret_configured": bool(os.getenv("BINANCE_API_SECRET")),

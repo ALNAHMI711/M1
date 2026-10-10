@@ -58,3 +58,16 @@ application, not a live trading product.
 - Real domain/TLS issuance, production server backup rotation and alerts.
 - Independent penetration testing, production user management, 2FA.
 - COIN-M, margin, Alpha and stocks live adapters; all remain disabled.
+
+## Phase-three preflight
+
+- Python 3.11: 365 tests passed, one existing Starlette/httpx warning.
+- Spot symbol status/mode/type, exact decimal LOT/MARKET_LOT/PRICE increments
+  and bounds, LIMIT notional, zero-disabled bounds, deferred dynamic checks.
+- Invalid/missing/duplicate/unknown metadata fails closed; fresh metadata fetch
+  before signed order validation; kill during fetch prevents signed validation.
+- API refuses caller metadata and mismatched LIMIT signal/price; VIEWER public
+  preflight uses no exchange keys; errors are redacted, no real order route.
+- CLI probe loads no credentials, performs only GET, and returns stable failures.
+- Actual public Testnet access returned HTTP 451. Authenticated exchange and
+  dynamic/account/asset filters remain unverified; no regional circumvention.

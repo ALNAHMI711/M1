@@ -49,6 +49,9 @@ def test_signed_request_uses_hmac_and_api_key():
     def opener(request, timeout):
         seen["url"] = request.full_url
         seen["headers"] = dict(request.headers)
+        if urlsplit(request.full_url).path == "/api/v3/exchangeInfo":
+            from test_spot_filters import metadata
+            return FakeResponse(metadata())
         return FakeResponse({"ok": True})
 
     client = BinanceSpotClient(
