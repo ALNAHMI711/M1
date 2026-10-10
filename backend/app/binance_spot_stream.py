@@ -107,6 +107,8 @@ class BinanceSpotUserDataStream:
         apply_event: Callable[[dict[str, Any]], bool] = apply_spot_order_update,
         recover: Callable[[BinanceSpotClient], dict[str, int]] = recover_spot_orders,
     ):
+        if not config.testnet or getattr(rest_client, "execution_mode", None) != "TESTNET":
+            raise ValueError("spot_stream_requires_testnet_client")
         self.config = config
         self.rest_client = rest_client
         self._connect = connect

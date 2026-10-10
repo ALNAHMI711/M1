@@ -14,3 +14,20 @@ tests/reference-regression/data/
 
 # Browser automation artifacts
 .playwright-mcp/
+
+# Private runtime state and local environments
+.venv/
+*.egg-info/
+.pytest_cache/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+backend/data/
+.env
+.env.*
+!.env.example
+dist-example/
+backups/
+qa-output/
+test-results/
+playwright-report/

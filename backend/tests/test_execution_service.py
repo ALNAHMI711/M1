@@ -69,9 +69,10 @@ def test_invalid_quantity_prevents_adapter_call():
     assert adapter.calls == 0
 
 
-def test_adapter_called_only_after_valid_risk_approval():
+def test_boolean_flag_cannot_enable_live_submission():
     adapter = SpyAdapter()
     result = ExecutionService(adapter, live_enabled=True).submit(intent())
-    assert result.accepted is True
-    assert result.status == "accepted"
-    assert adapter.calls == 1
+    assert result.accepted is False
+    assert result.status == "blocked"
+    assert result.reasons == ("live_readiness_verifier_required",)
+    assert adapter.calls == 0

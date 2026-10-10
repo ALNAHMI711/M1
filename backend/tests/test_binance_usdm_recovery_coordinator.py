@@ -198,6 +198,7 @@ def test_fresh_order_event_reconciles_after_recovery(tmp_path, monkeypatch):
         symbol="BTCUSDT",
         side="LONG",
         mode="TESTNET",
+        market="USDM",
         quantity="0.01",
         status="NEW",
         order_id="98765",

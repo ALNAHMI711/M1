@@ -5,6 +5,7 @@ from decimal import Decimal
 from typing import Protocol
 
 from .risk_gate import RiskDecision, RiskInput, evaluate_trade_risk
+from .operations import kill_switch_active
 
 
 @dataclass(frozen=True)
@@ -28,6 +29,8 @@ class ExecutionAdapter(Protocol):
     """Transport contract. Implementations must not bypass ExecutionService."""
 
     def submit(self, intent: ExecutionIntent) -> ExecutionResult:
+        if kill_switch_active():
+            return ExecutionResult(False, intent.client_order_id, "rejected", ("kill_switch",))
         ...
 
 
@@ -59,4 +62,6 @@ class ExecutionService:
         if not self._live_enabled:
             return ExecutionResult(False, intent.client_order_id, "blocked", ("live_execution_disabled",))
 
-        return self._adapter.submit(intent)
+        # A boolean is not a security/readiness certificate. This legacy entry
+        # point cannot identify a verified TESTNET adapter, so it never submits.
+        return ExecutionResult(False, intent.client_order_id, "blocked", ("live_readiness_verifier_required",))

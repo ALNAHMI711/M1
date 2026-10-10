@@ -1,0 +1,40 @@
+name: docker-check
+
+on:
+  push:
+    branches: [main, 'completion/**']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      M1_COMPOSE_TEST: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create isolated test environment
+        run: |
+          printf 'M1_AUTH_SECRET=ci-only-docker-secret-not-for-real-use-0123456789\nM1_SITE_ADDRESS=http://localhost\n' > .env
+          chmod 600 .env
+      - name: Build and start containers
+        run: |
+          docker compose config --quiet
+          docker compose build
+          docker compose up -d --wait
+      - name: Create isolated CI administrator
+        run: |
+          docker compose exec -T backend python -c "from app.operations import save_user; from app.auth import password_hash; save_user('ci-admin',password_hash.hash('ci-password-not-a-real-secret'),'ADMIN')"
+      - name: Verify full stack and persistence through real restarts
+        run: python tools/verify_compose.py
+      - name: Show container state
+        if: failure()
+        run: docker compose ps && docker compose logs --tail 80
+      - name: Remove isolated CI stack and volumes
+        if: always()
+        run: docker compose down -v

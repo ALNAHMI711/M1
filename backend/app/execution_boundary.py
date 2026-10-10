@@ -5,6 +5,7 @@ from decimal import Decimal
 from typing import Protocol
 
 from .risk_gate import RiskInput, evaluate_trade_risk
+from .operations import kill_switch_active
 
 
 SUPPORTED_MODES = {"DEVELOPMENT", "BACKTEST", "DRY_RUN", "PAPER", "TESTNET", "LIVE"}
@@ -45,6 +46,8 @@ def dispatch_execution(
     specific authentication, precision, filters, and idempotent client IDs.
     """
     mode = intent.mode.upper()
+    if kill_switch_active():
+        return ExecutionResult("rejected", ("kill_switch",))
     if mode not in SUPPORTED_MODES:
         return ExecutionResult("rejected", ("unsupported_mode",))
     if not intent.client_order_id or not intent.symbol:
@@ -65,6 +68,8 @@ def dispatch_execution(
         return ExecutionResult("not_submitted", ("non_execution_mode",))
     if adapter is None:
         return ExecutionResult("blocked", ("testnet_adapter_unavailable",))
+    if getattr(adapter, "execution_mode", getattr(adapter, "mode", None)) != "TESTNET":
+        return ExecutionResult("blocked", ("testnet_adapter_required",))
 
     exchange_order_id = adapter.submit(intent)
     if not isinstance(exchange_order_id, str) or not exchange_order_id.strip():

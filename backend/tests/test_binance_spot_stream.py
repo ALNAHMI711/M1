@@ -2,6 +2,7 @@ import json
 
 import pytest
 
+from app.binance_spot import BinanceSpotClient, BinanceSpotConfig
 from app.binance_spot_stream import (
     BinanceSpotStreamConfig,
     BinanceSpotUserDataStream,
@@ -54,7 +55,7 @@ def test_stream_consumes_execution_report_only_for_known_order():
 
     stream = BinanceSpotUserDataStream(
         BinanceSpotStreamConfig(api_key="key", api_secret="secret"),
-        rest_client=object(),
+        rest_client=BinanceSpotClient(BinanceSpotConfig("key", "secret")),
         apply_event=lambda payload: applied.append(payload) or True,
     )
     stream._consume(
@@ -75,7 +76,7 @@ def test_stream_ignores_non_execution_events():
     applied = []
     stream = BinanceSpotUserDataStream(
         BinanceSpotStreamConfig(api_key="key", api_secret="secret"),
-        rest_client=object(),
+        rest_client=BinanceSpotClient(BinanceSpotConfig("key", "secret")),
         apply_event=lambda payload: applied.append(payload) or True,
     )
     stream._consume(
@@ -87,6 +88,16 @@ def test_stream_ignores_non_execution_events():
 def test_stream_requires_credentials():
     with pytest.raises(ValueError, match="missing_binance_credentials"):
         subscription_request(api_key="", api_secret="secret")
+
+
+@pytest.mark.parametrize("testnet,rest_mode", [(False, "TESTNET"), (True, "LIVE"), (True, None)])
+def test_stream_rejects_live_or_unlabeled_environment_before_connect(testnet, rest_mode):
+    from types import SimpleNamespace
+    with pytest.raises(ValueError, match="requires_testnet_client"):
+        BinanceSpotUserDataStream(
+            BinanceSpotStreamConfig("key", "secret", testnet=testnet),
+            rest_client=SimpleNamespace(execution_mode=rest_mode),
+        )
 
 
 def test_stream_enforces_recv_window_limit():
@@ -155,7 +166,7 @@ def test_stream_reconnects_after_termination_and_recovers_before_events():
             reconnect_min_seconds=0,
             reconnect_max_seconds=0,
         ),
-        rest_client=object(),
+        rest_client=BinanceSpotClient(BinanceSpotConfig("key", "secret")),
         connect=Connect(),
         apply_event=lambda payload: (
             lifecycle.append("event"),
@@ -231,7 +242,7 @@ def test_stream_reconnects_after_server_shutdown():
             reconnect_min_seconds=0,
             reconnect_max_seconds=0,
         ),
-        rest_client=object(),
+        rest_client=BinanceSpotClient(BinanceSpotConfig("key", "secret")),
         connect=Connect(),
     )
 

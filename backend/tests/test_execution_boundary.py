@@ -32,6 +32,8 @@ def _intent(mode):
 
 
 class FakeAdapter:
+    execution_mode = "TESTNET"
+
     def __init__(self):
         self.calls = 0
 

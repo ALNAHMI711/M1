@@ -5,6 +5,7 @@ from decimal import Decimal
 from typing import Protocol
 
 from .risk_gate import RiskDecision, RiskInput, evaluate_trade_risk
+from .operations import kill_switch_active
 
 
 @dataclass(frozen=True)
@@ -50,8 +51,10 @@ def authorize_execution(
         raise ValueError("invalid_execution_quantity")
     if request.mode not in {"DEVELOPMENT", "BACKTEST", "DRY_RUN", "PAPER", "TESTNET", "LIVE"}:
         raise ValueError("invalid_execution_mode")
-    if request.mode == "LIVE" and not live_enabled:
+    if request.mode == "LIVE":
         raise PermissionError("execution_blocked:live_disabled")
+    if kill_switch_active():
+        raise PermissionError("execution_blocked:kill_switch")
 
     # Recompute the decision from the request at the boundary. A caller
     # cannot bypass risk by supplying a forged RiskDecision(True, ()).
@@ -76,4 +79,8 @@ def submit_after_risk(
         risk_decision=risk_decision,
         live_enabled=live_enabled,
     )
+    if request.mode != "TESTNET":
+        return ExecutionResult(False, request.client_order_id, status="NOT_SUBMITTED", reason="non_execution_mode")
+    if getattr(adapter, "execution_mode", getattr(adapter, "mode", None)) != "TESTNET":
+        raise PermissionError("execution_blocked:testnet_adapter_required")
     return adapter.submit(request)

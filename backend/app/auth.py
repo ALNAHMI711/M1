@@ -8,6 +8,9 @@ from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from jwt.exceptions import InvalidTokenError
 from pwdlib import PasswordHash
 from pydantic import BaseModel, ValidationError
+from pwdlib.exceptions import UnknownHashError
+
+from .operations import get_user, revoke_session, save_session, session_active
 
 ALGORITHM = "HS256"
 SCOPES = {
@@ -16,17 +19,20 @@ SCOPES = {
     "signals:read": "Read signal state",
     "signals:validate": "Validate signals",
     "admin": "Administrative operations",
+    "paper:read": "Read own simulated paper account",
+    "paper:write": "Submit simulated cash-only paper orders; never exchange orders",
 }
 ROLE_SCOPES = {
-    "VIEWER": {"control:read", "signals:read"},
-    "OPERATOR": {"control:read", "signals:read", "signals:validate"},
+    "VIEWER": {"control:read", "signals:read", "paper:read"},
+    "OPERATOR": {"control:read", "signals:read", "signals:validate", "paper:read", "paper:write"},
     "ADMIN": set(SCOPES),
 }
 
 password_hash = PasswordHash.recommended()
 dummy_password_hash = password_hash.hash("invalid-password-dummy")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/v1/auth/token", scopes=SCOPES)
-_revoked_tokens: set[str] = set()
+ISSUER = "m1-control-plane"
+AUDIENCE = "m1-control-api"
 
 
 class Token(BaseModel):
@@ -51,12 +57,23 @@ def _secret() -> str:
 
 
 def authenticate(username: str, password: str) -> str | None:
+    user = get_user(username)
+    if user is not None:
+        try:
+            verified = password_hash.verify(password, user["password_hash"])
+        except (ValueError, UnknownHashError):
+            return None
+        return user["role"] if verified and user["enabled"] and user["role"] in ROLE_SCOPES else None
     admin_username = os.getenv("M1_ADMIN_USERNAME", "admin")
     password_hash_value = os.getenv("M1_ADMIN_PASSWORD_HASH", "")
     if not secrets.compare_digest(username, admin_username):
         password_hash.verify(password, dummy_password_hash)
         return None
-    if not password_hash_value or not password_hash.verify(password, password_hash_value):
+    try:
+        verified = bool(password_hash_value) and password_hash.verify(password, password_hash_value)
+    except (ValueError, UnknownHashError):
+        verified = False
+    if not verified:
         return None
     return "ADMIN"
 
@@ -65,22 +82,32 @@ def create_access_token(username: str, role: str) -> str:
     now = datetime.now(timezone.utc)
     jti = secrets.token_urlsafe(24)
     scopes = sorted(ROLE_SCOPES[role])
+    secret = _secret()
+    minutes = int(os.getenv("M1_AUTH_TOKEN_MINUTES", "30"))
+    if not 1 <= minutes <= 60:
+        raise RuntimeError("M1_AUTH_TOKEN_MINUTES must be between 1 and 60")
+    expires = now + timedelta(minutes=minutes)
     payload = {
         "sub": username,
         "role": role,
         "scope": " ".join(scopes),
         "iat": now,
-        "exp": now + timedelta(minutes=int(os.getenv("M1_AUTH_TOKEN_MINUTES", "30"))),
+        "exp": expires,
         "jti": jti,
+        "iss": ISSUER,
+        "aud": AUDIENCE,
     }
-    return jwt.encode(payload, _secret(), algorithm=ALGORITHM)
+    token = jwt.encode(payload, secret, algorithm=ALGORITHM)
+    save_session(jti, username, role, int(expires.timestamp()))
+    return token
 
 
 def _decode(token: str) -> TokenData:
-    if token in _revoked_tokens:
-        raise HTTPException(status_code=401, detail="session revoked", headers={"WWW-Authenticate": "Bearer"})
     try:
-        payload = jwt.decode(token, _secret(), algorithms=[ALGORITHM])
+        payload = jwt.decode(
+            token, _secret(), algorithms=[ALGORITHM], issuer=ISSUER, audience=AUDIENCE,
+            options={"require": ["sub", "role", "scope", "iat", "exp", "jti", "iss", "aud"]},
+        )
         data = TokenData(
             username=payload["sub"],
             role=payload["role"],
@@ -91,6 +118,8 @@ def _decode(token: str) -> TokenData:
         raise HTTPException(status_code=401, detail="invalid or expired session", headers={"WWW-Authenticate": "Bearer"})
     if data.role not in ROLE_SCOPES or not set(data.scopes).issubset(ROLE_SCOPES[data.role]):
         raise HTTPException(status_code=403, detail="invalid session permissions")
+    if not session_active(data.jti, data.username, data.role):
+        raise HTTPException(status_code=401, detail="session revoked or unavailable", headers={"WWW-Authenticate": "Bearer"})
     return data
 
 
@@ -106,4 +135,4 @@ async def current_user(
 
 
 def revoke(token: str) -> None:
-    _revoked_tokens.add(token)
+    revoke_session(_decode(token).jti)

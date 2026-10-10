@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 from pwdlib import PasswordHash
 
 from app.main import app
+from app.auth import create_access_token
 
 
 @pytest.fixture()
@@ -69,5 +70,10 @@ def test_control_write_scope_is_enforced(auth_client):
 
 def test_short_auth_secret_is_rejected(auth_client, monkeypatch):
     monkeypatch.setenv("M1_AUTH_SECRET", "too-short")
+    response = auth_client.post(
+        "/v1/auth/token", data={"username": "admin", "password": "correct-password"}
+    )
+    assert response.status_code == 503
+    assert response.json()["detail"] == "authentication_not_configured"
     with pytest.raises(RuntimeError, match="at least 32 bytes"):
-        login(auth_client)
+        create_access_token("admin", "ADMIN")

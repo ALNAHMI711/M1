@@ -6,7 +6,7 @@ from .binance_spot import BinanceAPIError, BinanceSpotClient
 from .store import (
     pending_execution_orders,
     record_execution_audit,
-    update_execution_order,
+    apply_order_state,
 )
 
 
@@ -17,11 +17,13 @@ def _status(payload: Any) -> str | None:
     return value if isinstance(value, str) else None
 
 
-def recover_spot_orders(client: BinanceSpotClient) -> dict[str, int]:
+def recover_spot_orders(client: BinanceSpotClient, *, include_quarantined: bool = False) -> dict[str, int]:
     """Reconcile pending Spot orders without placing or replacing orders."""
 
+    if getattr(client, "execution_mode", None) != "TESTNET":
+        raise ValueError("spot_recovery_requires_testnet_client")
     checked = updated = unknown = 0
-    for local in pending_execution_orders():
+    for local in pending_execution_orders(mode="TESTNET", market="SPOT", include_unknown=include_quarantined):
         checked += 1
         try:
             remote = client.get_order(
@@ -32,7 +34,7 @@ def recover_spot_orders(client: BinanceSpotClient) -> dict[str, int]:
             remote_status = _status(remote)
             if remote_status is None:
                 unknown += 1
-                update_execution_order(local["client_order_id"], status="UNKNOWN")
+                apply_order_state(local["client_order_id"], status="UNKNOWN", market="SPOT", snapshot=local, event_prefix="spot_recovery")
                 record_execution_audit(
                     event="ORDER_RECOVERY",
                     status="UNKNOWN",
@@ -42,9 +44,14 @@ def recover_spot_orders(client: BinanceSpotClient) -> dict[str, int]:
                 )
                 continue
 
-            update_execution_order(
+            result = apply_order_state(
                 local["client_order_id"],
                 status=remote_status,
+                market="SPOT",
+                snapshot=local,
+                symbol=remote.get("symbol"),
+                event_time=remote.get("updateTime"),
+                event_prefix="spot_recovery",
                 order_id=str(remote.get("orderId"))
                 if remote.get("orderId") is not None
                 else local["order_id"],
@@ -55,6 +62,8 @@ def recover_spot_orders(client: BinanceSpotClient) -> dict[str, int]:
                 if remote.get("price") is not None
                 else local["price"],
             )
+            if result == "stale":
+                continue
             record_execution_audit(
                 event="ORDER_RECOVERY",
                 status=remote_status,
@@ -65,7 +74,7 @@ def recover_spot_orders(client: BinanceSpotClient) -> dict[str, int]:
             updated += 1
         except (BinanceAPIError, ValueError, TypeError):
             unknown += 1
-            update_execution_order(local["client_order_id"], status="UNKNOWN")
+            apply_order_state(local["client_order_id"], status="UNKNOWN", market="SPOT", snapshot=local, event_prefix="spot_recovery")
             record_execution_audit(
                 event="ORDER_RECOVERY",
                 status="UNKNOWN",
