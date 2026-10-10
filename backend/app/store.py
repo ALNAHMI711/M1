@@ -62,7 +62,8 @@ def connection():
                 executed_quantity TEXT NOT NULL DEFAULT '0',
                 price TEXT,
                 last_event_time INTEGER,
-                updated_at TEXT NOT NULL
+                updated_at TEXT NOT NULL,
+                request_fingerprint TEXT
             )"""
         )
         columns = {
@@ -76,6 +77,9 @@ def connection():
         if "market" not in columns:
             # Legacy records cannot safely be guessed to be Spot or futures.
             conn.execute("ALTER TABLE execution_orders ADD COLUMN market TEXT NOT NULL DEFAULT 'UNKNOWN'")
+        if "request_fingerprint" not in columns:
+            # Legacy rows have no provable request payload and remain unbound.
+            conn.execute("ALTER TABLE execution_orders ADD COLUMN request_fingerprint TEXT")
         conn.execute(
             """CREATE TABLE IF NOT EXISTS execution_audit (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -144,15 +148,23 @@ def record_execution_order(
     executed_quantity: str = "0",
     price: str | None = None,
     last_event_time: int | None = None,
+    request_fingerprint: str | None = None,
 ) -> None:
+    if request_fingerprint is not None and (
+        not isinstance(request_fingerprint, str)
+        or len(request_fingerprint) != 64
+        or any(char not in "0123456789abcdef" for char in request_fingerprint)
+    ):
+        raise ValueError("invalid_execution_request_fingerprint")
     now = datetime.now(timezone.utc).isoformat()
     with connection() as conn:
         conn.execute("BEGIN IMMEDIATE")
         cursor = conn.execute(
             """INSERT OR IGNORE INTO execution_orders
                (client_order_id, signal_id, symbol, side, mode, order_id,
-                status, quantity, executed_quantity, price, last_event_time, updated_at, market)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                status, quantity, executed_quantity, price, last_event_time, updated_at, market,
+                request_fingerprint)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 client_order_id,
                 signal_id,
@@ -167,17 +179,18 @@ def record_execution_order(
                 last_event_time,
                 now,
                 market,
+                request_fingerprint,
             ),
         )
         if cursor.rowcount == 1:
             return
         existing = conn.execute(
-            """SELECT signal_id, symbol, side, mode, market, quantity
+            """SELECT signal_id, symbol, side, mode, market, quantity, request_fingerprint
                FROM execution_orders WHERE client_order_id = ?""",
             (client_order_id,),
         ).fetchone()
         if existing is None or tuple(existing) != (
-            signal_id, symbol, side, mode, market, quantity
+            signal_id, symbol, side, mode, market, quantity, request_fingerprint
         ):
             raise ValueError("execution_order_identity_conflict")
         # Idempotent registration must never overwrite exchange state. In
@@ -192,7 +205,8 @@ def get_execution_order(client_order_id: str):
     with connection() as conn:
         row = conn.execute(
             """SELECT client_order_id, signal_id, symbol, side, mode, order_id,
-                      status, quantity, executed_quantity, price, last_event_time, updated_at, market
+                      status, quantity, executed_quantity, price, last_event_time, updated_at, market,
+                      request_fingerprint
                FROM execution_orders
                WHERE client_order_id = ?""",
             (client_order_id,),
@@ -215,7 +229,8 @@ def pending_execution_orders(*, mode: str | None = None, market: str | None = No
     with connection() as conn:
         rows = conn.execute(
             f"""SELECT client_order_id, signal_id, symbol, side, mode, order_id,
-                      status, quantity, executed_quantity, price, last_event_time, updated_at, market
+                      status, quantity, executed_quantity, price, last_event_time, updated_at, market,
+                      request_fingerprint
                FROM execution_orders
                WHERE {' AND '.join(clauses)}""",
             parameters,

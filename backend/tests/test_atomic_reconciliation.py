@@ -9,6 +9,7 @@ from app.recovery import recover_spot_orders
 from app.order_events import apply_spot_order_update
 from app.binance_usdm_events import parse_user_event
 from app.binance_usdm_reconciliation import apply_usdm_order_update
+from app.order_idempotency import order_request_fingerprint
 
 
 def seed(**kwargs):
@@ -38,6 +39,39 @@ def test_client_order_id_collision_with_different_identity_is_rejected():
     with pytest.raises(ValueError, match="execution_order_identity_conflict"):
         seed(symbol="ETHUSDT")
     assert get_execution_order("atomic-order-001")["symbol"] == "BTCUSDT"
+
+
+def test_fingerprinted_order_retry_must_match_complete_payload():
+    payload = {
+        "client_order_id": "atomic-order-001", "signal_id": "signal-001",
+        "symbol": "BTCUSDT", "side": "BUY", "mode": "TESTNET",
+        "market": "SPOT", "order_type": "LIMIT", "quantity": "1",
+        "price": "100", "time_in_force": "GTC",
+        "signal": {"entry": 100, "stop_loss": 90, "take_profit": 120},
+    }
+    fingerprint = order_request_fingerprint(payload)
+    seed(request_fingerprint=fingerprint)
+    before = get_execution_order("atomic-order-001")
+    seed(request_fingerprint=fingerprint, status="NEW", order_id="different")
+    assert get_execution_order("atomic-order-001") == before
+
+    changed = {**payload, "price": "101"}
+    with pytest.raises(ValueError, match="execution_order_identity_conflict"):
+        seed(request_fingerprint=order_request_fingerprint(changed))
+
+
+def test_order_request_fingerprint_is_canonical_and_rejects_incomplete_or_nan():
+    payload = {
+        "client_order_id": "id-1", "signal_id": "signal-1", "symbol": "BTCUSDT",
+        "side": "BUY", "mode": "TESTNET", "market": "SPOT",
+        "order_type": "MARKET", "quantity": "0.1",
+    }
+    reordered = dict(reversed(list(payload.items())))
+    assert order_request_fingerprint(payload) == order_request_fingerprint(reordered)
+    with pytest.raises(ValueError, match="incomplete_order_request"):
+        order_request_fingerprint({"client_order_id": "id-1"})
+    with pytest.raises(ValueError, match="invalid_order_request"):
+        order_request_fingerprint({**payload, "risk": float("nan")})
 
 
 @pytest.mark.parametrize("values,reason", [
@@ -156,5 +190,6 @@ def test_existing_database_migration_does_not_guess_market(tmp_path, monkeypatch
             executed_quantity TEXT, price TEXT, last_event_time INTEGER, updated_at TEXT)""")
         conn.execute("INSERT INTO execution_orders VALUES ('legacy-001','s','BTCUSDT','BUY','TESTNET','7','NEW','1','0','100',NULL,'old')")
     assert get_execution_order("legacy-001")["market"] == "UNKNOWN"
+    assert get_execution_order("legacy-001")["request_fingerprint"] is None
     with pytest.raises(ValueError, match="environment_mismatch"):
         apply_order_state("legacy-001", status="FILLED", market="SPOT", executed_quantity="1")
