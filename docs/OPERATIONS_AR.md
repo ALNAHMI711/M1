@@ -16,7 +16,7 @@ npm run build
 npm run build:example
 cd backend
 python3.11 -m venv .venv
-.venv/bin/python -m pip install --upgrade "pip>=26.2.1"
+.venv/bin/python -m pip install --upgrade "pip>=26.2.1" "setuptools>=83.0.0"
 .venv/bin/python -m pip install -r requirements-test.lock
 .venv/bin/python -m pip install -e ".[test]" --no-deps
 export M1_DB_PATH="$PWD/data/m1.sqlite3"

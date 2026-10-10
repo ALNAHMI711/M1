@@ -32,6 +32,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - name: Install backend
         run: |
+          python -m pip install --upgrade "pip>=26.2.1" "setuptools>=83.0.0"
           python -m pip install -r backend/requirements.lock
           python -m pip install -e backend --no-deps
       - name: Start isolated backend
