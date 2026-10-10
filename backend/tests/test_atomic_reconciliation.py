@@ -4,7 +4,13 @@ import sqlite3
 
 import pytest
 
-from app.store import record_execution_order, get_execution_order, apply_order_state
+from app.store import (
+    apply_order_state,
+    connection,
+    get_execution_order,
+    record_execution_order,
+    reserve_spot_testnet_order_intent,
+)
 from app.recovery import recover_spot_orders
 from app.order_events import apply_spot_order_update
 from app.binance_usdm_events import parse_user_event
@@ -72,6 +78,64 @@ def test_order_request_fingerprint_is_canonical_and_rejects_incomplete_or_nan():
         order_request_fingerprint({"client_order_id": "id-1"})
     with pytest.raises(ValueError, match="invalid_order_request"):
         order_request_fingerprint({**payload, "risk": float("nan")})
+
+
+def test_testnet_order_intent_is_atomically_reserved_and_duplicate_is_not_new():
+    fingerprint = order_request_fingerprint({
+        "client_order_id": "atomic-order-001", "signal_id": "signal-001",
+        "symbol": "BTCUSDT", "side": "BUY", "mode": "TESTNET",
+        "market": "SPOT", "order_type": "LIMIT", "quantity": "1",
+        "price": "100", "time_in_force": "GTC",
+    })
+    created, order = reserve_spot_testnet_order_intent(
+        client_order_id="atomic-order-001", signal_id="signal-001",
+        symbol="BTCUSDT", side="BUY", quantity="1", price="100",
+        request_fingerprint=fingerprint,
+    )
+    assert created is True
+    assert order["status"] == "SUBMITTING"
+    assert order["mode"] == "TESTNET" and order["market"] == "SPOT"
+    assert order["request_fingerprint"] == fingerprint
+
+    created_again, same_order = reserve_spot_testnet_order_intent(
+        client_order_id="atomic-order-001", signal_id="signal-001",
+        symbol="BTCUSDT", side="BUY", quantity="1", price="100",
+        request_fingerprint=fingerprint,
+    )
+    assert created_again is False
+    assert same_order == order
+    with connection() as conn:
+        rows = conn.execute(
+            "SELECT event, status, detail FROM execution_audit WHERE client_order_id=?",
+            ("atomic-order-001",),
+        ).fetchall()
+    assert [tuple(row) for row in rows] == [
+        ("SPOT_ORDER_INTENT", "SUBMITTING", "persisted_before_submission")
+    ]
+
+
+def test_concurrent_testnet_intent_reservation_has_one_winner():
+    fingerprint = order_request_fingerprint({
+        "client_order_id": "atomic-order-001", "signal_id": "signal-001",
+        "symbol": "BTCUSDT", "side": "BUY", "mode": "TESTNET",
+        "market": "SPOT", "order_type": "MARKET", "quantity": "1",
+    })
+    def reserve(_):
+        return reserve_spot_testnet_order_intent(
+            client_order_id="atomic-order-001", signal_id="signal-001",
+            symbol="BTCUSDT", side="BUY", quantity="1",
+            request_fingerprint=fingerprint,
+        )[0]
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(reserve, range(16)))
+    assert results.count(True) == 1
+    assert results.count(False) == 15
+    with connection() as conn:
+        count = conn.execute(
+            "SELECT COUNT(*) FROM execution_audit WHERE client_order_id=?",
+            ("atomic-order-001",),
+        ).fetchone()[0]
+    assert count == 1
 
 
 @pytest.mark.parametrize("values,reason", [

@@ -149,7 +149,7 @@ def record_execution_order(
     price: str | None = None,
     last_event_time: int | None = None,
     request_fingerprint: str | None = None,
-) -> None:
+) -> bool:
     if request_fingerprint is not None and (
         not isinstance(request_fingerprint, str)
         or len(request_fingerprint) != 64
@@ -183,7 +183,15 @@ def record_execution_order(
             ),
         )
         if cursor.rowcount == 1:
-            return
+            if mode == "TESTNET" and market == "SPOT" and status == "SUBMITTING":
+                conn.execute(
+                    """INSERT INTO execution_audit
+                       (client_order_id, signal_id, event, status, detail, created_at)
+                       VALUES (?, ?, ?, ?, ?, ?)""",
+                    (client_order_id, signal_id, "SPOT_ORDER_INTENT", "SUBMITTING",
+                     "persisted_before_submission", now),
+                )
+            return True
         existing = conn.execute(
             """SELECT signal_id, symbol, side, mode, market, quantity, request_fingerprint
                FROM execution_orders WHERE client_order_id = ?""",
@@ -195,6 +203,42 @@ def record_execution_order(
             raise ValueError("execution_order_identity_conflict")
         # Idempotent registration must never overwrite exchange state. In
         # particular, a retry cannot replace an order ID or regress a fill.
+        return False
+
+
+def reserve_spot_testnet_order_intent(
+    *,
+    client_order_id: str,
+    signal_id: str,
+    symbol: str,
+    side: str,
+    quantity: str,
+    request_fingerprint: str,
+    price: str | None = None,
+) -> tuple[bool, dict]:
+    """Persist an immutable Spot/Testnet intent; never sends an order.
+
+    The boolean is true only for the process that inserted the durable intent.
+    Retries receive the existing state and must reconcile it, never resubmit it.
+    """
+    if not isinstance(request_fingerprint, str):
+        raise ValueError("testnet_order_fingerprint_required")
+    created = record_execution_order(
+        client_order_id=client_order_id,
+        signal_id=signal_id,
+        symbol=symbol,
+        side=side,
+        mode="TESTNET",
+        market="SPOT",
+        quantity=quantity,
+        status="SUBMITTING",
+        price=price,
+        request_fingerprint=request_fingerprint,
+    )
+    order = get_execution_order(client_order_id)
+    if order is None:
+        raise RuntimeError("reserved_testnet_order_intent_missing")
+    return created, order
 
 
 def execution_order_exists(client_order_id: str) -> bool:
