@@ -74,6 +74,8 @@ class BinanceSpotClient:
             ("GET", "/api/v3/account"), ("GET", "/api/v3/order"),
             ("GET", "/api/v3/openOrders"), ("POST", "/api/v3/order/test"),
         }
+        if os.getenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "false").lower() == "true":
+            allowed.add(("POST", "/api/v3/order"))
         if (method.upper(), path) not in allowed:
             raise BinanceAPIError("exchange_operation_not_enabled")
         if method.upper() != "GET" and self.config.base_url != TESTNET_BASE_URL:
@@ -205,3 +207,50 @@ class BinanceSpotClient:
         if client_order_id is not None:
             params["newClientOrderId"] = client_order_id
         return self._request("POST", "/api/v3/order/test", params, signed=True)
+
+    def submit_testnet_order(
+        self,
+        *,
+        symbol: str,
+        side: str,
+        order_type: str,
+        quantity: str,
+        client_order_id: str,
+        price: str | None = None,
+        time_in_force: str | None = None,
+    ) -> Any:
+        """Submit one real-to-Testnet order; disabled unless explicitly enabled.
+
+        Callers must durably reserve and claim the idempotent intent and pass
+        all application risk/authorization gates before invoking this method.
+        This method never permits the LIVE endpoint.
+        """
+        from .operations import kill_switch_active
+
+        if os.getenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "false").lower() != "true":
+            raise BinanceAPIError("testnet_order_submission_disabled")
+        if self.execution_mode != "TESTNET":
+            raise BinanceAPIError("testnet_client_required")
+        if not self.config.api_key or not self.config.api_secret:
+            raise BinanceAPIError("missing_binance_credentials")
+        if not isinstance(client_order_id, str) or not client_order_id.strip():
+            raise BinanceAPIError("client_order_id_required")
+        if kill_switch_active():
+            raise BinanceAPIError("kill_switch")
+        report = self.order_preflight(
+            symbol=symbol, side=side, order_type=order_type, quantity=quantity,
+            price=price, time_in_force=time_in_force,
+        )
+        if report.get("deferred_checks") or report.get("account_and_asset_filters_verified") is not True:
+            raise BinanceAPIError("testnet_exchange_validation_incomplete")
+        if kill_switch_active():
+            raise BinanceAPIError("kill_switch")
+        params: dict[str, Any] = {
+            "symbol": symbol.upper(), "side": side.upper(), "type": order_type.upper(),
+            "quantity": quantity, "newClientOrderId": client_order_id,
+        }
+        if price is not None:
+            params["price"] = price
+        if time_in_force is not None:
+            params["timeInForce"] = time_in_force
+        return self._request("POST", "/api/v3/order", params, signed=True)

@@ -6,6 +6,8 @@ import app.main as main
 
 
 class FakeBinanceClient:
+    execution_mode = "TESTNET"
+
     def __init__(self, config):
         assert config.base_url == main.BinanceSpotConfig.from_env(testnet=True).base_url
 
@@ -16,6 +18,12 @@ class FakeBinanceClient:
         from test_spot_filters import metadata
         from app.spot_filters import validate_spot_order
         return validate_spot_order(metadata(), **kwargs)
+
+    def submit_testnet_order(self, **kwargs):
+        return {
+            "symbol": kwargs["symbol"], "orderId": 91, "status": "NEW",
+            "executedQty": "0", "price": kwargs.get("price"), "updateTime": 101,
+        }
 
 
 @pytest.fixture()
@@ -183,3 +191,71 @@ def test_preflight_read_scope_is_available_to_viewer_without_exchange_keys(clien
               "price": "100", "time_in_force": "GTC"})
     assert response.status_code == 200
     assert calls == [("GET", "/api/v3/exchangeInfo", False)]
+
+
+def test_order_submit_is_disabled_by_default_before_preflight(client, monkeypatch):
+    monkeypatch.delenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", raising=False)
+    token = login(client)
+    response = client.post(
+        "/v1/binance/spot/order-submit",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"signal": signal(), "order_type": "LIMIT", "quantity": "0.1",
+              "price": "100", "time_in_force": "GTC", "client_order_id": "submit-001"},
+    )
+    assert response.status_code == 503
+    assert response.json()["detail"] == "testnet_order_submission_disabled"
+
+
+def test_order_submit_refuses_unresolved_account_and_reference_checks(client, monkeypatch):
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    monkeypatch.setenv("M1_TESTNET_ALLOWED_SYMBOLS", "BTCUSDT")
+    monkeypatch.setenv("M1_TESTNET_MAX_NOTIONAL", "100")
+    monkeypatch.setenv("BINANCE_API_KEY", "fake-testnet-key")
+    monkeypatch.setenv("BINANCE_API_SECRET", "fake-testnet-secret")
+    token = login(client)
+    response = client.post(
+        "/v1/binance/spot/order-submit",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"signal": signal(), "order_type": "LIMIT", "quantity": "0.1",
+              "price": "100", "time_in_force": "GTC", "client_order_id": "submit-002"},
+    )
+    assert response.status_code == 409
+    assert response.json()["detail"] == "testnet_exchange_validation_incomplete"
+
+
+def test_order_submit_happy_path_uses_reserved_single_submission_offline(client, monkeypatch, tmp_path):
+    monkeypatch.setenv("M1_DB_PATH", str(tmp_path / "submit.sqlite3"))
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    monkeypatch.setenv("M1_TESTNET_ALLOWED_SYMBOLS", "BTCUSDT")
+    monkeypatch.setenv("M1_TESTNET_MAX_NOTIONAL", "100")
+    monkeypatch.setenv("BINANCE_API_KEY", "fake-testnet-key")
+    monkeypatch.setenv("BINANCE_API_SECRET", "fake-testnet-secret")
+    monkeypatch.setattr(FakeBinanceClient, "order_preflight", lambda self, **kwargs: {
+        "deferred_checks": [], "account_and_asset_filters_verified": True,
+    })
+    token = login(client)
+    body = {"signal": signal(), "order_type": "LIMIT", "quantity": "0.1",
+            "price": "100", "time_in_force": "GTC", "client_order_id": "submit-003"}
+    response = client.post(
+        "/v1/binance/spot/order-submit",
+        headers={"Authorization": f"Bearer {token}"}, json=body,
+    )
+    assert response.status_code == 200
+    assert response.json()["submitted"] is True
+    assert response.json()["order_id"] == 91
+    from app.store import get_execution_order
+    order = get_execution_order("submit-003")
+    assert order["status"] == "NEW" and order["market"] == "SPOT"
+
+
+def test_order_submit_is_admin_only(client, monkeypatch):
+    from app.auth import create_access_token
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    token = create_access_token("operator", "OPERATOR")
+    response = client.post(
+        "/v1/binance/spot/order-submit",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"signal": signal(), "order_type": "LIMIT", "quantity": "0.1",
+              "price": "100", "time_in_force": "GTC", "client_order_id": "submit-004"},
+    )
+    assert response.status_code == 403

@@ -152,3 +152,41 @@ def test_recovery_reconciles_submitting_intent_by_client_id_without_resubmission
     assert len(pending) == 1
     assert pending[0]["client_order_id"] == "m1-crash-before-ack"
     assert pending[0]["status"] == "NEW"
+
+
+def test_recovery_reads_sending_claim_after_crash_without_submit_method(monkeypatch, tmp_path):
+    monkeypatch.setenv("M1_DB_PATH", str(tmp_path / "m1.sqlite3"))
+    from app.order_idempotency import order_request_fingerprint
+    payload = {
+        "client_order_id": "m1-crash-in-flight", "signal_id": "signal-crash-002",
+        "symbol": "BTCUSDT", "side": "BUY", "mode": "TESTNET", "market": "SPOT",
+        "order_type": "LIMIT", "quantity": "0.001", "price": "50000",
+        "time_in_force": "GTC",
+    }
+    fingerprint = order_request_fingerprint(payload)
+    created, _ = store.reserve_spot_testnet_order_intent(
+        client_order_id=payload["client_order_id"], signal_id=payload["signal_id"],
+        symbol=payload["symbol"], side=payload["side"], quantity=payload["quantity"],
+        price=payload["price"], request_fingerprint=fingerprint, request_payload=payload,
+    )
+    assert created
+    assert store.claim_spot_testnet_order_submission(
+        payload["client_order_id"], request_fingerprint=fingerprint
+    )
+    assert store.get_execution_order(payload["client_order_id"])["status"] == "SENDING"
+
+    class ReadOnlyClient:
+        execution_mode = "TESTNET"
+        def get_order(self, **kwargs):
+            assert kwargs == {
+                "symbol": "BTCUSDT", "order_id": None,
+                "client_order_id": "m1-crash-in-flight",
+            }
+            return {
+                "symbol": "BTCUSDT", "orderId": 457, "status": "NEW",
+                "executedQty": "0", "price": "50000", "updateTime": 101,
+            }
+
+    assert recover_spot_orders(ReadOnlyClient()) == {"checked": 1, "updated": 1, "unknown": 0}
+    order = store.get_execution_order("m1-crash-in-flight")
+    assert order["status"] == "NEW" and order["order_id"] == "457"

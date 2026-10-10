@@ -285,6 +285,38 @@ def reserve_spot_testnet_order_intent(
     return created, order
 
 
+def claim_spot_testnet_order_submission(
+    client_order_id: str, *, request_fingerprint: str
+) -> bool:
+    """Claim one reserved intent exactly once before the transport call."""
+    if not isinstance(request_fingerprint, str) or len(request_fingerprint) != 64:
+        raise ValueError("invalid_execution_request_fingerprint")
+    now = datetime.now(timezone.utc).isoformat()
+    with connection() as conn:
+        conn.execute("BEGIN IMMEDIATE")
+        cursor = conn.execute(
+            """UPDATE execution_orders SET status='SENDING', updated_at=?
+               WHERE client_order_id=? AND mode='TESTNET' AND market='SPOT'
+                 AND status='SUBMITTING' AND request_fingerprint=?
+                 AND request_payload_json IS NOT NULL""",
+            (now, client_order_id, request_fingerprint),
+        )
+        if cursor.rowcount != 1:
+            return False
+        row = conn.execute(
+            "SELECT signal_id FROM execution_orders WHERE client_order_id=?",
+            (client_order_id,),
+        ).fetchone()
+        conn.execute(
+            """INSERT INTO execution_audit
+               (client_order_id, signal_id, event, status, detail, created_at)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (client_order_id, row["signal_id"], "SPOT_ORDER_SUBMISSION_CLAIMED",
+             "SENDING", "single_sender_claimed", now),
+        )
+        return True
+
+
 def execution_order_exists(client_order_id: str) -> bool:
     return get_execution_order(client_order_id) is not None
 

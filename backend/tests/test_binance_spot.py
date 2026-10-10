@@ -118,3 +118,67 @@ def test_signed_request_requires_credentials():
 def test_live_endpoint_can_only_be_selected_explicitly():
     config = BinanceSpotConfig(api_key="k", api_secret="s", base_url="https://api.binance.com")
     assert config.base_url == "https://api.binance.com"
+
+
+def test_real_testnet_order_submit_is_disabled_by_default(monkeypatch):
+    monkeypatch.delenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", raising=False)
+    calls = []
+    client = BinanceSpotClient(
+        BinanceSpotConfig(api_key="key", api_secret="secret"),
+        opener=lambda *args, **kwargs: calls.append(args),
+    )
+    with pytest.raises(BinanceAPIError, match="testnet_order_submission_disabled"):
+        client.submit_testnet_order(
+            symbol="BTCUSDT", side="BUY", order_type="LIMIT", quantity="0.001",
+            price="100", time_in_force="GTC", client_order_id="test-order-001",
+        )
+    assert calls == []
+
+
+def test_gated_testnet_submit_runs_preflight_then_signed_order(monkeypatch):
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    monkeypatch.setattr("app.operations.kill_switch_active", lambda: False)
+    seen = []
+
+    def opener(request, timeout):
+        seen.append(request)
+        return FakeResponse({"symbol": "BTCUSDT", "orderId": 123, "status": "NEW", "executedQty": "0", "price": "100"})
+
+    client = BinanceSpotClient(
+        BinanceSpotConfig(api_key="test-key", api_secret="secret"), opener=opener,
+    )
+    monkeypatch.setattr(client, "order_preflight", lambda **kwargs: {
+        "deferred_checks": [], "account_and_asset_filters_verified": True,
+    })
+    result = client.submit_testnet_order(
+        symbol="BTCUSDT", side="BUY", order_type="LIMIT", quantity="0.1",
+        price="100", time_in_force="GTC", client_order_id="test-order-001",
+    )
+    assert result["orderId"] == 123
+    assert [urlsplit(request.full_url).path for request in seen] == ["/api/v3/order"]
+    request = seen[0]
+    query = parse_qs(urlsplit(request.full_url).query)
+    signed_payload = request.full_url.split("?", 1)[1].rsplit("&signature=", 1)[0]
+    expected = hmac.new(b"secret", signed_payload.encode(), hashlib.sha256).hexdigest()
+    assert query["signature"] == [expected]
+    assert query["newClientOrderId"] == ["test-order-001"]
+    assert request.get_header("X-mbx-apikey") == "test-key"
+
+
+def test_unresolved_exchange_checks_block_testnet_submission_before_order_post(monkeypatch):
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    monkeypatch.setattr("app.operations.kill_switch_active", lambda: False)
+    seen = []
+    def opener(request, timeout):
+        seen.append(request)
+        from test_spot_filters import metadata
+        return FakeResponse(metadata())
+    client = BinanceSpotClient(
+        BinanceSpotConfig(api_key="test-key", api_secret="secret"), opener=opener,
+    )
+    with pytest.raises(BinanceAPIError, match="testnet_exchange_validation_incomplete"):
+        client.submit_testnet_order(
+            symbol="BTCUSDT", side="BUY", order_type="LIMIT", quantity="0.1",
+            price="100", time_in_force="GTC", client_order_id="blocked-order-001",
+        )
+    assert [urlsplit(request.full_url).path for request in seen] == ["/api/v3/exchangeInfo"]

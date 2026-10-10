@@ -14,12 +14,17 @@ from starlette.middleware.cors import CORSMiddleware
 from .auth import Token, authenticate, create_access_token, current_user, revoke
 from .binance_spot import BinanceAPIError, BinanceSpotClient, BinanceSpotConfig
 from .recovery import recover_spot_orders
-from .store import record_signal, recent_execution_audit, record_execution_audit
+from .store import (
+    record_signal, recent_execution_audit, record_execution_audit,
+    reserve_spot_testnet_order_intent,
+)
 from .telegram import parse_telegram_signal
 from .operations import check_database, kill_switch_active, set_kill_switch
 from .http_safety import HTTPSafetyMiddleware
 from .paper import PaperOrder, PaperError, paper_account, submit_paper_order, paper_ledger_csv
 from .spot_filters import SpotFilterError
+from .order_idempotency import order_request_fingerprint
+from .testnet_submission import submit_reserved_spot_testnet_order
 
 app = FastAPI(title="ALNAHMI M1 Trading Control Plane", version="0.8.0")
 app.add_middleware(HTTPSafetyMiddleware)
@@ -273,6 +278,101 @@ def binance_spot_order_test(
     return {"accepted": True, "mode": "TESTNET", "result": result, "user": user.username,
             "order_placement": False, "live_enabled": False,
             "production_readiness": False}
+
+
+@app.post("/v1/binance/spot/order-submit")
+def binance_spot_order_submit(
+    request: BinanceSpotOrderTest,
+    user=Security(current_user, scopes=["control:write"]),
+):
+    """Submit one idempotently reserved Spot order to Testnet only.
+
+    Disabled by default. Current preflight intentionally blocks any unresolved
+    reference-price or account/asset validation. No LIVE route is provided.
+    """
+    if os.getenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "false").lower() != "true":
+        raise HTTPException(status_code=503, detail="testnet_order_submission_disabled")
+    if request.signal.mode != "TESTNET":
+        raise HTTPException(status_code=400, detail="testnet_mode_required")
+    if request.signal.side != "LONG" or request.order_type != "LIMIT":
+        raise HTTPException(status_code=422, detail="only_limit_buy_testnet_orders_are_enabled")
+    if not request.client_order_id:
+        raise HTTPException(status_code=422, detail="client_order_id_required")
+    accepted, reasons = risk_check(request.signal)
+    if not accepted:
+        raise HTTPException(status_code=422, detail={"accepted": False, "reasons": reasons})
+    allowlist = {
+        symbol.strip().upper()
+        for symbol in os.getenv("M1_TESTNET_ALLOWED_SYMBOLS", "").split(",")
+        if symbol.strip()
+    }
+    try:
+        maximum_notional = Decimal(os.getenv("M1_TESTNET_MAX_NOTIONAL", "0"))
+        order_notional = Decimal(request.quantity) * Decimal(str(request.price))
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail="testnet_order_limits_invalid") from exc
+    if not allowlist or request.signal.symbol not in allowlist:
+        raise HTTPException(status_code=422, detail="testnet_symbol_not_allowlisted")
+    if not maximum_notional.is_finite() or maximum_notional <= 0 or order_notional > maximum_notional:
+        raise HTTPException(status_code=422, detail="testnet_order_notional_limit")
+
+    side = "BUY"
+    config = BinanceSpotConfig.from_env(testnet=True)
+    if not config.api_key or not config.api_secret:
+        raise HTTPException(status_code=503, detail="testnet_credentials_not_configured")
+    client = BinanceSpotClient(config)
+    try:
+        report = client.order_preflight(
+            symbol=request.signal.symbol, side=side, order_type=request.order_type,
+            quantity=request.quantity, price=request.price,
+            time_in_force=request.time_in_force,
+        )
+    except SpotFilterError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except BinanceAPIError as exc:
+        raise HTTPException(status_code=502, detail="testnet_metadata_unavailable") from exc
+    if report.get("deferred_checks") or report.get("account_and_asset_filters_verified") is not True:
+        raise HTTPException(status_code=409, detail="testnet_exchange_validation_incomplete")
+
+    payload = {
+        "client_order_id": request.client_order_id,
+        "signal_id": request.signal.signal_id,
+        "symbol": request.signal.symbol,
+        "side": side,
+        "mode": "TESTNET",
+        "market": "SPOT",
+        "order_type": request.order_type,
+        "quantity": request.quantity,
+        "price": request.price,
+        "time_in_force": request.time_in_force,
+        "signal": request.signal.model_dump(mode="json"),
+    }
+    fingerprint = order_request_fingerprint(payload)
+    try:
+        created, order = reserve_spot_testnet_order_intent(
+            client_order_id=request.client_order_id,
+            signal_id=request.signal.signal_id,
+            symbol=request.signal.symbol,
+            side=side,
+            quantity=request.quantity,
+            price=request.price,
+            request_fingerprint=fingerprint,
+            request_payload=payload,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail="client_order_id_conflict") from exc
+    if not created:
+        return {
+            "accepted": True, "submitted": False, "mode": "TESTNET",
+            "market": "SPOT", "status": order["status"],
+            "reason": "duplicate_intent_not_resubmitted", "live_enabled": False,
+        }
+    result = submit_reserved_spot_testnet_order(client, request.client_order_id)
+    return {
+        "accepted": True, **result, "mode": "TESTNET", "market": "SPOT",
+        "live_enabled": False, "production_readiness": False,
+        "user": user.username,
+    }
 
 
 @app.post("/v1/binance/spot/recover")
