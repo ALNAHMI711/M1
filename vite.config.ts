@@ -7,7 +7,6 @@ export default defineConfig({
     __M1_API_BASE__: JSON.stringify(process.env.M1_API_BASE ?? ''),
   },
   root: 'example',
-  base: process.env.GITHUB_ACTIONS ? '/M1/' : '/',
   publicDir: 'public',
   build: {
     outDir: '../dist-example',
