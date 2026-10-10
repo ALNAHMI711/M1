@@ -9,7 +9,7 @@ import urllib.parse
 import urllib.request
 from decimal import Decimal
 
-BASE = "http://127.0.0.1:8080"
+BASE = "http://localhost:8080"
 
 
 def request(path, *, token=None, data=None, method="GET", expected=200, form=False):
@@ -34,7 +34,8 @@ def request(path, *, token=None, data=None, method="GET", expected=200, form=Fal
 def wait_ready():
     for _ in range(45):
         try:
-            request("/ready")
+            readiness = request("/ready")
+            assert isinstance(readiness, dict) and readiness.get("status") == "ready"
             return
         except (AssertionError, OSError):
             time.sleep(1)
