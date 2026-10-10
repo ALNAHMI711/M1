@@ -97,6 +97,10 @@ M1_DB_PATH=/new-data/restored.sqlite3 python -m app.admin restore /private-backu
 
 ## الحدود المتبقية
 
+لخطة العمل وبوابات القبول للانتقال من PAPER إلى Spot Testnet، راجع
+`docs/TESTNET_TRANSITION_CHECKLIST_AR.md`. لا تمثل القائمة تصريحًا لـLIVE؛
+المتاح حاليًا فحص مسبق محدود و`order-test` فقط، لا اختبار مطابقة Testnet مكتمل.
+
 `/v1/binance/spot/preflight` يجلب `exchangeInfo` حديثًا من Testnet دون
 مفاتيح بورصة، ويفحص القواعد الثابتة ويعرض الفحوص الديناميكية المؤجلة.
 يتطلب دخول التطبيق وصلاحية `control:read` ولا يضع أمرًا.
