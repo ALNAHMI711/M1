@@ -367,7 +367,10 @@ def apply_order_state(
 
         if snapshot is not None and any(
             snapshot.get(key) != current[key]
-            for key in ("status", "executed_quantity", "order_id", "price", "last_event_time", "market", "mode")
+            for key in (
+                "status", "executed_quantity", "order_id", "price", "last_event_time",
+                "market", "mode", "request_fingerprint", "request_payload_json",
+            )
         ):
             audit(f"{event_prefix}_stale", "local_state_changed_during_lookup")
             return "stale"

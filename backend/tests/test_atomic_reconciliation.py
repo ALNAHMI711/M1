@@ -183,6 +183,31 @@ def test_bad_remote_event_cannot_modify_existing_order(values, reason):
     assert get_execution_order("atomic-order-001") == before
 
 
+def test_rest_snapshot_with_changed_request_fingerprint_is_stale():
+    payload = {
+        "client_order_id": "atomic-order-001", "signal_id": "signal-001",
+        "symbol": "BTCUSDT", "side": "BUY", "mode": "TESTNET",
+        "market": "SPOT", "order_type": "LIMIT", "quantity": "1",
+        "price": "100", "time_in_force": "GTC",
+    }
+    fingerprint = order_request_fingerprint(payload)
+    reserve_spot_testnet_order_intent(
+        client_order_id="atomic-order-001", signal_id="signal-001",
+        symbol="BTCUSDT", side="BUY", quantity="1", price="100",
+        request_fingerprint=fingerprint, request_payload=payload,
+    )
+    snapshot = get_execution_order("atomic-order-001")
+    before = dict(snapshot)
+    snapshot["request_fingerprint"] = "0" * 64
+    result = apply_order_state(
+        "atomic-order-001", status="NEW", market="SPOT", symbol="BTCUSDT",
+        executed_quantity="0", price="100", event_time=100, snapshot=snapshot,
+        event_prefix="spot_recovery",
+    )
+    assert result == "stale"
+    assert get_execution_order("atomic-order-001") == before
+
+
 def test_terminal_and_execution_quantity_cannot_regress():
     seed()
     update()
