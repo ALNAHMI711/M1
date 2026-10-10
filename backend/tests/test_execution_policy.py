@@ -186,3 +186,36 @@ def test_invalid_adapter_result_fails_closed():
         status="ADAPTER_FAILURE",
         reason="invalid_adapter_result",
     )
+
+
+
+def test_malformed_risk_object_is_rejected_before_adapter():
+    adapter = RecordingAdapter()
+    result = submit_authorized(adapter, request(risk=None))
+    assert result.status == "REJECTED_BY_POLICY"
+    assert result.reason == "invalid_risk_input"
+    assert adapter.calls == []
+
+
+def test_adapter_mode_missing_is_rejected_before_adapter():
+    class AdapterWithoutMode:
+        def __init__(self):
+            self.calls = []
+
+        def submit(self, request):
+            self.calls.append(request)
+            return ExecutionResult(accepted=True, status="SUBMITTED")
+
+    adapter = AdapterWithoutMode()
+    result = submit_authorized(adapter, request())
+    assert result.status == "REJECTED_BY_POLICY"
+    assert result.reason == "execution_mode_adapter_mismatch"
+    assert adapter.calls == []
+
+
+def test_adapter_cannot_turn_rejected_policy_into_submission():
+    adapter = RecordingAdapter()
+    result = submit_authorized(adapter, request(side="TRANSFER"))
+    assert result.accepted is False
+    assert result.status == "REJECTED_BY_POLICY"
+    assert adapter.calls == []
