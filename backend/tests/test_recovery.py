@@ -123,6 +123,7 @@ def test_recovery_reconciles_submitting_intent_by_client_id_without_resubmission
         client_order_id=payload["client_order_id"], signal_id=payload["signal_id"],
         symbol=payload["symbol"], side=payload["side"], quantity=payload["quantity"],
         price=payload["price"], request_fingerprint=order_request_fingerprint(payload),
+        request_payload=payload,
     )
     assert created and intent["status"] == "SUBMITTING"
 
@@ -146,6 +147,7 @@ def test_recovery_reconciles_submitting_intent_by_client_id_without_resubmission
     recovered = store.get_execution_order("m1-crash-before-ack")
     assert recovered["status"] == "NEW" and recovered["order_id"] == "456"
     assert recovered["request_fingerprint"] == intent["request_fingerprint"]
+    assert recovered["request_payload_json"] == intent["request_payload_json"]
     pending = store.pending_execution_orders(mode="TESTNET", market="SPOT")
     assert len(pending) == 1
     assert pending[0]["client_order_id"] == "m1-crash-before-ack"

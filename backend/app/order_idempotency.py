@@ -20,8 +20,8 @@ _REQUIRED_FIELDS = {
 }
 
 
-def order_request_fingerprint(payload: Mapping[str, Any]) -> str:
-    """Return a stable SHA-256 digest of the complete JSON request payload.
+def canonical_order_request_json(payload: Mapping[str, Any]) -> str:
+    """Return a stable JSON representation of the complete order request.
 
     Hashing the complete payload (rather than a hand-picked subset) binds the
     idempotency key to signal/risk inputs and every order parameter. Callers
@@ -39,4 +39,10 @@ def order_request_fingerprint(payload: Mapping[str, Any]) -> str:
         )
     except (TypeError, ValueError) as exc:
         raise ValueError("invalid_order_request_for_fingerprint") from exc
+    return canonical
+
+
+def order_request_fingerprint(payload: Mapping[str, Any]) -> str:
+    """Return a stable SHA-256 digest of the complete JSON request payload."""
+    canonical = canonical_order_request_json(payload)
     return hashlib.sha256(canonical.encode("utf-8")).hexdigest()

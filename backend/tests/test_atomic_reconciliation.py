@@ -81,26 +81,28 @@ def test_order_request_fingerprint_is_canonical_and_rejects_incomplete_or_nan():
 
 
 def test_testnet_order_intent_is_atomically_reserved_and_duplicate_is_not_new():
-    fingerprint = order_request_fingerprint({
+    payload = {
         "client_order_id": "atomic-order-001", "signal_id": "signal-001",
         "symbol": "BTCUSDT", "side": "BUY", "mode": "TESTNET",
         "market": "SPOT", "order_type": "LIMIT", "quantity": "1",
         "price": "100", "time_in_force": "GTC",
-    })
+    }
+    fingerprint = order_request_fingerprint(payload)
     created, order = reserve_spot_testnet_order_intent(
         client_order_id="atomic-order-001", signal_id="signal-001",
         symbol="BTCUSDT", side="BUY", quantity="1", price="100",
-        request_fingerprint=fingerprint,
+        request_fingerprint=fingerprint, request_payload=payload,
     )
     assert created is True
     assert order["status"] == "SUBMITTING"
     assert order["mode"] == "TESTNET" and order["market"] == "SPOT"
     assert order["request_fingerprint"] == fingerprint
+    assert order["request_payload_json"] is not None
 
     created_again, same_order = reserve_spot_testnet_order_intent(
         client_order_id="atomic-order-001", signal_id="signal-001",
         symbol="BTCUSDT", side="BUY", quantity="1", price="100",
-        request_fingerprint=fingerprint,
+        request_fingerprint=fingerprint, request_payload=payload,
     )
     assert created_again is False
     assert same_order == order
@@ -114,17 +116,41 @@ def test_testnet_order_intent_is_atomically_reserved_and_duplicate_is_not_new():
     ]
 
 
+def test_testnet_intent_rejects_payload_identity_or_fingerprint_mismatch():
+    payload = {
+        "client_order_id": "atomic-order-001", "signal_id": "signal-001",
+        "symbol": "BTCUSDT", "side": "BUY", "mode": "TESTNET",
+        "market": "SPOT", "order_type": "LIMIT", "quantity": "1",
+        "price": "100", "time_in_force": "GTC",
+    }
+    fingerprint = order_request_fingerprint(payload)
+    with pytest.raises(ValueError, match="payload_identity_mismatch"):
+        reserve_spot_testnet_order_intent(
+            client_order_id="atomic-order-001", signal_id="signal-001",
+            symbol="ETHUSDT", side="BUY", quantity="1", price="100",
+            request_fingerprint=fingerprint, request_payload=payload,
+        )
+    with pytest.raises(ValueError, match="payload_fingerprint_mismatch"):
+        reserve_spot_testnet_order_intent(
+            client_order_id="atomic-order-001", signal_id="signal-001",
+            symbol="BTCUSDT", side="BUY", quantity="1", price="100",
+            request_fingerprint="0" * 64, request_payload=payload,
+        )
+
+
 def test_concurrent_testnet_intent_reservation_has_one_winner():
-    fingerprint = order_request_fingerprint({
+    payload = {
         "client_order_id": "atomic-order-001", "signal_id": "signal-001",
         "symbol": "BTCUSDT", "side": "BUY", "mode": "TESTNET",
         "market": "SPOT", "order_type": "MARKET", "quantity": "1",
-    })
+        "price": None,
+    }
+    fingerprint = order_request_fingerprint(payload)
     def reserve(_):
         return reserve_spot_testnet_order_intent(
             client_order_id="atomic-order-001", signal_id="signal-001",
             symbol="BTCUSDT", side="BUY", quantity="1",
-            request_fingerprint=fingerprint,
+            request_fingerprint=fingerprint, request_payload=payload,
         )[0]
     with ThreadPoolExecutor(max_workers=8) as pool:
         results = list(pool.map(reserve, range(16)))

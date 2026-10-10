@@ -1,9 +1,11 @@
 import os
+import json
 import sqlite3
 import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
+from .order_idempotency import order_request_fingerprint
 
 
 def database_path() -> str:
@@ -63,7 +65,8 @@ def connection():
                 price TEXT,
                 last_event_time INTEGER,
                 updated_at TEXT NOT NULL,
-                request_fingerprint TEXT
+                request_fingerprint TEXT,
+                request_payload_json TEXT
             )"""
         )
         columns = {
@@ -80,6 +83,9 @@ def connection():
         if "request_fingerprint" not in columns:
             # Legacy rows have no provable request payload and remain unbound.
             conn.execute("ALTER TABLE execution_orders ADD COLUMN request_fingerprint TEXT")
+        if "request_payload_json" not in columns:
+            # Do not invent request fields for orders created by older versions.
+            conn.execute("ALTER TABLE execution_orders ADD COLUMN request_payload_json TEXT")
         conn.execute(
             """CREATE TABLE IF NOT EXISTS execution_audit (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -149,6 +155,7 @@ def record_execution_order(
     price: str | None = None,
     last_event_time: int | None = None,
     request_fingerprint: str | None = None,
+    request_payload_json: str | None = None,
 ) -> bool:
     if request_fingerprint is not None and (
         not isinstance(request_fingerprint, str)
@@ -156,6 +163,17 @@ def record_execution_order(
         or any(char not in "0123456789abcdef" for char in request_fingerprint)
     ):
         raise ValueError("invalid_execution_request_fingerprint")
+    if request_payload_json is not None:
+        if not isinstance(request_payload_json, str) or len(request_payload_json) > 65536:
+            raise ValueError("invalid_execution_request_payload")
+        try:
+            request_payload = json.loads(request_payload_json)
+        except (json.JSONDecodeError, TypeError) as exc:
+            raise ValueError("invalid_execution_request_payload") from exc
+        if not isinstance(request_payload, dict):
+            raise ValueError("invalid_execution_request_payload")
+        if request_fingerprint != order_request_fingerprint(request_payload):
+            raise ValueError("execution_request_payload_fingerprint_mismatch")
     now = datetime.now(timezone.utc).isoformat()
     with connection() as conn:
         conn.execute("BEGIN IMMEDIATE")
@@ -163,8 +181,8 @@ def record_execution_order(
             """INSERT OR IGNORE INTO execution_orders
                (client_order_id, signal_id, symbol, side, mode, order_id,
                 status, quantity, executed_quantity, price, last_event_time, updated_at, market,
-                request_fingerprint)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                request_fingerprint, request_payload_json)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 client_order_id,
                 signal_id,
@@ -180,6 +198,7 @@ def record_execution_order(
                 now,
                 market,
                 request_fingerprint,
+                request_payload_json,
             ),
         )
         if cursor.rowcount == 1:
@@ -193,12 +212,14 @@ def record_execution_order(
                 )
             return True
         existing = conn.execute(
-            """SELECT signal_id, symbol, side, mode, market, quantity, request_fingerprint
+            """SELECT signal_id, symbol, side, mode, market, quantity, request_fingerprint,
+                      request_payload_json
                FROM execution_orders WHERE client_order_id = ?""",
             (client_order_id,),
         ).fetchone()
         if existing is None or tuple(existing) != (
-            signal_id, symbol, side, mode, market, quantity, request_fingerprint
+            signal_id, symbol, side, mode, market, quantity, request_fingerprint,
+            request_payload_json
         ):
             raise ValueError("execution_order_identity_conflict")
         # Idempotent registration must never overwrite exchange state. In
@@ -214,6 +235,7 @@ def reserve_spot_testnet_order_intent(
     side: str,
     quantity: str,
     request_fingerprint: str,
+    request_payload: dict,
     price: str | None = None,
 ) -> tuple[bool, dict]:
     """Persist an immutable Spot/Testnet intent; never sends an order.
@@ -223,6 +245,27 @@ def reserve_spot_testnet_order_intent(
     """
     if not isinstance(request_fingerprint, str):
         raise ValueError("testnet_order_fingerprint_required")
+    if not isinstance(request_payload, dict):
+        raise ValueError("testnet_order_payload_required")
+    expected_identity = {
+        "client_order_id": client_order_id,
+        "signal_id": signal_id,
+        "symbol": symbol,
+        "side": side,
+        "mode": "TESTNET",
+        "market": "SPOT",
+        "quantity": quantity,
+    }
+    if any(request_payload.get(key) != value for key, value in expected_identity.items()):
+        raise ValueError("testnet_order_payload_identity_mismatch")
+    if request_payload.get("price") != price:
+        raise ValueError("testnet_order_payload_price_mismatch")
+    if request_fingerprint != order_request_fingerprint(request_payload):
+        raise ValueError("testnet_order_payload_fingerprint_mismatch")
+    payload_json = json.dumps(
+        request_payload, sort_keys=True, separators=(",", ":"),
+        ensure_ascii=False, allow_nan=False,
+    )
     created = record_execution_order(
         client_order_id=client_order_id,
         signal_id=signal_id,
@@ -234,6 +277,7 @@ def reserve_spot_testnet_order_intent(
         status="SUBMITTING",
         price=price,
         request_fingerprint=request_fingerprint,
+        request_payload_json=payload_json,
     )
     order = get_execution_order(client_order_id)
     if order is None:
@@ -250,7 +294,7 @@ def get_execution_order(client_order_id: str):
         row = conn.execute(
             """SELECT client_order_id, signal_id, symbol, side, mode, order_id,
                       status, quantity, executed_quantity, price, last_event_time, updated_at, market,
-                      request_fingerprint
+                      request_fingerprint, request_payload_json
                FROM execution_orders
                WHERE client_order_id = ?""",
             (client_order_id,),
@@ -274,7 +318,7 @@ def pending_execution_orders(*, mode: str | None = None, market: str | None = No
         rows = conn.execute(
             f"""SELECT client_order_id, signal_id, symbol, side, mode, order_id,
                       status, quantity, executed_quantity, price, last_event_time, updated_at, market,
-                      request_fingerprint
+                      request_fingerprint, request_payload_json
                FROM execution_orders
                WHERE {' AND '.join(clauses)}""",
             parameters,
