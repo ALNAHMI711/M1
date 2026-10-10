@@ -5,6 +5,7 @@ from decimal import Decimal
 from typing import Protocol
 
 from .risk_gate import RiskDecision, RiskInput, evaluate_trade_risk
+from .operations import kill_switch_active
 
 ALLOWED_EXECUTION_MODES = frozenset(
     {"DEVELOPMENT", "BACKTEST", "DRY_RUN", "PAPER", "TESTNET", "LIVE"}
@@ -65,6 +66,8 @@ def authorize_execution(request: ExecutionRequest) -> RiskDecision:
     validation_reasons = _validate_request(request)
     if validation_reasons:
         return RiskDecision(False, validation_reasons)
+    if kill_switch_active():
+        return RiskDecision(False, ("kill_switch",))
 
     if request.mode in {"LIVE", "TESTNET"}:
         # These modes remain blocked until their authenticated adapters,

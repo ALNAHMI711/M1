@@ -1,5 +1,12 @@
 # M1 Trading Control Plane
 
+## تحديث التسليم
+
+راجع [دليل التشغيل](../docs/OPERATIONS_AR.md) و
+[نطاق التسليم](../docs/RELEASE_DELIVERY_AR.md).
+الجلسات وإبطالها ومفتاح الإيقاف محفوظة في SQLite.
+LIVE مغلق، ولا توجد تعبئة أوامر PAPER أو تنفيذ تداول حقيقي.
+
 This service is the server-side boundary for future trading automation. It accepts normalized signals, validates them, applies hard risk gates, and must not expose Binance credentials to the browser.
 
 ## Current state

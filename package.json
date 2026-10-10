@@ -34,8 +34,10 @@
     "clean": "rimraf dist dist-example",
     "dev": "tsc --watch",
     "typecheck": "tsc --noEmit",
+    "typecheck:terminal": "tsc -p example/tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "test:pinesuite": "vitest run --config vitest.regression.config.ts",
     "test:reference": "vitest run --config vitest.reference.config.ts"
   },
@@ -60,8 +62,8 @@
   },
   "homepage": "https://github.com/deepentropy/lightweight-charts-indicators#readme",
   "peerDependencies": {
-    "oakscriptjs": ">=0.10.0 <0.11.0",
-    "lightweight-charts": ">=5.2.0 <6.0.0"
+    "lightweight-charts": ">=5.2.0 <6.0.0",
+    "oakscriptjs": ">=0.10.0 <0.11.0"
   },
   "peerDependenciesMeta": {
     "lightweight-charts": {
@@ -69,6 +71,7 @@
     }
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
     "@types/node": "^24.0.0",
     "esbuild": "^0.28.2",
     "lightweight-charts": "^5.2.1",

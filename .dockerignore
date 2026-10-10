@@ -1,0 +1,13 @@
+.git
+node_modules
+dist
+dist-example
+backend/.venv
+backend/data
+**/__pycache__
+**/*.egg-info
+**/.pytest_cache
+.env
+.env.*
+backups
+qa-output

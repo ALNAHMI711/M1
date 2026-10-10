@@ -1,5 +1,12 @@
 # ALNAHMI M1 — Lightweight Charts Indicators
 
+## ALNAHMI M1 delivery
+
+This fork includes an Arabic market-analysis terminal and a safety-focused
+FastAPI control plane. LIVE is disabled; demo data is not financial paper fills.
+Start with [the release handoff](docs/RELEASE_DELIVERY_AR.md) and
+[operations guide](docs/OPERATIONS_AR.md). Upstream sources and licenses are retained.
+
 **[ALNAHMI Trading Terminal](https://alnahmi711.github.io/M1/)**
 
 1290 technical analysis indicators for the lightweight-charts library — 95 standard indicators, 1150 community indicators, and 45 candlestick patterns. PineScript v6 compatible with full drawing primitive support (lines, boxes, labels, tables).

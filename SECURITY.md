@@ -16,3 +16,15 @@ Do not publish API keys, Telegram bot tokens, session cookies, private URLs, or 
 
 ## Scope
 CI security checks are a baseline, not a guarantee of system safety or profitability.
+
+## Operational controls
+
+Users, session revocations and the kill switch persist in private SQLite state.
+Password/role changes revoke sessions; restore revokes all sessions and activates
+the kill switch. Keep the DB, backups and `.env` out of Git. Requests have bounded
+bodies, durable throttles and Host checks; arbitrary forwarded-IP headers are not trusted.
+
+LIVE cannot be enabled by a boolean flag. Spot origins and read/validation-only
+operations are allowlisted; redirects and withdrawals/transfers/real order submission
+are blocked. The kill switch blocks new attempts, not liquidation or cancellation.
+Read `docs/OPERATIONS_AR.md` for remaining infrastructure and trading gates.

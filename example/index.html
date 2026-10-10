@@ -4,34 +4,68 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#0b0f14">
+  <meta name="description" content="منصة عربية لتحليل السوق والمؤشرات والتحقق من الإشارات، مع تعطيل التداول الحقيقي.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>ALNAHMI Trading Terminal</title>
 </head>
 <body>
+  <a class="skip-link" href="#main-content">انتقل إلى المنصة</a>
   <header class="topbar">
-    <div class="brand"><strong>ALNAHMI</strong><span>Trading Terminal</span></div>
-    <div class="market-status"><i></i><span id="connection-status">جاري الاتصال ببيانات السوق...</span></div>
+    <div class="brand"><svg aria-label="شعار M1" viewBox="0 0 32 32" width="28" height="28" fill="none"><path d="M3 26V8L10 18L17 8V26M23 13L29 7V26" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/></svg><h1>ALNAHMI M1</h1><span>Trading Terminal</span></div>
+    <div class="header-actions"><span class="safety-label">LIVE مغلق</span><button id="control-open" class="ghost" data-testid="button-control">لوحة التحكم</button><button id="theme-toggle" class="ghost" data-testid="button-theme" aria-label="تغيير المظهر">المظهر</button></div>
   </header>
-  <main class="terminal">
+  <main class="terminal" id="main-content">
+    <div class="market-status" role="status" aria-live="polite"><i></i><span id="connection-status" data-testid="status-market">جاري الاتصال ببيانات السوق...</span></div>
     <section class="toolbar panel">
       <div class="symbol-box"><label for="symbol">السوق</label><input id="symbol" value="BTCUSDT" autocomplete="off" spellcheck="false"></div>
       <div class="timeframes" id="timeframes">
         <button data-interval="1m" class="active">1د</button><button data-interval="5m">5د</button><button data-interval="15m">15د</button><button data-interval="1h">1س</button><button data-interval="4h">4س</button><button data-interval="1d">1ي</button>
       </div>
       <button id="load-market" class="primary">تحميل</button>
+      <button id="demo-market" class="ghost" data-testid="button-demo">بيانات تجريبية</button>
+      <button id="export-bars" class="ghost" data-testid="button-export">تصدير CSV</button>
       <div class="last-price"><span>السعر</span><strong id="last-price">—</strong></div>
       <div class="change" id="price-change">—</div>
     </section>
     <section class="workspace">
       <aside class="left-panel panel">
-        <div class="panel-title">قائمة المراقبة</div><div id="watchlist"></div>
-        <div class="panel-title indicator-title">المؤشرات</div>
-        <input id="indicator-search" class="search" placeholder="ابحث عن مؤشر..." autocomplete="off">
-        <select id="indicator-select" class="indicator-select" size="8"></select>
+        <h2 class="panel-title">قائمة المراقبة</h2><div id="watchlist"></div>
+        <h2 class="panel-title indicator-title">المؤشرات</h2>
+        <button id="load-indicators" class="ghost" data-testid="button-load-indicators">تحميل مكتبة المؤشرات</button>
+        <p id="indicator-status" class="muted" role="status">تُحمّل المكتبة عند الطلب لتسريع فتح المنصة.</p>
+        <label class="sr-only" for="indicator-search">ابحث عن مؤشر</label>
+        <input id="indicator-search" class="search" placeholder="ابحث عن مؤشر..." autocomplete="off" disabled>
+        <label class="sr-only" for="indicator-select">اختر المؤشر</label>
+        <select id="indicator-select" class="indicator-select" size="8" disabled></select>
         <button id="clear-indicator" class="ghost">إزالة المؤشر</button>
       </aside>
-      <section class="chart-panel panel"><div id="chart"></div><div class="chart-footer"><span>مصدر البيانات: Binance Spot public market data</span><span id="candle-info">—</span></div></section>
+      <section class="chart-panel panel" aria-label="رسم شموع السوق"><div id="chart"></div><div class="chart-footer"><span id="data-source">مصدر البيانات: Binance Spot public market data</span><span id="candle-info">—</span></div></section>
     </section>
   </main>
+  <dialog id="control-dialog" aria-labelledby="control-title">
+    <div class="dialog-header"><h2 id="control-title">لوحة التحكم الآمنة</h2><button id="control-close" class="ghost" aria-label="إغلاق لوحة التحكم">إغلاق</button></div>
+    <p class="notice">هذه اللوحة للتحقق والرقابة فقط. لا ترسل أوامر تداول، والتداول الحقيقي معطّل. تتطلب تشغيل Backend على نفس الموقع.</p>
+    <form id="login-form">
+      <label for="login-user">اسم المستخدم</label><input id="login-user" autocomplete="username" required maxlength="64">
+      <label for="login-password">كلمة المرور</label><input id="login-password" type="password" autocomplete="current-password" required>
+      <button type="submit" class="primary" data-testid="button-login">تسجيل الدخول</button>
+    </form>
+    <p id="control-message" class="muted" role="status" aria-live="polite">تُحفظ الجلسة في ذاكرة الصفحة فقط؛ تنتهي عند إعادة تحميلها.</p>
+    <section id="authenticated-controls" hidden>
+      <p id="control-user"></p>
+      <div class="control-actions"><button id="control-refresh" class="ghost">تحديث الحالة</button><button id="control-logout" class="ghost">تسجيل الخروج</button></div>
+      <h3>حالة الخدمة</h3><pre id="readiness-output"></pre>
+      <button id="kill-on" class="danger">تفعيل مفتاح الإيقاف</button>
+      <button id="kill-off" class="ghost">إلغاء مفتاح الإيقاف</button>
+      <p class="muted">مفتاح الإيقاف يمنع المحاولات الجديدة، ولا يصفي المراكز ولا يفعّل LIVE.</p>
+      <h3>التحقق من إشارة فقط</h3>
+      <label for="signal-json">إشارة JSON</label><textarea id="signal-json" rows="8" spellcheck="false"></textarea>
+      <button id="validate-signal" class="primary">تحقق دون تنفيذ</button><pre id="signal-output" aria-live="polite"></pre>
+      <h3>آخر أحداث التدقيق</h3><pre id="audit-output"></pre>
+    </section>
+  </dialog>
   <script type="module" src="./src/trading.ts"></script>
 </body>
 </html>

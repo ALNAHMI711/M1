@@ -19,6 +19,11 @@ class BinanceAPIError(RuntimeError):
     """Raised when Binance returns an API or transport error."""
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise BinanceAPIError("binance_redirect_blocked")
+
+
 @dataclass(frozen=True)
 class BinanceSpotConfig:
     api_key: str
@@ -43,11 +48,13 @@ class BinanceSpotClient:
     the M1 risk gate before invoking signed trading methods.
     """
 
-    def __init__(self, config: BinanceSpotConfig, *, opener=urllib.request.urlopen):
-        if not config.base_url.startswith("https://"):
-            raise ValueError("Binance endpoint must use HTTPS")
+    def __init__(self, config: BinanceSpotConfig, *, opener=None):
+        if config.base_url not in {TESTNET_BASE_URL, LIVE_BASE_URL}:
+            raise ValueError("Binance endpoint must be an allowlisted HTTPS origin")
+        if not 1 <= config.recv_window <= 60000:
+            raise ValueError("invalid_recv_window")
         self.config = config
-        self._opener = opener
+        self._opener = opener or urllib.request.build_opener(_NoRedirect()).open
 
     def _request(
         self,
@@ -57,6 +64,15 @@ class BinanceSpotClient:
         *,
         signed: bool = False,
     ) -> Any:
+        allowed = {
+            ("GET", "/api/v3/ping"), ("GET", "/api/v3/exchangeInfo"),
+            ("GET", "/api/v3/account"), ("GET", "/api/v3/order"),
+            ("GET", "/api/v3/openOrders"), ("POST", "/api/v3/order/test"),
+        }
+        if (method.upper(), path) not in allowed:
+            raise BinanceAPIError("exchange_operation_not_enabled")
+        if method.upper() != "GET" and self.config.base_url != TESTNET_BASE_URL:
+            raise BinanceAPIError("live_execution_not_enabled")
         values = dict(params or {})
         if signed:
             if not self.config.api_key or not self.config.api_secret:
@@ -96,6 +112,8 @@ class BinanceSpotClient:
             raise BinanceAPIError(json.dumps(payload, ensure_ascii=False)) from exc
         except (urllib.error.URLError, TimeoutError) as exc:
             raise BinanceAPIError("binance_transport_error") from exc
+        except (ValueError, UnicodeDecodeError) as exc:
+            raise BinanceAPIError("binance_invalid_response") from exc
 
         if isinstance(payload, dict) and "code" in payload and payload.get("code", 0) < 0:
             raise BinanceAPIError(json.dumps(payload, ensure_ascii=False))
@@ -142,6 +160,9 @@ class BinanceSpotClient:
         time_in_force: str | None = None,
         client_order_id: str | None = None,
     ) -> Any:
+        from .operations import kill_switch_active
+        if kill_switch_active():
+            raise BinanceAPIError("kill_switch")
         params: dict[str, Any] = {
             "symbol": symbol.upper(),
             "side": side.upper(),

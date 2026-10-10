@@ -1,0 +1,40 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      M1_DB_PATH: /data/m1.sqlite3
+      M1_ALLOWED_HOSTS: localhost,127.0.0.1,backend
+    volumes:
+      - m1-data:/data
+    expose:
+      - "8000"
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  web:
+    build:
+      context: .
+      dockerfile: deploy/Frontend.Dockerfile
+    restart: unless-stopped
+    environment:
+      M1_SITE_ADDRESS: ${M1_SITE_ADDRESS:-localhost}
+    ports:
+      - "127.0.0.1:8080:80"
+      - "127.0.0.1:8443:443"
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  m1-data:
+  caddy-data:
+  caddy-config:

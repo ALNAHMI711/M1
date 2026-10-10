@@ -5,6 +5,7 @@ from decimal import Decimal
 from typing import Literal, Protocol
 
 from .risk_gate import RiskDecision, RiskInput, evaluate_trade_risk
+from .operations import kill_switch_active
 
 VALID_SIDES = frozenset({"BUY", "SELL"})
 ExecutionMode = Literal["DEVELOPMENT", "BACKTEST", "DRY_RUN", "PAPER", "TESTNET", "LIVE"]
@@ -47,6 +48,8 @@ class RiskGatedExecutor:
 
     def authorize(self, intent: ExecutionIntent) -> RiskDecision:
         reasons: list[str] = []
+        if kill_switch_active():
+            reasons.append("kill_switch")
         if self._mode not in NON_LIVE_MODES and self._mode != "LIVE":
             reasons.append("invalid_execution_mode")
         if self._mode == "LIVE":

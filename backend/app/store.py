@@ -13,10 +13,14 @@ def connection():
     path = database_path()
     parent = os.path.dirname(path)
     if parent:
-        os.makedirs(parent, exist_ok=True)
-    conn = sqlite3.connect(path)
+        os.makedirs(parent, mode=0o700, exist_ok=True)
+    conn = sqlite3.connect(path, timeout=15)
+    os.chmod(path, 0o600)
     conn.row_factory = sqlite3.Row
     try:
+        conn.execute("PRAGMA busy_timeout = 15000")
+        conn.execute("PRAGMA foreign_keys = ON")
+        conn.execute("PRAGMA journal_mode = WAL")
         conn.execute(
             """CREATE TABLE IF NOT EXISTS signal_events (
                 signal_id TEXT PRIMARY KEY,
@@ -81,7 +85,7 @@ def connection():
 
 def record_signal(signal_id, symbol, side, source, mode, accepted, reasons):
     with connection() as conn:
-        conn.execute(
+        cursor = conn.execute(
             """INSERT OR IGNORE INTO signal_events
                (signal_id, symbol, side, source, mode, accepted, reasons, created_at)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
@@ -96,6 +100,7 @@ def record_signal(signal_id, symbol, side, source, mode, accepted, reasons):
                 datetime.now(timezone.utc).isoformat(),
             ),
         )
+        return cursor.rowcount == 1
 
 
 def signal_seen(signal_id):
