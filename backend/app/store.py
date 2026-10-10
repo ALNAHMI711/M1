@@ -147,18 +147,12 @@ def record_execution_order(
 ) -> None:
     now = datetime.now(timezone.utc).isoformat()
     with connection() as conn:
-        conn.execute(
-            """INSERT INTO execution_orders
+        conn.execute("BEGIN IMMEDIATE")
+        cursor = conn.execute(
+            """INSERT OR IGNORE INTO execution_orders
                (client_order_id, signal_id, symbol, side, mode, order_id,
                 status, quantity, executed_quantity, price, last_event_time, updated_at, market)
-               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-               ON CONFLICT(client_order_id) DO UPDATE SET
-                 order_id=excluded.order_id,
-                 status=excluded.status,
-                 executed_quantity=excluded.executed_quantity,
-                 price=excluded.price,
-                 last_event_time=COALESCE(excluded.last_event_time, execution_orders.last_event_time),
-                 updated_at=excluded.updated_at""",
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
             (
                 client_order_id,
                 signal_id,
@@ -175,6 +169,19 @@ def record_execution_order(
                 market,
             ),
         )
+        if cursor.rowcount == 1:
+            return
+        existing = conn.execute(
+            """SELECT signal_id, symbol, side, mode, market, quantity
+               FROM execution_orders WHERE client_order_id = ?""",
+            (client_order_id,),
+        ).fetchone()
+        if existing is None or tuple(existing) != (
+            signal_id, symbol, side, mode, market, quantity
+        ):
+            raise ValueError("execution_order_identity_conflict")
+        # Idempotent registration must never overwrite exchange state. In
+        # particular, a retry cannot replace an order ID or regress a fill.
 
 
 def execution_order_exists(client_order_id: str) -> bool:

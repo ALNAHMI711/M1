@@ -26,6 +26,20 @@ def update(**kwargs):
     })
 
 
+def test_duplicate_order_registration_never_overwrites_exchange_state():
+    seed(status="PARTIALLY_FILLED", executed_quantity="0.5", order_id="7")
+    before = get_execution_order("atomic-order-001")
+    seed(status="NEW", executed_quantity="0", order_id="99")
+    assert get_execution_order("atomic-order-001") == before
+
+
+def test_client_order_id_collision_with_different_identity_is_rejected():
+    seed()
+    with pytest.raises(ValueError, match="execution_order_identity_conflict"):
+        seed(symbol="ETHUSDT")
+    assert get_execution_order("atomic-order-001")["symbol"] == "BTCUSDT"
+
+
 @pytest.mark.parametrize("values,reason", [
     ({"market": "USDM"}, "environment_mismatch"),
     ({"mode": "LIVE"}, "environment_mismatch"),
