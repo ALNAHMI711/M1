@@ -3,9 +3,11 @@
 ## ALNAHMI M1 delivery
 
 This fork includes an Arabic market-analysis terminal and a safety-focused
-FastAPI control plane. LIVE is disabled; demo data is not financial paper fills.
+FastAPI control plane and a durable cash-only PAPER simulator. LIVE is disabled;
+chart DEMO data is separate from PAPER fills at explicit user-assumed prices.
 Start with [the release handoff](docs/RELEASE_DELIVERY_AR.md) and
-[operations guide](docs/OPERATIONS_AR.md). Upstream sources and licenses are retained.
+[operations guide](docs/OPERATIONS_AR.md), then [PAPER assumptions and limits](docs/PAPER_SIMULATION_AR.md).
+Upstream sources and licenses are retained.
 
 **[ALNAHMI Trading Terminal](https://alnahmi711.github.io/M1/)**
 

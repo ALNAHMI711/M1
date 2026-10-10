@@ -78,3 +78,33 @@ test('real local backend: login, durable switch, validation, audit and logout', 
   await expect(page.locator('#login-form')).toBeVisible();
   await expect(page.locator('#authenticated-controls')).toBeHidden();
 });
+
+test('paper UI: simulated buy, replay, sell, own-ledger export and invalid JSON', async ({ page }) => {
+  test.skip(!process.env.M1_E2E_USERNAME || !process.env.M1_E2E_PASSWORD, 'Requires isolated local backend.');
+  await page.goto('/');
+  await page.getByTestId('button-control').click();
+  await page.locator('#login-user').fill(process.env.M1_E2E_USERNAME!);
+  await page.locator('#login-password').fill(process.env.M1_E2E_PASSWORD!);
+  await page.getByTestId('button-login').click();
+  await expect(page.locator('#authenticated-controls')).toBeVisible();
+  await page.locator('#paper-panel summary').click();
+  await expect(page.locator('#paper-account-output')).toContainText('user_assumption_not_exchange');
+  await page.locator('#paper-buy-example').click();
+  await page.locator('#paper-submit').click();
+  await expect(page.locator('#paper-result')).toContainText('SIMULATED_FILLED');
+  await expect(page.locator('#paper-result')).toContainText('"replayed": false');
+  await page.locator('#paper-submit').click();
+  await expect(page.locator('#paper-result')).toContainText('"replayed": true');
+  await page.locator('#paper-sell-example').click();
+  await page.locator('#paper-submit').click();
+  await expect(page.locator('#paper-result')).toContainText('reduce_only_exit_gate');
+  await expect(page.locator('#paper-account-output')).toContainText('"positions": []');
+  const download = page.waitForEvent('download');
+  await page.locator('#paper-export').click();
+  expect((await download).suggestedFilename()).toBe('m1-paper-ledger.csv');
+  await page.locator('#paper-json').fill('{bad');
+  await page.locator('#paper-submit').click();
+  await expect(page.locator('#control-message')).toContainText('JSON غير صالحة');
+  await page.locator('#control-logout').click();
+  await expect(page.locator('#login-form')).toBeVisible();
+});

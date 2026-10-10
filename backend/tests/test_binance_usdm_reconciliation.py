@@ -13,6 +13,7 @@ def _seed_order(tmp_path, monkeypatch):
         symbol="BTCUSDT",
         side="LONG",
         mode="TESTNET",
+        market="USDM",
         quantity="0.01",
     )
 

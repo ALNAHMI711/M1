@@ -3,6 +3,16 @@ from app.binance_spot import BinanceAPIError
 from app.recovery import recover_spot_orders
 
 
+def test_recovery_rejects_live_or_unlabeled_clients_without_network():
+    import pytest
+    from app.binance_spot import BinanceSpotClient, BinanceSpotConfig, LIVE_BASE_URL
+    client = BinanceSpotClient(BinanceSpotConfig("key", "secret", base_url=LIVE_BASE_URL),
+                               opener=lambda *args, **kwargs: pytest.fail("network_must_not_run"))
+    for rejected in (client, object()):
+        with pytest.raises(ValueError, match="requires_testnet_client"):
+            recover_spot_orders(rejected)
+
+
 def test_recovery_updates_remote_order(monkeypatch, tmp_path):
     monkeypatch.setenv("M1_DB_PATH", str(tmp_path / "m1.sqlite3"))
     store.record_execution_order(
@@ -16,6 +26,7 @@ def test_recovery_updates_remote_order(monkeypatch, tmp_path):
     )
 
     class Client:
+        execution_mode = "TESTNET"
         def get_order(self, **kwargs):
             assert kwargs == {"symbol": "BTCUSDT", "order_id": 123, "client_order_id": None}
             return {
@@ -41,6 +52,7 @@ def test_recovery_marks_binance_failure_unknown(monkeypatch, tmp_path):
     )
 
     class Client:
+        execution_mode = "TESTNET"
         def get_order(self, **kwargs):
             raise BinanceAPIError("temporary")
 
@@ -60,6 +72,7 @@ def test_recovery_uses_client_order_id_when_remote_id_missing(monkeypatch, tmp_p
     )
 
     class Client:
+        execution_mode = "TESTNET"
         def get_order(self, **kwargs):
             assert kwargs == {
                 "symbol": "BTCUSDT",
@@ -87,6 +100,7 @@ def test_recovery_does_not_retry_quarantined_unknown(monkeypatch, tmp_path):
     calls = []
 
     class Client:
+        execution_mode = "TESTNET"
         def get_order(self, **kwargs):
             calls.append(kwargs)
             return {"status": "FILLED", "executedQty": "0.001", "price": "50000"}

@@ -3,7 +3,8 @@ import hmac
 import os
 from typing import Literal
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, Security
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Security, Query
+from fastapi.responses import Response
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, Field
 from starlette.middleware.trustedhost import TrustedHostMiddleware
@@ -16,8 +17,9 @@ from .store import record_signal, recent_execution_audit, record_execution_audit
 from .telegram import parse_telegram_signal
 from .operations import check_database, kill_switch_active, set_kill_switch
 from .http_safety import HTTPSafetyMiddleware
+from .paper import PaperOrder, PaperError, paper_account, submit_paper_order, paper_ledger_csv
 
-app = FastAPI(title="ALNAHMI M1 Trading Control Plane", version="0.6.0")
+app = FastAPI(title="ALNAHMI M1 Trading Control Plane", version="0.7.0")
 app.add_middleware(HTTPSafetyMiddleware)
 app.add_middleware(
     TrustedHostMiddleware,
@@ -175,6 +177,30 @@ def validate_signal(signal: Signal):
     return {"accepted": accepted, "reasons": reasons}
 
 
+@app.get("/v1/paper/account")
+def get_paper_account(user=Security(current_user, scopes=["paper:read"])):
+    try:
+        return paper_account(user.username)
+    except PaperError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.reason) from exc
+
+
+@app.post("/v1/paper/orders")
+def paper_order(order: PaperOrder, user=Security(current_user, scopes=["paper:write"])):
+    try:
+        return submit_paper_order(user.username, order)
+    except PaperError as exc:
+        raise HTTPException(status_code=exc.status_code, detail={"accepted": False, "reason": exc.reason}) from exc
+
+
+@app.get("/v1/paper/ledger.csv")
+def export_paper_ledger(limit: int = Query(1000, ge=1, le=5000), user=Security(current_user, scopes=["paper:read"])):
+    return Response(
+        paper_ledger_csv(user.username, limit), media_type="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="m1-paper-ledger.csv"'},
+    )
+
+
 @app.post("/v1/binance/spot/order-test")
 def binance_spot_order_test(
     request: BinanceSpotOrderTest,
@@ -210,11 +236,11 @@ def binance_spot_order_test(
 
 
 @app.post("/v1/binance/spot/recover")
-def binance_spot_recover(user=Security(current_user, scopes=["control:write"])):
+def binance_spot_recover(include_quarantined: bool = False, user=Security(current_user, scopes=["control:write"])):
     """Reconcile pending Spot state; this endpoint never places an order."""
     try:
         client = BinanceSpotClient(BinanceSpotConfig.from_env(testnet=True))
-        result = recover_spot_orders(client)
+        result = recover_spot_orders(client, include_quarantined=include_quarantined)
     except BinanceAPIError as exc:
         raise HTTPException(status_code=502, detail="binance_recovery_failed") from exc
     return {"mode": "TESTNET", "order_placement": False, "result": result, "user": user.username}
@@ -278,6 +304,7 @@ def control_readiness(user=Security(current_user, scopes=["control:read"])):
         "authentication": True,
         "persistent_store_healthy": check_database(),
         "durable_sessions": True,
+        "paper_simulation_available": True,
         "tradingview_webhook_secret_configured": bool(WEBHOOK_SECRET),
         "spot_api_key_configured": bool(os.getenv("BINANCE_API_KEY")),
         "spot_api_secret_configured": bool(os.getenv("BINANCE_API_SECRET")),

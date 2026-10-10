@@ -46,7 +46,7 @@
   </main>
   <dialog id="control-dialog" aria-labelledby="control-title">
     <div class="dialog-header"><h2 id="control-title">لوحة التحكم الآمنة</h2><button id="control-close" class="ghost" aria-label="إغلاق لوحة التحكم">إغلاق</button></div>
-    <p class="notice">هذه اللوحة للتحقق والرقابة فقط. لا ترسل أوامر تداول، والتداول الحقيقي معطّل. تتطلب تشغيل Backend على نفس الموقع.</p>
+    <p class="notice">هذه اللوحة للتحقق والرقابة ومحاكاة PAPER فقط. لا ترسل أوامر إلى البورصة، والتداول الحقيقي معطّل. تتطلب تشغيل Backend على نفس الموقع.</p>
     <form id="login-form">
       <label for="login-user">اسم المستخدم</label><input id="login-user" autocomplete="username" required maxlength="64">
       <label for="login-password">كلمة المرور</label><input id="login-password" type="password" autocomplete="current-password" required>
@@ -63,6 +63,19 @@
       <h3>التحقق من إشارة فقط</h3>
       <label for="signal-json">إشارة JSON</label><textarea id="signal-json" rows="8" spellcheck="false"></textarea>
       <button id="validate-signal" class="primary">تحقق دون تنفيذ</button><pre id="signal-output" aria-live="polite"></pre>
+      <details id="paper-panel">
+        <summary data-testid="summary-paper">محاكي PAPER: رصيد ومراكز افتراضية</summary>
+        <p class="notice">أسعار وافتراضات يحددها المستخدم، وليست أسعارًا موثقة أو تعبئة من Binance. لا أموال حقيقية أو رافعة أو بيع مكشوف؛ الوقف والهدف لا يُنفّذان تلقائيًا.</p>
+        <div class="control-actions"><button id="paper-refresh" class="ghost">تحديث المحفظة الافتراضية</button><button id="paper-export" class="ghost">تصدير سجل PAPER</button></div>
+        <pre id="paper-account-output" aria-live="polite"></pre>
+        <section id="paper-write-controls" hidden>
+          <div class="control-actions"><button id="paper-buy-example" class="ghost">إعداد مثال شراء</button><button id="paper-sell-example" class="ghost">إعداد مثال بيع</button></div>
+          <label for="paper-json">أمر محاكاة JSON</label><textarea id="paper-json" rows="10" spellcheck="false"></textarea>
+          <button id="paper-submit" class="primary">محاكاة الأمر فقط</button>
+          <p class="muted">إعادة نفس client_order_id والبيانات تعيد الإيصال دون تعبئة أخرى. غيّر المعرّف فقط لأمر جديد مقصود.</p>
+          <pre id="paper-result" aria-live="polite"></pre>
+        </section>
+      </details>
       <h3>آخر أحداث التدقيق</h3><pre id="audit-output"></pre>
     </section>
   </dialog>

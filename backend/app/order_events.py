@@ -1,8 +1,8 @@
 from typing import Any
 
-from .store import execution_order_exists, record_execution_audit, update_execution_order
+from .store import execution_order_exists, record_execution_audit, apply_order_state
 
-TERMINAL_STATUSES = {"FILLED", "CANCELED", "EXPIRED", "REJECTED"}
+TERMINAL_STATUSES = {"FILLED", "CANCELED", "EXPIRED", "EXPIRED_IN_MATCH", "REJECTED"}
 
 
 def _value(payload: dict[str, Any], *keys: str) -> Any:
@@ -19,7 +19,7 @@ def apply_spot_order_update(payload: dict[str, Any]) -> bool:
     or retarget a local execution order. The function never submits, amends,
     or cancels an order.
     """
-    order = payload.get("order", payload)
+    order = payload.get("order", payload.get("event", payload))
     if not isinstance(order, dict):
         raise ValueError("invalid_order_update")
 
@@ -34,6 +34,8 @@ def apply_spot_order_update(payload: dict[str, Any]) -> bool:
 
     client_order_id = str(client_order_id)
     status = str(status)
+    if status not in TERMINAL_STATUSES | {"NEW", "PARTIALLY_FILLED", "PENDING_CANCEL"}:
+        raise ValueError("unsupported_spot_order_status")
     if not execution_order_exists(client_order_id):
         record_execution_audit(
             event="user_data_order_update_rejected",
@@ -43,20 +45,15 @@ def apply_spot_order_update(payload: dict[str, Any]) -> bool:
         )
         raise ValueError("unknown_client_order_id")
 
-    updated = update_execution_order(
+    result = apply_order_state(
         client_order_id,
         status=status,
+        market="SPOT",
+        symbol=_value(order, "symbol", "s"),
+        event_time=_value(order, "eventTime", "E"),
         order_id=str(order_id) if order_id is not None else None,
         executed_quantity=str(executed_quantity) if executed_quantity is not None else None,
         price=str(price) if price is not None else None,
+        event_prefix="user_data_order_update",
     )
-    if not updated:
-        raise ValueError("execution_order_update_failed")
-
-    record_execution_audit(
-        event="user_data_order_update",
-        status=status,
-        detail="terminal" if status in TERMINAL_STATUSES else "non_terminal",
-        client_order_id=client_order_id,
-    )
-    return status in TERMINAL_STATUSES
+    return result != "stale" and status in TERMINAL_STATUSES

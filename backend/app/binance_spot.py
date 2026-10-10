@@ -56,6 +56,10 @@ class BinanceSpotClient:
         self.config = config
         self._opener = opener or urllib.request.build_opener(_NoRedirect()).open
 
+    @property
+    def execution_mode(self) -> str:
+        return "TESTNET" if self.config.base_url == TESTNET_BASE_URL else "LIVE"
+
     def _request(
         self,
         method: str,

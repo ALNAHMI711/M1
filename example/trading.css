@@ -76,6 +76,9 @@ dialog input,dialog textarea { width: 100%; margin-bottom: var(--space-3); }
 dialog h3 { margin-block: var(--space-4) var(--space-2); }
 dialog pre,dialog textarea { direction: ltr; text-align: left; font: var(--text-xs)/1.6 monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
 dialog pre { padding: var(--space-3); background: var(--surface-2); border-radius: var(--radius); }
+dialog details { margin-block: var(--space-4); }
+dialog summary { padding: var(--space-3); cursor: pointer; font-weight: 600; min-height: 44px; background: var(--surface-2); border-radius: var(--radius); }
+dialog summary:focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
 @media (max-width: 1000px) { .brand span { display: none; } .workspace { grid-template-columns: 210px minmax(0,1fr); } }
 @media (max-width: 700px) {
   .topbar { padding: var(--space-2); }

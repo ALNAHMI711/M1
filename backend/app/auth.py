@@ -19,10 +19,12 @@ SCOPES = {
     "signals:read": "Read signal state",
     "signals:validate": "Validate signals",
     "admin": "Administrative operations",
+    "paper:read": "Read own simulated paper account",
+    "paper:write": "Submit simulated cash-only paper orders; never exchange orders",
 }
 ROLE_SCOPES = {
-    "VIEWER": {"control:read", "signals:read"},
-    "OPERATOR": {"control:read", "signals:read", "signals:validate"},
+    "VIEWER": {"control:read", "signals:read", "paper:read"},
+    "OPERATOR": {"control:read", "signals:read", "signals:validate", "paper:read", "paper:write"},
     "ADMIN": set(SCOPES),
 }
 

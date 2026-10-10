@@ -5,7 +5,10 @@
 راجع [دليل التشغيل](../docs/OPERATIONS_AR.md) و
 [نطاق التسليم](../docs/RELEASE_DELIVERY_AR.md).
 الجلسات وإبطالها ومفتاح الإيقاف محفوظة في SQLite.
-LIVE مغلق، ولا توجد تعبئة أوامر PAPER أو تنفيذ تداول حقيقي.
+LIVE مغلق. يوجد محاكي PAPER نقدي محفوظ للأرصدة والمراكز والرسوم،
+بأسعار افتراضية يحددها المستخدم، دون اتصال تنفيذ ببورصة.
+راجع [دليل PAPER](../docs/PAPER_SIMULATION_AR.md)؛ ليس تداولًا حقيقيًا
+ولا محاكاة لتعبئة سوق موثقة أو أوامر وقف تلقائية.
 
 This service is the server-side boundary for future trading automation. It accepts normalized signals, validates them, applies hard risk gates, and must not expose Binance credentials to the browser.
 
