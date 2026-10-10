@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
 export default defineConfig({
+  base: './',
   define: {
     __M1_API_BASE__: JSON.stringify(process.env.M1_API_BASE ?? ''),
   },
