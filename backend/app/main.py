@@ -214,3 +214,33 @@ async def tradingview_webhook(
         reasons,
     )
     return {"accepted": accepted, "reasons": reasons, "signal_id": signal.signal_id}
+
+
+@app.get("/v1/control/readiness")
+def control_readiness(user=Security(current_user, scopes=["control:read"])):
+    """Expose operational readiness without revealing secret values."""
+    from .store import database_path
+
+    checks = {
+        "authentication": True,
+        "persistent_store_configured": bool(database_path()),
+        "tradingview_webhook_secret_configured": bool(WEBHOOK_SECRET),
+        "spot_api_key_configured": bool(os.getenv("BINANCE_API_KEY")),
+        "spot_api_secret_configured": bool(os.getenv("BINANCE_API_SECRET")),
+        "live_execution_enabled": False,
+        "usdm_live_execution_enabled": False,
+        "coinm_live_execution_enabled": False,
+        "cross_margin_live_execution_enabled": False,
+        "isolated_margin_live_execution_enabled": False,
+        "alpha_live_execution_enabled": False,
+        "stocks_live_execution_enabled": False,
+    }
+    blockers = [name for name, ok in checks.items() if not ok]
+    return {
+        "overall": "limited" if blockers else "paper_only",
+        "mode": "paper-first",
+        "live_enabled": False,
+        "checks": checks,
+        "blockers": blockers,
+        "user": user.username,
+    }
