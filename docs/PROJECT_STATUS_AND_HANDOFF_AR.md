@@ -1,6 +1,7 @@
 # تقرير حالة مشروع M1 وخطة التسليم — 2026-10-10
 
-> اقرأ أولًا `docs/RELEASE_DELIVERY_AR.md` و`docs/OPERATIONS_AR.md` لتعديلات
+> اقرأ أولًا `docs/RELEASE_DELIVERY_AR.md` و`docs/PHASE2_DELIVERY_AR.md`
+> و`docs/OPERATIONS_AR.md` لتعديلات
 > التسليم اللاحقة. هذا الملف يصف الحالة السابقة، وليس شهادة جاهزية إنتاجية.
 
 ## المستودع والفرع وطلب الدمج

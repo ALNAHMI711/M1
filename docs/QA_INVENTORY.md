@@ -36,8 +36,14 @@ application, not a live trading product.
 - Playwright: five tests passed against an isolated real local backend.
 - TypeScript library tests: rerun results are recorded in the release report.
 - Terminal/config typechecks and example build passed.
-- Docker workflow and CI-only restart harness added; Docker is unavailable in
-  the local sandbox. Remote status must be checked for the published commit.
+- Docker workflow and CI-only restart harness passed on code SHA
+  `78a00ba568ff71d0517db87a31d35405c48f1711`:
+  [Compose verification](https://github.com/ALNAHMI711/M1/actions/runs/38018329088).
+  Local sandbox has no Docker engine; CI is isolated, not production hosting.
+- PAPER dialog inspected at desktop 1440px and mobile 390px, light/dark,
+  with real local login and a successful simulated fill; no horizontal overflow.
+- Updated private preview checked through cloud browser: real preview login,
+  PAPER account and accepted simulated BUY, no exchange order.
 
 ## Visual coverage
 
@@ -49,6 +55,6 @@ application, not a live trading product.
 ## Exclusions requiring external infrastructure
 
 - Authenticated Binance Testnet end-to-end requests and real stream recovery.
-- Docker engine startup, real domain/TLS issuance, server backup rotation and alerts.
+- Real domain/TLS issuance, production server backup rotation and alerts.
 - Independent penetration testing, production user management, 2FA.
 - COIN-M, margin, Alpha and stocks live adapters; all remain disabled.

@@ -1,6 +1,11 @@
 # Execution policy boundary
 
-All trade requests must pass through `ExecutionRequest -> authorize_execution -> adapter mode check -> submit`.
+All exchange adapter requests must pass through
+`ExecutionRequest -> authorize_execution -> adapter mode check -> submit`.
+The cash-only PAPER ledger has a separate server-enforced local path:
+`PaperOrder -> transaction/idempotency -> kill switch -> persisted account and
+portfolio risk -> evaluate_trade_risk for entry -> simulated ledger fill`.
+It never calls an exchange adapter; SELL is limited to owned quantity.
 
 ## Safety invariants
 - Strategy, AI, Telegram, webhooks, and dashboard components must create an intent/request only; they must not call exchange APIs directly.
@@ -8,7 +13,13 @@ All trade requests must pass through `ExecutionRequest -> authorize_execution ->
 - Adapter execution mode must exactly match request mode.
 - `TESTNET` and `LIVE` are fail-closed until authenticated adapters, exchange metadata validation, persistence, idempotency, reconciliation/recovery, audit logging, Trusted IP verification, and withdrawal/transfer permission checks are implemented and validated.
 - Adapter exceptions are converted to a generic failure result; exchange response bodies and secrets must not be exposed.
-- The current interface does not claim to provide a real Binance adapter or paper fills. Test adapters exist only for policy tests.
+- The interface provides local cash-only PAPER fills at user-assumed prices,
+  not exchange fills or automatic stop/target execution. Read
+  `docs/PAPER_SIMULATION_AR.md` for assumptions and limits.
+- Spot recovery/stream require a TESTNET client. Legacy UNKNOWN-market orders
+  remain quarantined until explicit read-only reconciliation is requested.
+  Atomic event updates reject cross-market/mode, stale, conflicting or regressive
+  fills and terminal states. Tests do not prove authenticated exchange integration.
 - Never store exchange credentials in browser code, Telegram, logs, or source control.
 
 ## Before enabling a real adapter
