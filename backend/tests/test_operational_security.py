@@ -133,6 +133,18 @@ def test_atomic_signal_claim_with_concurrent_requests():
     assert results.count(True) == 1
 
 
+def test_parallel_cold_database_initialization_repeat(tmp_path, monkeypatch):
+    # Exercise real cold-file WAL transitions rather than warming the database
+    # before the concurrency test, which would hide initialization races.
+    for index in range(10):
+        monkeypatch.setenv("M1_DB_PATH", str(tmp_path / f"cold-{index}.sqlite3"))
+        def claim(_):
+            return record_signal("cold-start-001", "BTCUSDT", "LONG", "MANUAL", "PAPER", True, [])
+        with ThreadPoolExecutor(max_workers=8) as pool:
+            results = list(pool.map(claim, range(16)))
+        assert results.count(True) == 1
+
+
 @pytest.mark.parametrize("field", ["entry", "stop_loss", "take_profit", "score", "rr"])
 def test_signal_rejects_infinite_values(field):
     values = dict(symbol="BTCUSDT", side="LONG", entry=100, stop_loss=90, take_profit=120,

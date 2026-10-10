@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
 
@@ -20,7 +21,18 @@ def connection():
     try:
         conn.execute("PRAGMA busy_timeout = 15000")
         conn.execute("PRAGMA foreign_keys = ON")
-        conn.execute("PRAGMA journal_mode = WAL")
+        # WAL initialization takes an exclusive lock and SQLite may return BUSY
+        # immediately despite busy_timeout during simultaneous cold opens.
+        deadline = time.monotonic() + 15
+        while True:
+            try:
+                if conn.execute("PRAGMA journal_mode").fetchone()[0] != "wal":
+                    conn.execute("PRAGMA journal_mode = WAL")
+                break
+            except sqlite3.OperationalError as exc:
+                if "locked" not in str(exc).lower() or time.monotonic() >= deadline:
+                    raise
+                time.sleep(0.025)
         conn.execute(
             """CREATE TABLE IF NOT EXISTS signal_events (
                 signal_id TEXT PRIMARY KEY,
