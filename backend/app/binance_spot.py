@@ -267,6 +267,51 @@ class BinanceSpotClient:
             raise BinanceAPIError("client_order_id_required")
         if kill_switch_active():
             raise BinanceAPIError("kill_switch")
+
+        # Enforce policy at the transport boundary too, so direct callers
+        # cannot bypass the orchestration route.
+        from decimal import Decimal, InvalidOperation
+        from .store import get_execution_order
+        from .testnet_settings import get_settings, reserve_daily_notional
+        settings = get_settings()
+        if not settings["enabled"] or not settings["manual_approval"] or not settings["credentials_test_passed"]:
+            raise BinanceAPIError("testnet_admin_settings_disabled")
+        if symbol not in set(settings["allowed_symbols"]):
+            raise BinanceAPIError("testnet_symbol_not_allowlisted")
+        try:
+            amount = Decimal(quantity) * Decimal(str(price))
+            maximum = Decimal(settings["max_order_notional"])
+            daily_limit = Decimal(settings["max_daily_notional"])
+        except (InvalidOperation, TypeError, ValueError) as exc:
+            raise BinanceAPIError("testnet_order_notional_invalid") from exc
+        if not amount.is_finite() or amount <= 0 or not maximum.is_finite() or maximum <= 0 or amount > maximum:
+            raise BinanceAPIError("testnet_order_notional_limit")
+        intent = get_execution_order(client_order_id)
+        if (
+            intent is None or intent.get("status") != "SENDING"
+            or intent.get("mode") != "TESTNET" or intent.get("market") != "SPOT"
+            or intent.get("side") != "BUY" or intent.get("symbol") != symbol
+            or str(intent.get("quantity")) != str(quantity)
+            or str(intent.get("price")) != str(price)
+        ):
+            raise BinanceAPIError("reserved_testnet_order_intent_required")
+        try:
+            payload = json.loads(intent.get("request_payload_json") or "{}")
+            signal_payload = payload.get("signal") if isinstance(payload, dict) else None
+            from .main import Signal, risk_check
+            signal = Signal.model_validate(signal_payload)
+            accepted, reasons = risk_check(signal)
+        except Exception as exc:
+            raise BinanceAPIError("testnet_signal_payload_invalid") from exc
+        if (
+            not accepted or signal.mode != "TESTNET" or signal.side != "LONG"
+            or signal.symbol != symbol or signal.signal_id != intent.get("signal_id")
+            or Decimal(str(signal.entry)) != Decimal(str(price))
+        ):
+            raise BinanceAPIError("testnet_signal_risk_rejected")
+        if not reserve_daily_notional(client_order_id=client_order_id, notional=amount, daily_limit=daily_limit):
+            raise BinanceAPIError("testnet_daily_notional_limit")
+
         report = self.order_submission_preflight(
             symbol=symbol, side=side, order_type=order_type, quantity=quantity,
             price=price, time_in_force=time_in_force,
