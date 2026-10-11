@@ -44,5 +44,6 @@ jobs:
             if curl --fail --silent http://127.0.0.1:8000/ready; then exit 0; fi
             sleep 1
           done
+          cat /tmp/m1-ci-backend.log
           exit 1
       - run: npm run test:e2e
