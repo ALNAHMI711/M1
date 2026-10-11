@@ -31,8 +31,8 @@ class RiskGatedExecutor:
     """Fail-closed execution boundary.
 
     Development, backtest, dry-run and paper modes never call a transport.
-    Testnet requires an explicitly TESTNET-labelled transport. LIVE remains
-    blocked until a separate server-side readiness verifier is implemented.
+    Generic Testnet transport submission is disabled; Spot Testnet must use
+    the reserved-intent orchestrator. LIVE remains blocked.
     """
 
     def __init__(
@@ -79,9 +79,7 @@ class RiskGatedExecutor:
             raise PermissionError("risk_gate_rejected")
         if self._mode != "TESTNET":
             return {"accepted": False, "mode": self._mode, "status": "validated_only"}
-        return self._transport.submit(
-            client_order_id=intent.client_order_id,
-            symbol=intent.symbol,
-            side=intent.side,
-            quantity=intent.quantity,
-        )
+        return {
+            "accepted": False, "mode": "TESTNET", "status": "blocked",
+            "reason": "testnet_orchestrator_required",
+        }
