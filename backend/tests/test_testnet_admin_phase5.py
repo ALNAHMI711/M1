@@ -91,3 +91,25 @@ def test_settings_survive_new_client_and_admin_api_never_returns_secret(monkeypa
         assert response.json()["allowed_symbols"] == ["ETHUSDT"]
         assert response.json()["max_order_notional"] == "10"
         assert response.json()["max_daily_notional"] == "30"
+
+
+def test_activation_requires_owner_level_role_even_with_trading_admin_scope(monkeypatch):
+    monkeypatch.setenv("M1_AUTH_SECRET", "test-secret-for-settings-0123456789")
+    token = create_access_token("trading-admin", "TRADING_ADMIN")
+    with TestClient(app) as client:
+        response = client.post(
+            "/v1/admin/settings/testnet/activation",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"confirm": True},
+        )
+        assert response.status_code == 403
+        assert response.json()["detail"] == "owner_confirmation_required"
+
+
+def test_admin_page_is_responsive_arabic_rtl(monkeypatch):
+    with TestClient(app) as client:
+        response = client.get("/admin/testnet")
+        assert response.status_code == 200
+        assert 'lang="ar"' in response.text
+        assert 'dir="rtl"' in response.text
+        assert "حالة Testnet" in response.text
