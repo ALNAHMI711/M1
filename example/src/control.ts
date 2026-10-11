@@ -16,6 +16,7 @@ export function attachControlPanel() {
     el('paper-account-output').textContent = el('paper-result').textContent = '';
     el('paper-write-controls').hidden = true;
     el('testnet-admin-panel').hidden = true;
+    el<HTMLButtonElement>('open-testnet-settings').hidden = true;
     el('testnet-settings-output').textContent = '';
     el<HTMLInputElement>('testnet-api-key').value = '';
     el<HTMLInputElement>('testnet-api-secret').value = '';
@@ -96,6 +97,7 @@ export function attachControlPanel() {
       token = result.access_token;
       const user = await api('/v1/auth/me');
       el('control-user').textContent = `${user.username} · ${user.role}`;
+      el<HTMLButtonElement>('open-testnet-settings').hidden = !user.scopes.includes('trading:admin');
       form.hidden = true;
       el('authenticated-controls').hidden = false;
       el('paper-write-controls').hidden = !user.scopes.includes('paper:write');
