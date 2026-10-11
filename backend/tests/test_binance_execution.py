@@ -389,3 +389,100 @@ def test_daily_notional_cap_is_reserved_across_testnet_submissions(client, monke
     assert first.status_code == 200
     assert second.status_code == 422
     assert second.json()["detail"] == "testnet_daily_notional_limit"
+
+
+def _submission_account_preflight(monkeypatch, *, scenario="valid"):
+    from copy import deepcopy
+    from test_spot_filters import metadata, _account_snapshot
+    from app.spot_filters import validate_spot_order_with_account
+    data = metadata()
+    account = _account_snapshot(quote_free="1000")
+    average = {"price": "100", "mins": 5, "closeTime": 1_000_000}
+    now_ms = 1_000_001
+    if scenario == "missing_quote_balance":
+        account["balances"] = [b for b in account["balances"] if b["asset"] != "USDT"]
+    elif scenario == "insufficient_quote_balance":
+        account["balances"][0]["free"] = "10.099"
+    elif scenario == "far_reference_price":
+        average["price"] = "90"
+    elif scenario == "missing_min_notional":
+        data["symbols"][0]["filters"] = [
+            rule for rule in data["symbols"][0]["filters"]
+            if rule["filterType"] not in {"MIN_NOTIONAL", "NOTIONAL"}
+        ]
+    elif scenario == "symbol_not_trading":
+        data["symbols"][0]["status"] = "HALT"
+    elif scenario == "bad_price_tick":
+        pass
+    elif scenario == "bad_quantity_step":
+        pass
+    elif scenario == "below_min_notional":
+        pass
+
+    def preflight(self, **kwargs):
+        return validate_spot_order_with_account(
+            deepcopy(data), deepcopy(account), [], dict(average),
+            **kwargs, now_ms=now_ms,
+        )
+    monkeypatch.setattr(FakeBinanceClient, "order_submission_preflight", preflight)
+
+
+def _assert_no_execution_reservation():
+    from app.store import connection
+    with connection() as conn:
+        assert conn.execute("SELECT COUNT(*) FROM execution_orders").fetchone()[0] == 0
+        assert conn.execute("SELECT COUNT(*) FROM testnet_daily_reservations").fetchone()[0] == 0
+
+
+@pytest.mark.parametrize(("scenario", "quantity", "price", "reason"), [
+    ("missing_quote_balance", "0.1", "100", "quote_asset_balance_missing"),
+    ("insufficient_quote_balance", "0.1", "100", "insufficient_free_quote_balance"),
+    ("far_reference_price", "0.1", "100", "price_deviation_from_reference_too_large"),
+    ("missing_min_notional", "0.1", "100", "required_notional_filter_missing"),
+    ("symbol_not_trading", "0.1", "100", "spot_symbol_not_trading"),
+    ("bad_price_tick", "0.1", "100.001", "price_invalid_increment"),
+    ("bad_quantity_step", "0.1001", "100", "quantity_invalid_increment"),
+    ("below_min_notional", "0.099", "100", "notional_below_minimum"),
+])
+def test_order_submit_validation_rejections_create_no_execution_or_reservation(
+    client, monkeypatch, enable_admin_testnet_settings, scenario, quantity, price, reason,
+):
+    from app.testnet_settings import save_credentials
+    from app.store import connection
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    save_credentials(api_key="synthetic-phase6-key", api_secret="synthetic-phase6-secret", actor="test-admin")
+    enable_admin_testnet_settings()
+    _submission_account_preflight(monkeypatch, scenario=scenario)
+    body_signal = signal()
+    if price == "100.001":
+        body_signal.update(entry=100.001, stop_loss=90.001, take_profit=120.001)
+    body = {"signal": body_signal, "order_type": "LIMIT", "quantity": quantity,
+            "price": price, "time_in_force": "GTC", "client_order_id": f"phase6-{scenario}"}
+    response = client.post(
+        "/v1/binance/spot/order-submit",
+        headers={"Authorization": f"Bearer {login(client)}"}, json=body,
+    )
+    assert response.status_code == 422
+    assert response.json()["detail"] == reason
+    _assert_no_execution_reservation()
+
+
+def test_order_submit_accepts_complete_mocked_account_and_filter_checks_before_reserving(
+    client, monkeypatch, enable_admin_testnet_settings,
+):
+    from app.testnet_settings import save_credentials
+    from app.store import get_execution_order
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    save_credentials(api_key="synthetic-phase6-key", api_secret="synthetic-phase6-secret", actor="test-admin")
+    enable_admin_testnet_settings()
+    _submission_account_preflight(monkeypatch, scenario="valid")
+    response = client.post(
+        "/v1/binance/spot/order-submit",
+        headers={"Authorization": f"Bearer {login(client)}"},
+        json={"signal": signal(), "order_type": "LIMIT", "quantity": "0.1",
+              "price": "100", "time_in_force": "GTC", "client_order_id": "phase6-valid"},
+    )
+    assert response.status_code == 200
+    assert response.json()["submitted"] is True
+    order = get_execution_order("phase6-valid")
+    assert order["status"] == "NEW"
