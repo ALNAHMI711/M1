@@ -251,4 +251,4 @@ def delete_credentials(actor):
         now = _now()
         c.execute("UPDATE app_settings SET enabled=0,credentials_test_passed=0,manual_approval=0,updated_by=?,updated_at=?,version=version+1 WHERE id=1",(actor,now))
         c.execute("INSERT INTO execution_audit(event,status,detail,created_at) VALUES(?,?,?,?)",
-            ("TESTNET_CREDENTIALS","SAVED",json.dumps({"actor":actor,"operation":"encrypted_credentials_saved"}),now))
+            ("TESTNET_CREDENTIALS","DELETED",json.dumps({"actor":actor,"operation":"credentials_deleted"}),now))
