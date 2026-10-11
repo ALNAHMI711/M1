@@ -9,7 +9,7 @@ import urllib.parse
 import urllib.request
 from decimal import Decimal
 
-BASE = "http://localhost:8080"
+BASE = "http://localhost"
 
 
 def request(path, *, token=None, data=None, method="GET", expected=200, form=False):
