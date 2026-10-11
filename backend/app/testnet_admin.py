@@ -1,13 +1,13 @@
-"""Admin-only Spot Testnet settings API. No browser UI."""
+"""Admin-only Spot Testnet settings API."""
 import logging
 from contextlib import suppress
-from fastapi import APIRouter, HTTPException, Security
+from fastapi import APIRouter, HTTPException, Security, Query
 from pydantic import BaseModel, ConfigDict, Field, SecretStr
 from .auth import current_user
 from .binance_spot import BinanceAPIError, BinanceSpotClient, BinanceSpotConfig
-from .testnet_settings import (apply_migrations,credentials_status,delete_credentials,get_settings,
- load_credentials_for_testnet,load_master_key,mark_credentials_test_failed,mark_credentials_test_passed,
- save_credentials,update_settings)
+from .testnet_settings import (activate_testnet, apply_migrations, credentials_status, deactivate_testnet,
+ delete_credentials, get_settings, load_credentials_for_testnet, load_master_key,
+ mark_credentials_test_failed, mark_credentials_test_passed, recent_testnet_audit, save_credentials, update_settings)
 
 logger=logging.getLogger(__name__)
 router=APIRouter()
@@ -18,6 +18,10 @@ class TestnetSettingsInput(BaseModel):
     max_order_notional:str=Field(min_length=1,max_length=32)
     max_daily_notional:str=Field(min_length=1,max_length=32)
     enabled:bool=False
+
+class TestnetActivationInput(BaseModel):
+    model_config=ConfigDict(extra="forbid")
+    confirm: bool
 
 class TestnetCredentialsInput(BaseModel):
     model_config=ConfigDict(extra="forbid")
@@ -61,6 +65,13 @@ def write_credentials(payload:TestnetCredentialsInput,user=Security(current_user
 def test_credentials(user=Security(current_user,scopes=["trading:admin"])):
     try:
         key,secret=load_credentials_for_testnet()
+    except RuntimeError as exc:
+        with suppress(Exception): mark_credentials_test_failed(user.username)
+        if str(exc) == "testnet_credentials_not_configured":
+            raise HTTPException(status_code=409,detail="testnet_credentials_not_configured") from None
+        logger.warning("testnet_credentials_check_failed actor=%s reason=credential_load_failed",user.username)
+        raise HTTPException(status_code=503,detail="testnet_credentials_unavailable") from None
+    try:
         account=BinanceSpotClient(BinanceSpotConfig(api_key=key,api_secret=secret)).account()
         if not isinstance(account,dict) or account.get("canTrade") is not True: raise BinanceAPIError("testnet_account_not_trade_enabled")
     except Exception:
@@ -74,3 +85,18 @@ def test_credentials(user=Security(current_user,scopes=["trading:admin"])):
 def remove_credentials(user=Security(current_user,scopes=["trading:admin"])):
     delete_credentials(user.username)
     return {"deleted":True,"credentials_present":False,"enabled":False}
+
+@router.post("/v1/admin/settings/testnet/activation")
+def activate_settings(payload:TestnetActivationInput,user=Security(current_user,scopes=["trading:admin"])):
+    try:
+        return activate_testnet(actor=user.username,confirmed=payload.confirm)
+    except ValueError as exc:
+        raise HTTPException(status_code=409,detail=str(exc)) from None
+
+@router.delete("/v1/admin/settings/testnet/activation")
+def deactivate_settings(user=Security(current_user,scopes=["trading:admin"])):
+    return deactivate_testnet(actor=user.username)
+
+@router.get("/v1/admin/settings/testnet/audit")
+def read_testnet_audit(limit:int=Query(default=50,ge=1,le=100),user=Security(current_user,scopes=["trading:admin"])):
+    return {"events":recent_testnet_audit(limit=limit)}
