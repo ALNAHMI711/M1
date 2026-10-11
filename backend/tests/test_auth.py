@@ -77,3 +77,18 @@ def test_short_auth_secret_is_rejected(auth_client, monkeypatch):
     assert response.json()["detail"] == "authentication_not_configured"
     with pytest.raises(RuntimeError, match="at least 32 bytes"):
         create_access_token("admin", "ADMIN")
+
+def test_hash_password_cli_prints_verifiable_hash(monkeypatch, capsys):
+    import sys
+    import getpass
+    from app.auth import _hash_password_cli
+
+    answers = iter(["cli-test-password", "cli-test-password"])
+    monkeypatch.setattr(getpass, "getpass", lambda _prompt: next(answers))
+    monkeypatch.setattr(sys, "argv", ["python -m app.auth", "hash-password"])
+
+    assert _hash_password_cli() == 0
+    hashed = capsys.readouterr().out.strip()
+    assert hashed
+    assert PasswordHash.recommended().verify("cli-test-password", hashed)
+    assert "cli-test-password" not in hashed
