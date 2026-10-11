@@ -1,0 +1,22 @@
+{$M1_SITE_ADDRESS:localhost} {
+    encode zstd gzip
+    request_body {
+        max_size 64KB
+    }
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        -Server
+    }
+    @api path /v1/* /health /ready /docs /openapi.json /docs/*
+    handle @api {
+        reverse_proxy backend:8000 {
+            header_up Host backend:8000
+        }
+    }
+    handle {
+        root * /srv
+        file_server
+    }
+}
