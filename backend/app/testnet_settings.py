@@ -238,9 +238,11 @@ def _mark_test(actor,passed):
     apply_migrations()
     with connection() as c:
         c.execute("BEGIN IMMEDIATE")
-        c.execute("UPDATE app_settings SET credentials_test_passed=?,enabled=0,updated_by=?,updated_at=?,version=version+1 WHERE id=1",(int(passed),actor,_now()))
+        now = _now()
+        c.execute("UPDATE app_settings SET credentials_test_passed=?,enabled=0,manual_approval=0,updated_by=?,updated_at=?,version=version+1 WHERE id=1",(int(passed),actor,now))
         c.execute("INSERT INTO execution_audit(event,status,detail,created_at) VALUES(?,?,?,?)",
-                  ("TESTNET_CREDENTIALS_CHECK","PASSED" if passed else "FAILED","read_only_account_check" if passed else "read_only_account_check_failed",_now()))
+                  ("TESTNET_CREDENTIALS_CHECK","PASSED" if passed else "FAILED",
+                   json.dumps({"actor":actor,"operation":"read_only_account_check"} if passed else {"actor":actor,"operation":"read_only_account_check_failed"}),now))
 def mark_credentials_test_passed(actor): _mark_test(actor,True)
 def mark_credentials_test_failed(actor): _mark_test(actor,False)
 
