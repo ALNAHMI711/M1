@@ -322,22 +322,6 @@ def binance_spot_order_submit(
         raise HTTPException(status_code=422, detail="testnet_symbol_not_allowlisted")
     if not maximum_notional.is_finite() or maximum_notional <= 0 or order_notional > maximum_notional:
         raise HTTPException(status_code=422, detail="testnet_order_notional_limit")
-    # Daily notional is calculated from today's durable Testnet intents. Rejected
-    # and cancelled intents do not consume the cap; unknown outcomes remain counted.
-    from datetime import datetime, timezone
-    from .store import connection
-    today = datetime.now(timezone.utc).date().isoformat()
-    with connection() as conn:
-        rows = conn.execute("""SELECT quantity,price FROM execution_orders
-            WHERE mode='TESTNET' AND market='SPOT' AND substr(updated_at,1,10)=?
-            AND status NOT IN ('REJECTED','CANCELED','EXPIRED')""",(today,)).fetchall()
-    spent = sum(
-        (Decimal(row["quantity"]) * Decimal(row["price"] or "0") for row in rows),
-        Decimal("0"),
-    )
-    if spent + order_notional > daily_limit:
-        raise HTTPException(status_code=422, detail="testnet_daily_notional_limit")
-
     side = "BUY"
     try:
         stored_api_key, stored_api_secret = load_credentials_for_testnet()
@@ -359,6 +343,15 @@ def binance_spot_order_submit(
         raise HTTPException(status_code=502, detail="testnet_metadata_unavailable") from exc
     if report.get("deferred_checks") or report.get("account_and_asset_filters_verified") is not True:
         raise HTTPException(status_code=409, detail="testnet_exchange_validation_incomplete")
+    from .testnet_settings import reserve_daily_notional
+    try:
+        daily_reserved = reserve_daily_notional(
+            client_order_id=request.client_order_id, notional=order_notional, daily_limit=daily_limit,
+        )
+    except ValueError:
+        raise HTTPException(status_code=503, detail="testnet_order_limits_invalid") from None
+    if not daily_reserved:
+        raise HTTPException(status_code=422, detail="testnet_daily_notional_limit")
 
     payload = {
         "client_order_id": request.client_order_id,
