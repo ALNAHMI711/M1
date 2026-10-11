@@ -279,6 +279,8 @@ def test_order_submit_refuses_unresolved_account_and_reference_checks(client, mo
     monkeypatch.setenv("BINANCE_API_KEY", "fake-testnet-key")
     monkeypatch.setenv("BINANCE_API_SECRET", "fake-testnet-secret")
     enable_admin_testnet_settings()
+    from app.testnet_settings import save_credentials
+    save_credentials(api_key="synthetic-submit-key", api_secret="synthetic-submit-secret", actor="test-admin")
     token = login(client)
     response = client.post(
         "/v1/binance/spot/order-submit",
