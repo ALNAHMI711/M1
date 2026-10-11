@@ -67,18 +67,18 @@ def test_non_execution_mode_never_calls_adapter():
     assert adapter.calls == 0
 
 
-def test_testnet_submits_only_after_risk_approval():
+def test_generic_testnet_adapter_is_blocked_outside_reserved_intent_orchestrator():
     adapter = FakeAdapter()
     result = dispatch_execution(_intent("TESTNET"), _risk(), adapter=adapter)
-    assert result.status == "submitted_testnet"
-    assert result.exchange_order_id == "testnet-order-123"
-    assert adapter.calls == 1
+    assert result.status == "blocked"
+    assert result.reasons == ("testnet_orchestrator_required",)
+    assert adapter.calls == 0
 
 
 def test_testnet_without_adapter_is_blocked():
     result = dispatch_execution(_intent("TESTNET"), _risk())
     assert result.status == "blocked"
-    assert result.reasons == ("testnet_adapter_unavailable",)
+    assert result.reasons == ("testnet_orchestrator_required",)
 
 
 def test_invalid_quantity_is_rejected_before_adapter():
