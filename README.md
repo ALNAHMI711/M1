@@ -396,3 +396,7 @@ npm test
 ## License
 
 MIT
+
+## Deployment safety note
+
+Vercel must be disconnected manually in **Settings → Git → Disconnect**. The root vercel.json ignore command is an additional defensive layer, not a substitute for disconnecting Vercel from this repository.
