@@ -8,8 +8,8 @@ RUN python -m pip install --no-cache-dir --upgrade "pip>=26.2.1" "setuptools>=83
     && python -m pip install --no-cache-dir -r /opt/m1/backend/requirements.lock \
     && groupadd --gid 10001 m1 \
     && useradd --uid 10001 --gid m1 --no-create-home --shell /usr/sbin/nologin m1 \
-    && mkdir -p /tmp \
-    && chown m1:m1 /tmp \
+    && mkdir -p /tmp /data \
+    && chown m1:m1 /tmp /data \
     && chmod 1777 /tmp
 COPY --chown=m1:m1 backend/app /opt/m1/backend/app
 USER 10001:10001
