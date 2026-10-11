@@ -52,13 +52,21 @@ def reserve(monkeypatch, tmp_path, client_order_id="test-submit-001"):
 class FakeClient:
     execution_mode = "TESTNET"
 
-    def __init__(self, response=None, error=None):
+    def __init__(self, response=None, error=None, preflight=None):
         self.response = response or {
             "symbol": "BTCUSDT", "orderId": 73, "status": "NEW",
             "executedQty": "0", "price": "100", "updateTime": 123,
         }
         self.error = error
+        self.preflight = preflight or {
+            "deferred_checks": [], "account_and_asset_filters_verified": True,
+        }
+        self.preflight_calls = []
         self.calls = []
+
+    def order_submission_preflight(self, **kwargs):
+        self.preflight_calls.append(kwargs)
+        return self.preflight
 
     def submit_testnet_order(self, **kwargs):
         self.calls.append(kwargs)
@@ -131,3 +139,29 @@ def test_submission_feature_flag_off_preserves_reserved_intent(monkeypatch, tmp_
         submit_reserved_spot_testnet_order(client, "test-submit-001")
     assert client.calls == []
     assert store.get_execution_order("test-submit-001")["status"] == "SUBMITTING"
+
+
+
+def test_submission_orchestrator_rejects_incomplete_dynamic_preflight(monkeypatch, tmp_path):
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    reserve(monkeypatch, tmp_path)
+    client = FakeClient(preflight={
+        "deferred_checks": ["account_state_missing"],
+        "account_and_asset_filters_verified": False,
+    })
+    with pytest.raises(SpotTestnetSubmissionError, match="exchange_validation_incomplete"):
+        submit_reserved_spot_testnet_order(client, "test-submit-001")
+    assert client.calls == []
+    assert store.get_execution_order("test-submit-001")["status"] == "SUBMITTING"
+
+
+def test_submission_orchestrator_rejects_admin_disabled_before_preflight(monkeypatch, tmp_path):
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    reserve(monkeypatch, tmp_path)
+    with store.connection() as conn:
+        conn.execute("UPDATE app_settings SET enabled=0 WHERE id=1")
+    client = FakeClient()
+    with pytest.raises(SpotTestnetSubmissionError, match="admin_settings_disabled"):
+        submit_reserved_spot_testnet_order(client, "test-submit-001")
+    assert client.preflight_calls == []
+    assert client.calls == []
