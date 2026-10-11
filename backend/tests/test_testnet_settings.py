@@ -1,4 +1,5 @@
 import base64, logging, os
+from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 from app.auth import create_access_token
@@ -26,6 +27,33 @@ def test_missing_or_invalid_key_fails_closed(tmp_path):
 def test_key_file_permissions_enforced(tmp_path):
     p=tmp_path/"key"; p.write_text(base64.b64encode(os.urandom(32)).decode()); p.chmod(0o644)
     with pytest.raises(RuntimeError,match="testnet_encryption_key_file_permissions_invalid"): load_master_key(str(p))
+
+def test_key_path_inside_project_is_rejected():
+    project_root = Path(__file__).resolve().parents[2]
+    with pytest.raises(RuntimeError, match="testnet_encryption_key_path_inside_project"):
+        load_master_key(str(project_root / ".env.example"))
+
+
+def test_world_readable_key_file_is_rejected(tmp_path):
+    p = tmp_path / "world-readable-key"
+    p.write_text(base64.b64encode(os.urandom(32)).decode(), encoding="ascii")
+    p.chmod(0o604)
+    with pytest.raises(RuntimeError, match="testnet_encryption_key_file_permissions_invalid"):
+        load_master_key(str(p))
+
+
+def test_symlink_key_target_outside_allowed_secrets_dir_is_rejected(tmp_path, monkeypatch):
+    allowed = tmp_path / "allowed-secrets"
+    allowed.mkdir()
+    outside = tmp_path / "outside-key"
+    outside.write_text(base64.b64encode(os.urandom(32)).decode(), encoding="ascii")
+    outside.chmod(0o600)
+    link = tmp_path / "key-link"
+    link.symlink_to(outside)
+    monkeypatch.setenv("M1_TESTNET_SECRETS_DIR", str(allowed))
+    with pytest.raises(RuntimeError, match="testnet_encryption_key_symlink_target_not_allowed"):
+        load_master_key(str(link))
+
 
 def test_default_settings_fail_closed():
     s=get_settings()
