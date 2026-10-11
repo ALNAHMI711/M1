@@ -12,6 +12,11 @@ def reserve(monkeypatch, tmp_path, client_order_id="test-submit-001"):
     monkeypatch.setenv("M1_DB_PATH", str(tmp_path / "m1.sqlite3"))
     monkeypatch.setenv("M1_TESTNET_ALLOWED_SYMBOLS", "BTCUSDT")
     monkeypatch.setenv("M1_TESTNET_MAX_NOTIONAL", "25")
+    from app.testnet_settings import apply_migrations
+    apply_migrations()
+    with store.connection() as conn:
+        conn.execute("""UPDATE app_settings SET enabled=1,credentials_test_passed=1,manual_approval=1,
+            allowed_symbols_json='["BTCUSDT"]',max_order_notional='20',max_daily_notional='50' WHERE id=1""")
     payload = {
         "client_order_id": client_order_id,
         "signal_id": "signal-submit-001",
