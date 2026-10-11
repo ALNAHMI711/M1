@@ -29,7 +29,7 @@ services:
     environment:
       M1_SITE_ADDRESS: ${M1_SITE_ADDRESS:?Set M1_SITE_ADDRESS to a public DNS hostname}
     ports:
-      - "80:80"
+      - "${M1_HTTP_PORT:-80}:80"
       - "443:443"
       - "443:443/udp"
     volumes:
