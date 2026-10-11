@@ -334,3 +334,21 @@ def test_signed_testnet_submission_client_keeps_buy_limit_only(monkeypatch, side
             time_in_force="GTC" if order_type == "LIMIT" else None,
         )
     assert calls == []
+
+
+
+def test_raw_order_endpoint_requires_internal_submission_capability(monkeypatch):
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    calls = []
+    client = BinanceSpotClient(
+        BinanceSpotConfig("synthetic-key", "synthetic-secret"),
+        opener=lambda *args, **kwargs: calls.append((args, kwargs)),
+    )
+    with pytest.raises(BinanceAPIError, match="order_submission_orchestrator_required"):
+        client._request(
+            "POST", "/api/v3/order",
+            {"symbol": "BTCUSDT", "side": "BUY", "type": "LIMIT",
+             "quantity": "0.1", "price": "100", "timeInForce": "GTC"},
+            signed=True,
+        )
+    assert calls == []
