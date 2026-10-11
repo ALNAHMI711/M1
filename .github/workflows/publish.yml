@@ -1,9 +1,9 @@
-name: Publish
+name: Publish package (manual only)
 
+# Tagging a GitHub Release must not publish to npm implicitly.
+# Run manually only after explicitly deciding to publish the package.
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
 
 jobs:
   publish:
@@ -16,15 +16,13 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org/'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
-      # Local development uses an oakscriptjs commit (devDependencies); a release is built and tested with the
-      # latest oakscriptjs release, which must be inside the peerDependencies range.
       - name: Use the latest oakscriptjs release
         run: |
           npm install --no-save oakscriptjs@latest
