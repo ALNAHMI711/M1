@@ -95,6 +95,8 @@ def remove_credentials(user=Security(current_user,scopes=["trading:admin"])):
 
 @router.post("/v1/admin/settings/testnet/activation")
 def activate_settings(payload:TestnetActivationInput,user=Security(current_user,scopes=["trading:admin"])):
+    if user.role != "ADMIN":
+        raise HTTPException(status_code=403,detail="owner_confirmation_required")
     try:
         return activate_testnet(actor=user.username,confirmed=payload.confirm)
     except ValueError as exc:
