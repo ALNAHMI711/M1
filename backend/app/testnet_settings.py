@@ -155,10 +155,60 @@ def update_settings(*,allowed_symbols,max_order_notional,max_daily_notional,acto
         raise ValueError("testnet_order_limits_invalid")
     with connection() as c:
         c.execute("BEGIN IMMEDIATE")
-        c.execute("""UPDATE app_settings SET enabled=0,allowed_symbols_json=?,allowed_order_types_json='["LIMIT"]',
+        c.execute("""UPDATE app_settings SET enabled=0,manual_approval=0,allowed_symbols_json=?,allowed_order_types_json='["LIMIT"]',
             allowed_sides_json='["BUY"]',max_order_notional=?,max_daily_notional=?,updated_by=?,updated_at=?,version=version+1 WHERE id=1""",
             (json.dumps(symbols,separators=(",",":")),format(order,"f"),format(daily,"f"),actor,_now()))
+        c.execute("INSERT INTO execution_audit(event,status,detail,created_at) VALUES(?,?,?,?)",
+            ("TESTNET_SETTINGS_UPDATED","SUCCESS",json.dumps({"actor":actor,"symbols":symbols,"max_order_notional":format(order,"f"),"max_daily_notional":format(daily,"f")},separators=(",",":")),_now()))
     return get_settings()
+
+def activate_testnet(*, actor: str, confirmed: bool):
+    """Enable Spot Testnet only after saved credentials, a passed test, and explicit owner confirmation."""
+    if confirmed is not True:
+        raise ValueError("testnet_owner_confirmation_required")
+    apply_migrations()
+    with connection() as c:
+        c.execute("BEGIN IMMEDIATE")
+        settings = c.execute("SELECT * FROM app_settings WHERE id=1").fetchone()
+        credentials = c.execute("SELECT id FROM exchange_credentials WHERE id=1").fetchone()
+        if settings is None:
+            raise RuntimeError("testnet_settings_missing")
+        if credentials is None:
+            raise ValueError("testnet_credentials_required")
+        if not bool(settings["credentials_test_passed"]):
+            raise ValueError("testnet_connection_test_required")
+        now = _now()
+        c.execute("UPDATE app_settings SET enabled=1,manual_approval=1,updated_by=?,updated_at=?,version=version+1 WHERE id=1",(actor,now))
+        c.execute("INSERT INTO execution_audit(event,status,detail,created_at) VALUES(?,?,?,?)",
+            ("TESTNET_ACTIVATION","ENABLED",json.dumps({"actor":actor,"confirmation":True,"environment":"SPOT_TESTNET"}),now))
+    return get_settings()
+
+def deactivate_testnet(*, actor: str):
+    apply_migrations()
+    now = _now()
+    with connection() as c:
+        c.execute("BEGIN IMMEDIATE")
+        c.execute("UPDATE app_settings SET enabled=0,manual_approval=0,updated_by=?,updated_at=?,version=version+1 WHERE id=1",(actor,now))
+        c.execute("INSERT INTO execution_audit(event,status,detail,created_at) VALUES(?,?,?,?)",
+            ("TESTNET_ACTIVATION","DISABLED",json.dumps({"actor":actor,"environment":"SPOT_TESTNET"}),now))
+    return get_settings()
+
+def recent_testnet_audit(*, limit: int=50):
+    apply_migrations()
+    bounded=max(1,min(int(limit),100))
+    with connection() as c:
+        rows=c.execute("""SELECT id,event,status,detail,created_at FROM execution_audit
+            WHERE event LIKE 'TESTNET_%' ORDER BY id DESC LIMIT ?""",(bounded,)).fetchall()
+    result=[]
+    for row in rows:
+        try:
+            detail=json.loads(row["detail"])
+        except (TypeError,ValueError):
+            detail={"message":"redacted"}
+        # Never return credentials, raw request data, or arbitrary exception text.
+        safe={k:detail[k] for k in ("actor","symbols","max_order_notional","max_daily_notional","environment","confirmation") if k in detail}
+        result.append({"id":row["id"],"event":row["event"],"status":row["status"],"detail":safe,"created_at":row["created_at"]})
+    return result
 
 def save_credentials(*,api_key,api_secret,actor,key=None):
     apply_migrations(); master=key if key is not None else load_master_key()
