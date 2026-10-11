@@ -224,6 +224,8 @@ def binance_spot_preflight(request: BinanceSpotOrderTest,
                           user=Security(current_user, scopes=["control:read"])):
     if request.signal.mode != "TESTNET":
         raise HTTPException(status_code=400, detail="preflight_requires_testnet_mode")
+    if request.signal.side != "LONG" or request.order_type != "LIMIT":
+        raise HTTPException(status_code=422, detail="only_limit_buy_testnet_orders_are_enabled")
     accepted, reasons = risk_check(request.signal)
     if not accepted:
         raise HTTPException(status_code=422, detail={"accepted": False, "reasons": reasons})
@@ -247,6 +249,8 @@ def binance_spot_order_test(
 ):
     if request.signal.mode != "TESTNET":
         raise HTTPException(status_code=400, detail="binance_order_test_requires_testnet_mode")
+    if request.signal.side != "LONG" or request.order_type != "LIMIT":
+        raise HTTPException(status_code=422, detail="only_limit_buy_testnet_orders_are_enabled")
     accepted, reasons = risk_check(request.signal)
     if not accepted:
         raise HTTPException(status_code=422, detail={"accepted": False, "reasons": reasons})
@@ -292,6 +296,11 @@ def binance_spot_order_submit(
     """
     if os.getenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "false").lower() != "true":
         raise HTTPException(status_code=503, detail="testnet_order_submission_disabled")
+    # Encrypted admin settings are authoritative; owner review is required
+    # before activation. Environment flags alone can never enable order placement.
+    from .testnet_settings import get_settings
+    if not get_settings()["enabled"]:
+        raise HTTPException(status_code=503, detail="testnet_admin_settings_disabled")
     if request.signal.mode != "TESTNET":
         raise HTTPException(status_code=400, detail="testnet_mode_required")
     if request.signal.side != "LONG" or request.order_type != "LIMIT":
@@ -473,3 +482,8 @@ def control_readiness(user=Security(current_user, scopes=["control:read"])):
         "user": user.username,
         "kill_switch": kill_switch_active(),
     }
+
+
+# Server-side administration API; no browser UI in this change.
+from .testnet_admin import router as testnet_admin_router
+app.include_router(testnet_admin_router)

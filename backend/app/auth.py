@@ -19,12 +19,14 @@ SCOPES = {
     "signals:read": "Read signal state",
     "signals:validate": "Validate signals",
     "admin": "Administrative operations",
+    "trading:admin": "Manage Spot Testnet settings and encrypted credentials",
     "paper:read": "Read own simulated paper account",
     "paper:write": "Submit simulated cash-only paper orders; never exchange orders",
 }
 ROLE_SCOPES = {
     "VIEWER": {"control:read", "signals:read", "paper:read"},
     "OPERATOR": {"control:read", "signals:read", "signals:validate", "paper:read", "paper:write"},
+    "TRADING_ADMIN": {"control:read", "trading:admin"},
     "ADMIN": set(SCOPES),
 }
 

@@ -5,8 +5,12 @@ services:
       dockerfile: backend/Dockerfile
     restart: unless-stopped
     env_file: .env
+    secrets:
+      - source: m1_testnet_encryption_key
+        target: m1_testnet_encryption_key
     environment:
       M1_DB_PATH: /data/m1.sqlite3
+      M1_TESTNET_ENCRYPTION_KEY_FILE: /run/secrets/m1_testnet_encryption_key
       M1_ALLOWED_HOSTS: localhost,127.0.0.1,backend
     volumes:
       - m1-data:/data
@@ -33,6 +37,10 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+
+secrets:
+  m1_testnet_encryption_key:
+    file: ${M1_TESTNET_ENCRYPTION_KEY_FILE:?Set M1_TESTNET_ENCRYPTION_KEY_FILE to an absolute protected file path outside the repository}
 
 volumes:
   m1-data:
