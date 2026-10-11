@@ -14,6 +14,7 @@ from typing import Any, Mapping
 
 TESTNET_BASE_URL = "https://testnet.binance.vision"
 LIVE_BASE_URL = "https://api.binance.com"
+_ORDER_SUBMISSION_CAPABILITY = object()
 
 
 class BinanceAPIError(RuntimeError):
@@ -68,6 +69,7 @@ class BinanceSpotClient:
         params: Mapping[str, Any] | None = None,
         *,
         signed: bool = False,
+        submission_capability: object | None = None,
     ) -> Any:
         allowed = {
             ("GET", "/api/v3/ping"), ("GET", "/api/v3/exchangeInfo"),
@@ -79,6 +81,8 @@ class BinanceSpotClient:
             allowed.add(("POST", "/api/v3/order"))
         if (method.upper(), path) not in allowed:
             raise BinanceAPIError("exchange_operation_not_enabled")
+        if (method.upper(), path) == ("POST", "/api/v3/order") and submission_capability is not _ORDER_SUBMISSION_CAPABILITY:
+            raise BinanceAPIError("order_submission_orchestrator_required")
         if method.upper() != "GET" and self.config.base_url != TESTNET_BASE_URL:
             raise BinanceAPIError("live_execution_not_enabled")
         values = dict(params or {})
@@ -279,4 +283,5 @@ class BinanceSpotClient:
             params["price"] = price
         if time_in_force is not None:
             params["timeInForce"] = time_in_force
-        return self._request("POST", "/api/v3/order", params, signed=True)
+        return self._request("POST", "/api/v3/order", params, signed=True,
+                             submission_capability=_ORDER_SUBMISSION_CAPABILITY)
