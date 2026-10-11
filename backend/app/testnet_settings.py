@@ -221,7 +221,10 @@ def save_credentials(*,api_key,api_secret,actor,key=None):
           api_secret_ciphertext=excluded.api_secret_ciphertext,api_secret_nonce=excluded.api_secret_nonce,
           encryption_key_version=excluded.encryption_key_version,updated_by=excluded.updated_by,updated_at=excluded.updated_at""",
           (kc,kn,sc,sn,KEY_VERSION,actor,_now()))
-        c.execute("UPDATE app_settings SET enabled=0,credentials_test_passed=0,manual_approval=0,updated_by=?,updated_at=?,version=version+1 WHERE id=1",(actor,_now()))
+        now = _now()
+        c.execute("UPDATE app_settings SET enabled=0,credentials_test_passed=0,manual_approval=0,updated_by=?,updated_at=?,version=version+1 WHERE id=1",(actor,now))
+        c.execute("INSERT INTO execution_audit(event,status,detail,created_at) VALUES(?,?,?,?)",
+            ("TESTNET_CREDENTIALS","SAVED",json.dumps({"actor":actor,"operation":"encrypted_credentials_saved"}),now))
 
 def load_credentials_for_testnet(*,key=None):
     apply_migrations(); master=key if key is not None else load_master_key()
@@ -245,4 +248,7 @@ def delete_credentials(actor):
     apply_migrations()
     with connection() as c:
         c.execute("BEGIN IMMEDIATE"); c.execute("DELETE FROM exchange_credentials WHERE id=1")
-        c.execute("UPDATE app_settings SET enabled=0,credentials_test_passed=0,manual_approval=0,updated_by=?,updated_at=?,version=version+1 WHERE id=1",(actor,_now()))
+        now = _now()
+        c.execute("UPDATE app_settings SET enabled=0,credentials_test_passed=0,manual_approval=0,updated_by=?,updated_at=?,version=version+1 WHERE id=1",(actor,now))
+        c.execute("INSERT INTO execution_audit(event,status,detail,created_at) VALUES(?,?,?,?)",
+            ("TESTNET_CREDENTIALS","SAVED",json.dumps({"actor":actor,"operation":"encrypted_credentials_saved"}),now))
