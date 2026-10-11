@@ -278,9 +278,9 @@ def test_order_submit_refuses_unresolved_account_and_reference_checks(client, mo
     monkeypatch.setenv("M1_TESTNET_MAX_NOTIONAL", "100")
     monkeypatch.setenv("BINANCE_API_KEY", "fake-testnet-key")
     monkeypatch.setenv("BINANCE_API_SECRET", "fake-testnet-secret")
-    enable_admin_testnet_settings()
     from app.testnet_settings import save_credentials
     save_credentials(api_key="synthetic-submit-key", api_secret="synthetic-submit-secret", actor="test-admin")
+    enable_admin_testnet_settings()
     token = login(client)
     response = client.post(
         "/v1/binance/spot/order-submit",
@@ -299,9 +299,9 @@ def test_order_submit_happy_path_uses_reserved_single_submission_offline(client,
     monkeypatch.setenv("M1_TESTNET_MAX_NOTIONAL", "100")
     monkeypatch.setenv("BINANCE_API_KEY", "fake-testnet-key")
     monkeypatch.setenv("BINANCE_API_SECRET", "fake-testnet-secret")
-    enable_admin_testnet_settings()
     from app.testnet_settings import save_credentials
     save_credentials(api_key="synthetic-submit-key", api_secret="synthetic-submit-secret", actor="test-admin")
+    enable_admin_testnet_settings()
     monkeypatch.setattr(FakeBinanceClient, "order_submission_preflight", lambda self, **kwargs: {
         "deferred_checks": [], "account_and_asset_filters_verified": True,
     })
