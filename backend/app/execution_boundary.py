@@ -40,10 +40,9 @@ def dispatch_execution(
 ) -> ExecutionResult:
     """Single policy boundary before any exchange submission.
 
-    LIVE is intentionally hard-disabled. Non-execution modes never call an
-    adapter. TESTNET may submit only after risk approval and only with an
-    explicitly supplied adapter. The adapter itself must implement exchange-
-    specific authentication, precision, filters, and idempotent client IDs.
+    LIVE and generic TESTNET execution are hard-disabled here. Spot Testnet
+    order placement must go through the reserved-intent orchestrator so admin
+    settings, exchange filters, account state and notional caps cannot be bypassed.
     """
     mode = intent.mode.upper()
     if kill_switch_active():
@@ -66,12 +65,6 @@ def dispatch_execution(
         return ExecutionResult("blocked", ("live_execution_not_implemented",))
     if mode != "TESTNET":
         return ExecutionResult("not_submitted", ("non_execution_mode",))
-    if adapter is None:
-        return ExecutionResult("blocked", ("testnet_adapter_unavailable",))
-    if getattr(adapter, "execution_mode", getattr(adapter, "mode", None)) != "TESTNET":
-        return ExecutionResult("blocked", ("testnet_adapter_required",))
-
-    exchange_order_id = adapter.submit(intent)
-    if not isinstance(exchange_order_id, str) or not exchange_order_id.strip():
-        return ExecutionResult("error", ("invalid_adapter_order_id",))
-    return ExecutionResult("submitted_testnet", exchange_order_id=exchange_order_id)
+    # Do not let a generic adapter create an alternate path around the
+    # Spot Testnet reserved-intent, allowlist and account-preflight controls.
+    return ExecutionResult("blocked", ("testnet_orchestrator_required",))
