@@ -38,6 +38,12 @@ jobs:
       - name: Start isolated backend
         working-directory: backend
         run: |
+          mkdir -p /tmp/m1-testnet-secrets
+          chmod 700 /tmp/m1-testnet-secrets
+          head -c 32 /dev/urandom | base64 > /tmp/m1-testnet-secrets/key
+          chmod 600 /tmp/m1-testnet-secrets/key
+          export M1_TESTNET_SECRETS_DIR=/tmp/m1-testnet-secrets
+          export M1_TESTNET_ENCRYPTION_KEY_FILE=/tmp/m1-testnet-secrets/key
           export M1_ADMIN_PASSWORD_HASH="$(python -c 'import os; from pwdlib import PasswordHash; print(PasswordHash.recommended().hash(os.environ["M1_E2E_PASSWORD"]))')"
           uvicorn app.main:app --host 127.0.0.1 --port 8000 --no-proxy-headers --no-access-log >/tmp/m1-ci-backend.log 2>&1 &
           for i in $(seq 1 30); do
