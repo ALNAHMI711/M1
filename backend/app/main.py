@@ -298,8 +298,9 @@ def binance_spot_order_submit(
         raise HTTPException(status_code=503, detail="testnet_order_submission_disabled")
     # Encrypted admin settings are authoritative; owner review is required
     # before activation. Environment flags alone can never enable order placement.
-    from .testnet_settings import get_settings
-    if not get_settings()["enabled"]:
+    from .testnet_settings import get_settings, load_credentials_for_testnet
+    admin_settings = get_settings()
+    if not admin_settings["enabled"] or not admin_settings["manual_approval"] or not admin_settings["credentials_test_passed"]:
         raise HTTPException(status_code=503, detail="testnet_admin_settings_disabled")
     if request.signal.mode != "TESTNET":
         raise HTTPException(status_code=400, detail="testnet_mode_required")
@@ -310,23 +311,35 @@ def binance_spot_order_submit(
     accepted, reasons = risk_check(request.signal)
     if not accepted:
         raise HTTPException(status_code=422, detail={"accepted": False, "reasons": reasons})
-    allowlist = {
-        symbol.strip().upper()
-        for symbol in os.getenv("M1_TESTNET_ALLOWED_SYMBOLS", "").split(",")
-        if symbol.strip()
-    }
+    allowlist = set(admin_settings["allowed_symbols"])
     try:
-        maximum_notional = Decimal(os.getenv("M1_TESTNET_MAX_NOTIONAL", "0"))
+        maximum_notional = Decimal(admin_settings["max_order_notional"])
+        daily_limit = Decimal(admin_settings["max_daily_notional"])
         order_notional = Decimal(request.quantity) * Decimal(str(request.price))
     except Exception as exc:
         raise HTTPException(status_code=503, detail="testnet_order_limits_invalid") from exc
-    if not allowlist or request.signal.symbol not in allowlist:
+    if request.signal.symbol not in allowlist:
         raise HTTPException(status_code=422, detail="testnet_symbol_not_allowlisted")
     if not maximum_notional.is_finite() or maximum_notional <= 0 or order_notional > maximum_notional:
         raise HTTPException(status_code=422, detail="testnet_order_notional_limit")
+    # Daily notional is calculated from today's durable Testnet intents. Rejected
+    # and cancelled intents do not consume the cap; unknown outcomes remain counted.
+    from datetime import datetime, timezone
+    from .store import connection
+    today = datetime.now(timezone.utc).date().isoformat()
+    with connection() as conn:
+        spent = Decimal(str(conn.execute("""SELECT COALESCE(SUM(CAST(quantity AS REAL)*CAST(price AS REAL)),0)
+            FROM execution_orders WHERE mode='TESTNET' AND market='SPOT' AND substr(updated_at,1,10)=?
+            AND status NOT IN ('REJECTED','CANCELED','EXPIRED')""",(today,)).fetchone()[0]))
+    if spent + order_notional > daily_limit:
+        raise HTTPException(status_code=422, detail="testnet_daily_notional_limit")
 
     side = "BUY"
-    config = BinanceSpotConfig.from_env(testnet=True)
+    try:
+        stored_api_key, stored_api_secret = load_credentials_for_testnet()
+    except RuntimeError:
+        raise HTTPException(status_code=503, detail="testnet_credentials_not_configured") from None
+    config = BinanceSpotConfig(api_key=stored_api_key, api_secret=stored_api_secret, base_url="https://testnet.binance.vision")
     if not config.api_key or not config.api_secret:
         raise HTTPException(status_code=503, detail="testnet_credentials_not_configured")
     client = BinanceSpotClient(config)
