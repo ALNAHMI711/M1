@@ -315,3 +315,22 @@ def test_reference_deviation_cap_applies_even_without_exchange_percent_filter(pr
     else:
         result = validate_spot_order_with_account(**kwargs)
         assert result["account_and_asset_filters_verified"] is True
+
+
+@pytest.mark.parametrize(("side", "order_type"), [
+    ("SELL", "LIMIT"),
+    ("BUY", "MARKET"),
+])
+def test_signed_testnet_submission_client_keeps_buy_limit_only(monkeypatch, side, order_type):
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    client = BinanceSpotClient(BinanceSpotConfig("synthetic-key", "synthetic-secret"))
+    calls = []
+    monkeypatch.setattr(client, "_request", lambda *args, **kwargs: calls.append((args, kwargs)))
+    with pytest.raises(BinanceAPIError, match="only_limit_buy_testnet_orders_are_enabled"):
+        client.submit_testnet_order(
+            symbol="BTCUSDT", side=side, order_type=order_type,
+            quantity="0.1", client_order_id="phase6-forbidden",
+            price="100" if order_type == "LIMIT" else None,
+            time_in_force="GTC" if order_type == "LIMIT" else None,
+        )
+    assert calls == []
