@@ -55,6 +55,8 @@ def _boolean(value: Any) -> bool:
 
 
 STATIC = {"PRICE_FILTER", "LOT_SIZE", "MARKET_LOT_SIZE", "MIN_NOTIONAL", "NOTIONAL"}
+# Independent safety cap even when exchange metadata omits PERCENT_PRICE filters.
+MAX_REFERENCE_PRICE_DEVIATION_BPS = 500
 DYNAMIC = {
     "PERCENT_PRICE", "PERCENT_PRICE_BY_SIDE", "MAX_NUM_ORDERS",
     "MAX_NUM_ALGO_ORDERS", "MAX_NUM_ICEBERG_ORDERS", "MAX_POSITION",
@@ -129,6 +131,8 @@ def validate_spot_order(
     # Optional exchange filters are not guessed from absent/malformed static rules.
     if not {"PRICE_FILTER", "LOT_SIZE"} <= rules.keys():
         raise SpotFilterError("required_static_filters_missing")
+    if not ({"MIN_NOTIONAL", "NOTIONAL"} & rules.keys()):
+        raise SpotFilterError("required_notional_filter_missing")
     checked: list[str] = []
     deferred: list[str] = sorted(exchange)
     with localcontext() as context:
@@ -254,6 +258,10 @@ def validate_spot_order_with_account(
     base_asset, quote_asset = info.get("baseAsset"), info.get("quoteAsset")
     if not all(isinstance(asset, str) and re.fullmatch(r"[A-Z0-9]{2,20}", asset) for asset in (base_asset, quote_asset)):
         raise SpotFilterError("invalid_symbol_assets")
+    # M1 currently allows only BTCUSDT and ETHUSDT. Do not let a malformed or
+    # unexpected exchange symbol redirect a BUY to another quote asset.
+    if quote_asset != "USDT":
+        raise SpotFilterError("testnet_quote_asset_must_be_usdt")
     balances = account.get("balances")
     if not isinstance(balances, list) or len(balances) > 10_000:
         raise SpotFilterError("invalid_account_balances")
@@ -270,6 +278,8 @@ def validate_spot_order_with_account(
         item = by_asset.get(asset, {"free": "0", "locked": "0"})
         return _decimal(item.get("free")), _decimal(item.get("locked"))
 
+    if quote_asset not in by_asset:
+        raise SpotFilterError("quote_asset_balance_missing")
     quote_free, _ = balance_values(quote_asset)
     base_free, base_locked = balance_values(base_asset)
     qty = _decimal(quantity, positive=True)
