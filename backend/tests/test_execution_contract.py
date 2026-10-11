@@ -113,3 +113,22 @@ def test_invalid_side_is_rejected_before_adapter():
             _request(side="SHORT"),
             risk_decision=RiskDecision(True, ()),
         )
+
+
+
+def test_generic_execution_contract_blocks_approved_testnet_before_adapter():
+    class Adapter:
+        called = False
+
+        def submit(self, request):
+            self.called = True
+            return ExecutionResult(True, request.client_order_id, "1", "NEW")
+
+    adapter = Adapter()
+    with pytest.raises(PermissionError, match="testnet_orchestrator_required"):
+        submit_after_risk(
+            adapter,
+            _request(),
+            risk_decision=RiskDecision(True, ()),
+        )
+    assert adapter.called is False
