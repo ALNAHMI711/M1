@@ -112,7 +112,7 @@ export function attachControlPanel() {
       api('/v1/admin/settings/testnet/credentials/status'),
       api('/v1/admin/settings/testnet/audit?limit=20'),
     ]);
-    el('testnet-symbols').value = settings.allowed_symbols.join(',');
+    el<HTMLInputElement>('testnet-symbols').value = settings.allowed_symbols.join(',');
     el<HTMLInputElement>('testnet-max-order').value = settings.max_order_notional;
     el<HTMLInputElement>('testnet-max-daily').value = settings.max_daily_notional;
     el('testnet-settings-output').textContent = JSON.stringify({
