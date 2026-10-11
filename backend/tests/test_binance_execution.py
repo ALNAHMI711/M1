@@ -300,6 +300,8 @@ def test_order_submit_happy_path_uses_reserved_single_submission_offline(client,
     monkeypatch.setenv("BINANCE_API_KEY", "fake-testnet-key")
     monkeypatch.setenv("BINANCE_API_SECRET", "fake-testnet-secret")
     enable_admin_testnet_settings()
+    from app.testnet_settings import save_credentials
+    save_credentials(api_key="synthetic-submit-key", api_secret="synthetic-submit-secret", actor="test-admin")
     monkeypatch.setattr(FakeBinanceClient, "order_submission_preflight", lambda self, **kwargs: {
         "deferred_checks": [], "account_and_asset_filters_verified": True,
     })
@@ -329,3 +331,37 @@ def test_order_submit_is_admin_only(client, monkeypatch):
               "price": "100", "time_in_force": "GTC", "client_order_id": "submit-004"},
     )
     assert response.status_code == 403
+
+
+def test_admin_allowlist_change_blocks_order_submit(client, monkeypatch, enable_admin_testnet_settings):
+    from app.testnet_settings import update_settings
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    enable_admin_testnet_settings()
+    update_settings(allowed_symbols=["ETHUSDT"], max_order_notional="20", max_daily_notional="50", actor="test-admin")
+    enable_admin_testnet_settings()
+    token = login(client)
+    response = client.post(
+        "/v1/binance/spot/order-submit",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"signal": signal(), "order_type": "LIMIT", "quantity": "0.1",
+              "price": "100", "time_in_force": "GTC", "client_order_id": "submit-disallowed-symbol"},
+    )
+    assert response.status_code == 422
+    assert response.json()["detail"] == "testnet_symbol_not_allowlisted"
+
+
+def test_admin_notional_limit_change_blocks_order_submit(client, monkeypatch, enable_admin_testnet_settings):
+    from app.testnet_settings import update_settings
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    enable_admin_testnet_settings()
+    update_settings(allowed_symbols=["BTCUSDT"], max_order_notional="5", max_daily_notional="50", actor="test-admin")
+    enable_admin_testnet_settings()
+    token = login(client)
+    response = client.post(
+        "/v1/binance/spot/order-submit",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"signal": signal(), "order_type": "LIMIT", "quantity": "0.1",
+              "price": "100", "time_in_force": "GTC", "client_order_id": "submit-over-limit"},
+    )
+    assert response.status_code == 422
+    assert response.json()["detail"] == "testnet_order_notional_limit"
