@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: m1-trading-control-plane
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: main
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /ready
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: M1_DB_PATH
+        value: /tmp/m1.sqlite3
+      - key: M1_TESTNET_ENCRYPTION_KEY_FILE
+        value: /tmp/m1_testnet_encryption_key
+      - key: M1_TESTNET_ORDER_SUBMISSION_ENABLED
+        value: "false"
+      - key: M1_AUTH_SECRET
+        generateValue: true
+      - key: M1_ADMIN_USERNAME
+        value: admin
+      - key: M1_ADMIN_PASSWORD_HASH
+        sync: false
+      - key: M1_ALLOWED_HOSTS
+        value: "*.onrender.com,localhost,127.0.0.1"
+      - key: M1_AUTH_TOKEN_MINUTES
+        value: "30"
+      - key: M1_LOGIN_RATE_PER_MINUTE
+        value: "10"
+      - key: M1_API_RATE_PER_MINUTE
+        value: "120"
+      - key: M1_MAX_BODY_BYTES
+        value: "65536"
+      - key: M1_PAPER_INITIAL_CASH
+        value: "10000"
+      - key: M1_PAPER_FEE_BPS
+        value: "10"
+      - key: M1_PAPER_MAX_NOTIONAL
+        value: "1000"
+      - key: M1_PAPER_MAX_TRADE_RISK_PCT
+        value: "1"
+      - key: M1_PAPER_MAX_OPEN_RISK_PCT
+        value: "3"
+      - key: M1_PAPER_MAX_DAILY_LOSS_PCT
+        value: "5"
