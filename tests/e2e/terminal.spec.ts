@@ -61,6 +61,11 @@ test('real local backend: login, durable switch, validation, audit and logout', 
   await page.getByTestId('button-login').click();
   await expect(page.locator('#authenticated-controls')).toBeVisible();
   await expect(page.locator('#readiness-output')).toContainText('"live_enabled": false');
+  await expect(page.locator('#open-testnet-settings')).toBeVisible();
+  await page.locator('#open-testnet-settings').click();
+  await expect(page.locator('#testnet-admin-panel')).toBeVisible();
+  await expect(page.locator('#testnet-settings-output')).toContainText('SPOT_TESTNET');
+  await expect(page.locator('#testnet-admin-status')).toContainText('معطّل');
   await page.locator('#kill-on').click();
   await expect(page.locator('#control-message')).toContainText('مفتاح الإيقاف مفعّل');
   await page.locator('#validate-signal').click();
