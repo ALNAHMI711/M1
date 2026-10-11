@@ -1,8 +1,8 @@
-name: Deploy to GitHub Pages
+name: Deploy to GitHub Pages (manual only)
 
+# Intentionally no push trigger: merging code must not deploy a site automatically.
+# Run this workflow manually only after explicitly enabling/configuring GitHub Pages.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -22,11 +22,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Build library
         run: npm run build
