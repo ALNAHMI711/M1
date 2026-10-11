@@ -138,3 +138,26 @@ async def current_user(
 
 def revoke(token: str) -> None:
     revoke_session(_decode(token).jti)
+
+def _hash_password_cli() -> int:
+    """Print a password hash for secure first-admin bootstrap; never print the password."""
+    import argparse
+    from getpass import getpass
+
+    parser = argparse.ArgumentParser(description="M1 authentication utilities")
+    parser.add_argument("command", choices=["hash-password"], help="Utility to run")
+    args = parser.parse_args()
+    if args.command == "hash-password":
+        password = getpass("New administrator password: ")
+        confirmation = getpass("Confirm administrator password: ")
+        if not password:
+            parser.error("password must not be empty")
+        if not secrets.compare_digest(password, confirmation):
+            parser.error("passwords do not match")
+        print(PasswordHash.recommended().hash(password))
+        return 0
+    return 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(_hash_password_cli())
