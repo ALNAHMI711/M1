@@ -55,19 +55,17 @@ def test_rejected_intent_never_reaches_transport():
     assert transport.calls == []
 
 
-def test_approved_testnet_intent_reaches_testnet_transport():
+def test_approved_testnet_intent_is_blocked_from_generic_transport():
     transport = RecordingTransport(mode="TESTNET")
     executor = RiskGatedExecutor(transport, mode="TESTNET")
 
     result = executor.submit(_intent())
 
-    assert result == {"accepted": True}
-    assert transport.calls == [{
-        "client_order_id": "TEST-1",
-        "symbol": "BTCUSDT",
-        "side": "BUY",
-        "quantity": Decimal("0.001"),
-    }]
+    assert result == {
+        "accepted": False, "mode": "TESTNET", "status": "blocked",
+        "reason": "testnet_orchestrator_required",
+    }
+    assert transport.calls == []
 
 
 @pytest.mark.parametrize("mode", ["DEVELOPMENT", "BACKTEST", "DRY_RUN", "PAPER"])
