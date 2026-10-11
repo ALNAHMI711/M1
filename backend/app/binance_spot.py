@@ -255,6 +255,8 @@ class BinanceSpotClient:
             raise BinanceAPIError("testnet_order_submission_disabled")
         if self.execution_mode != "TESTNET":
             raise BinanceAPIError("testnet_client_required")
+        if side.upper() != "BUY" or order_type.upper() != "LIMIT":
+            raise BinanceAPIError("only_limit_buy_testnet_orders_are_enabled")
         if not self.config.api_key or not self.config.api_secret:
             raise BinanceAPIError("missing_binance_credentials")
         if not isinstance(client_order_id, str) or not client_order_id.strip():
