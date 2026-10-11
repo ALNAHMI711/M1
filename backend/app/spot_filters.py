@@ -295,8 +295,10 @@ def validate_spot_order_with_account(
         context.prec = 100
         notional = qty * limit_price
         required_quote = notional * (Decimal(10_000 + fee_buffer_bps) / Decimal(10_000))
-    if quote_free < required_quote:
+    if side == "BUY" and quote_free < required_quote:
         raise SpotFilterError("insufficient_free_quote_balance")
+    if side == "SELL" and base_free < qty:
+        raise SpotFilterError("insufficient_free_base_balance")
 
     symbol_open_count = 0
     total_open_count = 0
