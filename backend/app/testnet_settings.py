@@ -20,19 +20,52 @@ def _now():
     return datetime.now(timezone.utc).isoformat()
 
 def load_master_key(path: str | None=None) -> bytes:
-    """Load base64 for a 32-byte AES key; no env/plaintext fallback."""
-    p=Path(path or os.getenv("M1_TESTNET_ENCRYPTION_KEY_FILE",DEFAULT_KEY_FILE))
+    """Load a protected base64 AES key; reject project paths and unsafe links."""
+    configured = path or os.getenv("M1_TESTNET_ENCRYPTION_KEY_FILE", DEFAULT_KEY_FILE)
+    p = Path(configured).expanduser()
+    project_root = Path(__file__).resolve().parents[2]
+    lexical_path = Path(os.path.abspath(p))
+    allowed_secrets_root = Path(
+        os.getenv("M1_TESTNET_SECRETS_DIR", "/run/secrets")
+    ).resolve()
+
+    # Reject both a path lexically inside the checkout and a path that resolves
+    # into it (including links from outside the checkout).
     try:
-        info=p.stat()
-        if not stat.S_ISREG(info.st_mode): raise RuntimeError("testnet_encryption_key_file_invalid")
-        if str(p)!=DEFAULT_KEY_FILE and stat.S_IMODE(info.st_mode)&0o077:
+        resolved_path = p.resolve(strict=True)
+    except FileNotFoundError:
+        raise RuntimeError("testnet_encryption_key_missing") from None
+    except OSError:
+        raise RuntimeError("testnet_encryption_key_unreadable") from None
+
+    if lexical_path.is_relative_to(project_root) or resolved_path.is_relative_to(project_root):
+        raise RuntimeError("testnet_encryption_key_path_inside_project")
+
+    # A symlink is permitted only when its resolved target remains under the
+    # configured secrets mount. Ordinary protected files may live elsewhere,
+    # provided they remain outside the project tree.
+    if p.is_symlink() and not resolved_path.is_relative_to(allowed_secrets_root):
+        raise RuntimeError("testnet_encryption_key_symlink_target_not_allowed")
+
+    try:
+        info = p.stat()
+        if not stat.S_ISREG(info.st_mode):
+            raise RuntimeError("testnet_encryption_key_file_invalid")
+        permissions = stat.S_IMODE(info.st_mode)
+        if permissions & 0o077 or permissions & 0o004:
             raise RuntimeError("testnet_encryption_key_file_permissions_invalid")
-        raw=p.read_bytes().strip()
-    except FileNotFoundError: raise RuntimeError("testnet_encryption_key_missing") from None
-    except OSError: raise RuntimeError("testnet_encryption_key_unreadable") from None
-    try: key=base64.b64decode(raw,validate=True)
-    except (ValueError,base64.binascii.Error): raise RuntimeError("testnet_encryption_key_format_invalid") from None
-    if len(key)!=32: raise RuntimeError("testnet_encryption_key_must_be_32_bytes")
+        raw = p.read_bytes().strip()
+    except FileNotFoundError:
+        raise RuntimeError("testnet_encryption_key_missing") from None
+    except OSError:
+        raise RuntimeError("testnet_encryption_key_unreadable") from None
+
+    try:
+        key = base64.b64decode(raw, validate=True)
+    except (ValueError, base64.binascii.Error):
+        raise RuntimeError("testnet_encryption_key_format_invalid") from None
+    if len(key) != 32:
+        raise RuntimeError("testnet_encryption_key_must_be_32_bytes")
     return key
 
 def encrypt_value(value: str, *, field: str, key: bytes, nonce: bytes | None=None):
