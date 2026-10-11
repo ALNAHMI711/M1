@@ -17,6 +17,7 @@ from .store import (
     claim_spot_testnet_order_submission,
     get_execution_order,
 )
+from .testnet_settings import get_settings
 
 
 class SpotTestnetSubmissionError(RuntimeError):
@@ -49,6 +50,9 @@ def submit_reserved_spot_testnet_order(
         raise SpotTestnetSubmissionError("testnet_client_required")
     if os.getenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "false").lower() != "true":
         raise SpotTestnetSubmissionError("testnet_order_submission_disabled")
+    settings = get_settings()
+    if not settings["enabled"] or not settings["manual_approval"] or not settings["credentials_test_passed"]:
+        raise SpotTestnetSubmissionError("testnet_admin_settings_disabled")
     order = get_execution_order(client_order_id)
     if order is None:
         raise SpotTestnetSubmissionError("reserved_testnet_order_not_found")
@@ -76,15 +80,11 @@ def submit_reserved_spot_testnet_order(
     # explicit server allowlist; never sell or submit a market order here.
     if payload.get("order_type") != "LIMIT" or order["side"] != "BUY":
         raise SpotTestnetSubmissionError("testnet_order_type_or_side_not_enabled")
-    allowed_symbols = {
-        item.strip().upper()
-        for item in os.getenv("M1_TESTNET_ALLOWED_SYMBOLS", "").split(",")
-        if item.strip()
-    }
+    allowed_symbols = set(settings["allowed_symbols"])
     if not allowed_symbols or order["symbol"] not in allowed_symbols:
         raise SpotTestnetSubmissionError("testnet_symbol_not_allowlisted")
     try:
-        maximum_notional = Decimal(os.getenv("M1_TESTNET_MAX_NOTIONAL", "0"))
+        maximum_notional = Decimal(settings["max_order_notional"])
         notional = Decimal(order["quantity"]) * Decimal(str(payload["price"]))
     except (InvalidOperation, KeyError, TypeError) as exc:
         raise SpotTestnetSubmissionError("testnet_order_notional_invalid") from exc
