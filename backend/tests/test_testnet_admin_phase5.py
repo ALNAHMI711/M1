@@ -1,3 +1,4 @@
+import pytest
 import time
 from datetime import datetime, timezone, timedelta
 
@@ -113,3 +114,31 @@ def test_admin_page_is_responsive_arabic_rtl(monkeypatch):
         assert 'lang="ar"' in response.text
         assert 'dir="rtl"' in response.text
         assert "حالة Testnet" in response.text
+
+
+@pytest.mark.parametrize(("method", "path", "body"), [
+    ("GET", "/v1/admin/settings/testnet", None),
+    ("PUT", "/v1/admin/settings/testnet", {"allowed_symbols": ["BTCUSDT"], "max_order_notional": "10", "max_daily_notional": "20", "enabled": False}),
+    ("GET", "/v1/admin/settings/testnet/credentials/status", None),
+    ("PUT", "/v1/admin/settings/testnet/credentials", {"api_key": "fake", "api_secret": "fake"}),
+    ("POST", "/v1/admin/settings/testnet/credentials/test", {}),
+    ("DELETE", "/v1/admin/settings/testnet/credentials", None),
+    ("POST", "/v1/admin/settings/testnet/activation", {"confirm": True}),
+    ("DELETE", "/v1/admin/settings/testnet/activation", None),
+    ("GET", "/v1/admin/settings/testnet/audit", None),
+])
+def test_every_admin_endpoint_rejects_viewer_and_expired_sessions(monkeypatch, method, path, body):
+    monkeypatch.setenv("M1_AUTH_SECRET", "test-secret-for-settings-0123456789")
+    viewer = create_access_token("viewer", "VIEWER")
+    now = int(time.time())
+    expired = jwt.encode({
+        "sub": "test-admin", "role": "ADMIN",
+        "scope": "admin control:read control:write signals:read signals:validate trading:admin paper:read paper:write",
+        "iat": now - 120, "exp": now - 60, "jti": "expired-" + path.rsplit("/", 1)[-1],
+        "iss": "m1-control-plane", "aud": "m1-control-api",
+    }, "test-secret-for-settings-0123456789", algorithm="HS256")
+    with TestClient(app) as client:
+        viewer_response = client.request(method, path, headers={"Authorization": f"Bearer {viewer}"}, json=body)
+        expired_response = client.request(method, path, headers={"Authorization": f"Bearer {expired}"}, json=body)
+        assert viewer_response.status_code == 403
+        assert expired_response.status_code == 401
