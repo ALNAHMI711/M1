@@ -365,3 +365,27 @@ def test_admin_notional_limit_change_blocks_order_submit(client, monkeypatch, en
     )
     assert response.status_code == 422
     assert response.json()["detail"] == "testnet_order_notional_limit"
+
+
+def test_daily_notional_cap_is_reserved_across_testnet_submissions(client, monkeypatch, enable_admin_testnet_settings):
+    from app.testnet_settings import save_credentials, update_settings
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    update_settings(allowed_symbols=["BTCUSDT"], max_order_notional="10", max_daily_notional="15", actor="test-admin")
+    save_credentials(api_key="synthetic-submit-key", api_secret="synthetic-submit-secret", actor="test-admin")
+    enable_admin_testnet_settings()
+    monkeypatch.setattr(FakeBinanceClient, "order_submission_preflight", lambda self, **kwargs: {
+        "deferred_checks": [], "account_and_asset_filters_verified": True,
+    })
+    token = login(client)
+    headers = {"Authorization": f"Bearer {token}"}
+    first = client.post("/v1/binance/spot/order-submit", headers=headers, json={
+        "signal": signal(), "order_type": "LIMIT", "quantity": "0.1", "price": "100",
+        "time_in_force": "GTC", "client_order_id": "daily-cap-first",
+    })
+    second = client.post("/v1/binance/spot/order-submit", headers=headers, json={
+        "signal": signal(), "order_type": "LIMIT", "quantity": "0.1", "price": "100",
+        "time_in_force": "GTC", "client_order_id": "daily-cap-second",
+    })
+    assert first.status_code == 200
+    assert second.status_code == 422
+    assert second.json()["detail"] == "testnet_daily_notional_limit"
