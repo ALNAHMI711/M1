@@ -57,4 +57,9 @@ if grep -RIlE 'M1_TESTNET_ENCRYPTION_KEY[[:space:]]*=[[:space:]]*["]?[A-Za-z0-9+
 fi
 pass "No encryption-key literal detected in Docker build files"
 
+[[ -f backend/Dockerfile ]] || fail "backend/Dockerfile is missing"
+grep -Fq 'WORKDIR /opt/m1/backend' backend/Dockerfile || fail "backend image must preserve the expected /opt/m1/backend project layout"
+grep -Fq 'COPY --chown=m1:m1 backend/app /opt/m1/backend/app' backend/Dockerfile || fail "backend app must be copied to /opt/m1/backend/app so the key-path guard resolves correctly"
+pass "Backend Dockerfile preserves the project-root layout required by the encryption-key path guard"
+
 printf '\nStaging preflight passed. No services were started and no deployment was performed.\n'

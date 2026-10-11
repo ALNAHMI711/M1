@@ -40,7 +40,7 @@ Do not put encryption-key bytes in an environment variable. Only `M1_TESTNET_ENC
 Run on the staging host, outside the repository. This produces Base64 of 32 cryptographically random bytes:
 
 ```bash
-sudo install -d -o root -g 10001 -m 0700 /etc/m1-staging/secrets
+sudo install -d -o root -g root -m 0711 /etc/m1-staging/secrets
 sudo sh -c 'umask 077; openssl rand -base64 32 > /etc/m1-staging/secrets/testnet-encryption-key'
 sudo chown 10001:10001 /etc/m1-staging/secrets/testnet-encryption-key
 sudo chmod 0600 /etc/m1-staging/secrets/testnet-encryption-key
@@ -53,7 +53,7 @@ python3 -c 'import base64,pathlib; p=pathlib.Path("/etc/m1-staging/secrets/testn
 stat -c '%a %u:%g %n' /etc/m1-staging/secrets/testnet-encryption-key
 ```
 
-Expected mode is `600`. Ownership by UID/GID `10001:10001` lets the non-root backend process read the local Compose file secret while preserving restrictive permissions. Keep the file backed up securely: credentials saved with this key cannot be decrypted if the key is lost or changed. Never rotate/delete it after credentials have been saved without a tested re-encryption migration.
+Expected mode is `600`. The parent directory is root-owned with mode `711` so the service can traverse the known path without listing the directory. Ownership by UID/GID `10001:10001` lets the non-root backend process read the file; the file remains mode `600`. Keep the file backed up securely: credentials saved with this key cannot be decrypted if the key is lost or changed. Never rotate/delete it after credentials have been saved without a tested re-encryption migration.
 
 ### Prepare host-only `.env`
 
@@ -73,7 +73,29 @@ python3 -c 'from getpass import getpass; from pwdlib import PasswordHash; print(
 
 Run this in the backend virtual environment where `pwdlib` is installed. Do not store the plaintext password in `.env`. Set `M1_TESTNET_ENCRYPTION_KEY_FILE` to the absolute host path above. Leave `BINANCE_API_KEY`, `BINANCE_API_SECRET`, and `M1_TESTNET_ORDER_SUBMISSION_ENABLED` unset. Leave `TRADINGVIEW_WEBHOOK_SECRET` unset unless intentionally testing webhooks.
 
-## 2. Review and preflight
+## 2. Ubuntu VPS prerequisites and installation
+
+Use a clean supported Ubuntu LTS VPS, a DNS name you control, and a non-root sudo user. Recommended starting point: **2 vCPU, 2 GB RAM, 20 GB SSD**. A 1 vCPU / 1 GB host may run at low load, but image builds may run out of memory.
+
+Install Docker Engine and the Compose plugin from Docker's official apt repository:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo $VERSION_CODENAME) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo systemctl enable --now docker
+docker --version
+docker compose version
+```
+
+Do not add an untrusted account to the `docker` group: membership is effectively root-level access. Use `sudo docker` if appropriate.
+
+## 3. Review and preflight
 
 1. Use only `feature/testnet-settings-admin`; verify the checked-out SHA is the reviewed commit.
 2. Verify DNS A/AAAA records point to staging and the host firewall allows inbound TCP 80/443. Caddy needs public port 80 for ACME HTTP challenge/redirect and 443 for HTTPS. UDP 443 is optional for HTTP/3.
@@ -81,7 +103,22 @@ Run this in the backend virtual environment where `pwdlib` is installed. Do not 
 4. Check rendered Compose configuration with `docker compose config --quiet`. Do not paste expanded configuration into public logs because it includes environment values.
 5. Confirm `.env` and the encryption-key file are outside Git. `.dockerignore` excludes `.env` and `.env.*`.
 
-## 3. Start staging (no trading activation)
+## 4. Clone the project (preparation only)
+
+```bash
+git clone --branch feature/testnet-settings-admin --single-branch https://github.com/ALNAHMI711/M1.git
+cd M1
+git rev-parse --abbrev-ref HEAD
+git rev-parse HEAD
+```
+
+Verify the branch and compare the SHA with the reviewed commit before continuing. Do not use `main`.
+
+## 5. Configure Caddy's hostname
+
+The current `deploy/Caddyfile` already reads `M1_SITE_ADDRESS`; do not hard-code a domain into the image. Set `M1_SITE_ADDRESS` in the host-only `.env` to a bare DNS hostname such as `staging.example.com` (no scheme). Point DNS A/AAAA records to the VPS and allow inbound TCP 80/443 in both provider and host firewalls. Caddy obtains and renews the TLS certificate when DNS and ports are correct.
+
+## 6. Start staging (only after owner approval)
 
 From the repository root on the staging host:
 
@@ -98,7 +135,7 @@ docker compose ps
 
 Do not run until the owner reviews the exact commit and host configuration. This starts the app but does not activate Testnet or place orders. Compose publishes Caddy on host ports 80/443; the backend only has internal `expose: 8000` and no host-published port. SQLite data is on the persistent `m1-data` named volume; Caddy certificate/configuration data uses persistent named volumes too.
 
-## 4. Verify startup and encryption
+## 7. Verify startup and encryption
 
 ```bash
 docker compose ps
@@ -110,14 +147,14 @@ Replace the example hostname with the configured DNS name. Expect HTTP 200 JSON 
 
 If HTTPS/certificate issuance fails, stop and fix DNS/firewall/Caddy before entering any credential.
 
-## 5. Verify Testnet is off
+## 8. Verify Testnet is off
 
 1. Sign in with the staging administrator account over HTTPS.
 2. Open **إعدادات Spot Testnet** in the control panel.
 3. Confirm environment is `SPOT_TESTNET`, status is disabled, manual approval is off, and no credentials are present.
 4. Verify `M1_TESTNET_ORDER_SUBMISSION_ENABLED` is unset or `false`. Do not activate anything during the initial smoke test.
 
-## 6. Add Spot Testnet credentials and test connectivity
+## 9. Add Spot Testnet credentials and test connectivity
 
 Only after the owner confirms HTTPS, host identity, administrator login, persistent storage, and key-load health:
 
@@ -127,7 +164,7 @@ Only after the owner confirms HTTPS, host identity, administrator login, persist
 4. Click **اختبار الاتصال / Test credentials** once. This is a read-only account request against `https://testnet.binance.vision`; it is not an order. Confirm the UI reports success and the audit entry shows the read-only check passed.
 5. Confirm Testnet is still disabled after the test. The credential test intentionally resets activation to disabled.
 
-## 7. Activation and emergency disable
+## 10. Activation and emergency disable
 
 Activation is **not part of the initial deployment**. Only after a separate explicit owner review of staging may the owner enable Testnet through the UI's separate activation confirmation. Activation requires saved credentials and a successful read-only test; only the admin owner role can confirm. Current execution policy remains Spot Testnet only, BUY LIMIT only, with allowlisted symbols and bounded order sizes. Passing connectivity does not mean production readiness.
 
@@ -146,3 +183,9 @@ If anything looks wrong:
 - No deployment from `main`, no merge, and no PR #4 changes as part of this staging preparation.
 
 **Stop condition:** if Compose differs from this guide, the key is unreadable by the backend, HTTPS is not valid, or Testnet does not clearly show disabled, do not enter credentials and do not activate Testnet.
+
+## Docker image and key-path invariant
+
+`backend/Dockerfile` already exists. It must preserve the layout expected by `backend/app/testnet_settings.py`: application code at `/opt/m1/backend/app` makes `/opt/m1` the project root and leaves `/run/secrets/m1_testnet_encryption_key` outside it. Do not move the app to `/app/app` without updating and testing the path guard; that layout can cause the key path to be rejected.
+
+The encryption key is not baked into the image. Compose mounts the host key as `/run/secrets/m1_testnet_encryption_key`; only this in-container path is passed to the backend. The host source path is used by Compose to locate the file.
