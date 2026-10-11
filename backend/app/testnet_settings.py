@@ -20,7 +20,11 @@ def _now():
     return datetime.now(timezone.utc).isoformat()
 
 def load_master_key(path: str | None=None) -> bytes:
-    """Load a protected base64 AES key; reject project paths and unsafe links."""
+    """Load a protected base64 AES key; reject project paths and unsafe links.
+
+    TODO(security): implement versioned key rotation and re-encryption of stored
+    credentials before enabling production use. Rotation is intentionally deferred.
+    """
     configured = path or os.getenv("M1_TESTNET_ENCRYPTION_KEY_FILE", DEFAULT_KEY_FILE)
     p = Path(configured).expanduser()
     project_root = Path(__file__).resolve().parents[2]
@@ -47,14 +51,37 @@ def load_master_key(path: str | None=None) -> bytes:
     if p.is_symlink() and not resolved_path.is_relative_to(allowed_secrets_root):
         raise RuntimeError("testnet_encryption_key_symlink_target_not_allowed")
 
+    # Open the resolved target once, then validate the opened inode before reading.
+    # This narrows the path-swap/TOCTOU window without following a second path read.
+    # TODO(security): consider platform-specific openat2/RESOLVE_BENEATH hardening
+    # if the secret mount can be modified by an untrusted local process.
     try:
-        info = p.stat()
-        if not stat.S_ISREG(info.st_mode):
-            raise RuntimeError("testnet_encryption_key_file_invalid")
-        permissions = stat.S_IMODE(info.st_mode)
-        if permissions & 0o077 or permissions & 0o004:
-            raise RuntimeError("testnet_encryption_key_file_permissions_invalid")
-        raw = p.read_bytes().strip()
+        expected = resolved_path.stat()
+        fd = os.open(resolved_path, os.O_RDONLY | getattr(os, "O_CLOEXEC", 0))
+        try:
+            info = os.fstat(fd)
+            if not stat.S_ISREG(info.st_mode):
+                raise RuntimeError("testnet_encryption_key_file_invalid")
+            if (info.st_dev, info.st_ino) != (expected.st_dev, expected.st_ino):
+                raise RuntimeError("testnet_encryption_key_file_changed")
+            # Accept root-owned Docker secrets and files owned by the service user;
+            # reject files owned by a different untrusted account.
+            if info.st_uid not in {0, os.geteuid()}:
+                raise RuntimeError("testnet_encryption_key_file_owner_invalid")
+            permissions = stat.S_IMODE(info.st_mode)
+            if permissions & 0o077 or permissions & 0o004:
+                raise RuntimeError("testnet_encryption_key_file_permissions_invalid")
+            chunks = []
+            while True:
+                chunk = os.read(fd, 4096)
+                if not chunk:
+                    break
+                chunks.append(chunk)
+            raw = b"".join(chunks).strip()
+        finally:
+            os.close(fd)
+    except RuntimeError:
+        raise
     except FileNotFoundError:
         raise RuntimeError("testnet_encryption_key_missing") from None
     except OSError:
