@@ -11,7 +11,7 @@ Names and metadata only; never copy secret values into this document or Git.
 | `M1_SITE_ADDRESS` | Yes | Caddy site address: a bare public DNS name (for example, `staging.example.com`), not a URL or scheme | No | Choose a DNS name and point its A/AAAA records to the staging host |
 | `M1_AUTH_SECRET` | Yes | Random UTF-8 secret of at least 32 bytes, used to sign sessions | **Yes** | Generate locally with `openssl rand -base64 48`; keep only in the host's untracked `.env` |
 | `M1_ADMIN_USERNAME` | Recommended | Initial administrator login name; plain text | No | Choose a unique staging-only name |
-| `M1_ADMIN_PASSWORD_HASH` | Yes for first-login bootstrap | Password hash produced by `pwdlib.PasswordHash.recommended()`; never a plaintext password | **Sensitive** | Generate using the command below; do not commit it |
+| `M1_ADMIN_PASSWORD_HASH` | Yes for first-login bootstrap | Password hash generated inside the backend Docker image by `python -m app.auth hash-password`; never a plaintext password | **Sensitive** | Use the Docker command below and store the hash only in the untracked host `.env` |
 | `M1_AUTH_TOKEN_MINUTES` | Optional | Integer from 1 to 60; default 30 | No | Choose a short staging session duration |
 | `M1_LOGIN_RATE_PER_MINUTE` | Optional | Positive integer login rate limit | No | Choose a conservative rate |
 | `M1_API_RATE_PER_MINUTE` | Optional | Positive integer API rate limit | No | Choose a conservative rate |
@@ -65,13 +65,16 @@ cp .env.example .env
 chmod 0600 .env
 ```
 
-Edit locally. Set `M1_SITE_ADDRESS` to the bare DNS name (e.g. `staging.example.com`), `M1_AUTH_SECRET` to output from `openssl rand -base64 48`, and `M1_ADMIN_USERNAME` to your chosen staging admin name. Set `M1_ADMIN_PASSWORD_HASH` to the output of:
+Edit locally. Set `M1_SITE_ADDRESS` to the bare DNS name (e.g. `staging.example.com`), `M1_AUTH_SECRET` to output from `openssl rand -base64 48`, and `M1_ADMIN_USERNAME` to your chosen staging admin name. Set `M1_TESTNET_ENCRYPTION_KEY_FILE` to the absolute host path above. Leave `BINANCE_API_KEY`, `BINANCE_API_SECRET`, and `M1_TESTNET_ORDER_SUBMISSION_ENABLED` unset. Leave `TRADINGVIEW_WEBHOOK_SECRET` unset unless intentionally testing webhooks.
+
+Generate `M1_ADMIN_PASSWORD_HASH` using the same backend image and locked dependencies used by the application; no host Python installation is needed. After `.env` contains `M1_SITE_ADDRESS` and `M1_TESTNET_ENCRYPTION_KEY_FILE`, run:
 
 ```bash
-python3 -c 'from getpass import getpass; from pwdlib import PasswordHash; print(PasswordHash.recommended().hash(getpass("New staging admin password: ")))'
+docker compose build backend
+docker compose run --rm --no-deps backend python -m app.auth hash-password
 ```
 
-Run this in the backend virtual environment where `pwdlib` is installed. Do not store the plaintext password in `.env`. Set `M1_TESTNET_ENCRYPTION_KEY_FILE` to the absolute host path above. Leave `BINANCE_API_KEY`, `BINANCE_API_SECRET`, and `M1_TESTNET_ORDER_SUBMISSION_ENABLED` unset. Leave `TRADINGVIEW_WEBHOOK_SECRET` unset unless intentionally testing webhooks.
+Enter the new administrator password twice when prompted. The command prints only the password hash; copy that single line into `M1_ADMIN_PASSWORD_HASH` in the host-only `.env`. It rejects an empty password or mismatched confirmation. Do not save the plaintext password, paste it into chat, or put it in Git. The command overrides the container's normal server command and does not start the backend service or enable Testnet. If Docker requires elevated permissions for your account, prefix both commands with `sudo` consistently.
 
 ## 2. Ubuntu VPS prerequisites and installation
 
