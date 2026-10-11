@@ -206,7 +206,7 @@ def recent_testnet_audit(*, limit: int=50):
         except (TypeError,ValueError):
             detail={"message":"redacted"}
         # Never return credentials, raw request data, or arbitrary exception text.
-        safe={k:detail[k] for k in ("actor","symbols","max_order_notional","max_daily_notional","environment","confirmation") if k in detail}
+        safe={k:detail[k] for k in ("actor","operation","symbols","max_order_notional","max_daily_notional","environment","confirmation") if k in detail}
         result.append({"id":row["id"],"event":row["event"],"status":row["status"],"detail":safe,"created_at":row["created_at"]})
     return result
 
