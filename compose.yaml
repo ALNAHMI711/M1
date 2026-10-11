@@ -27,10 +27,11 @@ services:
       dockerfile: deploy/Frontend.Dockerfile
     restart: unless-stopped
     environment:
-      M1_SITE_ADDRESS: ${M1_SITE_ADDRESS:-localhost}
+      M1_SITE_ADDRESS: ${M1_SITE_ADDRESS:?Set M1_SITE_ADDRESS to a public DNS hostname}
     ports:
-      - "127.0.0.1:8080:80"
-      - "127.0.0.1:8443:443"
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
     volumes:
       - caddy-data:/data
       - caddy-config:/config

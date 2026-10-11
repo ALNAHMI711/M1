@@ -11,6 +11,29 @@ permissions:
   contents: read
 
 jobs:
+  staging-preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - name: Prepare disposable, non-production preflight fixtures
+        run: |
+          mkdir -p /tmp/m1-staging-secrets
+          head -c 32 /dev/urandom | base64 > /tmp/m1-staging-secrets/key
+          chmod 600 /tmp/m1-staging-secrets/key
+          {
+            printf 'M1_AUTH_SECRET=%s\n' "$(openssl rand -base64 48)"
+            printf 'M1_SITE_ADDRESS=staging.example.invalid\n'
+            printf 'M1_ADMIN_USERNAME=ci-staging-admin\n'
+            printf 'M1_ADMIN_PASSWORD_HASH=ci-only-placeholder-not-used-for-login\n'
+            printf 'M1_TESTNET_ENCRYPTION_KEY_FILE=/tmp/m1-staging-secrets/key\n'
+          } > .env
+          chmod 600 .env
+          echo "M1_TESTNET_ENCRYPTION_KEY_FILE=/tmp/m1-staging-secrets/key" >> "$GITHUB_ENV"
+      - name: Run staging preflight checks (no deployment)
+        run: bash scripts/staging_preflight.sh
+
   verify:
     runs-on: ubuntu-latest
     steps:
