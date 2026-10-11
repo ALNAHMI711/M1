@@ -264,7 +264,9 @@ def reserve_daily_notional(*, client_order_id: str, notional: Decimal, daily_lim
 
     Reservations are conservative: once preflight passes, an ambiguous or failed
     submission keeps its allocation for the UTC day rather than allowing retries
-    to bypass the daily cap.
+    to bypass the daily cap. In particular, UNKNOWN means the request may have
+    reached Binance; do not refund the reservation automatically. Reconciliation
+    is read-only, and the reservation expires only by rolling into the next UTC day.
     """
     apply_migrations()
     if not notional.is_finite() or notional <= 0 or not daily_limit.is_finite() or daily_limit <= 0:
