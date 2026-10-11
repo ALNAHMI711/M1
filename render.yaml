@@ -1,3 +1,8 @@
+# Render Blueprint: one Docker backend service only (no Compose/Caddy).
+# Trial storage is intentionally ephemeral: SQLite at /tmp/m1.sqlite3 and the
+# auto-generated encryption key at /tmp/m1_testnet_encryption_key.
+# Render restarts/redeploys can erase sessions, audit/PAPER records, settings,
+# and the encryption key. Do not store real exchange credentials on this trial.
 services:
   - type: web
     name: m1-trading-control-plane
