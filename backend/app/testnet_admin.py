@@ -1,7 +1,9 @@
 """Admin-only Spot Testnet settings API."""
 import logging
+from pathlib import Path
 from contextlib import suppress
 from fastapi import APIRouter, HTTPException, Security, Query
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field, SecretStr
 from .auth import current_user
 from .binance_spot import BinanceAPIError, BinanceSpotClient, BinanceSpotConfig
@@ -11,6 +13,11 @@ from .testnet_settings import (activate_testnet, apply_migrations, credentials_s
 
 logger=logging.getLogger(__name__)
 router=APIRouter()
+
+@router.get("/admin/testnet", response_class=HTMLResponse, include_in_schema=False)
+def testnet_admin_page():
+    page = Path(__file__).parent / "templates" / "testnet_admin.html"
+    return HTMLResponse(page.read_text(encoding="utf-8"))
 
 class TestnetSettingsInput(BaseModel):
     model_config=ConfigDict(extra="forbid")
