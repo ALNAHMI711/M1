@@ -78,7 +78,11 @@ def submit_reserved_spot_testnet_order(
     # Current account/asset state and market-reference checks are incomplete.
     # Until those are implemented, permit only bounded limit buys from an
     # explicit server allowlist; never sell or submit a market order here.
-    if payload.get("order_type") != "LIMIT" or order["side"] != "BUY":
+    if (
+        payload.get("order_type") != "LIMIT" or order["side"] != "BUY"
+        or payload.get("price") is None or str(payload.get("price")) != str(order["price"])
+        or payload.get("time_in_force") not in {"GTC", "IOC", "FOK"}
+    ):
         raise SpotTestnetSubmissionError("testnet_order_type_or_side_not_enabled")
     allowed_symbols = set(settings["allowed_symbols"])
     if not allowed_symbols or order["symbol"] not in allowed_symbols:
@@ -104,6 +108,35 @@ def submit_reserved_spot_testnet_order(
     accepted, reasons = risk_check(signal)
     if not accepted:
         raise SpotTestnetSubmissionError("testnet_risk_rejected:" + ",".join(reasons))
+
+    # Repeat the dynamic account/asset/reference checks here, not only in the
+    # HTTP route. This protects any future scheduler, CLI, or internal caller.
+    try:
+        report = client.order_submission_preflight(
+            symbol=payload["symbol"], side="BUY", order_type="LIMIT",
+            quantity=payload["quantity"], price=payload["price"],
+            time_in_force=payload["time_in_force"],
+        )
+    except Exception as exc:
+        raise SpotTestnetSubmissionError("testnet_exchange_validation_failed") from exc
+    if (
+        not isinstance(report, dict) or report.get("deferred_checks")
+        or report.get("account_and_asset_filters_verified") is not True
+    ):
+        raise SpotTestnetSubmissionError("testnet_exchange_validation_incomplete")
+
+    try:
+        amount = Decimal(order["quantity"]) * Decimal(str(payload["price"]))
+        daily_limit = Decimal(settings["max_daily_notional"])
+    except (InvalidOperation, KeyError, TypeError) as exc:
+        raise SpotTestnetSubmissionError("testnet_order_notional_invalid") from exc
+    if not amount.is_finite() or amount <= 0 or not daily_limit.is_finite() or daily_limit <= 0:
+        raise SpotTestnetSubmissionError("testnet_order_notional_invalid")
+    from .testnet_settings import reserve_daily_notional
+    if not reserve_daily_notional(
+        client_order_id=client_order_id, notional=amount, daily_limit=daily_limit
+    ):
+        raise SpotTestnetSubmissionError("testnet_daily_notional_limit")
 
     if not claim_spot_testnet_order_submission(
         client_order_id, request_fingerprint=order["request_fingerprint"]
