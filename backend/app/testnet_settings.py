@@ -254,3 +254,32 @@ def delete_credentials(actor):
         c.execute("UPDATE app_settings SET enabled=0,credentials_test_passed=0,manual_approval=0,updated_by=?,updated_at=?,version=version+1 WHERE id=1",(actor,now))
         c.execute("INSERT INTO execution_audit(event,status,detail,created_at) VALUES(?,?,?,?)",
             ("TESTNET_CREDENTIALS","DELETED",json.dumps({"actor":actor,"operation":"credentials_deleted"}),now))
+
+
+def reserve_daily_notional(*, client_order_id: str, notional: Decimal, daily_limit: Decimal) -> bool:
+    """Atomically reserve daily Testnet notional by unique client order ID.
+
+    Reservations are conservative: once preflight passes, an ambiguous or failed
+    submission keeps its allocation for the UTC day rather than allowing retries
+    to bypass the daily cap.
+    """
+    apply_migrations()
+    if not notional.is_finite() or notional <= 0 or not daily_limit.is_finite() or daily_limit <= 0:
+        raise ValueError("testnet_order_limits_invalid")
+    day = datetime.now(timezone.utc).date().isoformat()
+    with connection() as c:
+        c.execute("""CREATE TABLE IF NOT EXISTS testnet_daily_reservations (
+            client_order_id TEXT PRIMARY KEY, trade_day TEXT NOT NULL, notional TEXT NOT NULL
+        )""")
+        c.execute("BEGIN IMMEDIATE")
+        existing = c.execute("SELECT trade_day FROM testnet_daily_reservations WHERE client_order_id=?",
+                              (client_order_id,)).fetchone()
+        if existing is not None:
+            return True
+        rows = c.execute("SELECT notional FROM testnet_daily_reservations WHERE trade_day=?", (day,)).fetchall()
+        spent = sum((Decimal(row["notional"]) for row in rows), Decimal("0"))
+        if spent + notional > daily_limit:
+            return False
+        c.execute("INSERT INTO testnet_daily_reservations(client_order_id,trade_day,notional) VALUES(?,?,?)",
+                  (client_order_id, day, format(notional, "f")))
+        return True
