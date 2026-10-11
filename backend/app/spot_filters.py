@@ -284,6 +284,11 @@ def validate_spot_order_with_account(
     base_free, base_locked = balance_values(base_asset)
     qty = _decimal(quantity, positive=True)
     limit_price = _decimal(price, positive=True)
+    with localcontext() as context:
+        context.prec = 100
+        deviation_bps = abs(limit_price - avg) * Decimal(10_000) / avg
+        if deviation_bps > Decimal(MAX_REFERENCE_PRICE_DEVIATION_BPS):
+            raise SpotFilterError("price_deviation_from_reference_too_large")
     if type(fee_buffer_bps) is not int or not 1 <= fee_buffer_bps <= 10_000:
         raise SpotFilterError("invalid_fee_buffer")
     with localcontext() as context:
