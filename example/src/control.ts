@@ -15,6 +15,10 @@ export function attachControlPanel() {
     el('readiness-output').textContent = el('audit-output').textContent = '';
     el('paper-account-output').textContent = el('paper-result').textContent = '';
     el('paper-write-controls').hidden = true;
+    el('testnet-admin-panel').hidden = true;
+    el('testnet-settings-output').textContent = '';
+    el<HTMLInputElement>('testnet-api-key').value = '';
+    el<HTMLInputElement>('testnet-api-secret').value = '';
   }
   async function api(path: string, options: RequestInit = {}, format: 'json' | 'text' = 'json') {
     const response = await fetch(__M1_API_BASE__ + path, {
@@ -101,6 +105,88 @@ export function attachControlPanel() {
     });
   });
   el('control-refresh').addEventListener('click', () => void action(refresh));
+
+  async function refreshTestnetSettings() {
+    const [settings, credentials, audit] = await Promise.all([
+      api('/v1/admin/settings/testnet'),
+      api('/v1/admin/settings/testnet/credentials/status'),
+      api('/v1/admin/settings/testnet/audit?limit=20'),
+    ]);
+    el('testnet-symbols').value = settings.allowed_symbols.join(',');
+    el<HTMLInputElement>('testnet-max-order').value = settings.max_order_notional;
+    el<HTMLInputElement>('testnet-max-daily').value = settings.max_daily_notional;
+    el('testnet-settings-output').textContent = JSON.stringify({
+      environment: settings.environment,
+      enabled: settings.enabled,
+      credentials_present: credentials.present,
+      credentials_test_passed: settings.credentials_test_passed,
+      updated_at: settings.updated_at,
+      recent_audit_events: audit.events?.length ?? 0,
+    }, null, 2);
+    el('testnet-admin-status').textContent = settings.enabled
+      ? 'تحذير: إعدادات Spot Testnet مفعّلة؛ تحقق من حدودها قبل أي إجراء.'
+      : 'Spot Testnet معطّل حالياً. لا تغيّر الإعدادات إلا إذا كنت مسؤولاً مخوّلاً.';
+  }
+  el('open-testnet-settings').addEventListener('click', () => void action(async () => {
+    el('testnet-admin-panel').hidden = false;
+    el('testnet-admin-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    await refreshTestnetSettings();
+  }));
+  el('testnet-refresh').addEventListener('click', () => void action(refreshTestnetSettings));
+  el('testnet-save-settings').addEventListener('click', () => void action(async () => {
+    const allowed_symbols = [...new Set(el<HTMLInputElement>('testnet-symbols').value
+      .split(',').map(s => s.trim().toUpperCase()).filter(Boolean))];
+    await api('/v1/admin/settings/testnet', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        allowed_symbols,
+        max_order_notional: el<HTMLInputElement>('testnet-max-order').value,
+        max_daily_notional: el<HTMLInputElement>('testnet-max-daily').value,
+        enabled: false,
+      }),
+    });
+    await refreshTestnetSettings();
+    message('حُفظت الحدود والرموز؛ لم يتم تفعيل Testnet.');
+  }));
+  el('testnet-save-credentials').addEventListener('click', () => void action(async () => {
+    const api_key = el<HTMLInputElement>('testnet-api-key').value;
+    const api_secret = el<HTMLInputElement>('testnet-api-secret').value;
+    if (!api_key || !api_secret) throw new Error('أدخل مفتاح وسر Spot Testnet.');
+    await api('/v1/admin/settings/testnet/credentials', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ api_key, api_secret }),
+    });
+    el<HTMLInputElement>('testnet-api-key').value = '';
+    el<HTMLInputElement>('testnet-api-secret').value = '';
+    await refreshTestnetSettings();
+    message('حُفظت بيانات الاعتماد مشفّرة؛ اختبر الاتصال قبل أي تفعيل.');
+  }));
+  el('testnet-test-credentials').addEventListener('click', () => void action(async () => {
+    await api('/v1/admin/settings/testnet/credentials/test', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    await refreshTestnetSettings();
+    message('نجح اختبار بيانات اعتماد Spot Testnet للقراءة فقط.');
+  }));
+  el('testnet-delete-credentials').addEventListener('click', () => void action(async () => {
+    if (!window.confirm('هل تريد حذف بيانات اعتماد Spot Testnet؟')) return;
+    await api('/v1/admin/settings/testnet/credentials', { method: 'DELETE' });
+    el<HTMLInputElement>('testnet-api-key').value = '';
+    el<HTMLInputElement>('testnet-api-secret').value = '';
+    await refreshTestnetSettings();
+    message('حُذفت بيانات الاعتماد. لم يتم تفعيل Testnet.');
+  }));
+  el('testnet-deactivate').addEventListener('click', () => void action(async () => {
+    await api('/v1/admin/settings/testnet/activation', { method: 'DELETE' });
+    await refreshTestnetSettings();
+    message('تم طلب إيقاف Spot Testnet.');
+  }));
+  el('testnet-activate').addEventListener('click', () => void action(async () => {
+    if (!window.confirm('تأكيد مسؤول صريح: هل تريد تفعيل Spot Testnet؟ لا LIVE ولا MARKET ولا SELL.')) return;
+    await api('/v1/admin/settings/testnet/activation', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ confirm: true }),
+    });
+    await refreshTestnetSettings();
+    message('تم إرسال طلب التفعيل بعد التأكيد الصريح للمسؤول.');
+  }));
   el('control-logout').addEventListener('click', () => void action(async () => {
     try { await api('/v1/auth/logout', { method: 'POST' }); }
     finally { reset(); message('حُذفت الجلسة من الصفحة.'); }
