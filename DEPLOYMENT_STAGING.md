@@ -76,6 +76,77 @@ docker compose run --rm --no-deps backend python -m app.auth hash-password
 
 Enter the new administrator password twice when prompted. The command prints only the password hash; copy that single line into `M1_ADMIN_PASSWORD_HASH` in the host-only `.env`. It rejects an empty password or mismatched confirmation. Do not save the plaintext password, paste it into chat, or put it in Git. The command overrides the container's normal server command and does not start the backend service or enable Testnet. If Docker requires elevated permissions for your account, prefix both commands with `sudo` consistently.
 
+## Oracle Cloud Always Free — Ampere A1 (ARM64)
+
+This is the preferred no-budget cloud option, but **Always Free capacity and continued availability are not guaranteed**. Oracle may show "out of host capacity"; retry later or another availability domain in your home region. Always Free compute must be provisioned in the tenancy's home region. Current official allowance documented by Oracle is up to **2 OCPUs and 12 GB RAM total** for A1 Always Free. Confirm the Always Free eligibility label and estimated cost in the Console before creating anything.
+
+### Create the instance
+
+1. Sign up at [Oracle Cloud Free Tier](https://www.oracle.com/cloud/free/) and complete account verification. Oracle may require a payment card for identity verification; do not assume every account/region will have immediate A1 capacity.
+2. Select the home region carefully; Always Free A1 compute is limited to the home region.
+3. In **Compute → Instances → Create instance**, choose a name such as `m1-staging-arm`.
+4. Select **Canonical Ubuntu 22.04 ARM64/aarch64** as the platform image, and **VM.Standard.A1.Flex** as the shape. Verify the image architecture says ARM/aarch64, not AMD/x86_64.
+5. Start with 2 OCPUs and 12 GB memory if the Console marks the whole allocation Always Free and the account quota permits it. Keep total A1 usage within the current Always Free allowance. Choose a boot volume that fits the Always Free storage allowance.
+6. Select or create a VCN and a **public subnet** if this host will serve a public site. Assign a public IPv4 address and add your SSH public key. Keep the private SSH key on your own device; never commit it or paste it into chat.
+7. Before creating the instance, review the cost/Always Free labels and quotas. Stop if any resource is shown as billable.
+
+### Network Security List / NSG
+
+In **Networking → Virtual Cloud Networks → your VCN → Security Lists** (or the instance's Network Security Group), add inbound stateful rules:
+
+- TCP 22 (SSH): source should be **your current public IP/32 only**, not the whole internet where avoidable.
+- TCP 80: source `0.0.0.0/0` for public HTTP and ACME certificate challenge/redirect.
+- TCP 443: source `0.0.0.0/0` for public HTTPS.
+- Add equivalent IPv6 rules only if you deliberately configure public IPv6 and DNS AAAA records.
+
+Do not open backend port 8000. Check the Ubuntu host firewall too; allow only SSH from your IP and TCP 80/443. If the SSH address changes, update the rule deliberately rather than opening SSH to everyone.
+
+### Connect and install Docker on ARM
+
+Connect as `ubuntu` using your SSH private key and public IP:
+
+```bash
+ssh -i /path/to/private_key ubuntu@YOUR_PUBLIC_IP
+uname -m
+```
+
+Expected architecture is `aarch64`. Then follow the Docker Engine installation commands in section 2 below. The same official Ubuntu apt repository supports ARM64; the repository setup uses `dpkg --print-architecture`, so do not hard-code `amd64`. Confirm with `docker version` and `docker compose version`.
+
+### ARM64 image compatibility check
+
+The Compose files build the backend from `python:3.11-slim` and the frontend from `node:24-alpine`, then use `caddy:2-alpine` for the final web image. Docker Official Images metadata lists ARM64/aarch64 support for all three tags, as well as amd64:
+
+- `python:3.11-slim`: ARM64 and amd64 supported.
+- `node:24-alpine`: ARM64 and amd64 supported. Note: Node's official image documentation says Alpine/musl builds for architectures other than amd64, including ARM64, are not tested before release; if the frontend build fails on ARM, switch only the build stage to `node:24-bookworm-slim` and retest.
+- `caddy:2-alpine`: ARM64 and amd64 supported.
+
+No `platform: linux/amd64` override is needed; do not add one for the A1 host. Docker will select the host's ARM64 manifest automatically. The image manifests establish architecture availability, but do not replace a successful build on the actual A1 host.
+
+### Prepare and run staging
+
+Continue with sections 1 and 3–10 in this document, keeping the branch at `feature/testnet-settings-admin`. In short: create the key outside the checkout, configure the private `.env`, run the staging preflight, verify the reviewed SHA, then build and start Compose only after the owner explicitly approves. The commands `docker compose build --pull` and `docker compose up -d` are the same on ARM64 and amd64. Build locally on the ARM host to avoid emulation and to validate native ARM compatibility. Do not publish the backend port or activate Testnet.
+
+### Oracle idle-instance reclamation — important limitation
+
+Oracle's documented idle policy evaluates CPU, network, and (for A1) memory utilization over a seven-day period; thresholds are based on the 95th percentile being below 20%. **A cron job that runs `curl https://YOUR_DOMAIN/ready` every ten minutes is only a health check. It does not meaningfully guarantee enough CPU, network, or memory usage, and it cannot prevent Oracle from reclaiming an instance. Do not treat it as protection or rely on artificial keep-alive traffic.**
+
+If useful, install a health-check cron after valid HTTPS is configured. It records only success/failure and must not print environment variables or secrets:
+
+```bash
+sudo install -d -m 0755 /var/log/m1
+sudo tee /usr/local/bin/m1-ready-check >/dev/null <<'EOF'
+#!/bin/sh
+/usr/bin/curl --fail --silent --show-error --max-time 10 https://YOUR_DOMAIN/ready >/dev/null
+EOF
+sudo chmod 0755 /usr/local/bin/m1-ready-check
+sudo tee /etc/cron.d/m1-ready-check >/dev/null <<'EOF'
+*/10 * * * * root /usr/local/bin/m1-ready-check >/dev/null 2>&1
+EOF
+sudo chmod 0644 /etc/cron.d/m1-ready-check
+```
+
+Replace `YOUR_DOMAIN` with the actual HTTPS hostname before enabling the cron. Test manually with `sudo /usr/local/bin/m1-ready-check`. This checks uptime only; it does **not** prevent idle reclamation. Monitor OCI notifications and metrics in the Console, keep encrypted backups of the database and key in a separate secure location, and plan for recovery/recreation. Never put Oracle API keys, SSH private keys, or cloud credentials in the repository. A truly free always-on guarantee is not available.
+
 ## 2. Ubuntu VPS prerequisites and installation
 
 Use a clean supported Ubuntu LTS VPS, a DNS name you control, and a non-root sudo user. Recommended starting point: **2 vCPU, 2 GB RAM, 20 GB SSD**. A 1 vCPU / 1 GB host may run at low load, but image builds may run out of memory.
@@ -186,6 +257,18 @@ If anything looks wrong:
 - No deployment from `main`, no merge, and no PR #4 changes as part of this staging preparation.
 
 **Stop condition:** if Compose differs from this guide, the key is unreadable by the backend, HTTPS is not valid, or Testnet does not clearly show disabled, do not enter credentials and do not activate Testnet.
+
+## Vercel — disconnect Git and remove Preview deployments
+
+This repository is not intended to be hosted by Vercel. Perform these steps manually in the Vercel dashboard; no Vercel setting was changed by this documentation update.
+
+1. Open the M1 project in Vercel and go to **Settings → Git**.
+2. Select **Disconnect** for the connected Git repository and confirm. This stops Git-triggered deployments for the project; it is broader than stopping Preview deployments alone.
+3. Open the project's **Deployments** page, filter for Preview deployments, select the M1 Preview deployment(s), open the action menu, and choose **Delete**. Confirm the exact project/deployment before deletion. Disconnecting Git does not automatically delete deployments that already exist.
+4. Revisit the Deployments page and verify the old Preview URL is deleted or no longer serves the project. If you cannot delete it, enable Deployment Protection / Vercel Authentication and verify anonymous access is blocked.
+5. Do not reconnect this repository or enable automatic deployments unless the owner explicitly requests it.
+
+Official documentation: [Vercel project settings](https://vercel.com/docs/project-configuration/project-settings) and [Vercel Git settings](https://vercel.com/docs/project-configuration/git-settings).
 
 ## Docker image and key-path invariant
 
