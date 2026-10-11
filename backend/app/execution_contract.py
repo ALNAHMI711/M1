@@ -65,6 +65,9 @@ def authorize_execution(
     if not risk_decision.allowed:
         reason = ",".join(risk_decision.reasons) or "risk_rejected"
         raise PermissionError(f"execution_blocked:{reason}")
+    if request.mode == "TESTNET":
+        # Only the durable Spot Testnet orchestrator may reach exchange transport.
+        raise PermissionError("execution_blocked:testnet_orchestrator_required")
 
 
 def submit_after_risk(
