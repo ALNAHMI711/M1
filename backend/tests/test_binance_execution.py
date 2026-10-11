@@ -41,6 +41,21 @@ def client(monkeypatch):
     return TestClient(main.app)
 
 
+@pytest.fixture()
+def enable_admin_testnet_settings():
+    """Enable Testnet only in this test's isolated SQLite database."""
+    def enable():
+        from app.store import connection
+        from app.testnet_settings import apply_migrations
+        apply_migrations()
+        with connection() as conn:
+            conn.execute(
+                "UPDATE app_settings SET enabled=1, credentials_test_passed=1, "
+                "manual_approval=1 WHERE id=1"
+            )
+    return enable
+
+
 def login(client):
     response = client.post(
         "/v1/auth/token",
@@ -99,7 +114,8 @@ def test_testnet_order_endpoint_rejects_low_score(client):
     response = client.post(
         "/v1/binance/spot/order-test",
         headers={"Authorization": f"Bearer {token}"},
-        json={"signal": signal(score=84), "quantity": "0.001"},
+        json={"signal": signal(score=84), "order_type": "LIMIT", "quantity": "0.001",
+              "price": "100", "time_in_force": "GTC"},
     )
     assert response.status_code == 422
     assert "score_below_85" in response.json()["detail"]["reasons"]
@@ -196,25 +212,55 @@ def test_preflight_read_scope_is_available_to_viewer_without_exchange_keys(clien
     assert calls == [("GET", "/api/v3/exchangeInfo", False)]
 
 
-def test_order_submit_is_disabled_by_default_before_preflight(client, monkeypatch):
-    monkeypatch.delenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", raising=False)
+def test_order_submit_rejected_when_settings_disabled_by_default(client, monkeypatch):
+    # Even with the environment flag and all request prerequisites present,
+    # fresh admin settings remain disabled and stop the request before preflight.
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    monkeypatch.setenv("M1_TESTNET_ALLOWED_SYMBOLS", "BTCUSDT")
+    monkeypatch.setenv("M1_TESTNET_MAX_NOTIONAL", "20")
+    monkeypatch.setenv("BINANCE_API_KEY", "synthetic-testnet-key")
+    monkeypatch.setenv("BINANCE_API_SECRET", "synthetic-testnet-secret")
+    preflight_calls = []
+    monkeypatch.setattr(FakeBinanceClient, "order_submission_preflight",
+                        lambda self, **kwargs: preflight_calls.append(kwargs))
     token = login(client)
     response = client.post(
         "/v1/binance/spot/order-submit",
         headers={"Authorization": f"Bearer {token}"},
         json={"signal": signal(), "order_type": "LIMIT", "quantity": "0.1",
-              "price": "100", "time_in_force": "GTC", "client_order_id": "submit-001"},
+              "price": "100", "time_in_force": "GTC", "client_order_id": "submit-default-off"},
     )
     assert response.status_code == 503
-    assert response.json()["detail"] == "testnet_order_submission_disabled"
+    assert response.json()["detail"] == "testnet_admin_settings_disabled"
+    assert preflight_calls == []
 
 
-def test_order_submit_refuses_missing_credentials_before_exchange_preflight(client, monkeypatch):
+def test_settings_override_env_flag(client, monkeypatch):
+    # The legacy environment switch is explicitly ON, but admin settings are
+    # still at their default disabled state and remain the authoritative gate.
+    monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
+    monkeypatch.setenv("M1_TESTNET_ALLOWED_SYMBOLS", "BTCUSDT")
+    monkeypatch.setenv("M1_TESTNET_MAX_NOTIONAL", "20")
+    monkeypatch.setenv("BINANCE_API_KEY", "synthetic-testnet-key")
+    monkeypatch.setenv("BINANCE_API_SECRET", "synthetic-testnet-secret")
+    token = login(client)
+    response = client.post(
+        "/v1/binance/spot/order-submit",
+        headers={"Authorization": f"Bearer {token}"},
+        json={"signal": signal(), "order_type": "LIMIT", "quantity": "0.1",
+              "price": "100", "time_in_force": "GTC", "client_order_id": "submit-env-override"},
+    )
+    assert response.status_code == 503
+    assert response.json()["detail"] == "testnet_admin_settings_disabled"
+
+
+def test_order_submit_refuses_missing_credentials_before_exchange_preflight(client, monkeypatch, enable_admin_testnet_settings):
     monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
     monkeypatch.setenv("M1_TESTNET_ALLOWED_SYMBOLS", "BTCUSDT")
     monkeypatch.setenv("M1_TESTNET_MAX_NOTIONAL", "100")
     monkeypatch.delenv("BINANCE_API_KEY", raising=False)
     monkeypatch.delenv("BINANCE_API_SECRET", raising=False)
+    enable_admin_testnet_settings()
     token = login(client)
     response = client.post(
         "/v1/binance/spot/order-submit",
@@ -226,12 +272,13 @@ def test_order_submit_refuses_missing_credentials_before_exchange_preflight(clie
     assert response.json()["detail"] == "testnet_credentials_not_configured"
 
 
-def test_order_submit_refuses_unresolved_account_and_reference_checks(client, monkeypatch):
+def test_order_submit_refuses_unresolved_account_and_reference_checks(client, monkeypatch, enable_admin_testnet_settings):
     monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
     monkeypatch.setenv("M1_TESTNET_ALLOWED_SYMBOLS", "BTCUSDT")
     monkeypatch.setenv("M1_TESTNET_MAX_NOTIONAL", "100")
     monkeypatch.setenv("BINANCE_API_KEY", "fake-testnet-key")
     monkeypatch.setenv("BINANCE_API_SECRET", "fake-testnet-secret")
+    enable_admin_testnet_settings()
     token = login(client)
     response = client.post(
         "/v1/binance/spot/order-submit",
@@ -243,13 +290,14 @@ def test_order_submit_refuses_unresolved_account_and_reference_checks(client, mo
     assert response.json()["detail"] == "testnet_exchange_validation_incomplete"
 
 
-def test_order_submit_happy_path_uses_reserved_single_submission_offline(client, monkeypatch, tmp_path):
+def test_order_submit_happy_path_uses_reserved_single_submission_offline(client, monkeypatch, tmp_path, enable_admin_testnet_settings):
     monkeypatch.setenv("M1_DB_PATH", str(tmp_path / "submit.sqlite3"))
     monkeypatch.setenv("M1_TESTNET_ORDER_SUBMISSION_ENABLED", "true")
     monkeypatch.setenv("M1_TESTNET_ALLOWED_SYMBOLS", "BTCUSDT")
     monkeypatch.setenv("M1_TESTNET_MAX_NOTIONAL", "100")
     monkeypatch.setenv("BINANCE_API_KEY", "fake-testnet-key")
     monkeypatch.setenv("BINANCE_API_SECRET", "fake-testnet-secret")
+    enable_admin_testnet_settings()
     monkeypatch.setattr(FakeBinanceClient, "order_submission_preflight", lambda self, **kwargs: {
         "deferred_checks": [], "account_and_asset_filters_verified": True,
     })
