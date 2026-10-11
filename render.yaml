@@ -10,8 +10,6 @@ services:
     healthCheckPath: /ready
     autoDeploy: true
     envVars:
-      - key: PORT
-        value: "10000"
       - key: M1_DB_PATH
         value: /tmp/m1.sqlite3
       - key: M1_TESTNET_ENCRYPTION_KEY_FILE
