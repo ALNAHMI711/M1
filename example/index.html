@@ -55,7 +55,22 @@
     <p id="control-message" class="muted" role="status" aria-live="polite">تُحفظ الجلسة في ذاكرة الصفحة فقط؛ تنتهي عند إعادة تحميلها.</p>
     <section id="authenticated-controls" hidden>
       <p id="control-user"></p>
-      <div class="control-actions"><button id="control-refresh" class="ghost">تحديث الحالة</button><button id="control-logout" class="ghost">تسجيل الخروج</button></div>
+      <div class="control-actions"><button id="control-refresh" class="ghost">تحديث الحالة</button><button id="open-testnet-settings" class="ghost" type="button">إعدادات Spot Testnet</button><button id="control-logout" class="ghost">تسجيل الخروج</button></div>
+      <section id="testnet-admin-panel" hidden aria-labelledby="testnet-admin-title">
+        <h3 id="testnet-admin-title">إعدادات Spot Testnet</h3>
+        <p class="notice">إدارة إعدادات الاختبار فقط. التفعيل معطّل افتراضياً ويتطلب تأكيد مسؤول. لا LIVE ولا MARKET ولا SELL.</p>
+        <p id="testnet-admin-status" class="muted" role="status" aria-live="polite">حمّل الحالة لعرض الإعدادات.</p>
+        <div class="control-actions"><button id="testnet-refresh" class="ghost" type="button">تحميل/تحديث الإعدادات</button><button id="testnet-deactivate" class="danger" type="button">إيقاف Testnet</button></div>
+        <h4>الرموز المسموحة والحدود</h4>
+        <label for="testnet-symbols">الرموز (BTCUSDT وETHUSDT فقط، مفصولة بفاصلة)</label><input id="testnet-symbols" value="BTCUSDT" autocomplete="off">
+        <div class="control-actions"><label for="testnet-max-order">الحد لكل أمر (USDT)</label><input id="testnet-max-order" inputmode="decimal" value="20"><label for="testnet-max-daily">الحد اليومي (USDT)</label><input id="testnet-max-daily" inputmode="decimal" value="50"></div>
+        <button id="testnet-save-settings" class="ghost" type="button">حفظ الحدود والرموز</button>
+        <h4>بيانات اعتماد Spot Testnet</h4>
+        <label for="testnet-api-key">API Key (Testnet)</label><input id="testnet-api-key" type="password" autocomplete="new-password">
+        <label for="testnet-api-secret">API Secret (Testnet)</label><input id="testnet-api-secret" type="password" autocomplete="new-password">
+        <div class="control-actions"><button id="testnet-save-credentials" class="ghost" type="button">حفظ مشفّر</button><button id="testnet-test-credentials" class="ghost" type="button">اختبار الاتصال</button><button id="testnet-delete-credentials" class="danger" type="button">حذف الاعتمادات</button><button id="testnet-activate" class="danger" type="button">تفعيل بعد تأكيد صريح</button></div>
+        <pre id="testnet-settings-output" aria-live="polite"></pre>
+      </section>
       <h3>حالة الخدمة</h3><pre id="readiness-output"></pre>
       <button id="kill-on" class="danger">تفعيل مفتاح الإيقاف</button>
       <button id="kill-off" class="ghost">إلغاء مفتاح الإيقاف</button>
