@@ -16,7 +16,7 @@ cffi==2.1.1
     # via
     #   argon2-cffi-bindings
     #   cryptography
-cryptography==46.0.3
+cryptography==50.0.0
     # via m1-trading-control-plane (pyproject.toml)
 click==8.5.0
     # via uvicorn
