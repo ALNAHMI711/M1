@@ -2,7 +2,7 @@ name: browser-check
 
 on:
   push:
-    branches: [main, 'completion/**', 'feature/**']
+    branches: [main, 'completion/**', 'feature/testnet-settings-admin']
   pull_request:
     branches: [main]
   workflow_dispatch:
