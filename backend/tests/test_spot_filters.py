@@ -176,7 +176,7 @@ def test_account_and_reference_preflight_resolves_dynamic_buy_filters():
 
 @pytest.mark.parametrize("kwargs,reason", [
     ({"average_price": {"price": "100", "mins": 5, "closeTime": 900_000}, "now_ms": 1_000_001}, "stale_exchange_reference_price"),
-    ({"average_price": {"price": "1000", "mins": 5, "closeTime": 1_000_000}, "now_ms": 1_000_001}, "price_outside_reference_band"),
+    ({"average_price": {"price": "1000", "mins": 5, "closeTime": 1_000_000}, "now_ms": 1_000_001}, "price_deviation_from_reference_too_large"),
     ({"average_price": {"price": "100", "mins": 1, "closeTime": 1_000_000}, "now_ms": 1_000_001}, "reference_price_window_mismatch"),
     ({"account": _account_snapshot(quote_free="10")}, "insufficient_free_quote_balance"),
     ({"account": _account_snapshot(base_free="99.95")}, "max_position_exceeded"),
@@ -223,3 +223,95 @@ def test_preflight_no_credentials_signed_headers_or_post(monkeypatch):
         client.order_test(symbol="BTCUSDT", side="BUY", order_type="LIMIT",
                           quantity="0.1", price="100", time_in_force="GTC")
     assert len(calls) == 1
+
+
+def test_usdt_quote_asset_must_exist_and_match_symbol():
+    account = _account_snapshot()
+    good = validate_spot_order_with_account(
+        metadata(), account, [], {"price": "100", "mins": 5, "closeTime": 1_000_000},
+        symbol="BTCUSDT", side="BUY", order_type="LIMIT", quantity="0.1",
+        price="100", time_in_force="GTC", now_ms=1_000_001,
+    )
+    assert good["account_and_asset_filters_verified"] is True
+
+    missing = _account_snapshot()
+    missing["balances"] = [item for item in missing["balances"] if item["asset"] != "USDT"]
+    with pytest.raises(SpotFilterError, match="quote_asset_balance_missing"):
+        validate_spot_order_with_account(
+            metadata(), missing, [], {"price": "100", "mins": 5, "closeTime": 1_000_000},
+            symbol="BTCUSDT", side="BUY", order_type="LIMIT", quantity="0.1",
+            price="100", time_in_force="GTC", now_ms=1_000_001,
+        )
+
+    wrong_quote = metadata()
+    wrong_quote["symbols"][0]["quoteAsset"] = "BUSD"
+    with pytest.raises(SpotFilterError, match="testnet_quote_asset_must_be_usdt"):
+        validate_spot_order_with_account(
+            wrong_quote, account, [], {"price": "100", "mins": 5, "closeTime": 1_000_000},
+            symbol="BTCUSDT", side="BUY", order_type="LIMIT", quantity="0.1",
+            price="100", time_in_force="GTC", now_ms=1_000_001,
+        )
+
+
+def test_buy_quote_fee_buffer_boundary_and_sell_base_balance():
+    args = dict(
+        metadata=metadata(), open_orders=[],
+        average_price={"price": "100", "mins": 5, "closeTime": 1_000_000},
+        symbol="BTCUSDT", order_type="LIMIT", quantity="0.1",
+        price="100", time_in_force="GTC", now_ms=1_000_001,
+    )
+    accepted = validate_spot_order_with_account(
+        account=_account_snapshot(quote_free="10.1"), side="BUY", **args,
+    )
+    assert accepted["required_quote_with_fee_buffer"] == "10.100"
+    with pytest.raises(SpotFilterError, match="insufficient_free_quote_balance"):
+        validate_spot_order_with_account(
+            account=_account_snapshot(quote_free="10.099"), side="BUY", **args,
+        )
+
+    with pytest.raises(SpotFilterError, match="insufficient_free_base_balance"):
+        validate_spot_order_with_account(
+            account=_account_snapshot(base_free="0"), side="SELL", **args,
+        )
+    sold = validate_spot_order_with_account(
+        account=_account_snapshot(base_free="0.1"), side="SELL", **args,
+    )
+    assert sold["account_and_asset_filters_verified"] is True
+
+
+def test_minimum_notional_metadata_is_required_and_enforced():
+    result = check(quantity="0.100", price="100")
+    assert "MIN_NOTIONAL" in result["checked_filters"] or "NOTIONAL" in result["checked_filters"]
+    with pytest.raises(SpotFilterError, match="notional_below_minimum"):
+        check(quantity="0.1", price="99.99")
+    data = metadata()
+    data["symbols"][0]["filters"] = [
+        rule for rule in data["symbols"][0]["filters"]
+        if rule["filterType"] not in {"MIN_NOTIONAL", "NOTIONAL"}
+    ]
+    with pytest.raises(SpotFilterError, match="required_notional_filter_missing"):
+        check(data)
+
+
+@pytest.mark.parametrize(("price", "reason"), [
+    ("105", None),
+    ("105.01", "price_deviation_from_reference_too_large"),
+])
+def test_reference_deviation_cap_applies_even_without_exchange_percent_filter(price, reason):
+    data = metadata()
+    data["symbols"][0]["filters"] = [
+        rule for rule in data["symbols"][0]["filters"]
+        if rule["filterType"] not in {"PERCENT_PRICE", "PERCENT_PRICE_BY_SIDE"}
+    ]
+    kwargs = dict(
+        metadata=data, account=_account_snapshot(), open_orders=[],
+        average_price={"price": "100", "mins": 5, "closeTime": 1_000_000},
+        symbol="BTCUSDT", side="BUY", order_type="LIMIT", quantity="0.1",
+        price=price, time_in_force="GTC", now_ms=1_000_001,
+    )
+    if reason:
+        with pytest.raises(SpotFilterError, match=reason):
+            validate_spot_order_with_account(**kwargs)
+    else:
+        result = validate_spot_order_with_account(**kwargs)
+        assert result["account_and_asset_filters_verified"] is True
