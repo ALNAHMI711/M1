@@ -8,8 +8,9 @@ from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from .store import connection
 
-MIGRATION_VERSION=1
-MIGRATION_NAME="0001_testnet_settings"
+MIGRATION_VERSION=2
+MIGRATION_NAME="0002_testnet_daily_reservations"
+MIGRATIONS=((1,"0001_testnet_settings"),(2,"0002_testnet_daily_reservations"))
 KEY_VERSION=1
 DEFAULT_KEY_FILE="/run/secrets/m1_testnet_encryption_key"
 ALLOWED_SYMBOLS={"BTCUSDT","ETHUSDT"}
@@ -110,12 +111,14 @@ def decrypt_value(ciphertext: bytes, nonce: bytes, *, field: str, key: bytes) ->
     except (InvalidTag,UnicodeDecodeError,ValueError): raise RuntimeError("credential_decryption_failed") from None
 
 def apply_migrations():
-    sql=(Path(__file__).parent/"migrations"/f"{MIGRATION_NAME}.sql").read_text(encoding="utf-8")
     with connection() as c:
         c.execute("CREATE TABLE IF NOT EXISTS schema_migrations(version INTEGER PRIMARY KEY,name TEXT NOT NULL,applied_at TEXT NOT NULL)")
-        if c.execute("SELECT 1 FROM schema_migrations WHERE version=?",(MIGRATION_VERSION,)).fetchone(): return
-        c.executescript(sql)
-        c.execute("INSERT OR IGNORE INTO schema_migrations VALUES(?,?,?)",(MIGRATION_VERSION,MIGRATION_NAME,_now()))
+        for version, name in MIGRATIONS:
+            if c.execute("SELECT 1 FROM schema_migrations WHERE version=?",(version,)).fetchone():
+                continue
+            sql=(Path(__file__).parent/"migrations"/f"{name}.sql").read_text(encoding="utf-8")
+            c.executescript(sql)
+            c.execute("INSERT OR IGNORE INTO schema_migrations VALUES(?,?,?)",(version,name,_now()))
 
 def _row(c):
     r=c.execute("SELECT * FROM app_settings WHERE id=1").fetchone()
@@ -268,9 +271,6 @@ def reserve_daily_notional(*, client_order_id: str, notional: Decimal, daily_lim
         raise ValueError("testnet_order_limits_invalid")
     day = datetime.now(timezone.utc).date().isoformat()
     with connection() as c:
-        c.execute("""CREATE TABLE IF NOT EXISTS testnet_daily_reservations (
-            client_order_id TEXT PRIMARY KEY, trade_day TEXT NOT NULL, notional TEXT NOT NULL
-        )""")
         c.execute("BEGIN IMMEDIATE")
         existing = c.execute("SELECT trade_day FROM testnet_daily_reservations WHERE client_order_id=?",
                               (client_order_id,)).fetchone()
