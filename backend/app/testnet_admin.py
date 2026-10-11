@@ -1,7 +1,7 @@
 """Admin-only Spot Testnet settings API."""
 import logging
 from pathlib import Path
-from contextlib import suppress
+from contextlib import suppress, asynccontextmanager
 from fastapi import APIRouter, HTTPException, Security, Query
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, ConfigDict, Field, SecretStr
@@ -12,7 +12,15 @@ from .testnet_settings import (activate_testnet, apply_migrations, credentials_s
  mark_credentials_test_failed, mark_credentials_test_passed, recent_testnet_audit, save_credentials, update_settings)
 
 logger=logging.getLogger(__name__)
-router=APIRouter()
+
+@asynccontextmanager
+async def testnet_admin_lifespan(app):
+    # Preserve startup fail-closed behavior without deprecated on_event hooks.
+    load_master_key()
+    apply_migrations()
+    yield
+
+router=APIRouter(lifespan=testnet_admin_lifespan)
 
 @router.get("/admin/testnet", response_class=HTMLResponse, include_in_schema=False)
 def testnet_admin_page():
@@ -34,11 +42,6 @@ class TestnetCredentialsInput(BaseModel):
     model_config=ConfigDict(extra="forbid")
     api_key:SecretStr=Field(min_length=1,max_length=4096,repr=False)
     api_secret:SecretStr=Field(min_length=1,max_length=4096,repr=False)
-
-@router.on_event("startup")
-def startup_testnet_admin():
-    load_master_key()
-    apply_migrations()
 
 @router.get("/v1/admin/settings/testnet")
 def read_settings(user=Security(current_user,scopes=["trading:admin"])):
