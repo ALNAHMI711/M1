@@ -31,3 +31,4 @@
 - Disconnect Vercel manually under **Settings → Git → Disconnect**. vercel.json is only an additional defensive layer, not a replacement for disconnecting Vercel.
 - Do not enable LIVE until a real Spot Testnet end-to-end validation has been completed and independently reviewed.
 - Testnet is disabled by default. No server deployment or Testnet activation is part of this release.
+ملاحظة: وجود vercel.json لا يعني أن Vercel مفصول. الفصل الفعلي يتم يدوياً من إعدادات Vercel (Settings → Git → Disconnect). تحقق من حالة الفصل قبل اعتبار هذه النقطة مكتملة.
