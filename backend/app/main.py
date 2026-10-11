@@ -328,9 +328,13 @@ def binance_spot_order_submit(
     from .store import connection
     today = datetime.now(timezone.utc).date().isoformat()
     with connection() as conn:
-        spent = Decimal(str(conn.execute("""SELECT COALESCE(SUM(CAST(quantity AS REAL)*CAST(price AS REAL)),0)
-            FROM execution_orders WHERE mode='TESTNET' AND market='SPOT' AND substr(updated_at,1,10)=?
-            AND status NOT IN ('REJECTED','CANCELED','EXPIRED')""",(today,)).fetchone()[0]))
+        rows = conn.execute("""SELECT quantity,price FROM execution_orders
+            WHERE mode='TESTNET' AND market='SPOT' AND substr(updated_at,1,10)=?
+            AND status NOT IN ('REJECTED','CANCELED','EXPIRED')""",(today,)).fetchall()
+    spent = sum(
+        (Decimal(row["quantity"]) * Decimal(row["price"] or "0") for row in rows),
+        Decimal("0"),
+    )
     if spent + order_notional > daily_limit:
         raise HTTPException(status_code=422, detail="testnet_daily_notional_limit")
 
