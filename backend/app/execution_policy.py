@@ -67,11 +67,28 @@ def authorize_execution(request: ExecutionRequest) -> RiskDecision:
         return RiskDecision(False, validation_reasons)
 
     if request.mode in {"LIVE", "TESTNET"}:
-        # These modes remain blocked until their authenticated adapters,
+        # These modes remain blocked until authenticated adapters,
         # reconciliation/recovery, audit and deployment gates are validated.
         return RiskDecision(False, (f"{request.mode.lower()}_execution_not_enabled",))
 
     return evaluate_trade_risk(request.risk)
+
+
+def _valid_adapter_result(result: object) -> bool:
+    if not isinstance(result, ExecutionResult):
+        return False
+    if not isinstance(result.accepted, bool):
+        return False
+    if not isinstance(result.status, str) or not result.status.strip():
+        return False
+    if result.reason is not None and not isinstance(result.reason, str):
+        return False
+    # A rejected response must never be represented as an accepted submission.
+    if result.accepted and result.status.upper() in {
+        "REJECTED", "REJECTED_BY_POLICY", "ERROR", "ADAPTER_FAILURE"
+    }:
+        return False
+    return True
 
 
 def submit_authorized(
@@ -106,7 +123,7 @@ def submit_authorized(
             status="ADAPTER_FAILURE",
             reason="adapter_submission_failed",
         )
-    if not isinstance(result, ExecutionResult):
+    if not _valid_adapter_result(result):
         return ExecutionResult(
             accepted=False,
             status="ADAPTER_FAILURE",
