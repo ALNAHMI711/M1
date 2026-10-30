@@ -219,3 +219,30 @@ def test_adapter_cannot_turn_rejected_policy_into_submission():
     assert result.accepted is False
     assert result.status == "REJECTED_BY_POLICY"
     assert adapter.calls == []
+
+
+def test_adapter_cannot_claim_acceptance_with_rejected_status():
+    class ContradictoryAdapter:
+        execution_mode = "PAPER"
+
+        def submit(self, request):
+            return ExecutionResult(accepted=True, status="REJECTED")
+
+    result = submit_authorized(ContradictoryAdapter(), request())
+    assert result == ExecutionResult(
+        accepted=False,
+        status="ADAPTER_FAILURE",
+        reason="invalid_adapter_result",
+    )
+
+
+def test_adapter_result_requires_boolean_acceptance():
+    class MalformedAdapter:
+        execution_mode = "PAPER"
+
+        def submit(self, request):
+            return ExecutionResult(accepted="true", status="SUBMITTED")
+
+    result = submit_authorized(MalformedAdapter(), request())
+    assert result.status == "ADAPTER_FAILURE"
+    assert result.reason == "invalid_adapter_result"
