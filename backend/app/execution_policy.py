@@ -77,6 +77,23 @@ def authorize_execution(request: ExecutionRequest) -> RiskDecision:
     return evaluate_trade_risk(request.risk)
 
 
+def _valid_adapter_result(result: object) -> bool:
+    if not isinstance(result, ExecutionResult):
+        return False
+    if not isinstance(result.accepted, bool):
+        return False
+    if not isinstance(result.status, str) or not result.status.strip():
+        return False
+    if result.reason is not None and not isinstance(result.reason, str):
+        return False
+    # Fail closed if an adapter claims acceptance while reporting rejection/error.
+    if result.accepted and result.status.upper() in {
+        "REJECTED", "REJECTED_BY_POLICY", "ERROR", "ADAPTER_FAILURE"
+    }:
+        return False
+    return True
+
+
 def submit_authorized(
     adapter: ExecutionAdapter,
     request: ExecutionRequest,
@@ -109,7 +126,7 @@ def submit_authorized(
             status="ADAPTER_FAILURE",
             reason="adapter_submission_failed",
         )
-    if not isinstance(result, ExecutionResult):
+    if not _valid_adapter_result(result):
         return ExecutionResult(
             accepted=False,
             status="ADAPTER_FAILURE",
